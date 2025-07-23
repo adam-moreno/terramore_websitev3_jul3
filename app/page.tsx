@@ -29,6 +29,8 @@ export default function TerramoreHomepage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [currentCardIndex, setCurrentCardIndex] = useState(0)
   const [isHovering, setIsHovering] = useState(false)
+  const [touchStart, setTouchStart] = useState(0)
+  const [touchEnd, setTouchEnd] = useState(0)
 
   // Founder photos for the carousel
   const founderPhotos = [
@@ -159,6 +161,31 @@ export default function TerramoreHomepage() {
 
     return () => clearInterval(interval)
   }, [flashCards.length, isHovering])
+
+  // Touch handlers for mobile swipe
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(0)
+    setTouchStart(e.targetTouches[0].clientX)
+  }
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX)
+  }
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return
+    
+    const distance = touchStart - touchEnd
+    const isLeftSwipe = distance > 50
+    const isRightSwipe = distance < -50
+
+    if (isLeftSwipe) {
+      setCurrentCardIndex((prevIndex) => (prevIndex + 1) % flashCards.length)
+    }
+    if (isRightSwipe) {
+      setCurrentCardIndex((prevIndex) => (prevIndex - 1 + flashCards.length) % flashCards.length)
+    }
+  }
 
   const handleFooterNavigation = (href: string) => {
     window.location.href = href
@@ -389,6 +416,9 @@ export default function TerramoreHomepage() {
             className="relative min-h-[300px] md:min-h-[400px] overflow-hidden"
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
           >
             {flashCards.map((card, index) => (
               <div
@@ -428,6 +458,13 @@ export default function TerramoreHomepage() {
                 }`}
               />
             ))}
+          </div>
+          
+          {/* Mobile swipe indicator */}
+          <div className="md:hidden text-center mt-4">
+            <p className="text-sm text-slate-500">
+              ← Swipe to navigate →
+            </p>
           </div>
         </div>
       </div>
