@@ -22,7 +22,7 @@ import {
   User,
 } from "lucide-react"
 import Link from "next/link"
-import { SchedulePopup } from "@/components/schedule-popup"
+import { IClosedWidget } from "@/components/iclosed-widget"
 import { useSchedulePopup } from "@/hooks/use-schedule-popup"
 
 export default function PartnerPage() {
@@ -668,7 +668,7 @@ export default function PartnerPage() {
       </footer>
 
       {/* Schedule Popup */}
-      <SchedulePopup isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)} />
+      <IClosedWidget isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)} />
     </div>
   )
 }

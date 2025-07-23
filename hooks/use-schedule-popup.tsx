@@ -14,17 +14,6 @@ export function useSchedulePopup() {
     // Auto-open popup after 5.5 seconds on any page load or navigation
     const timer = setTimeout(() => {
       setIsPopupOpen(true)
-
-      // Play notification sound
-      try {
-        const audio = new Audio("/notification.mp3")
-        audio.play().catch(() => {
-          // Fallback if audio fails to play
-          console.log("Audio playback failed")
-        })
-      } catch (error) {
-        console.log("Audio not available")
-      }
     }, 5500)
 
     return () => clearTimeout(timer)

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Calendar, Cookie, ChevronDown, Menu } from "lucide-react"
 import Link from "next/link"
-import { SchedulePopup } from "@/components/schedule-popup"
+import { IClosedWidget } from "@/components/iclosed-widget"
 import { useSchedulePopup } from "@/hooks/use-schedule-popup"
 
 export default function TermsPage() {
@@ -451,7 +451,7 @@ export default function TermsPage() {
       </footer>
 
       {/* Schedule Popup */}
-      <SchedulePopup isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)} />
+      <IClosedWidget isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)} />
     </div>
   )
 }

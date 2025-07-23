@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { SchedulePopup } from "@/components/schedule-popup"
+import { IClosedWidget } from "@/components/iclosed-widget"
 import { useSchedulePopup } from "@/hooks/use-schedule-popup"
 import { Calendar } from "lucide-react"
 import { useState } from "react"
@@ -194,7 +194,7 @@ export default function ResourcesPage() {
       </div>
 
       {/* Schedule Popup */}
-      <SchedulePopup isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)} />
+      <IClosedWidget isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)} />
     </div>
   )
 }

@@ -51,7 +51,7 @@
 - **Legal Pages**: Privacy, Terms, Careers
 
 #### Interactive Components
-- **Schedule Popup**: Modal for booking appointments
+- **iClosed Scheduler**: Integrated scheduling widget for appointments
 - **Floating Action Buttons**: Quick access to cookies and scheduling
 - **Announcement Banner**: Promotional content display
 - **Accordion Components**: Collapsible content sections
@@ -138,6 +138,7 @@
 2. **Image Optimization**: Optimize and compress all images
 3. **Form Integration**: Connect forms to backend services
 4. **Analytics Setup**: Implement tracking and analytics
+5. **iClosed Integration**: Test and optimize the scheduling widget functionality
 
 #### Medium-term Goals
 1. **Performance Optimization**: Lighthouse score improvements
@@ -151,6 +152,26 @@
 3. **User Authentication**: Member portal and accounts
 4. **Advanced Analytics**: Detailed user behavior tracking
 
+### Recent Updates
+
+#### iClosed Scheduler Integration - [Current Date]
+- **Replaced Custom Popup**: Removed the custom schedule popup component
+- **iClosed Widget**: Integrated the official iClosed scheduling widget
+- **Script Injection**: Dynamic script loading for optimal performance
+- **Cross-Page Consistency**: Updated all pages to use the new widget
+- **Maintained UX**: Kept the same trigger button and timing behavior (5.5 second auto-open)
+- **Visual Consistency**: Maintained the same popup styling and positioning
+
+#### Implementation Details
+- **Component**: Created `IClosedWidget` component with proper TypeScript types
+- **Script Management**: Dynamic script injection with error handling
+- **State Management**: Maintained existing popup state logic and timing
+- **Performance**: Async script loading to avoid blocking page load
+- **User Experience**: Preserved the original popup appearance and behavior
+- **iClosed Integration**: Successfully integrated with specific calendar link
+- **Calendar URL**: https://app.iclosed.io/e/adam/terramore-marketing-meeting
+- **Embed Type**: Popup widget with proper data attributes
+
 ### Lessons Learned
 
 #### What Worked Well
@@ -158,6 +179,7 @@
 - **Tailwind CSS**: Rapid development and consistent styling
 - **Next.js 15**: Modern features and excellent performance
 - **TypeScript**: Caught many potential bugs early
+- **iClosed Integration**: Seamless replacement of custom popup with official widget
 
 #### Areas for Improvement
 - **Content Strategy**: Need better content organization

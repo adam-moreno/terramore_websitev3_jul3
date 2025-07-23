@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Calendar, Cookie, ChevronDown, Menu, ArrowRight } from "lucide-react"
 import Link from "next/link"
-import { SchedulePopup } from "@/components/schedule-popup"
+import { IClosedWidget } from "@/components/iclosed-widget"
 import { useSchedulePopup } from "@/hooks/use-schedule-popup"
 
 export default function AboutPage() {
@@ -235,9 +235,10 @@ export default function AboutPage() {
               <div className="flex flex-col md:flex-row items-center gap-8">
                 <div className="flex-shrink-0">
                   <img
-                    src="/images/adam-moreno-profile.png"
+                    src="https://res.cloudinary.com/dx7id04uv/image/upload/f_auto,q_auto,w_400,h_400,c_fill,g_auto/v1752608693/adam-moreno-profile-new_jb3lr7.jpg"
                     alt="Adam Moreno"
                     className="w-48 h-48 rounded-full object-cover"
+                    loading="eager"
                   />
                 </div>
                 <div className="text-center md:text-left">
@@ -277,7 +278,7 @@ export default function AboutPage() {
               <div className="text-lg">Businesses Scaled</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl md:text-5xl font-bold mb-2">$100M+</div>
+              <div className="text-4xl md:text-5xl font-bold mb-2">$1M+</div>
               <div className="text-lg">Revenue Generated</div>
             </div>
             <div className="text-center">
@@ -406,7 +407,7 @@ export default function AboutPage() {
       </footer>
 
       {/* Schedule Popup */}
-      <SchedulePopup isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)} />
+      <IClosedWidget isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)} />
     </div>
   )
 }

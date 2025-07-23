@@ -56,11 +56,6 @@ export function SchedulePopup({ isOpen, onClose }: SchedulePopupProps) {
         {/* Header */}
         <div className="p-4 pb-3">
           <div className="flex items-center space-x-3 mb-4">
-            <img
-              src="/images/adam-moreno-profile.png"
-              alt="Adam Moreno"
-              className="w-10 h-10 rounded-full object-cover"
-            />
             <div>
               <h3 className="font-semibold text-gray-900 text-sm">Adam Moreno</h3>
               <p className="text-xs text-gray-500">Founder</p>

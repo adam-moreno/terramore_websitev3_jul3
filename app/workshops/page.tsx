@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import Link from "next/link"
 import { useState } from "react"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { SchedulePopup } from "@/components/schedule-popup"
+import { IClosedWidget } from "@/components/iclosed-widget"
 import { useSchedulePopup } from "@/hooks/use-schedule-popup"
 
 export default function WorkshopsPage() {
@@ -1123,7 +1123,7 @@ export default function WorkshopsPage() {
       </footer>
 
       {/* Schedule Popup */}
-      <SchedulePopup isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)} />
+      <IClosedWidget isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)} />
     </div>
   )
 }

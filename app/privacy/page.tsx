@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Calendar, Cookie, ChevronDown, Menu } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
-import { SchedulePopup } from "@/components/schedule-popup"
+import { IClosedWidget } from "@/components/iclosed-widget"
 import { useSchedulePopup } from "@/hooks/use-schedule-popup"
 
 export default function PrivacyPolicyPage() {
@@ -463,7 +463,7 @@ export default function PrivacyPolicyPage() {
       </div>
 
       {/* Schedule Popup */}
-      <SchedulePopup isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)} />
+      <IClosedWidget isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)} />
       {/* Footer */}
       <footer className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-16 px-6">
         <div className="max-w-7xl mx-auto">
