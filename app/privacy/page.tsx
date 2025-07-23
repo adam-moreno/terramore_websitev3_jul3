@@ -7,21 +7,17 @@ import Link from "next/link"
 import { useState } from "react"
 import { IClosedWidget } from "@/components/iclosed-widget"
 import { useSchedulePopup } from "@/hooks/use-schedule-popup"
+import { useDoNotSellPopup } from "@/hooks/use-do-not-sell-popup"
+import { DoNotSellPopup } from "@/components/do-not-sell-popup"
 
 export default function PrivacyPolicyPage() {
   const { isPopupOpen, setIsPopupOpen } = useSchedulePopup()
+  const { isOpen: isDoNotSellOpen, openPopup: openDoNotSell, closePopup: closeDoNotSell } = useDoNotSellPopup()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
     <div className="min-h-screen bg-white">
       {/* Floating Corner Buttons */}
-      <div className="fixed bottom-4 left-4 z-50">
-        <Button size="sm" variant="secondary" className="rounded-full shadow-lg hover:shadow-xl transition-shadow">
-          <Cookie className="w-4 h-4 mr-2" />
-          Cookies
-        </Button>
-      </div>
-
       <div className="fixed bottom-4 right-4 z-50">
         <Button
           size="sm"
@@ -439,6 +435,9 @@ export default function PrivacyPolicyPage() {
 
       {/* Schedule Popup */}
       <IClosedWidget isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)} />
+      
+      {/* Do Not Sell Popup */}
+      <DoNotSellPopup isOpen={isDoNotSellOpen} onClose={closeDoNotSell} />
       {/* Footer */}
       <footer className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-16 px-6">
         <div className="max-w-7xl mx-auto">
@@ -467,26 +466,36 @@ export default function PrivacyPolicyPage() {
               <Link href="/privacy" className="text-blue-200 transition-colors">
                 Privacy Policy
               </Link>
-              <div className="hover:text-blue-200 transition-colors cursor-pointer">Terms of Service</div>
-              <div className="hover:text-blue-200 transition-colors cursor-pointer">Disclosure</div>
-              <div className="hover:text-blue-200 transition-colors cursor-pointer">DMCA POLICY</div>
-              <div className="hover:text-blue-200 transition-colors cursor-pointer">Do Not Sell My Info</div>
+              <Link href="/terms" className="text-blue-200 transition-colors">
+                Terms of Service
+              </Link>
+              <Link href="/disclosure" className="text-blue-200 transition-colors">
+                Disclosure
+              </Link>
+              <Link href="/dmca" className="text-blue-200 transition-colors">
+                DMCA POLICY
+              </Link>
+              <button
+                onClick={openDoNotSell}
+                className="hover:text-blue-200 transition-colors text-sm cursor-pointer bg-transparent border-none text-white"
+              >
+                Do Not Sell My Personal Information
+              </button>
             </div>
           </div>
 
           {/* Disclaimer */}
           <div className="text-center text-sm leading-relaxed opacity-90 max-w-6xl mx-auto">
             <p>
-              Adam Moreno's results are not typical and are not a guarantee of your success. Adam is an experienced
-              business owner and consultant, and your results will vary depending on education, effort, application,
-              experience, and background. Adam does not personally invest in every business he works with through
-              Terramore.io, LLC. Due to the sensitivity of financial information, we do not track the typical results of
-              our students. We cannot guarantee that you will make money or that you will be successful if you employ
-              his business strategies specifically or generally. Consequently, your results may significantly vary from
-              his. We do not give investment, tax, or other professional advice. Specific transactions and experiences
-              are mentioned for informational purposes only. The information contained within this website is the
-              property of Terramore.io. Any use of the images, content, or ideas expressed herein without the express
-              written consent of Terramore.io is prohibited. Copyright © 2025 Terramore.io, LLC. All Rights Reserved.
+              Results mentioned on this website are not typical and are not a guarantee of your success. Individual
+              results will vary depending on education, effort, application, experience, and background. Due to the
+              sensitivity of financial information, we do not track the typical results of our students. We cannot
+              guarantee that you will make money or that you will be successful if you employ the business strategies
+              discussed. Consequently, your results may significantly vary. We do not give investment, tax, or other
+              professional advice. Specific transactions and experiences are mentioned for informational purposes only.
+              The information contained within this website is the property of Terramore.io. Any use of the images,
+              content, or ideas expressed herein without the express written consent of Terramore.io is prohibited.
+              Copyright © 2025 Terramore.io, LLC. All Rights Reserved.
             </p>
           </div>
         </div>

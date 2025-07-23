@@ -37,12 +37,15 @@ import {
 import Link from "next/link"
 import { IClosedWidget } from "@/components/iclosed-widget"
 import { IClosedPopup } from "@/components/iclosed-popup"
+import { useDoNotSellPopup } from "@/hooks/use-do-not-sell-popup"
+import { DoNotSellPopup } from "@/components/do-not-sell-popup"
 import { useSchedulePopup } from "@/hooks/use-schedule-popup"
 import { useIClosedPopup } from "@/hooks/use-iclosed-popup"
 
 export default function SolutionsPage() {
   const { isPopupOpen, setIsPopupOpen } = useSchedulePopup()
   const { isOpen: isIClosedOpen, openPopup: openIClosed, closePopup: closeIClosed } = useIClosedPopup()
+  const { isOpen: isDoNotSellOpen, openPopup: openDoNotSell, closePopup: closeDoNotSell } = useDoNotSellPopup()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [activePhase, setActivePhase] = useState("discovery")
   const [expandedDetails, setExpandedDetails] = useState<string | null>(null)
@@ -110,15 +113,6 @@ export default function SolutionsPage() {
         }
       `}</style>
       {/* Floating Corner Buttons */}
-      <div className="fixed bottom-4 left-4 z-50">
-        <Button size="sm" variant="secondary" className="rounded-full shadow-lg hover:shadow-xl transition-shadow">
-          <Cookie className="w-4 h-4 mr-2" />
-          Cookies
-        </Button>
-      </div>
-
-
-
       <div className="fixed bottom-4 right-4 z-50">
         <Button
           size="sm"
@@ -1094,26 +1088,39 @@ export default function SolutionsPage() {
               >
                 Terms of Service
               </button>
-              <div className="hover:text-blue-200 transition-colors cursor-pointer">Disclosure</div>
-              <div className="hover:text-blue-200 transition-colors cursor-pointer">DMCA POLICY</div>
-              <div className="hover:text-blue-200 transition-colors cursor-pointer">Do Not Sell My Info</div>
+              <button
+                onClick={() => handleFooterNavigation("/disclosure")}
+                className="hover:text-blue-200 transition-colors text-sm cursor-pointer bg-transparent border-none text-white"
+              >
+                Disclosure
+              </button>
+              <button
+                onClick={() => handleFooterNavigation("/dmca")}
+                className="hover:text-blue-200 transition-colors text-sm cursor-pointer bg-transparent border-none text-white"
+              >
+                DMCA POLICY
+              </button>
+              <button
+                onClick={openDoNotSell}
+                className="hover:text-blue-200 transition-colors text-sm cursor-pointer bg-transparent border-none text-white"
+              >
+                Do Not Sell My Personal Information
+              </button>
             </div>
           </div>
 
           {/* Disclaimer */}
           <div className="text-center text-sm leading-relaxed opacity-90 max-w-6xl mx-auto">
             <p>
-              Adam Moreno's results are not typical and are not a guarantee of your success. Adam Moreno is an
-              experienced business owner and consultant, and your results will vary depending on education, effort,
-              application, experience, and background. Adam Moreno does not personally invest in every business he works
-              with through Terramore.io, LLC. Due to the sensitivity of financial information, we do not track the
-              typical results of our students. We cannot guarantee that you will make money or that you will be
-              successful if you employ his business strategies specifically or generally. Consequently, your results may
-              significantly vary from his. We do not give investment, tax, or other professional advice. Specific
-              transactions and experiences are mentioned for informational purposes only. The information contained
-              within this website is the property of Terramore.io. Any use of the images, content, or ideas expressed
-              herein without the express written consent of Terramore.io is prohibited. Copyright © 2025 Terramore.io,
-              LLC. All Rights Reserved.
+              Results mentioned on this website are not typical and are not a guarantee of your success. Individual
+              results will vary depending on education, effort, application, experience, and background. Due to the
+              sensitivity of financial information, we do not track the typical results of our students. We cannot
+              guarantee that you will make money or that you will be successful if you employ the business strategies
+              discussed. Consequently, your results may significantly vary. We do not give investment, tax, or other
+              professional advice. Specific transactions and experiences are mentioned for informational purposes only.
+              The information contained within this website is the property of Terramore.io. Any use of the images,
+              content, or ideas expressed herein without the express written consent of Terramore.io is prohibited.
+              Copyright © 2025 Terramore.io, LLC. All Rights Reserved.
             </p>
           </div>
         </div>
@@ -1124,6 +1131,9 @@ export default function SolutionsPage() {
       
       {/* iClosed Popup */}
       <IClosedPopup isOpen={isIClosedOpen} onClose={closeIClosed} />
+      
+      {/* Do Not Sell Popup */}
+      <DoNotSellPopup isOpen={isDoNotSellOpen} onClose={closeDoNotSell} />
     </div>
   )
 }

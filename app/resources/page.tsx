@@ -4,6 +4,8 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { IClosedWidget } from "@/components/iclosed-widget"
 import { useSchedulePopup } from "@/hooks/use-schedule-popup"
+import { useDoNotSellPopup } from "@/hooks/use-do-not-sell-popup"
+import { DoNotSellPopup } from "@/components/do-not-sell-popup"
 import { Calendar } from "lucide-react"
 import { useState } from "react"
 import { Cookie, ChevronDown, Menu } from "lucide-react"
@@ -11,6 +13,7 @@ import { Badge } from "@/components/ui/badge"
 
 export default function ResourcesPage() {
   const { isPopupOpen, setIsPopupOpen } = useSchedulePopup()
+  const { isOpen: isDoNotSellOpen, openPopup: openDoNotSell, closePopup: closeDoNotSell } = useDoNotSellPopup()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const handleFooterNavigation = (href: string) => {
@@ -20,13 +23,6 @@ export default function ResourcesPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Floating Corner Buttons */}
-      <div className="fixed bottom-4 left-4 z-50">
-        <Button size="sm" variant="secondary" className="rounded-full shadow-lg hover:shadow-xl transition-shadow">
-          <Cookie className="w-4 h-4 mr-2" />
-          Cookies
-        </Button>
-      </div>
-
       <div className="fixed bottom-4 right-4 z-50">
         <Button
           size="sm"
@@ -167,8 +163,87 @@ export default function ResourcesPage() {
         </div>
       </div>
 
+      {/* Footer */}
+      <footer className="bg-slate-900 text-white py-12 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div>
+              <div className="flex items-center space-x-2 mb-6">
+                <img src="/images/terramore-logo-clean.png" alt="Terramore Logo" className="w-10 h-10 object-contain" />
+                <span className="text-xl font-bold">TERRAMORE.IO</span>
+              </div>
+              <p className="text-gray-400 text-sm">
+                Helping businesses scale through proven systems, strategic marketing, and operational excellence.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
+              <ul className="space-y-2">
+                <li>
+                  <Link href="/workshops" className="text-gray-400 hover:text-white transition-colors">
+                    Workshops
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/courses/scaling" className="text-gray-400 hover:text-white transition-colors">
+                    Courses
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/solutions" className="text-gray-400 hover:text-white transition-colors">
+                    Solutions
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Legal</h3>
+              <ul className="space-y-2">
+                <li>
+                  <Link href="/privacy" className="text-gray-400 hover:text-white transition-colors">
+                    Privacy Policy
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/terms" className="text-gray-400 hover:text-white transition-colors">
+                    Terms of Service
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/disclosure" className="text-gray-400 hover:text-white transition-colors">
+                    Disclosure
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/dmca" className="text-gray-400 hover:text-white transition-colors">
+                    DMCA Policy
+                  </Link>
+                </li>
+                <li>
+                  <button
+                    onClick={openDoNotSell}
+                    className="text-gray-400 hover:text-white transition-colors text-sm cursor-pointer bg-transparent border-none"
+                  >
+                    Do Not Sell My Personal Information
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="mt-12 pt-8 border-t border-gray-800 text-center">
+            <p className="text-gray-500 text-sm">© {new Date().getFullYear()} Terramore.io. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
+
       {/* Schedule Popup */}
       <IClosedWidget isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)} />
+      
+      {/* Do Not Sell Popup */}
+      <DoNotSellPopup isOpen={isDoNotSellOpen} onClose={closeDoNotSell} />
     </div>
   )
 }

@@ -9,9 +9,12 @@ import { Calendar, Cookie, ChevronDown, Menu, Play } from "lucide-react"
 import Link from "next/link"
 import { IClosedWidget } from "@/components/iclosed-widget"
 import { useSchedulePopup } from "@/hooks/use-schedule-popup"
+import { useDoNotSellPopup } from "@/hooks/use-do-not-sell-popup"
+import { DoNotSellPopup } from "@/components/do-not-sell-popup"
 
 export default function ScalingCoursePage() {
   const { isPopupOpen, setIsPopupOpen } = useSchedulePopup()
+  const { isOpen: isDoNotSellOpen, openPopup: openDoNotSell, closePopup: closeDoNotSell } = useDoNotSellPopup()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [selectedVideo, setSelectedVideo] = useState(0)
   const [isModulesOpen, setIsModulesOpen] = useState(false)
@@ -34,16 +37,49 @@ export default function ScalingCoursePage() {
     window.location.href = href
   }
 
+  const handleCourseSignup = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    const formData = new FormData(e.target as HTMLFormElement)
+    const firstName = formData.get('firstName') as string
+    const lastName = formData.get('lastName') as string
+    const email = formData.get('email') as string
+    const phone = formData.get('phone') as string
+    const company = formData.get('company') as string
+
+    try {
+      const response = await fetch('/api/course-signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          firstName,
+          lastName,
+          email,
+          phone,
+          company,
+          courseType: 'scaling',
+          signupSource: 'scaling_course_page'
+        }),
+      })
+
+      if (response.ok) {
+        alert('Thank you! You\'ve been successfully signed up for course updates.')
+        ;(e.target as HTMLFormElement).reset()
+      } else {
+        const errorData = await response.json()
+        alert(errorData.error || 'Failed to sign up. Please try again.')
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error)
+      alert('Something went wrong. Please try again.')
+    }
+  }
+
   return (
     <div className="min-h-screen bg-white">
       {/* Floating Corner Buttons */}
-      <div className="fixed bottom-4 left-4 z-50">
-        <Button size="sm" variant="secondary" className="rounded-full shadow-lg hover:shadow-xl transition-shadow">
-          <Cookie className="w-4 h-4 mr-2" />
-          Cookies
-        </Button>
-      </div>
-
       <div className="fixed bottom-4 right-4 z-50">
         <Button
           size="sm"
@@ -424,13 +460,14 @@ export default function ScalingCoursePage() {
               </p>
             </div>
 
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={handleCourseSignup}>
               <div>
                 <Label htmlFor="firstName" className="text-sm font-medium text-gray-700">
                   First Name *
                 </Label>
                 <Input
                   id="firstName"
+                  name="firstName"
                   type="text"
                   required
                   className="mt-1 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
@@ -443,6 +480,7 @@ export default function ScalingCoursePage() {
                 </Label>
                 <Input
                   id="lastName"
+                  name="lastName"
                   type="text"
                   required
                   className="mt-1 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
@@ -455,6 +493,7 @@ export default function ScalingCoursePage() {
                 </Label>
                 <Input
                   id="email"
+                  name="email"
                   type="email"
                   required
                   className="mt-1 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
@@ -467,6 +506,7 @@ export default function ScalingCoursePage() {
                 </Label>
                 <Input
                   id="phone"
+                  name="phone"
                   type="tel"
                   required
                   className="mt-1 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
@@ -479,6 +519,7 @@ export default function ScalingCoursePage() {
                 </Label>
                 <Input
                   id="company"
+                  name="company"
                   type="text"
                   className="mt-1 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                 />
@@ -522,8 +563,87 @@ export default function ScalingCoursePage() {
 
 
 
+      {/* Footer */}
+      <footer className="bg-slate-900 text-white py-12 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div>
+              <div className="flex items-center space-x-2 mb-6">
+                <img src="/images/terramore-logo-clean.png" alt="Terramore Logo" className="w-10 h-10 object-contain" />
+                <span className="text-xl font-bold">TERRAMORE.IO</span>
+              </div>
+              <p className="text-gray-400 text-sm">
+                Helping businesses scale through proven systems, strategic marketing, and operational excellence.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
+              <ul className="space-y-2">
+                <li>
+                  <Link href="/workshops" className="text-gray-400 hover:text-white transition-colors">
+                    Workshops
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/courses/scaling" className="text-gray-400 hover:text-white transition-colors">
+                    Courses
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/solutions" className="text-gray-400 hover:text-white transition-colors">
+                    Solutions
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Legal</h3>
+              <ul className="space-y-2">
+                <li>
+                  <Link href="/privacy" className="text-gray-400 hover:text-white transition-colors">
+                    Privacy Policy
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/terms" className="text-gray-400 hover:text-white transition-colors">
+                    Terms of Service
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/disclosure" className="text-gray-400 hover:text-white transition-colors">
+                    Disclosure
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/dmca" className="text-gray-400 hover:text-white transition-colors">
+                    DMCA Policy
+                  </Link>
+                </li>
+                <li>
+                  <button
+                    onClick={openDoNotSell}
+                    className="text-gray-400 hover:text-white transition-colors text-sm cursor-pointer bg-transparent border-none"
+                  >
+                    Do Not Sell My Personal Information
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="mt-12 pt-8 border-t border-gray-800 text-center">
+            <p className="text-gray-500 text-sm">© {new Date().getFullYear()} Terramore.io. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
+
       {/* Schedule Popup */}
       <IClosedWidget isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)} />
+      
+      {/* Do Not Sell Popup */}
+      <DoNotSellPopup isOpen={isDoNotSellOpen} onClose={closeDoNotSell} />
     </div>
   )
 }

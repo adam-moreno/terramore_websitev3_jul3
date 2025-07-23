@@ -8,10 +8,14 @@ import Link from "next/link"
 import { IClosedWidget } from "@/components/iclosed-widget"
 import { IClosedPopup } from "@/components/iclosed-popup"
 import { RoadmapModal } from "@/components/roadmap-modal"
+import { DoNotSellPopup } from "@/components/do-not-sell-popup"
+import { FreeCoursesPopup } from "@/components/free-courses-popup"
 import { FounderPhotoCarousel } from "@/components/founder-photo-carousel"
 import { useSchedulePopup } from "@/hooks/use-schedule-popup"
 import { useIClosedPopup } from "@/hooks/use-iclosed-popup"
 import { useRoadmapModal } from "@/hooks/use-roadmap-modal"
+import { useDoNotSellPopup } from "@/hooks/use-do-not-sell-popup"
+import { useFreeCoursesPopup } from "@/hooks/use-free-courses-popup"
 import { useEffect, useState } from "react"
 import "@/styles/fadeInUp.css"
 
@@ -19,6 +23,8 @@ export default function TerramoreHomepage() {
   const { isPopupOpen, setIsPopupOpen } = useSchedulePopup()
   const { isOpen: isIClosedOpen, openPopup: openIClosed, closePopup: closeIClosed } = useIClosedPopup()
   const { isOpen: isRoadmapOpen, setIsOpen: setIsRoadmapOpen } = useRoadmapModal()
+  const { isOpen: isDoNotSellOpen, openPopup: openDoNotSell, closePopup: closeDoNotSell } = useDoNotSellPopup()
+  const { isOpen: isFreeCoursesOpen, openPopup: openFreeCourses, closePopup: closeFreeCourses } = useFreeCoursesPopup()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [currentCardIndex, setCurrentCardIndex] = useState(0)
   const [isHovering, setIsHovering] = useState(false)
@@ -412,6 +418,22 @@ export default function TerramoreHomepage() {
       {/* Course Cards */}
       <div className="py-16 px-6 bg-white">
         <div className="max-w-7xl mx-auto">
+          {/* Free Courses Notification Banner */}
+          <div 
+            className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg p-6 mb-8 shadow-lg cursor-pointer hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]"
+            onClick={openFreeCourses}
+          >
+            <div className="text-center text-white">
+              <div className="flex items-center justify-center mb-2">
+                <span className="text-2xl mr-2">🎉</span>
+                <h3 className="text-xl font-bold">FREE Courses Coming by End of August!</h3>
+              </div>
+              <p className="text-blue-100 text-lg">
+                Click here to sign up for email notifications when new course videos are uploaded!
+              </p>
+            </div>
+          </div>
+          
           {/* Section Title */}
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-slate-900 mb-4">
@@ -967,12 +989,7 @@ export default function TerramoreHomepage() {
               >
                 Partner With Us
               </button>
-              <button
-                onClick={() => handleFooterNavigation("/resources")}
-                className="hover:text-blue-200 transition-colors text-lg cursor-pointer bg-transparent border-none text-white"
-              >
-                Resources
-              </button>
+
             </div>
           </div>
 
@@ -991,26 +1008,39 @@ export default function TerramoreHomepage() {
               >
                 Terms of Service
               </button>
-              <div className="hover:text-blue-200 transition-colors cursor-pointer">Disclosure</div>
-              <div className="hover:text-blue-200 transition-colors cursor-pointer">DMCA POLICY</div>
-              <div className="hover:text-blue-200 transition-colors cursor-pointer">Do Not Sell My Info</div>
+              <button
+                onClick={() => handleFooterNavigation("/disclosure")}
+                className="hover:text-blue-200 transition-colors text-sm cursor-pointer bg-transparent border-none text-white"
+              >
+                Disclosure
+              </button>
+              <button
+                onClick={() => handleFooterNavigation("/dmca")}
+                className="hover:text-blue-200 transition-colors text-sm cursor-pointer bg-transparent border-none text-white"
+              >
+                DMCA POLICY
+              </button>
+              <button
+                onClick={openDoNotSell}
+                className="hover:text-blue-200 transition-colors text-sm cursor-pointer bg-transparent border-none text-white"
+              >
+                Do Not Sell My Personal Information
+              </button>
             </div>
           </div>
 
           {/* Disclaimer */}
           <div className="text-center text-sm leading-relaxed opacity-90 max-w-6xl mx-auto">
             <p>
-              Adam Moreno's results are not typical and are not a guarantee of your success. Adam Moreno is an
-              experienced business owner and consultant, and your results will vary depending on education, effort,
-              application, experience, and background. Adam Moreno does not personally invest in every business he works
-              with through Terramore.io, LLC. Due to the sensitivity of financial information, we do not track the
-              typical results of our students. We cannot guarantee that you will make money or that you will be
-              successful if you employ his business strategies specifically or generally. Consequently, your results may
-              significantly vary from his. We do not give investment, tax, or other professional advice. Specific
-              transactions and experiences are mentioned for informational purposes only. The information contained
-              within this website is the property of Terramore.io. Any use of the images, content, or ideas expressed
-              herein without the express written consent of Terramore.io is prohibited. Copyright © 2025 Terramore.io,
-              LLC. All Rights Reserved.
+              Results mentioned on this website are not typical and are not a guarantee of your success. Individual
+              results will vary depending on education, effort, application, experience, and background. Due to the
+              sensitivity of financial information, we do not track the typical results of our students. We cannot
+              guarantee that you will make money or that you will be successful if you employ the business strategies
+              discussed. Consequently, your results may significantly vary. We do not give investment, tax, or other
+              professional advice. Specific transactions and experiences are mentioned for informational purposes only.
+              The information contained within this website is the property of Terramore.io. Any use of the images,
+              content, or ideas expressed herein without the express written consent of Terramore.io is prohibited.
+              Copyright © 2025 Terramore.io, LLC. All Rights Reserved.
             </p>
           </div>
         </div>
@@ -1023,6 +1053,12 @@ export default function TerramoreHomepage() {
       
       {/* Roadmap Modal */}
       <RoadmapModal isOpen={isRoadmapOpen} onClose={() => setIsRoadmapOpen(false)} />
+      
+      {/* Do Not Sell Popup */}
+      <DoNotSellPopup isOpen={isDoNotSellOpen} onClose={closeDoNotSell} />
+      
+      {/* Free Courses Popup */}
+      <FreeCoursesPopup isOpen={isFreeCoursesOpen} onClose={closeFreeCourses} />
     </div>
   )
 }

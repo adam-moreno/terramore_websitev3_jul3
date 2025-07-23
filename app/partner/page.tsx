@@ -24,9 +24,12 @@ import {
 import Link from "next/link"
 import { IClosedWidget } from "@/components/iclosed-widget"
 import { useSchedulePopup } from "@/hooks/use-schedule-popup"
+import { useDoNotSellPopup } from "@/hooks/use-do-not-sell-popup"
+import { DoNotSellPopup } from "@/components/do-not-sell-popup"
 
 export default function PartnerPage() {
   const { isPopupOpen, setIsPopupOpen } = useSchedulePopup()
+  const { isOpen: isDoNotSellOpen, openPopup: openDoNotSell, closePopup: closeDoNotSell } = useDoNotSellPopup()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [currentStep, setCurrentStep] = useState(1)
   const [formData, setFormData] = useState({
@@ -42,6 +45,9 @@ export default function PartnerPage() {
     phone: "",
     message: "",
   })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSubmitted, setIsSubmitted] = useState(false)
+  const [submitError, setSubmitError] = useState("")
 
   const totalSteps = 8
 
@@ -63,6 +69,51 @@ export default function PartnerPage() {
 
   const handleInputChange = (field: string, value: string) => {
     setFormData({ ...formData, [field]: value })
+  }
+
+  const handleSubmit = async () => {
+    setIsSubmitting(true)
+    setSubmitError("")
+
+    try {
+      const response = await fetch('/api/partner-application', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      })
+
+      if (response.ok) {
+        setIsSubmitted(true)
+        // Reset form after 5 seconds
+        setTimeout(() => {
+          setIsSubmitted(false)
+          setFormData({
+            location: "",
+            businessType: "",
+            revenue: "",
+            teamSize: "",
+            goal: "",
+            timeline: "",
+            budget: "",
+            name: "",
+            email: "",
+            phone: "",
+            message: "",
+          })
+          setCurrentStep(1)
+        }, 5000)
+      } else {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to submit application')
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error)
+      setSubmitError(error instanceof Error ? error.message : 'Something went wrong. Please try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const renderStep = () => {
@@ -357,13 +408,6 @@ export default function PartnerPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Floating Corner Buttons */}
-      <div className="fixed bottom-4 left-4 z-50">
-        <Button size="sm" variant="secondary" className="rounded-full shadow-lg hover:shadow-xl transition-shadow">
-          <Cookie className="w-4 h-4 mr-2" />
-          Cookies
-        </Button>
-      </div>
-
       <div className="fixed bottom-4 right-4 z-50">
         <Button
           size="sm"
@@ -502,6 +546,28 @@ export default function PartnerPage() {
         </div>
       </div>
 
+      {/* Success/Error Messages */}
+      {isSubmitted && (
+        <div className="py-8 px-4 bg-green-50">
+          <div className="max-w-4xl mx-auto text-center">
+            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+              <strong>Application Submitted Successfully! 🎉</strong>
+              <p className="mt-2">Thank you for your interest in partnering with us. We'll review your application and get back to you within 2-3 business days.</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {submitError && (
+        <div className="py-8 px-4 bg-red-50">
+          <div className="max-w-4xl mx-auto text-center">
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+              <strong>Error:</strong> {submitError}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Questionnaire */}
       <div className="py-16 px-4 bg-white min-h-[600px] flex items-center">
         <div className="max-w-6xl mx-auto w-full">{renderStep()}</div>
@@ -530,14 +596,11 @@ export default function PartnerPage() {
             </Button>
           ) : (
             <Button
-              onClick={() => {
-                // Handle form submission
-                console.log("Form submitted:", formData)
-                alert("Thank you! We'll be in touch soon.")
-              }}
-              className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 transform hover:scale-105 transition-all duration-200"
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+              className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <span>Submit Application</span>
+              <span>{isSubmitting ? "Submitting..." : "Submit Application"}</span>
               <ArrowRight className="w-4 h-4" />
             </Button>
           )}
@@ -579,31 +642,7 @@ export default function PartnerPage() {
               </ul>
             </div>
 
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Resources</h3>
-              <ul className="space-y-2">
-                <li>
-                  <Link href="/resources" className="text-gray-400 hover:text-white transition-colors">
-                    Free Resources
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/blog" className="text-gray-400 hover:text-white transition-colors">
-                    Blog
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/case-studies" className="text-gray-400 hover:text-white transition-colors">
-                    Case Studies
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/faq" className="text-gray-400 hover:text-white transition-colors">
-                    FAQ
-                  </Link>
-                </li>
-              </ul>
-            </div>
+
 
             <div>
               <h3 className="text-lg font-semibold mb-4">Legal</h3>
@@ -623,6 +662,14 @@ export default function PartnerPage() {
                     Disclaimer
                   </Link>
                 </li>
+                <li>
+                  <button
+                    onClick={openDoNotSell}
+                    className="text-gray-400 hover:text-white transition-colors text-sm cursor-pointer bg-transparent border-none"
+                  >
+                    Do Not Sell My Personal Information
+                  </button>
+                </li>
               </ul>
             </div>
           </div>
@@ -630,8 +677,8 @@ export default function PartnerPage() {
           <div className="mt-12 pt-8 border-t border-gray-800 text-center">
             <p className="text-gray-500 text-sm">© {new Date().getFullYear()} Terramore.io. All rights reserved.</p>
             <p className="text-gray-500 text-xs mt-4 max-w-3xl mx-auto">
-              Terramore.io is owned and operated by Adam Moreno. Results mentioned are not typical or guaranteed.
-              Individual results will vary based on your business, implementation, and market conditions.
+              Results mentioned are not typical or guaranteed. Individual results will vary based on your business,
+              implementation, and market conditions.
             </p>
           </div>
         </div>
@@ -639,6 +686,9 @@ export default function PartnerPage() {
 
       {/* Schedule Popup */}
       <IClosedWidget isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)} />
+      
+      {/* Do Not Sell Popup */}
+      <DoNotSellPopup isOpen={isDoNotSellOpen} onClose={closeDoNotSell} />
     </div>
   )
 }
