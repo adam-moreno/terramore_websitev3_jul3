@@ -134,9 +134,6 @@ export default function WorkshopsPage() {
               <Link href="/partner" className="hover:text-blue-300 transition-colors">
                 Partner With Us
               </Link>
-              <Link href="/about" className="hover:text-blue-300 transition-colors">
-                About the Firm
-              </Link>
             </div>
           </div>
 
@@ -1084,9 +1081,6 @@ export default function WorkshopsPage() {
               <div className="hover:text-blue-200 transition-colors cursor-pointer">Media</div>
               <Link href="/partner" className="hover:text-blue-200 transition-colors">
                 Partner With Us
-              </Link>
-              <Link href="/about" className="hover:text-blue-200 transition-colors">
-                About the Firm
               </Link>
               <Link href="/careers" className="hover:text-blue-200 transition-colors">
                 Careers

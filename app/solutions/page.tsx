@@ -179,9 +179,6 @@ export default function SolutionsPage() {
               <Link href="/partner" className="hover:text-blue-300 transition-colors">
                 Partner With Us
               </Link>
-              <Link href="/about" className="hover:text-blue-300 transition-colors">
-                About the Firm
-              </Link>
             </div>
           </div>
 
@@ -224,9 +221,6 @@ export default function SolutionsPage() {
               </Link>
               <Link href="/partner" className="text-white hover:text-blue-300 transition-colors py-2">
                 Partner With Us
-              </Link>
-              <Link href="/about" className="text-white hover:text-blue-300 transition-colors py-2">
-                About the Firm
               </Link>
             </div>
           </div>
@@ -1081,18 +1075,6 @@ export default function SolutionsPage() {
                 className="hover:text-blue-200 transition-colors text-lg cursor-pointer bg-transparent border-none text-white"
               >
                 Partner With Us
-              </button>
-              <button
-                onClick={() => handleFooterNavigation("/about")}
-                className="hover:text-blue-200 transition-colors text-lg cursor-pointer bg-transparent border-none text-white"
-              >
-                About the Firm
-              </button>
-              <button
-                onClick={() => handleFooterNavigation("/resources")}
-                className="hover:text-blue-200 transition-colors text-lg cursor-pointer bg-transparent border-none text-white"
-              >
-                Resources
               </button>
             </div>
           </div>

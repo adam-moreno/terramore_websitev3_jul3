@@ -55,19 +55,6 @@ export default function ScalingCoursePage() {
         </Button>
       </div>
 
-      {/* Announcement Banner */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-3 px-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-center">
-          <Badge variant="secondary" className="mr-3 bg-white text-blue-800">
-            NEW
-          </Badge>
-          <span className="text-sm font-medium">
-            2025 AI Marketing Workshop Dates Announced: Find out if you're a fit
-          </span>
-          <span className="ml-2">→</span>
-        </div>
-      </div>
-
       {/* Navigation */}
       <nav className="bg-slate-900 text-white py-4 px-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -81,7 +68,6 @@ export default function ScalingCoursePage() {
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center justify-center flex-1">
             <div className="flex items-center space-x-8">
-              </Link>
               <div className="relative group">
                 <div className="flex items-center space-x-1 text-blue-300 transition-colors cursor-pointer">
                   <span>Courses</span>
@@ -113,9 +99,6 @@ export default function ScalingCoursePage() {
               <Link href="/partner" className="hover:text-blue-300 transition-colors">
                 Partner With Us
               </Link>
-              <Link href="/about" className="hover:text-blue-300 transition-colors">
-                About the Firm
-              </Link>
             </div>
           </div>
 
@@ -136,7 +119,6 @@ export default function ScalingCoursePage() {
         {isMobileMenuOpen && (
           <div className="lg:hidden mt-4 pb-4">
             <div className="flex flex-col space-y-2">
-              </Link>
               <div className="py-2">
                 <span className="text-blue-300">Courses</span>
                 <div className="ml-4 mt-2 space-y-2">
@@ -156,9 +138,6 @@ export default function ScalingCoursePage() {
               </Link>
               <Link href="/partner" className="text-white hover:text-blue-300 transition-colors py-2">
                 Partner With Us
-              </Link>
-              <Link href="/about" className="text-white hover:text-blue-300 transition-colors py-2">
-                About the Firm
               </Link>
             </div>
           </div>

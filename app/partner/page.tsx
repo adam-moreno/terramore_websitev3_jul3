@@ -422,9 +422,6 @@ export default function PartnerPage() {
               <Link href="/partner" className="text-blue-300 transition-colors">
                 Partner With Us
               </Link>
-              <Link href="/about" className="hover:text-blue-300 transition-colors">
-                About the Firm
-              </Link>
             </div>
           </div>
 
@@ -467,9 +464,6 @@ export default function PartnerPage() {
               </Link>
               <Link href="/partner" className="text-blue-300 transition-colors py-2">
                 Partner With Us
-              </Link>
-              <Link href="/about" className="text-white hover:text-blue-300 transition-colors py-2">
-                About the Firm
               </Link>
             </div>
           </div>
@@ -580,11 +574,6 @@ export default function PartnerPage() {
                 <li>
                   <Link href="/solutions" className="text-gray-400 hover:text-white transition-colors">
                     Solutions
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/about" className="text-gray-400 hover:text-white transition-colors">
-                    About
                   </Link>
                 </li>
               </ul>

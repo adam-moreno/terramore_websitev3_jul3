@@ -13,7 +13,7 @@ import { useSchedulePopup } from "@/hooks/use-schedule-popup"
 import { useIClosedPopup } from "@/hooks/use-iclosed-popup"
 import { useRoadmapModal } from "@/hooks/use-roadmap-modal"
 import { useEffect, useState } from "react"
-import "../styles/fadeInUp.css"
+import "@/styles/fadeInUp.css"
 
 export default function TerramoreHomepage() {
   const { isPopupOpen, setIsPopupOpen } = useSchedulePopup()
@@ -229,9 +229,6 @@ export default function TerramoreHomepage() {
               <Link href="/partner" className="hover:text-blue-300 transition-colors">
                 Partner With Us
               </Link>
-              <Link href="/about" className="hover:text-blue-300 transition-colors">
-                About the Firm
-              </Link>
             </div>
           </div>
 
@@ -299,13 +296,6 @@ export default function TerramoreHomepage() {
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Partner With Us
-            </Link>
-            <Link
-              href="/about"
-              className="hover:text-blue-300 transition-colors py-2"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              About the Firm
             </Link>
           </div>
         </div>
@@ -976,12 +966,6 @@ export default function TerramoreHomepage() {
                 className="hover:text-blue-200 transition-colors text-lg cursor-pointer bg-transparent border-none text-white"
               >
                 Partner With Us
-              </button>
-              <button
-                onClick={() => handleFooterNavigation("/about")}
-                className="hover:text-blue-200 transition-colors text-lg cursor-pointer bg-transparent border-none text-white"
-              >
-                About the Firm
               </button>
               <button
                 onClick={() => handleFooterNavigation("/resources")}
