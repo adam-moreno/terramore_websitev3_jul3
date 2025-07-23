@@ -21,12 +21,12 @@ export function Logo({ size = 'md', showText = true, className = '' }: LogoProps
 
   return (
     <Link href="/" className={`flex items-center space-x-2 ${className}`}>
-      {/* Logo Icon - Using a simple SVG for reliability */}
-      <div className={`${sizeClasses[size]} bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold`}>
-        <span className={size === 'sm' ? 'text-xs' : size === 'md' ? 'text-sm' : 'text-base'}>
-          T
-        </span>
-      </div>
+      {/* Terramore Logo from Cloudinary */}
+      <img 
+        src="https://res.cloudinary.com/dx7id04uv/image/upload/v1753313070/Screenshot_2025-07-23_at_4.21.18_PM_1_dxk0j8.png"
+        alt="Terramore Logo"
+        className={`${sizeClasses[size]} object-contain`}
+      />
       
       {/* Logo Text */}
       {showText && (
