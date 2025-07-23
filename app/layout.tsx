@@ -14,6 +14,11 @@ export const metadata: Metadata = {
     telephone: false,
   },
   metadataBase: new URL('https://terramore.io'),
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon-16x16.png',
+    apple: '/apple-touch-icon.png',
+  },
   openGraph: {
     title: 'Terramore.io - Business Scaling Solutions',
     description: 'Transform your business with proven scaling strategies and AI-powered marketing solutions.',
@@ -21,11 +26,20 @@ export const metadata: Metadata = {
     siteName: 'Terramore.io',
     locale: 'en_US',
     type: 'website',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Terramore.io - Business Scaling Solutions',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Terramore.io - Business Scaling Solutions',
     description: 'Transform your business with proven scaling strategies and AI-powered marketing solutions.',
+    images: ['/og-image.png'],
   },
   robots: {
     index: true,
@@ -48,8 +62,11 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <head>
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="icon" href="/favicon.ico" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
       <body className="antialiased">
