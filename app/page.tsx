@@ -326,6 +326,25 @@ export default function TerramoreHomepage() {
               <h1 className="text-4xl md:text-6xl font-bold text-slate-900 mb-6 leading-tight uppercase">
                 WHY IS YOUR<br />BUSINESS STUCK?
               </h1>
+              
+              {/* Video Placeholder - Mobile and Desktop */}
+              <div className="mb-8">
+                <div className="w-full max-w-2xl mx-auto bg-slate-200 rounded-lg aspect-video flex items-center justify-center relative overflow-hidden">
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-16 h-16 bg-slate-300 rounded-full flex items-center justify-center">
+                      <svg className="w-8 h-8 text-slate-600" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z"/>
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="absolute bottom-4 left-4 right-4">
+                    <div className="bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                      Video Placeholder
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
               <div className="text-lg md:text-xl lg:text-2xl font-medium text-slate-700 mb-8 max-w-2xl mx-auto">
                 <span className="block">
                   Learn from a team that's spent 10+ years building scalable frameworks that power marketing, automation, and growth.
@@ -367,14 +386,14 @@ export default function TerramoreHomepage() {
       <div className="py-12 px-6 bg-slate-50">
         <div className="max-w-4xl mx-auto text-center">
           <div 
-            className="relative h-56 md:h-64 overflow-hidden"
+            className="relative min-h-[300px] md:min-h-[400px] overflow-hidden"
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}
           >
             {flashCards.map((card, index) => (
               <div
                 key={index}
-                className={`absolute inset-0 flex items-center justify-center transition-all duration-1000 ease-in-out ${
+                className={`absolute inset-0 flex items-center justify-center transition-all duration-1000 ease-in-out px-4 ${
                   index === currentCardIndex
                     ? 'opacity-100 transform translate-x-0'
                     : index < currentCardIndex
@@ -382,12 +401,12 @@ export default function TerramoreHomepage() {
                     : 'opacity-0 transform translate-x-full'
                 }`}
               >
-                <div className="bg-white rounded-2xl shadow-lg p-8 md:p-12 border border-gray-100 relative transform transition-all duration-300 hover:shadow-xl cursor-pointer">
+                <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8 lg:p-12 border border-gray-100 relative transform transition-all duration-300 hover:shadow-xl cursor-pointer w-full max-w-sm md:max-w-md lg:max-w-lg">
                   <div className={`absolute top-4 left-4 ${card.color} text-white px-3 py-1 rounded-md text-sm font-medium`}>
                     {card.audience}
                   </div>
                   <div className="pt-8">
-                    <p className="text-lg md:text-xl lg:text-2xl font-medium leading-relaxed">
+                    <p className="text-base md:text-lg lg:text-xl xl:text-2xl font-medium leading-relaxed">
                       <span className="text-slate-900 block mb-4">
                         {card.content.split('?')[0]}?
                       </span>
