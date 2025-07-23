@@ -57,8 +57,6 @@ export default function TermsPage() {
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center justify-center flex-1">
             <div className="flex items-center space-x-8">
-              <Link href="/workshops" className="hover:text-blue-300 transition-colors">
-                Workshops
               </Link>
               <div className="relative group">
                 <div className="flex items-center space-x-1 hover:text-blue-300 transition-colors cursor-pointer">
@@ -399,7 +397,6 @@ export default function TermsPage() {
             </div>
 
             <div className="flex flex-wrap justify-center gap-6 mb-8">
-              <Link href="/workshops" className="hover:text-blue-200 transition-colors">
                 Workshops
               </Link>
               <Link href="/courses/scaling" className="hover:text-blue-200 transition-colors">

@@ -7,10 +7,29 @@ import { Calendar, Cookie, ChevronDown, Menu, ArrowRight } from "lucide-react"
 import Link from "next/link"
 import { IClosedWidget } from "@/components/iclosed-widget"
 import { useSchedulePopup } from "@/hooks/use-schedule-popup"
+import { FounderPhotoCarousel } from "@/components/founder-photo-carousel"
 
 export default function AboutPage() {
   const { isPopupOpen, setIsPopupOpen } = useSchedulePopup()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+
+  const founderPhotos = [
+    {
+      src: "https://res.cloudinary.com/dx7id04uv/image/upload/f_auto,q_auto,w_400,h_400,c_fill,g_auto/v1752608693/adam-moreno-profile-new_jb3lr7.jpg",
+      alt: "Adam Moreno - Professional Headshot",
+      description: "Adam Moreno, Founder & CEO of Terramore.io"
+    },
+    {
+      src: "https://res.cloudinary.com/dx7id04uv/image/upload/f_auto,q_auto,w_400,h_400,c_fill,g_auto/v1752608693/adam-moreno-profile-new_jb3lr7.jpg",
+      alt: "Adam Moreno - Business Portrait",
+      description: "Leading business strategist and entrepreneur"
+    },
+    {
+      src: "https://res.cloudinary.com/dx7id04uv/image/upload/f_auto,q_auto,w_400,h_400,c_fill,g_auto/v1752608693/adam-moreno-profile-new_jb3lr7.jpg",
+      alt: "Adam Moreno - Executive Photo",
+      description: "Expert in marketing automation and growth strategies"
+    }
+  ]
 
   return (
     <div className="min-h-screen bg-white">
@@ -33,19 +52,6 @@ export default function AboutPage() {
         </Button>
       </div>
 
-      {/* Announcement Banner */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-3 px-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-center">
-          <Badge variant="secondary" className="mr-3 bg-white text-blue-800">
-            NEW
-          </Badge>
-          <span className="text-sm font-medium">
-            2025 AI Marketing Workshop Dates Announced: Find out if you're a fit
-          </span>
-          <span className="ml-2">→</span>
-        </div>
-      </div>
-
       {/* Navigation */}
       <nav className="bg-slate-900 text-white py-4 px-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -59,9 +65,6 @@ export default function AboutPage() {
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center justify-center flex-1">
             <div className="flex items-center space-x-8">
-              <Link href="/workshops" className="hover:text-blue-300 transition-colors">
-                Workshops
-              </Link>
               <div className="relative group">
                 <div className="flex items-center space-x-1 hover:text-blue-300 transition-colors cursor-pointer">
                   <span>Courses</span>
@@ -119,9 +122,6 @@ export default function AboutPage() {
         {isMobileMenuOpen && (
           <div className="lg:hidden mt-4 px-4 py-2 bg-slate-800 rounded-md">
             <div className="flex flex-col space-y-3">
-              <Link href="/workshops" className="text-white hover:text-blue-300 transition-colors py-2">
-                Workshops
-              </Link>
               <div className="relative">
                 <div className="flex items-center space-x-1 text-white hover:text-blue-300 transition-colors py-2">
                   <span>Courses</span>
@@ -220,43 +220,46 @@ export default function AboutPage() {
         </div>
       </div>
 
-      {/* Founder Section */}
-      <div className="py-16 px-4 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">Meet Our Founder</h2>
-            <p className="text-lg max-w-3xl mx-auto text-gray-600">
-              Learn about the visionary leader behind Terramore.io's proven business scaling methodologies.
-            </p>
+      {/* About Our Founder Section */}
+      <div className="py-20 px-6 bg-gray-50">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-8">ABOUT OUR FOUNDER</h2>
           </div>
 
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-gray-50 rounded-lg p-8 md:p-12">
-              <div className="flex flex-col md:flex-row items-center gap-8">
-                <div className="flex-shrink-0">
-                  <img
-                    src="https://res.cloudinary.com/dx7id04uv/image/upload/f_auto,q_auto,w_400,h_400,c_fill,g_auto/v1752608693/adam-moreno-profile-new_jb3lr7.jpg"
-                    alt="Adam Moreno"
-                    className="w-48 h-48 rounded-full object-cover"
-                    loading="eager"
-                  />
-                </div>
-                <div className="text-center md:text-left">
-                  <h3 className="text-2xl md:text-3xl font-bold mb-4">Adam Moreno</h3>
-                  <p className="text-lg text-blue-600 mb-6">Founder & CEO, Terramore.io</p>
-                  <p className="text-gray-600 leading-relaxed mb-6">
-                    Adam Moreno is a seasoned business strategist and entrepreneur with over a decade of experience
-                    helping companies scale from startup to multi-million dollar enterprises. His proven methodologies
-                    have generated over $100M in additional revenue for his clients across various industries.
-                  </p>
-                  <p className="text-gray-600 leading-relaxed">
-                    With expertise in marketing automation, operational efficiency, and strategic growth planning, Adam
-                    has developed the comprehensive systems and frameworks that power Terramore.io's success. His
-                    mission is to democratize access to enterprise-level business scaling strategies for companies of
-                    all sizes.
-                  </p>
-                </div>
-              </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            {/* Left Side - Photo Carousel */}
+            <div className="flex justify-center">
+              <FounderPhotoCarousel 
+                photos={founderPhotos}
+                autoRotate={true}
+                rotationInterval={6000}
+              />
+            </div>
+
+            {/* Right Side - Content */}
+            <div className="space-y-6">
+              <p className="text-lg text-gray-700 leading-relaxed">
+                Adam Moreno is the founder and managing partner of Terramore.io. With over a decade of experience in
+                corporate market research, Adam has worked directly with major digital and television platforms at
+                leading companies including Kantar and Samba TV, where he specialized in comprehensive market insights
+                and consumer behavior analysis across social media platforms.
+              </p>
+
+              <p className="text-lg text-gray-700 leading-relaxed">
+                As a solutions and sales engineer, Adam has extensive experience in software sales, working with Fortune
+                500 companies to develop automated audience targeting systems and real-time analytics dashboards. His
+                expertise in brand lift insights and data-driven marketing strategies has helped major advertisers
+                optimize their campaigns across traditional and streaming platforms.
+              </p>
+
+              <p className="text-lg text-gray-700 leading-relaxed">
+                Adam's technical background spans software engineering, data engineering, and full-stack development. He
+                has built websites, mobile applications, and worked directly with social media platforms to create
+                comprehensive marketing solutions. His mission at Terramore.io is to make advanced business education
+                and AI-powered marketing strategies accessible to entrepreneurs and business owners looking to scale
+                their operations.
+              </p>
             </div>
           </div>
         </div>

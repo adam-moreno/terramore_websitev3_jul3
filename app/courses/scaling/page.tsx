@@ -81,8 +81,6 @@ export default function ScalingCoursePage() {
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center justify-center flex-1">
             <div className="flex items-center space-x-8">
-              <Link href="/workshops" className="hover:text-blue-300 transition-colors">
-                Workshops
               </Link>
               <div className="relative group">
                 <div className="flex items-center space-x-1 text-blue-300 transition-colors cursor-pointer">
@@ -138,8 +136,6 @@ export default function ScalingCoursePage() {
         {isMobileMenuOpen && (
           <div className="lg:hidden mt-4 pb-4">
             <div className="flex flex-col space-y-2">
-              <Link href="/workshops" className="text-white hover:text-blue-300 transition-colors py-2">
-                Workshops
               </Link>
               <div className="py-2">
                 <span className="text-blue-300">Courses</span>
@@ -239,7 +235,6 @@ export default function ScalingCoursePage() {
           <Button
             variant="outline"
             className="w-full border-blue-600 text-blue-600 hover:bg-blue-50 py-4 text-lg font-semibold rounded-lg bg-transparent"
-            onClick={() => (window.location.href = "/workshops")}
           >
             CHECK WORKSHOP DATES
           </Button>

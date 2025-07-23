@@ -59,8 +59,6 @@ export default function PrivacyPolicyPage() {
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center justify-center flex-1">
             <div className="flex items-center space-x-8">
-              <Link href="/workshops" className="hover:text-blue-300 transition-colors">
-                Workshops
               </Link>
               <div className="relative group">
                 <div className="flex items-center space-x-1 hover:text-blue-300 transition-colors cursor-pointer">
@@ -119,8 +117,6 @@ export default function PrivacyPolicyPage() {
         {mobileMenuOpen && (
           <div className="lg:hidden mt-4 pb-4 border-t border-slate-700">
             <div className="flex flex-col space-y-4 mt-4">
-              <Link href="/workshops" className="hover:text-blue-300 transition-colors">
-                Workshops
               </Link>
               <Link href="/courses/scaling" className="hover:text-blue-300 transition-colors pl-4">
                 Scaling Course
@@ -478,7 +474,6 @@ export default function PrivacyPolicyPage() {
             </div>
 
             <div className="flex flex-wrap justify-center gap-6 mb-8">
-              <Link href="/workshops" className="hover:text-blue-200 transition-colors">
                 Workshops
               </Link>
               <Link href="/courses/scaling" className="hover:text-blue-200 transition-colors">
