@@ -11,6 +11,7 @@ import { IClosedWidget } from "@/components/iclosed-widget"
 import { useSchedulePopup } from "@/hooks/use-schedule-popup"
 import { useDoNotSellPopup } from "@/hooks/use-do-not-sell-popup"
 import { DoNotSellPopup } from "@/components/do-not-sell-popup"
+import { Logo } from "@/components/logo"
 
 export default function OffersCoursePage() {
   const { isPopupOpen, setIsPopupOpen } = useSchedulePopup()
@@ -54,10 +55,7 @@ export default function OffersCoursePage() {
       <nav className="bg-slate-900 text-white py-4 px-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <Link href="/" className="flex items-center space-x-2">
-              <img src="/images/terramore-logo-clean.png" alt="Terramore Logo" className="w-10 h-10 object-contain" />
-              <span className="text-xl font-bold">TERRAMORE.IO</span>
-            </Link>
+            <Logo size="lg" className="text-white" />
           </div>
 
           {/* Desktop Navigation */}
@@ -515,8 +513,7 @@ export default function OffersCoursePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center space-x-2 mb-6">
-                <img src="/images/terramore-logo-clean.png" alt="Terramore Logo" className="w-10 h-10 object-contain" />
-                <span className="text-xl font-bold">TERRAMORE.IO</span>
+                <Logo size="md" className="text-white" />
               </div>
               <p className="text-gray-400 text-sm">
                 Helping businesses scale through proven systems, strategic marketing, and operational excellence.

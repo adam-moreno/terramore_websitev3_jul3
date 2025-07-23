@@ -8,6 +8,7 @@ import { IClosedWidget } from "@/components/iclosed-widget"
 import { useSchedulePopup } from "@/hooks/use-schedule-popup"
 import { useDoNotSellPopup } from "@/hooks/use-do-not-sell-popup"
 import { DoNotSellPopup } from "@/components/do-not-sell-popup"
+import { Logo } from "@/components/logo"
 
 export default function DisclosurePage() {
   const { isPopupOpen, setIsPopupOpen } = useSchedulePopup()
@@ -31,10 +32,7 @@ export default function DisclosurePage() {
       <nav className="bg-slate-900 text-white py-4 px-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <Link href="/" className="flex items-center space-x-2">
-              <img src="/images/terramore-logo-clean.png" alt="Terramore Logo" className="w-10 h-10 object-contain" />
-              <span className="text-xl font-bold">TERRAMORE.IO</span>
-            </Link>
+            <Logo size="lg" className="text-white" />
           </div>
 
           {/* Desktop Navigation */}
@@ -215,12 +213,7 @@ export default function DisclosurePage() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-8">
             <div className="flex items-center justify-center mb-6">
-              <img
-                src="/images/terramore-logo-clean.png"
-                alt="Terramore Logo"
-                className="w-8 h-8 object-contain mr-3 filter brightness-0 invert"
-              />
-              <span className="text-xl font-bold">TERRAMORE.IO</span>
+              <Logo size="md" className="text-white" />
             </div>
 
             <div className="flex flex-wrap justify-center gap-6 mb-8">
