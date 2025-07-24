@@ -29,8 +29,8 @@ export default function TerramoreHomepage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [currentCardIndex, setCurrentCardIndex] = useState(0)
   const [isHovering, setIsHovering] = useState(false)
-  const [touchStart, setTouchStart] = useState(0)
-  const [touchEnd, setTouchEnd] = useState(0)
+  const [touchStart, setTouchStart] = useState({ x: 0, y: 0 })
+  const [touchEnd, setTouchEnd] = useState({ x: 0, y: 0 })
   const [showAllFAQs, setShowAllFAQs] = useState(false)
 
   // Founder photos for the carousel
@@ -165,18 +165,29 @@ export default function TerramoreHomepage() {
 
   // Touch handlers for mobile swipe
   const onTouchStart = (e: React.TouchEvent) => {
-    setTouchEnd(0)
-    setTouchStart(e.targetTouches[0].clientX)
+    setTouchEnd({ x: 0, y: 0 })
+    setTouchStart({ x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY })
   }
 
   const onTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX)
+    setTouchEnd({ x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY })
+    
+    // Prevent vertical scrolling during horizontal swipe
+    if (touchStart.x && touchEnd.x) {
+      const horizontalDistance = Math.abs(touchStart.x - touchEnd.x)
+      const verticalDistance = Math.abs(touchStart.y - touchEnd.y)
+      
+      // If horizontal movement is greater than vertical, prevent default scrolling
+      if (horizontalDistance > verticalDistance && horizontalDistance > 10) {
+        e.preventDefault()
+      }
+    }
   }
 
   const onTouchEnd = () => {
-    if (!touchStart || !touchEnd) return
+    if (!touchStart.x || !touchEnd.x) return
     
-    const distance = touchStart - touchEnd
+    const distance = touchStart.x - touchEnd.x
     const isLeftSwipe = distance > 50
     const isRightSwipe = distance < -50
 
