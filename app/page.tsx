@@ -432,7 +432,7 @@ export default function TerramoreHomepage() {
                     : 'opacity-0 transform translate-x-full'
                 }`}
               >
-                <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8 lg:p-12 border border-gray-100 relative transform transition-all duration-300 hover:shadow-xl cursor-pointer w-full max-w-sm md:max-w-md lg:max-w-lg">
+                <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8 lg:p-12 border border-gray-100 relative transform transition-all duration-300 hover:shadow-xl cursor-pointer w-full max-w-sm md:max-w-lg lg:max-w-2xl xl:max-w-3xl">
                   <div className={`absolute top-4 left-4 ${card.color} text-white px-3 py-1 rounded-md text-sm font-medium`}>
                     {card.audience}
                   </div>
