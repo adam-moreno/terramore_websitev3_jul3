@@ -31,6 +31,7 @@ export default function TerramoreHomepage() {
   const [isHovering, setIsHovering] = useState(false)
   const [touchStart, setTouchStart] = useState({ x: 0, y: 0 })
   const [touchEnd, setTouchEnd] = useState({ x: 0, y: 0 })
+  const [isHorizontalGesture, setIsHorizontalGesture] = useState(false)
   const [showAllFAQs, setShowAllFAQs] = useState(false)
 
   // Founder photos for the carousel
@@ -167,18 +168,20 @@ export default function TerramoreHomepage() {
   const onTouchStart = (e: React.TouchEvent) => {
     setTouchEnd({ x: 0, y: 0 })
     setTouchStart({ x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY })
+    setIsHorizontalGesture(false)
   }
 
   const onTouchMove = (e: React.TouchEvent) => {
     setTouchEnd({ x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY })
     
-    // Prevent vertical scrolling during horizontal swipe
+    // Determine if this is a horizontal gesture
     if (touchStart.x && touchEnd.x) {
       const horizontalDistance = Math.abs(touchStart.x - touchEnd.x)
       const verticalDistance = Math.abs(touchStart.y - touchEnd.y)
       
-      // If horizontal movement is greater than vertical, prevent default scrolling
-      if (horizontalDistance > verticalDistance && horizontalDistance > 10) {
+      // Very strict conditions for horizontal gesture detection
+      if (horizontalDistance > verticalDistance * 3 && horizontalDistance > 40) {
+        setIsHorizontalGesture(true)
         e.preventDefault()
       }
     }
@@ -197,6 +200,9 @@ export default function TerramoreHomepage() {
     if (isRightSwipe) {
       setCurrentCardIndex((prevIndex) => (prevIndex - 1 + flashCards.length) % flashCards.length)
     }
+    
+    // Reset gesture state
+    setIsHorizontalGesture(false)
   }
 
   const handleFooterNavigation = (href: string) => {
