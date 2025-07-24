@@ -351,7 +351,7 @@ export default function TerramoreHomepage() {
       )}
 
       {/* Hero Section */}
-      <div className="relative py-20 px-6 bg-white">
+      <div className="relative py-12 md:py-16 lg:py-20 px-6 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="relative flex flex-col lg:flex-row items-center justify-center lg:justify-between gap-4 lg:gap-16">
             {/* Left Person Image */}
@@ -368,7 +368,7 @@ export default function TerramoreHomepage() {
 
             {/* Center Content */}
             <div className="text-center w-full lg:max-w-4xl mx-auto px-2">
-              <h1 className="text-4xl md:text-6xl font-bold text-slate-900 mb-6 leading-tight uppercase">
+              <h1 className="text-4xl md:text-6xl font-bold text-slate-900 mb-4 md:mb-6 leading-tight uppercase">
                 WHY IS YOUR<br />BUSINESS STUCK?
               </h1>
               
@@ -390,12 +390,12 @@ export default function TerramoreHomepage() {
                 </div>
               </div>
               
-              <div className="text-lg md:text-xl lg:text-2xl font-medium text-slate-700 mb-8 max-w-2xl mx-auto">
+              <div className="text-lg md:text-xl lg:text-2xl font-medium text-slate-700 mb-6 md:mb-8 max-w-2xl mx-auto">
                 <span className="block">
                   Learn from a team that's spent 10+ years building scalable frameworks that power marketing, automation, and growth.
                 </span>
               </div>
-              <div className="mt-10">
+              <div className="mt-6 md:mt-8 lg:mt-10">
                 <Button
                   size="lg"
                   className="bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white px-8 py-4 rounded-full text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
@@ -428,7 +428,7 @@ export default function TerramoreHomepage() {
       </div>
 
       {/* Animated Flashcard Section */}
-      <div className="py-12 px-6 bg-slate-50">
+      <div className="py-8 md:py-10 lg:py-12 px-6 bg-slate-50">
         <div className="max-w-4xl mx-auto text-center">
           <div 
             className="relative min-h-[300px] md:min-h-[400px] overflow-hidden"
