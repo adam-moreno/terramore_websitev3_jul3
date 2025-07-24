@@ -12,6 +12,7 @@ import { useSchedulePopup } from "@/hooks/use-schedule-popup"
 import { useDoNotSellPopup } from "@/hooks/use-do-not-sell-popup"
 import { useRoadmapModal } from "@/hooks/use-roadmap-modal"
 import { DoNotSellPopup } from "@/components/do-not-sell-popup"
+import { RoadmapModal } from "@/components/roadmap-modal"
 import { Logo } from "@/components/logo"
 
 export default function ScalingCoursePage() {
@@ -244,7 +245,7 @@ export default function ScalingCoursePage() {
             className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 text-lg font-semibold rounded-lg"
             onClick={() => setIsRoadmapOpen(true)}
           >
-            GET MY $100M ROADMAP
+            Get My Custom Business Roadmap
           </Button>
 
 
@@ -635,6 +636,9 @@ export default function ScalingCoursePage() {
 
       {/* Schedule Popup */}
       <IClosedWidget isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)} />
+      
+      {/* Roadmap Modal */}
+      <RoadmapModal isOpen={isRoadmapOpen} onClose={() => setIsRoadmapOpen(false)} />
       
       {/* Do Not Sell Popup */}
       <DoNotSellPopup isOpen={isDoNotSellOpen} onClose={closeDoNotSell} />
