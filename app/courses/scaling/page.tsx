@@ -10,12 +10,14 @@ import Link from "next/link"
 import { IClosedWidget } from "@/components/iclosed-widget"
 import { useSchedulePopup } from "@/hooks/use-schedule-popup"
 import { useDoNotSellPopup } from "@/hooks/use-do-not-sell-popup"
+import { useRoadmapModal } from "@/hooks/use-roadmap-modal"
 import { DoNotSellPopup } from "@/components/do-not-sell-popup"
 import { Logo } from "@/components/logo"
 
 export default function ScalingCoursePage() {
   const { isPopupOpen, setIsPopupOpen } = useSchedulePopup()
   const { isOpen: isDoNotSellOpen, openPopup: openDoNotSell, closePopup: closeDoNotSell } = useDoNotSellPopup()
+  const { isOpen: isRoadmapOpen, setIsOpen: setIsRoadmapOpen } = useRoadmapModal()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [selectedVideo, setSelectedVideo] = useState(0)
   const [isModulesOpen, setIsModulesOpen] = useState(false)
@@ -181,9 +183,9 @@ export default function ScalingCoursePage() {
       {/* Mobile Layout */}
       <div className="lg:hidden">
         {/* Mobile Hero */}
-        <div className="bg-white text-center py-12 px-6">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Foundation</h1>
-          <div className="w-16 h-1 bg-blue-600 mx-auto mb-8"></div>
+        <div className="bg-white text-center py-6 px-6">
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-2">Foundation</h1>
+          <div className="w-16 h-1 bg-blue-600 mx-auto mb-4"></div>
         </div>
 
         {/* Course Modules Accordion */}
@@ -240,17 +242,12 @@ export default function ScalingCoursePage() {
         <div className="px-6 space-y-4 mb-8">
           <Button
             className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 text-lg font-semibold rounded-lg"
-            onClick={() => setIsPopupOpen(true)}
+            onClick={() => setIsRoadmapOpen(true)}
           >
-            GET MY PERSONALIZED $100M ROADMAP
+            GET MY $100M ROADMAP
           </Button>
 
-          <Button
-            variant="outline"
-            className="w-full border-blue-600 text-blue-600 hover:bg-blue-50 py-4 text-lg font-semibold rounded-lg bg-transparent"
-          >
-            CHECK WORKSHOP DATES
-          </Button>
+
         </div>
 
         {/* Mobile Form */}

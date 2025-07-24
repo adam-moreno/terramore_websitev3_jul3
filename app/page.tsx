@@ -31,6 +31,7 @@ export default function TerramoreHomepage() {
   const [isHovering, setIsHovering] = useState(false)
   const [touchStart, setTouchStart] = useState(0)
   const [touchEnd, setTouchEnd] = useState(0)
+  const [showAllFAQs, setShowAllFAQs] = useState(false)
 
   // Founder photos for the carousel
   const founderPhotos = [
@@ -703,6 +704,7 @@ export default function TerramoreHomepage() {
           </div>
 
           <Accordion type="single" collapsible className="space-y-4">
+            {/* First 5 FAQs - Always visible */}
             <AccordionItem value="item-1" className="bg-white rounded-lg px-6 border border-gray-200">
               <AccordionTrigger className="text-left font-semibold text-slate-900 hover:text-blue-600">
                 How much do your services cost?
@@ -884,15 +886,143 @@ export default function TerramoreHomepage() {
               </AccordionContent>
             </AccordionItem>
 
-            <AccordionItem value="item-18" className="bg-white rounded-lg px-6 border border-gray-200">
-              <AccordionTrigger className="text-left font-semibold text-slate-900 hover:text-blue-600">
-                How do you use data to improve customer experience?
-              </AccordionTrigger>
-              <AccordionContent className="text-slate-600 pt-2">
-                We analyze customer behavior data to identify friction points in your customer journey, optimize conversion paths, and personalize user experiences. Our data-driven approach ensures every touchpoint is designed to move prospects closer to becoming customers.
-              </AccordionContent>
-            </AccordionItem>
+            {/* Additional FAQs - Show only when showAllFAQs is true */}
+                          {showAllFAQs && (
+                <>
+                  <AccordionItem value="item-6" className="bg-white rounded-lg px-6 border border-gray-200">
+                    <AccordionTrigger className="text-left font-semibold text-slate-900 hover:text-blue-600">
+                      Do you run ads or manage paid campaigns?
+                    </AccordionTrigger>
+                    <AccordionContent className="text-slate-600 pt-2">
+                      We offer complete media planning and ad management, including funnel design, creative direction, and daily optimization for platforms like Meta, Google, and YouTube. Your media budget and goals will shape the strategy we recommend.
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-7" className="bg-white rounded-lg px-6 border border-gray-200">
+                    <AccordionTrigger className="text-left font-semibold text-slate-900 hover:text-blue-600">
+                      What kind of automations do you build?
+                    </AccordionTrigger>
+                    <AccordionContent className="text-slate-600 pt-2">
+                      We build scalable automations that reduce your workload and boost conversions—everything from CRM integrations to email/SMS workflows, onboarding systems, and client retention sequences.
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-8" className="bg-white rounded-lg px-6 border border-gray-200">
+                    <AccordionTrigger className="text-left font-semibold text-slate-900 hover:text-blue-600">
+                      Do you offer salespeople or closers?
+                    </AccordionTrigger>
+                    <AccordionContent className="text-slate-600 pt-2">
+                      We do provide appointment setters and closers when the foundation is in place. That said, we focus first on making sure your offer, funnel, and lead flow are ready—because no closer can fix a broken system.
+                      <br /><br />
+                      ➡️ <button onClick={openIClosed} className="text-blue-600 hover:text-blue-800 underline font-medium">If your offer is strong and you're ready for scale, we'll plug in sales support.</button>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-9" className="bg-white rounded-lg px-6 border border-gray-200">
+                    <AccordionTrigger className="text-left font-semibold text-slate-900 hover:text-blue-600">
+                      Can you help me grow my audience or brand?
+                    </AccordionTrigger>
+                    <AccordionContent className="text-slate-600 pt-2">
+                      Yes—we support brand awareness through influencer marketing, social campaigns, and paid reach strategies. We help you get seen by the right people using modern, conversion-friendly tactics.
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-10" className="bg-white rounded-lg px-6 border border-gray-200">
+                    <AccordionTrigger className="text-left font-semibold text-slate-900 hover:text-blue-600">
+                      Do you work with businesses that are already earning revenue?
+                    </AccordionTrigger>
+                    <AccordionContent className="text-slate-600 pt-2">
+                      We work with companies from pre-revenue up to $100K+ per month. For those already earning, we focus on scaling infrastructure, automation, and freeing up your time through operational systems.
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-11" className="bg-white rounded-lg px-6 border border-gray-200">
+                    <AccordionTrigger className="text-left font-semibold text-slate-900 hover:text-blue-600">
+                      How soon can I expect results?
+                    </AccordionTrigger>
+                    <AccordionContent className="text-slate-600 pt-2">
+                      Most clients start to see measurable results within 30–45 days, especially if they follow our rollout plan. We work with businesses typically anywhere from 6-12 months depending on how much help they need and which pricing model they choose. Timelines vary based on offer, niche, and how quickly you're able to implement.
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-12" className="bg-white rounded-lg px-6 border border-gray-200">
+                    <AccordionTrigger className="text-left font-semibold text-slate-900 hover:text-blue-600">
+                      How do you increase sales for service businesses?
+                    </AccordionTrigger>
+                    <AccordionContent className="text-slate-600 pt-2">
+                      We don't just plug in ads or build funnels—we look at the entire sales system: offer structure, messaging, pipeline flow, lead nurture, and conversion points. Then we optimize or automate wherever possible.
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-13" className="bg-white rounded-lg px-6 border border-gray-200">
+                    <AccordionTrigger className="text-left font-semibold text-slate-900 hover:text-blue-600">
+                      Can you help me launch a digital product?
+                    </AccordionTrigger>
+                    <AccordionContent className="text-slate-600 pt-2">
+                      Yes—we help package your expertise into digital products (courses, toolkits, subscriptions), and then build and market your funnel to support it from pre-launch to scale.
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-14" className="bg-white rounded-lg px-6 border border-gray-200">
+                    <AccordionTrigger className="text-left font-semibold text-slate-900 hover:text-blue-600">
+                      What if I have more questions or don't know where I fit?
+                    </AccordionTrigger>
+                    <AccordionContent className="text-slate-600 pt-2">
+                      No problem—many founders aren't sure where they stand. That's what we're here for.
+                      <br /><br />
+                      ➡️ <button onClick={openIClosed} className="text-blue-600 hover:text-blue-800 underline font-medium">Book a free strategy call and we'll help you assess your next best step—no pressure, just clarity.</button>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-15" className="bg-white rounded-lg px-6 border border-gray-200">
+                    <AccordionTrigger className="text-left font-semibold text-slate-900 hover:text-blue-600">
+                      What makes your team different from other marketing agencies?
+                    </AccordionTrigger>
+                    <AccordionContent className="text-slate-600 pt-2">
+                      We're a group of web developers, software engineers, and data scientists who focus on the consumer journey. Stop worrying about the product, and start worrying about how your audience is perceiving your service/brand/business. We build the technical infrastructure and data systems that power successful customer experiences.
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-16" className="bg-white rounded-lg px-6 border border-gray-200">
+                    <AccordionTrigger className="text-left font-semibold text-slate-900 hover:text-blue-600">
+                      Do you provide analytics and data insights?
+                    </AccordionTrigger>
+                    <AccordionContent className="text-slate-600 pt-2">
+                      Yes—our data scientists build comprehensive analytics dashboards that track customer behavior, conversion funnels, and business performance. We provide actionable insights that help you understand your audience better and optimize your customer journey for maximum results.
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-17" className="bg-white rounded-lg px-6 border border-gray-200">
+                    <AccordionTrigger className="text-left font-semibold text-slate-900 hover:text-blue-600">
+                      Can you build backends for websites and mobile apps?
+                    </AccordionTrigger>
+                    <AccordionContent className="text-slate-600 pt-2">
+                      Absolutely. Our software engineers build robust backends for both websites and mobile apps, including apps for the Apple App Store and Google Play Store. We handle everything from API development and database design to server infrastructure and app store optimization.
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-18" className="bg-white rounded-lg px-6 border border-gray-200">
+                    <AccordionTrigger className="text-left font-semibold text-slate-900 hover:text-blue-600">
+                      How do you use data to improve customer experience?
+                    </AccordionTrigger>
+                    <AccordionContent className="text-slate-600 pt-2">
+                      We analyze customer behavior data to identify friction points in your customer journey, optimize conversion paths, and personalize user experiences. Our data-driven approach ensures every touchpoint is designed to move prospects closer to becoming customers.
+                    </AccordionContent>
+                  </AccordionItem>
+                </>
+              )}
           </Accordion>
+
+          {/* Show More/Less Button */}
+          <div className="text-center mt-8">
+            <Button
+              onClick={() => setShowAllFAQs(!showAllFAQs)}
+              variant="outline"
+              className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition-all"
+            >
+              {showAllFAQs ? 'Show Less' : 'Show More FAQs'}
+            </Button>
+          </div>
         </div>
       </div>
 
