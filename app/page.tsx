@@ -355,8 +355,8 @@ export default function TerramoreHomepage() {
                 WHY IS YOUR<br />BUSINESS STUCK?
               </h1>
               
-              {/* Video Placeholder - Mobile and Desktop */}
-              <div className="mb-8">
+              {/* Video Placeholder - Mobile Only */}
+              <div className="mb-8 lg:hidden">
                 <div className="w-full max-w-2xl mx-auto bg-slate-200 rounded-lg aspect-video flex items-center justify-center relative overflow-hidden">
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="w-16 h-16 bg-slate-300 rounded-full flex items-center justify-center">
