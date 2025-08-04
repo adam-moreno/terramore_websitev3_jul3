@@ -401,7 +401,7 @@ export default function TerramoreHomepage() {
       </nav>
 
       {/* Hero Section */}
-      <div className="relative px-6 bg-white pt-32 md:pt-40 lg:pt-52 pb-12 md:pb-16 lg:pb-8">
+      <div className="relative px-6 bg-white pt-32 md:pt-40 lg:pt-52 pb-12 md:pb-16 lg:pb-16">
         <div className="max-w-7xl mx-auto">
           <div className="relative flex flex-col lg:flex-row items-center justify-center lg:justify-start gap-4 lg:gap-16">
             {/* Left Content */}
@@ -456,7 +456,7 @@ export default function TerramoreHomepage() {
       </div>
 
       {/* Animated Flashcard Section */}
-      <div className="py-4 md:py-6 lg:pt-0 lg:pb-0 px-6 bg-slate-50">
+      <div className="py-4 md:py-6 lg:pt-0 lg:pb-0 px-6 bg-slate-50 -mt-8 lg:-mt-8">
         <div className="max-w-4xl mx-auto text-center">
           <div 
             className="flashcard-carousel relative min-h-[300px] md:min-h-[400px] overflow-hidden lg:mb-4"
