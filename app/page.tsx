@@ -377,7 +377,7 @@ export default function TerramoreHomepage() {
       </nav>
 
       {/* Hero Section */}
-      <div className="relative py-12 md:py-16 lg:py-20 px-6 bg-white pt-40">
+      <div className="relative px-6 bg-white pt-52 pb-12 md:pb-16 lg:pb-20">
         <div className="max-w-7xl mx-auto">
           <div className="relative flex flex-col lg:flex-row items-center justify-center lg:justify-start gap-4 lg:gap-16">
             {/* Left Content */}
