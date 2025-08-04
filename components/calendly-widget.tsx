@@ -50,6 +50,17 @@ const MONTH_LABELS = [
 export function CalendlyWidget({ isOpen, onClose }: CalendlyWidgetProps) {
   const [selectedDateIdx, setSelectedDateIdx] = useState(0)
   const [showBooking, setShowBooking] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [loadingMessage, setLoadingMessage] = useState(0)
+  
+  const loadingMessages = [
+    "Finding the right person for your call...",
+    "Coordinating schedules...",
+    "Checking time zones...",
+    "Preparing your strategy session...",
+    "Setting up your personalized consultation..."
+  ]
+
   const businessDays = getNextBusinessDays(5)
   const selectedDate = businessDays[selectedDateIdx]
 
@@ -57,8 +68,30 @@ export function CalendlyWidget({ isOpen, onClose }: CalendlyWidgetProps) {
     if (!isOpen) {
       setShowBooking(false)
       setSelectedDateIdx(0)
+      setIsLoading(false)
     }
   }, [isOpen])
+
+  const handleScheduleClick = () => {
+    setIsLoading(true)
+    setLoadingMessage(0)
+    setShowBooking(true)
+    
+    // Rotate through loading messages
+    const messageInterval = setInterval(() => {
+      setLoadingMessage(prev => (prev + 1) % loadingMessages.length)
+    }, 2000)
+
+    // Hide loading after 3 seconds
+    const loadingTimeout = setTimeout(() => {
+      setIsLoading(false)
+    }, 3000)
+
+    return () => {
+      clearInterval(messageInterval)
+      clearTimeout(loadingTimeout)
+    }
+  }
 
   if (!isOpen) return null
 
@@ -134,7 +167,7 @@ export function CalendlyWidget({ isOpen, onClose }: CalendlyWidgetProps) {
             <div className="px-4 pb-2">
               <button
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold text-sm transition-colors shadow"
-                onClick={() => setShowBooking(true)}
+                onClick={handleScheduleClick}
               >
                 Schedule a 1-on-1 Call
               </button>
@@ -145,8 +178,17 @@ export function CalendlyWidget({ isOpen, onClose }: CalendlyWidgetProps) {
             </div>
           </>
         )}
+        {/* Loading State */}
+        {showBooking && isLoading && (
+          <div className="flex flex-col items-center justify-center h-96 bg-gray-50 p-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-3"></div>
+            <p className="text-gray-600 text-center text-sm font-medium">
+              {loadingMessages[loadingMessage]}
+            </p>
+          </div>
+        )}
         {/* Embedded Calendly Booking Form */}
-        {showBooking && (
+        {showBooking && !isLoading && (
           <div className="w-full h-96 flex flex-col items-center justify-center p-4">
             <iframe
               src="https://calendly.com/terramore/30min"
