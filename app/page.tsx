@@ -34,6 +34,8 @@ export default function TerramoreHomepage() {
   const [isHorizontalGesture, setIsHorizontalGesture] = useState(false)
   const [showAllFAQs, setShowAllFAQs] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true)
+  const [lastScrollY, setLastScrollY] = useState(0)
 
   // Founder photos for the carousel
   const founderPhotos = [
@@ -210,7 +212,23 @@ export default function TerramoreHomepage() {
     window.location.href = href
   }
 
+  // Scroll-triggered header visibility
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY
+      
+      // Show header when scrolling up, let it naturally disappear when scrolling down
+      if (currentScrollY < lastScrollY) {
+        setIsHeaderVisible(true) // Scrolling up - show header
+      }
+      // Don't hide header when scrolling down - let it naturally scroll out of view
+      
+      setLastScrollY(currentScrollY)
+    }
 
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [lastScrollY])
 
   // Animation keyframes for fade-in-up
   const fadeInUp = {
@@ -235,7 +253,9 @@ export default function TerramoreHomepage() {
 
 
       {/* Navigation */}
-      <nav className="bg-slate-900 text-white py-4 px-6">
+      <nav className={`sticky top-0 z-50 bg-slate-900 text-white py-4 px-6 transition-transform duration-300 ${
+        isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
+      }`}>
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Logo size="lg" className="text-white" />
