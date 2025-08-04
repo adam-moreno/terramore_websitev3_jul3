@@ -6,7 +6,11 @@
     "build": "next build",
     "dev": "next dev",
     "lint": "next lint",
-    "start": "next start"
+    "start": "next start",
+    "render:video:mobile": "remotion render src/remotion/index.ts TerramoreVideo16x9 out/terramore-video-mobile.mp4",
+    "render:video:desktop": "remotion render src/remotion/index.ts TerramoreVideo14x9 out/terramore-video-desktop.mp4",
+    "render:video:all": "pnpm render:video:mobile && pnpm render:video:desktop",
+    "preview:video": "remotion preview src/remotion/index.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
@@ -37,6 +41,9 @@
     "@radix-ui/react-toggle": "latest",
     "@radix-ui/react-toggle-group": "latest",
     "@radix-ui/react-tooltip": "latest",
+    "@remotion/cli": "^4.0.327",
+    "@remotion/player": "^4.0.327",
+    "@remotion/renderer": "^4.0.327",
     "@supabase/supabase-js": "^2.52.1",
     "autoprefixer": "^10.4.20",
     "class-variance-authority": "^0.7.1",
@@ -54,6 +61,7 @@
     "react-hook-form": "latest",
     "react-resizable-panels": "latest",
     "recharts": "latest",
+    "remotion": "^4.0.327",
     "sonner": "latest",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",

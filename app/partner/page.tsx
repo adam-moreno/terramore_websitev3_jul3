@@ -22,7 +22,7 @@ import {
   User,
 } from "lucide-react"
 import Link from "next/link"
-import { IClosedWidget } from "@/components/iclosed-widget"
+import { CalendlyWidget } from "@/components/calendly-widget"
 import { useSchedulePopup } from "@/hooks/use-schedule-popup"
 import { useDoNotSellPopup } from "@/hooks/use-do-not-sell-popup"
 import { DoNotSellPopup } from "@/components/do-not-sell-popup"
@@ -682,7 +682,7 @@ export default function PartnerPage() {
       </footer>
 
       {/* Schedule Popup */}
-      <IClosedWidget isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)} />
+      <CalendlyWidget isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)} />
       
       {/* Do Not Sell Popup */}
       <DoNotSellPopup isOpen={isDoNotSellOpen} onClose={closeDoNotSell} />

@@ -35,17 +35,17 @@ import {
   ArrowUpRight,
 } from "lucide-react"
 import Link from "next/link"
-import { IClosedWidget } from "@/components/iclosed-widget"
-import { IClosedPopup } from "@/components/iclosed-popup"
+import { CalendlyWidget } from "@/components/calendly-widget"
+import { CalendlyPopup } from "@/components/calendly-popup"
 import { useDoNotSellPopup } from "@/hooks/use-do-not-sell-popup"
 import { DoNotSellPopup } from "@/components/do-not-sell-popup"
 import { Logo } from "@/components/logo"
 import { useSchedulePopup } from "@/hooks/use-schedule-popup"
-import { useIClosedPopup } from "@/hooks/use-iclosed-popup"
+import { useCalendlyPopup } from "@/hooks/use-calendly-popup"
 
 export default function SolutionsPage() {
   const { isPopupOpen, setIsPopupOpen } = useSchedulePopup()
-  const { isOpen: isIClosedOpen, openPopup: openIClosed, closePopup: closeIClosed } = useIClosedPopup()
+  const { isOpen: isCalendlyOpen, openPopup: openCalendly, closePopup: closeCalendly } = useCalendlyPopup()
   const { isOpen: isDoNotSellOpen, openPopup: openDoNotSell, closePopup: closeDoNotSell } = useDoNotSellPopup()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [activePhase, setActivePhase] = useState("discovery")
@@ -243,7 +243,7 @@ export default function SolutionsPage() {
           <Button 
             size="lg" 
             className="bg-blue-600 hover:bg-blue-700 transition-all duration-1000 ease-out delay-500 transform hover:scale-105 text-lg font-semibold px-8 py-4 rounded-full shadow-lg hover:shadow-xl"
-            onClick={openIClosed}
+            onClick={openCalendly}
           >
             I'M READY FOR OUTSIDE HELP
             <ArrowRight className="w-5 h-5 ml-2 animate-bounce" />
@@ -1002,7 +1002,7 @@ export default function SolutionsPage() {
                   <Button 
                     size="lg" 
                     className="bg-white text-blue-600 hover:bg-gray-100"
-                    onClick={openIClosed}
+                    onClick={openCalendly}
                   >
                     <Play className="w-5 h-5 mr-2" />
                     Schedule Demo
@@ -1120,10 +1120,10 @@ export default function SolutionsPage() {
       </footer>
 
       {/* Schedule Popup */}
-      <IClosedWidget isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)} />
+      <CalendlyWidget isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)} />
       
-      {/* iClosed Popup */}
-      <IClosedPopup isOpen={isIClosedOpen} onClose={closeIClosed} />
+      {/* Calendly Popup */}
+      <CalendlyPopup isOpen={isCalendlyOpen} onClose={closeCalendly} />
       
       {/* Do Not Sell Popup */}
       <DoNotSellPopup isOpen={isDoNotSellOpen} onClose={closeDoNotSell} />

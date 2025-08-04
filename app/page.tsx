@@ -5,24 +5,25 @@ import { Badge } from "@/components/ui/badge"
 import { Calendar, Cookie, ChevronDown, Menu } from "lucide-react"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import Link from "next/link"
-import { IClosedWidget } from "@/components/iclosed-widget"
-import { IClosedPopup } from "@/components/iclosed-popup"
+import { CalendlyWidget } from "@/components/calendly-widget"
+import { CalendlyPopup } from "@/components/calendly-popup"
 import { RoadmapModal } from "@/components/roadmap-modal"
 import { DoNotSellPopup } from "@/components/do-not-sell-popup"
 import { FreeCoursesPopup } from "@/components/free-courses-popup"
 import { FounderPhotoCarousel } from "@/components/founder-photo-carousel"
 import { useSchedulePopup } from "@/hooks/use-schedule-popup"
-import { useIClosedPopup } from "@/hooks/use-iclosed-popup"
+import { useCalendlyPopup } from "@/hooks/use-calendly-popup"
 import { useRoadmapModal } from "@/hooks/use-roadmap-modal"
 import { useDoNotSellPopup } from "@/hooks/use-do-not-sell-popup"
 import { useFreeCoursesPopup } from "@/hooks/use-free-courses-popup"
 import { useEffect, useState } from "react"
 import "@/styles/fadeInUp.css"
 import { Logo } from "@/components/logo"
+import { TerramoreVideoSimple } from "@/components/terramore-video-simple"
 
 export default function TerramoreHomepage() {
   const { isPopupOpen, setIsPopupOpen } = useSchedulePopup()
-  const { isOpen: isIClosedOpen, openPopup: openIClosed, closePopup: closeIClosed } = useIClosedPopup()
+  const { isOpen: isCalendlyOpen, openPopup: openCalendly, closePopup: closeCalendly } = useCalendlyPopup()
   const { isOpen: isRoadmapOpen, setIsOpen: setIsRoadmapOpen } = useRoadmapModal()
   const { isOpen: isDoNotSellOpen, openPopup: openDoNotSell, closePopup: closeDoNotSell } = useDoNotSellPopup()
   const { isOpen: isFreeCoursesOpen, openPopup: openFreeCourses, closePopup: closeFreeCourses } = useFreeCoursesPopup()
@@ -353,41 +354,19 @@ export default function TerramoreHomepage() {
       {/* Hero Section */}
       <div className="relative py-12 md:py-16 lg:py-20 px-6 bg-white">
         <div className="max-w-7xl mx-auto">
-          <div className="relative flex flex-col lg:flex-row items-center justify-center lg:justify-between gap-4 lg:gap-16">
-            {/* Left Person Image */}
-            <div className="hidden lg:flex flex-shrink-0 absolute left-0 top-1/2 -translate-y-1/2">
-              <div className="w-56 h-96 rounded-lg overflow-hidden shadow-lg">
-                <img 
-                  src="https://res.cloudinary.com/dx7id04uv/image/upload/f_auto,q_auto,w_600,h_900,c_fill,g_north,e_enhance:20,e_sharpen:30,fl_force_strip/v1752637525/IMG_4094_cbdtly.jpg"
-                  alt="Adam Moreno - Professional headshot"
-                  className="w-full h-full object-cover"
-                  loading="eager"
-                />
-              </div>
-            </div>
-
-            {/* Center Content */}
-            <div className="text-center w-full lg:max-w-4xl mx-auto px-2">
+          <div className="relative flex flex-col lg:flex-row items-center justify-center lg:justify-start gap-4 lg:gap-16">
+            {/* Left Content */}
+            <div className="text-left w-full lg:max-w-2xl px-2 lg:pl-0">
               <h1 className="text-4xl md:text-6xl font-bold text-slate-900 mb-4 md:mb-6 leading-tight uppercase">
                 WHY IS YOUR<br />BUSINESS STUCK?
               </h1>
               
               {/* Video Placeholder - Mobile Only */}
               <div className="mb-8 lg:hidden">
-                <div className="w-full max-w-2xl mx-auto bg-slate-200 rounded-lg aspect-video flex items-center justify-center relative overflow-hidden">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-16 h-16 bg-slate-300 rounded-full flex items-center justify-center">
-                      <svg className="w-8 h-8 text-slate-600" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M8 5v14l11-7z"/>
-                      </svg>
-                    </div>
-                  </div>
-                  <div className="absolute bottom-4 left-4 right-4">
-                    <div className="bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
-                      Video Placeholder
-                    </div>
-                  </div>
-                </div>
+                <TerramoreVideoSimple 
+                  aspectRatio="16:9"
+                  className="w-full max-w-3xl mx-auto"
+                />
               </div>
               
               <div className="text-lg md:text-xl lg:text-2xl font-medium text-slate-700 mb-6 md:mb-8 max-w-2xl mx-auto">
@@ -399,7 +378,7 @@ export default function TerramoreHomepage() {
                 <Button
                   size="lg"
                   className="bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white px-8 py-4 rounded-full text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
-                  onClick={openIClosed}
+                  onClick={openCalendly}
                 >
                   I'M READY FOR CHANGE
                 </Button>
@@ -408,30 +387,20 @@ export default function TerramoreHomepage() {
 
             {/* Right Video Placeholder */}
             <div className="hidden lg:flex flex-shrink-0 absolute right-0 top-1/2 -translate-y-1/2">
-              <div className="w-56 h-96 bg-slate-200 rounded-lg flex items-center justify-center relative overflow-hidden">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-16 h-16 bg-slate-300 rounded-full flex items-center justify-center">
-                    <svg className="w-8 h-8 text-slate-600" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M8 5v14l11-7z"/>
-                    </svg>
-                  </div>
-                </div>
-                <div className="absolute bottom-4 left-4 right-4">
-                  <div className="bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
-                    Video Placeholder
-                  </div>
-                </div>
-              </div>
+              <TerramoreVideoSimple 
+                aspectRatio="16:9"
+                className="w-[36rem] h-[20.25rem] transition-transform duration-300 hover:scale-110"
+              />
             </div>
           </div>
         </div>
       </div>
 
       {/* Animated Flashcard Section */}
-      <div className="py-8 md:py-10 lg:py-12 px-6 bg-slate-50">
+      <div className="py-6 md:py-8 lg:pt-2 lg:pb-0 px-6 bg-slate-50">
         <div className="max-w-4xl mx-auto text-center">
           <div 
-            className="relative min-h-[300px] md:min-h-[400px] overflow-hidden"
+            className="relative min-h-[300px] md:min-h-[400px] overflow-hidden lg:mb-4"
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}
             onTouchStart={onTouchStart}
@@ -467,7 +436,7 @@ export default function TerramoreHomepage() {
               </div>
             ))}
           </div>
-          <div className="flex justify-center mt-6 space-x-2">
+          <div className="flex justify-center mt-4 space-x-2">
             {flashCards.map((_, index) => (
               <div
                 key={index}
@@ -741,7 +710,7 @@ export default function TerramoreHomepage() {
                 <br /><br />
                 We work with businesses for 6-12 months depending on your needs. Many clients start with just $500 upfront and pay the rest as they grow.
                 <br /><br />
-                ➡️ <button onClick={openIClosed} className="text-blue-600 hover:text-blue-800 underline font-medium">See where you fit and book a strategy call to discuss your options.</button>
+                ➡️ <button onClick={openCalendly} className="text-blue-600 hover:text-blue-800 underline font-medium">See where you fit and book a strategy call to discuss your options.</button>
               </AccordionContent>
             </AccordionItem>
 
@@ -769,7 +738,7 @@ export default function TerramoreHomepage() {
               <AccordionContent className="text-slate-600 pt-2">
                 Yes—if you have an offer with clear revenue potential or traction, we'll consider hybrid deals that combine a reduced upfront cost with performance-based commission structures.
                 <br /><br />
-                ➡️ <button onClick={openIClosed} className="text-blue-600 hover:text-blue-800 underline font-medium">Submit a short application or schedule a call to explore eligibility.</button>
+                ➡️ <button onClick={openCalendly} className="text-blue-600 hover:text-blue-800 underline font-medium">Submit a short application or schedule a call to explore eligibility.</button>
               </AccordionContent>
             </AccordionItem>
 
@@ -816,7 +785,7 @@ export default function TerramoreHomepage() {
               <AccordionContent className="text-slate-600 pt-2">
                 We do provide appointment setters and closers when the foundation is in place. That said, we focus first on making sure your offer, funnel, and lead flow are ready—because no closer can fix a broken system.
                 <br /><br />
-                ➡️ <button onClick={openIClosed} className="text-blue-600 hover:text-blue-800 underline font-medium">If your offer is strong and you're ready for scale, we'll plug in sales support.</button>
+                ➡️ <button onClick={openCalendly} className="text-blue-600 hover:text-blue-800 underline font-medium">If your offer is strong and you're ready for scale, we'll plug in sales support.</button>
               </AccordionContent>
             </AccordionItem>
 
@@ -872,7 +841,7 @@ export default function TerramoreHomepage() {
               <AccordionContent className="text-slate-600 pt-2">
                 No problem—many founders aren't sure where they stand. That's what we're here for.
                 <br /><br />
-                ➡️ <button onClick={openIClosed} className="text-blue-600 hover:text-blue-800 underline font-medium">Book a free strategy call and we'll help you assess your next best step—no pressure, just clarity.</button>
+                ➡️ <button onClick={openCalendly} className="text-blue-600 hover:text-blue-800 underline font-medium">Book a free strategy call and we'll help you assess your next best step—no pressure, just clarity.</button>
               </AccordionContent>
             </AccordionItem>
 
@@ -931,7 +900,7 @@ export default function TerramoreHomepage() {
                     <AccordionContent className="text-slate-600 pt-2">
                       We do provide appointment setters and closers when the foundation is in place. That said, we focus first on making sure your offer, funnel, and lead flow are ready—because no closer can fix a broken system.
                       <br /><br />
-                      ➡️ <button onClick={openIClosed} className="text-blue-600 hover:text-blue-800 underline font-medium">If your offer is strong and you're ready for scale, we'll plug in sales support.</button>
+                      ➡️ <button onClick={openCalendly} className="text-blue-600 hover:text-blue-800 underline font-medium">If your offer is strong and you're ready for scale, we'll plug in sales support.</button>
                     </AccordionContent>
                   </AccordionItem>
 
@@ -987,7 +956,7 @@ export default function TerramoreHomepage() {
                     <AccordionContent className="text-slate-600 pt-2">
                       No problem—many founders aren't sure where they stand. That's what we're here for.
                       <br /><br />
-                      ➡️ <button onClick={openIClosed} className="text-blue-600 hover:text-blue-800 underline font-medium">Book a free strategy call and we'll help you assess your next best step—no pressure, just clarity.</button>
+                      ➡️ <button onClick={openCalendly} className="text-blue-600 hover:text-blue-800 underline font-medium">Book a free strategy call and we'll help you assess your next best step—no pressure, just clarity.</button>
                     </AccordionContent>
                   </AccordionItem>
 
@@ -1241,11 +1210,11 @@ export default function TerramoreHomepage() {
           </div>
         </div>
       </footer>
-      {/* iClosed Widget */}
-      <IClosedWidget isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)} />
+      {/* Calendly Widget */}
+      <CalendlyWidget isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)} />
       
-      {/* iClosed Popup for FAQ Links */}
-      <IClosedPopup isOpen={isIClosedOpen} onClose={closeIClosed} />
+      {/* Calendly Popup for FAQ Links */}
+      <CalendlyPopup isOpen={isCalendlyOpen} onClose={closeCalendly} />
       
       {/* Roadmap Modal */}
       <RoadmapModal isOpen={isRoadmapOpen} onClose={() => setIsRoadmapOpen(false)} />
