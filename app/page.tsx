@@ -392,6 +392,9 @@ export default function TerramoreHomepage() {
                   aspectRatio="16:9"
                   className="w-full max-w-3xl mx-auto"
                 />
+                <p className="text-xs text-slate-500 text-center mt-2">
+                  💡 Tip: Click the full-screen button in the bottom-right corner for a larger view
+                </p>
               </div>
               
               <div className="text-lg md:text-xl lg:text-2xl font-medium text-slate-700 mb-6 md:mb-8 max-w-2xl mx-auto">
@@ -416,6 +419,9 @@ export default function TerramoreHomepage() {
                 aspectRatio="16:9"
                 className="w-[36rem] h-[20.25rem] transition-transform duration-300 hover:scale-110"
               />
+              <p className="absolute bottom-0 left-0 text-xs text-slate-500 mt-2">
+                💡 Tip: Click the full-screen button in the bottom-right corner for a larger view
+              </p>
             </div>
           </div>
         </div>
