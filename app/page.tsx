@@ -401,7 +401,7 @@ export default function TerramoreHomepage() {
       </nav>
 
       {/* Hero Section */}
-      <div className="relative px-6 bg-white pt-32 md:pt-40 lg:pt-52 pb-12 md:pb-16 lg:pb-20">
+      <div className="relative px-6 bg-white pt-32 md:pt-40 lg:pt-52 pb-12 md:pb-16 lg:pb-8">
         <div className="max-w-7xl mx-auto">
           <div className="relative flex flex-col lg:flex-row items-center justify-center lg:justify-start gap-4 lg:gap-16">
             {/* Left Content */}
@@ -444,10 +444,12 @@ export default function TerramoreHomepage() {
                 className="w-[36rem] h-[20.25rem] transition-transform duration-300 hover:scale-110"
               />
             </div>
-            <div className="hidden lg:block absolute left-1/2 top-1/2 translate-x-1/2 translate-y-48">
-              <p className="text-xs text-slate-500 text-center">
-                💡 Tip: Click the full-screen button in the bottom-right corner for a larger view
-              </p>
+            <div className="hidden lg:block absolute right-0 top-1/2 translate-y-48">
+              <div className="w-[36rem] flex justify-center">
+                <p className="text-xs text-slate-500 text-center">
+                  💡 Tip: Click the full-screen button in the bottom-right corner for a larger view
+                </p>
+              </div>
             </div>
           </div>
         </div>
