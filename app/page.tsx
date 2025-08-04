@@ -64,7 +64,7 @@ export default function TerramoreHomepage() {
     {
       audience: "Marketing Agency",
       color: "bg-blue-600",
-      content: "Terramore is a full-service marketing agency that helps both <strong>PRODUCT</strong> and <strong>SERVICE</strong> businesses scale for over 10 years. Take a look at these common problems and solutions we provide our previous clients."
+      content: "Terramore is a full-service marketing agency that helps both <strong>PRODUCT</strong> and <strong>SERVICE</strong> businesses scale. Take a look at these common problems and solutions we provide our clients."
     },
     {
       audience: "Entrepreneur making no money",
@@ -444,7 +444,7 @@ export default function TerramoreHomepage() {
                 className="w-[36rem] h-[20.25rem] transition-transform duration-300 hover:scale-110"
               />
             </div>
-            <div className="hidden lg:block absolute right-0 top-1/2 translate-y-48">
+            <div className="hidden lg:block absolute right-0 top-1/2 translate-y-40">
               <div className="w-[36rem] flex justify-center">
                 <p className="text-xs text-slate-500 text-center">
                   💡 Tip: Click the full-screen button in the bottom-right corner for a larger view
