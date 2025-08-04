@@ -27,15 +27,13 @@ export default function TerramoreHomepage() {
   const { isOpen: isRoadmapOpen, setIsOpen: setIsRoadmapOpen } = useRoadmapModal()
   const { isOpen: isDoNotSellOpen, openPopup: openDoNotSell, closePopup: closeDoNotSell } = useDoNotSellPopup()
   const { isOpen: isFreeCoursesOpen, openPopup: openFreeCourses, closePopup: closeFreeCourses } = useFreeCoursesPopup()
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [currentCardIndex, setCurrentCardIndex] = useState(0)
   const [isHovering, setIsHovering] = useState(false)
   const [touchStart, setTouchStart] = useState({ x: 0, y: 0 })
   const [touchEnd, setTouchEnd] = useState({ x: 0, y: 0 })
   const [isHorizontalGesture, setIsHorizontalGesture] = useState(false)
   const [showAllFAQs, setShowAllFAQs] = useState(false)
-  const [isHeaderVisible, setIsHeaderVisible] = useState(true)
-  const [lastScrollY, setLastScrollY] = useState(0)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   // Founder photos for the carousel
   const founderPhotos = [
@@ -212,23 +210,7 @@ export default function TerramoreHomepage() {
     window.location.href = href
   }
 
-  // Scroll-triggered header visibility
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY
-      
-      // Only show header when scrolling up, let it naturally disappear when scrolling down
-      if (currentScrollY < lastScrollY) {
-        setIsHeaderVisible(true) // Scrolling up - show header
-      }
-      // Don't hide header when scrolling down - let it naturally scroll out of view
-      
-      setLastScrollY(currentScrollY)
-    }
 
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [lastScrollY])
 
   // Animation keyframes for fade-in-up
   const fadeInUp = {
@@ -253,9 +235,7 @@ export default function TerramoreHomepage() {
 
 
       {/* Navigation */}
-      <nav className={`sticky top-0 z-50 bg-slate-900 text-white py-4 px-6 transition-transform duration-300 ${
-        isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
-      }`}>
+      <nav className="bg-slate-900 text-white py-4 px-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Logo size="lg" className="text-white" />
@@ -315,63 +295,63 @@ export default function TerramoreHomepage() {
               <Menu className="w-6 h-6" />
             </Button>
           </div>
-        </div>
-      </nav>
 
-      {/* Mobile Navigation Menu */}
-      {isMobileMenuOpen && (
-        <div className="lg:hidden bg-slate-800 text-white py-4 px-6 border-t border-slate-700">
-          <div className="flex flex-col space-y-4">
-            {/* <Link
-              href="/workshops"
-              className="hover:text-blue-300 transition-colors py-2"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Workshops
-            </Link> */}
-            <div className="py-2">
-              <div className="text-white mb-2">Courses</div>
-              <div className="pl-4 space-y-2">
-                <Link
-                  href="/courses/scaling"
-                  className="block text-gray-300 hover:text-blue-300 transition-colors py-1"
+          {/* Mobile Navigation Menu - Inside Header */}
+          {isMobileMenuOpen && (
+            <div className="absolute top-full left-0 right-0 lg:hidden bg-slate-800 text-white py-4 px-6 border-t border-slate-700 z-50">
+              <div className="flex flex-col space-y-4">
+                {/* <Link
+                  href="/workshops"
+                  className="hover:text-blue-300 transition-colors py-2"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  The Foundation
+                  Workshops
+                </Link> */}
+                <div className="py-2">
+                  <div className="text-white mb-2">Courses</div>
+                  <div className="pl-4 space-y-2">
+                    <Link
+                      href="/courses/scaling"
+                      className="block text-gray-300 hover:text-blue-300 transition-colors py-1"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      The Foundation
+                    </Link>
+                    <Link
+                      href="/courses/offers"
+                      className="block text-gray-300 hover:text-blue-300 transition-colors py-1"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      Make It Real
+                    </Link>
+                    <Link
+                      href="/courses/leads"
+                      className="block text-gray-300 hover:text-blue-300 transition-colors py-1"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      Build to Grow
+                    </Link>
+                  </div>
+                </div>
+                <Link
+                  href="/solutions"
+                  className="hover:text-blue-300 transition-colors py-2"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Solutions
                 </Link>
                 <Link
-                  href="/courses/offers"
-                  className="block text-gray-300 hover:text-blue-300 transition-colors py-1"
+                  href="/partner"
+                  className="hover:text-blue-300 transition-colors py-2"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  Make It Real
-                </Link>
-                <Link
-                  href="/courses/leads"
-                  className="block text-gray-300 hover:text-blue-300 transition-colors py-1"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Build to Grow
+                  Partner With Us
                 </Link>
               </div>
             </div>
-            <Link
-              href="/solutions"
-              className="hover:text-blue-300 transition-colors py-2"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Solutions
-            </Link>
-            <Link
-              href="/partner"
-              className="hover:text-blue-300 transition-colors py-2"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Partner With Us
-            </Link>
-          </div>
+          )}
         </div>
-      )}
+      </nav>
 
       {/* Hero Section */}
       <div className="relative py-12 md:py-16 lg:py-20 px-6 bg-white">
