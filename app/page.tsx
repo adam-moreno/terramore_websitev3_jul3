@@ -422,7 +422,7 @@ export default function TerramoreHomepage() {
       </div>
 
       {/* Animated Flashcard Section */}
-      <div className="py-6 md:py-8 lg:pt-2 lg:pb-0 px-6 bg-slate-50">
+      <div className="py-4 md:py-6 lg:pt-0 lg:pb-0 px-6 bg-slate-50">
         <div className="max-w-4xl mx-auto text-center">
           <div 
             className="relative min-h-[300px] md:min-h-[400px] overflow-hidden lg:mb-4"
