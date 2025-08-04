@@ -356,13 +356,13 @@ export default function TerramoreHomepage() {
         <div className="max-w-7xl mx-auto">
           <div className="relative flex flex-col lg:flex-row items-center justify-center lg:justify-start gap-4 lg:gap-16">
             {/* Left Content */}
-            <div className="text-left w-full lg:max-w-2xl px-2 lg:pl-0">
+            <div className="text-center lg:text-left w-full lg:max-w-2xl px-2 lg:pl-0">
               <h1 className="text-4xl md:text-6xl font-bold text-slate-900 mb-4 md:mb-6 leading-tight uppercase">
                 WHY IS YOUR<br />BUSINESS STUCK?
               </h1>
               
               {/* Video Placeholder - Mobile Only */}
-              <div className="mb-8 lg:hidden">
+              <div className="mb-6 lg:hidden">
                 <TerramoreVideoSimple 
                   aspectRatio="16:9"
                   className="w-full max-w-3xl mx-auto"
@@ -374,7 +374,7 @@ export default function TerramoreHomepage() {
                   Learn from a team that's spent 10+ years building scalable frameworks that power marketing, automation, and growth.
                 </span>
               </div>
-              <div className="mt-6 md:mt-8 lg:mt-10">
+              <div className="mt-4 md:mt-6 lg:mt-10">
                 <Button
                   size="lg"
                   className="bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white px-8 py-4 rounded-full text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
