@@ -34,7 +34,7 @@ export default function TerramoreHomepage() {
   const [touchEnd, setTouchEnd] = useState({ x: 0, y: 0 })
   const [isHorizontalGesture, setIsHorizontalGesture] = useState(false)
   const [showAllFAQs, setShowAllFAQs] = useState(false)
-  const [isHeaderVisible, setIsHeaderVisible] = useState(false)
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
 
   // Founder photos for the carousel
@@ -217,12 +217,11 @@ export default function TerramoreHomepage() {
     const handleScroll = () => {
       const currentScrollY = window.scrollY
       
-      // Show header when scrolling up, hide when scrolling down
-      if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        setIsHeaderVisible(false) // Scrolling down
-      } else if (currentScrollY < lastScrollY) {
-        setIsHeaderVisible(true) // Scrolling up
+      // Only show header when scrolling up, let it naturally disappear when scrolling down
+      if (currentScrollY < lastScrollY) {
+        setIsHeaderVisible(true) // Scrolling up - show header
       }
+      // Don't hide header when scrolling down - let it naturally scroll out of view
       
       setLastScrollY(currentScrollY)
     }
@@ -254,7 +253,7 @@ export default function TerramoreHomepage() {
 
 
       {/* Navigation */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 bg-slate-900 text-white py-4 px-6 transition-transform duration-300 ${
+      <nav className={`sticky top-0 z-50 bg-slate-900 text-white py-4 px-6 transition-transform duration-300 ${
         isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
       }`}>
         <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -375,7 +374,7 @@ export default function TerramoreHomepage() {
       )}
 
       {/* Hero Section */}
-      <div className="relative py-12 md:py-16 lg:py-20 px-6 bg-white pt-20">
+      <div className="relative py-12 md:py-16 lg:py-20 px-6 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="relative flex flex-col lg:flex-row items-center justify-center lg:justify-start gap-4 lg:gap-16">
             {/* Left Content */}
