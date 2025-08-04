@@ -40,7 +40,7 @@ export const TerramoreVideoSimple: React.FC<TerramoreVideoSimpleProps> = ({
           <div className="flex items-center justify-center h-full">
             <div className="flex flex-col items-center space-y-3">
               <div className="w-16 h-16 bg-gray-400 rounded-full animate-pulse"></div>
-              <div className="text-gray-500 text-sm font-medium">Loading video...</div>
+              <div className="text-gray-500 text-sm font-medium">Terramore's elves loading your video...</div>
             </div>
           </div>
         </div>
