@@ -36,6 +36,7 @@ export default function TerramoreHomepage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isHeaderVisible, setIsHeaderVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
+  const [isCarouselVisible, setIsCarouselVisible] = useState(false)
 
   // Founder photos for the carousel
   const founderPhotos = [
@@ -158,14 +159,14 @@ export default function TerramoreHomepage() {
   ]
 
   useEffect(() => {
-    if (isHovering) return // Pause timer when hovering
+    if (isHovering || !isCarouselVisible) return // Pause timer when hovering or not visible
 
     const interval = setInterval(() => {
       setCurrentCardIndex((prevIndex) => (prevIndex + 1) % flashCards.length)
-    }, 6500) // Change every 6.5 seconds (increased by 1.5 seconds)
+    }, currentCardIndex === 0 ? 13000 : 6500) // Double time for first card (13 seconds), normal time for others (6.5 seconds)
 
     return () => clearInterval(interval)
-  }, [flashCards.length, isHovering])
+  }, [flashCards.length, isHovering, isCarouselVisible, currentCardIndex])
 
   // Touch handlers for mobile swipe
   const onTouchStart = (e: React.TouchEvent) => {
@@ -232,6 +233,29 @@ export default function TerramoreHomepage() {
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [lastScrollY])
+
+  // Intersection observer for carousel visibility
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsCarouselVisible(true)
+        }
+      },
+      { threshold: 0.3 } // Trigger when 30% of the carousel is visible
+    )
+
+    const carouselElement = document.querySelector('.flashcard-carousel')
+    if (carouselElement) {
+      observer.observe(carouselElement)
+    }
+
+    return () => {
+      if (carouselElement) {
+        observer.unobserve(carouselElement)
+      }
+    }
+  }, [])
 
   // Animation keyframes for fade-in-up
   const fadeInUp = {
@@ -420,7 +444,7 @@ export default function TerramoreHomepage() {
                 className="w-[36rem] h-[20.25rem] transition-transform duration-300 hover:scale-110"
               />
             </div>
-            <div className="hidden lg:block absolute right-0 top-1/2 translate-y-32">
+            <div className="hidden lg:block absolute right-0 top-1/2 translate-y-48">
               <p className="text-xs text-slate-500 text-center">
                 💡 Tip: Click the full-screen button in the bottom-right corner for a larger view
               </p>
@@ -433,7 +457,7 @@ export default function TerramoreHomepage() {
       <div className="py-4 md:py-6 lg:pt-0 lg:pb-0 px-6 bg-slate-50">
         <div className="max-w-4xl mx-auto text-center">
           <div 
-            className="relative min-h-[300px] md:min-h-[400px] overflow-hidden lg:mb-4"
+            className="flashcard-carousel relative min-h-[300px] md:min-h-[400px] overflow-hidden lg:mb-4"
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}
             onTouchStart={onTouchStart}
@@ -457,12 +481,20 @@ export default function TerramoreHomepage() {
                   </div>
                   <div className="pt-8">
                     <p className="text-base md:text-lg lg:text-xl xl:text-2xl font-medium leading-relaxed">
-                      <span className="text-slate-900 block mb-4">
-                        {card.content.split('?')[0]}?
-                      </span>
-                      <span className="text-slate-700 block">
-                        {card.content.split('?')[1]}
-                      </span>
+                      {card.content.includes('?') ? (
+                        <>
+                          <span className="text-slate-900 block mb-4">
+                            {card.content.split('?')[0]}?
+                          </span>
+                          <span className="text-slate-700 block">
+                            {card.content.split('?')[1]}
+                          </span>
+                        </>
+                      ) : (
+                        <span className="text-slate-900 block">
+                          {card.content}
+                        </span>
+                      )}
                     </p>
                   </div>
                 </div>
