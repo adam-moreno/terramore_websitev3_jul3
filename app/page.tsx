@@ -61,9 +61,9 @@ export default function TerramoreHomepage() {
 
   const flashCards = [
     {
-      audience: "Brand Building",
-      color: "bg-purple-500",
-      content: "Struggling to stand out from your competition? Our team of expert web designers, sales closers, and content creators work together to make your business the obvious choice and drive consistent profits."
+      audience: "Marketing Agency",
+      color: "bg-blue-600",
+      content: "Terramore is a full-service marketing agency that helps both product and service businesses scale for over 10 years. See if any of these proven solutions we've delivered to hundreds of clients applies to your business."
     },
     {
       audience: "Entrepreneur making no money",
@@ -377,7 +377,7 @@ export default function TerramoreHomepage() {
       </nav>
 
       {/* Hero Section */}
-      <div className="relative px-6 bg-white pt-52 pb-12 md:pb-16 lg:pb-20">
+      <div className="relative px-6 bg-white pt-32 md:pt-40 lg:pt-52 pb-12 md:pb-16 lg:pb-20">
         <div className="max-w-7xl mx-auto">
           <div className="relative flex flex-col lg:flex-row items-center justify-center lg:justify-start gap-4 lg:gap-16">
             {/* Left Content */}
