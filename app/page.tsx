@@ -64,7 +64,7 @@ export default function TerramoreHomepage() {
     {
       audience: "Marketing Agency",
       color: "bg-blue-600",
-      content: "Terramore is a full-service marketing agency that helps both **PRODUCT** and **SERVICE** businesses scale for over 10 years. Take a look at these common problems and solutions we provide our previous clients."
+      content: "Terramore is a full-service marketing agency that helps both <strong>PRODUCT</strong> and <strong>SERVICE</strong> businesses scale for over 10 years. Take a look at these common problems and solutions we provide our previous clients."
     },
     {
       audience: "Entrepreneur making no money",
@@ -483,17 +483,11 @@ export default function TerramoreHomepage() {
                     <p className="text-base md:text-lg lg:text-xl xl:text-2xl font-medium leading-relaxed">
                       {card.content.includes('?') ? (
                         <>
-                          <span className="text-slate-900 block mb-4">
-                            {card.content.split('?')[0]}?
-                          </span>
-                          <span className="text-slate-700 block">
-                            {card.content.split('?')[1]}
-                          </span>
+                          <span className="text-slate-900 block mb-4" dangerouslySetInnerHTML={{ __html: card.content.split('?')[0] + '?' }} />
+                          <span className="text-slate-700 block" dangerouslySetInnerHTML={{ __html: card.content.split('?')[1] }} />
                         </>
                       ) : (
-                        <span className="text-slate-900 block">
-                          {card.content}
-                        </span>
+                        <span className="text-slate-900 block" dangerouslySetInnerHTML={{ __html: card.content }} />
                       )}
                     </p>
                   </div>
