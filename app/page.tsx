@@ -63,7 +63,7 @@ export default function TerramoreHomepage() {
     {
       audience: "Marketing Agency",
       color: "bg-blue-600",
-      content: "Terramore is a full-service marketing agency that helps both product and service businesses scale for over 10 years. See if any of these proven solutions we've delivered to hundreds of clients applies to your business."
+      content: "Terramore is a full-service marketing agency that helps both PRODUCT and SERVICE businesses scale for over 10 years. Take a look at these common problems and solutions we provide our previous clients."
     },
     {
       audience: "Entrepreneur making no money",
