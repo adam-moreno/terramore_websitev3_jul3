@@ -444,7 +444,7 @@ export default function TerramoreHomepage() {
                 className="w-[36rem] h-[20.25rem] transition-transform duration-300 hover:scale-110"
               />
             </div>
-            <div className="hidden lg:block absolute right-0 top-1/2 translate-y-40">
+            <div className="hidden lg:block absolute right-0 top-1/2 translate-y-56">
               <div className="w-[36rem] flex justify-center">
                 <p className="text-xs text-slate-500 text-center">
                   💡 Tip: Click the full-screen button in the bottom-right corner for a larger view
