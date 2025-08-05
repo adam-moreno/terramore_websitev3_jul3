@@ -117,6 +117,10 @@ export default function PartnerPage() {
     }
   }
 
+  const handleFooterNavigation = (href: string) => {
+    window.location.href = href
+  }
+
   const renderStep = () => {
     switch (currentStep) {
       case 1:
@@ -606,76 +610,106 @@ export default function PartnerPage() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-slate-900 text-white py-12 px-4">
+      <footer className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-16 px-6">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center space-x-2 mb-6">
-                <Logo size="md" className="text-white" />
+          {/* Logo and Main Navigation */}
+          <div className="text-center mb-12">
+            <div className="flex items-center justify-center mb-6">
+              <Logo size="md" className="text-white" />
+            </div>
+
+            <div className="flex flex-wrap justify-center gap-8 mb-12">
+              <div className="relative group">
+                <div className="flex items-center space-x-1 hover:text-blue-200 transition-colors cursor-pointer text-lg">
+                  <span>Courses</span>
+                  <ChevronDown className="w-4 h-4" />
+                </div>
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                  <div className="py-2">
+                    <button
+                      onClick={() => handleFooterNavigation("/courses/scaling")}
+                      className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-blue-50 hover:text-blue-600 bg-transparent border-none cursor-pointer"
+                    >
+                      The Foundation
+                    </button>
+                    <button
+                      onClick={() => handleFooterNavigation("/courses/offers")}
+                      className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-blue-50 hover:text-blue-600 bg-transparent border-none cursor-pointer"
+                    >
+                      Make It Real
+                    </button>
+                    <button
+                      onClick={() => handleFooterNavigation("/courses/leads")}
+                      className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-blue-50 hover:text-blue-600 bg-transparent border-none cursor-pointer"
+                    >
+                      Build to Grow
+                    </button>
+                  </div>
+                </div>
               </div>
-              <p className="text-gray-400 text-sm">
-                Helping businesses scale through proven systems, strategic marketing, and operational excellence.
-              </p>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
-              <ul className="space-y-2">
-                <li>
-                  <Link href="/workshops" className="text-gray-400 hover:text-white transition-colors">
-                    Workshops
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/courses/scaling" className="text-gray-400 hover:text-white transition-colors">
-                    Courses
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/solutions" className="text-gray-400 hover:text-white transition-colors">
-                    Solutions
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-
-
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Legal</h3>
-              <ul className="space-y-2">
-                <li>
-                  <Link href="/privacy" className="text-gray-400 hover:text-white transition-colors">
-                    Privacy Policy
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/terms" className="text-gray-400 hover:text-white transition-colors">
-                    Terms of Service
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/disclaimer" className="text-gray-400 hover:text-white transition-colors">
-                    Disclaimer
-                  </Link>
-                </li>
-                <li>
-                  <button
-                    onClick={openDoNotSell}
-                    className="text-gray-400 hover:text-white transition-colors text-sm cursor-pointer bg-transparent border-none"
-                  >
-                    Do Not Sell My Personal Information
-                  </button>
-                </li>
-              </ul>
+              <button
+                onClick={() => handleFooterNavigation("/solutions")}
+                className="hover:text-blue-200 transition-colors text-lg cursor-pointer bg-transparent border-none text-white"
+              >
+                Solutions
+              </button>
+              <button
+                onClick={() => handleFooterNavigation("/partner")}
+                className="hover:text-blue-200 transition-colors text-lg cursor-pointer bg-transparent border-none text-white"
+              >
+                Partner With Us
+              </button>
             </div>
           </div>
 
-          <div className="mt-12 pt-8 border-t border-gray-800 text-center">
-            <p className="text-gray-500 text-sm">© {new Date().getFullYear()} Terramore.io. All rights reserved.</p>
-            <p className="text-gray-500 text-xs mt-4 max-w-3xl mx-auto">
-              Results mentioned are not typical or guaranteed. Individual results will vary based on your business,
-              implementation, and market conditions.
+          {/* Legal Links */}
+          <div className="text-center mb-12">
+            <div className="flex flex-wrap justify-center gap-6 text-sm">
+              <button
+                onClick={() => handleFooterNavigation("/privacy")}
+                className="hover:text-blue-200 transition-colors text-sm cursor-pointer bg-transparent border-none text-white"
+              >
+                Privacy Policy
+              </button>
+              <button
+                onClick={() => handleFooterNavigation("/terms")}
+                className="hover:text-blue-200 transition-colors text-sm cursor-pointer bg-transparent border-none text-white"
+              >
+                Terms of Service
+              </button>
+              <button
+                onClick={() => handleFooterNavigation("/disclosure")}
+                className="hover:text-blue-200 transition-colors text-sm cursor-pointer bg-transparent border-none text-white"
+              >
+                Disclosure
+              </button>
+              <button
+                onClick={() => handleFooterNavigation("/dmca")}
+                className="hover:text-blue-200 transition-colors text-sm cursor-pointer bg-transparent border-none text-white"
+              >
+                DMCA POLICY
+              </button>
+              <button
+                onClick={openDoNotSell}
+                className="hover:text-blue-200 transition-colors text-sm cursor-pointer bg-transparent border-none text-white"
+              >
+                Do Not Sell My Personal Information
+              </button>
+            </div>
+          </div>
+
+          {/* Disclaimer */}
+          <div className="text-center text-sm leading-relaxed opacity-90 max-w-6xl mx-auto">
+            <p>
+              Results mentioned on this website are not typical and are not a guarantee of your success. Individual
+              results will vary depending on education, effort, application, experience, and background. Due to the
+              sensitivity of financial information, we do not track the typical results of our students. We cannot
+              guarantee that you will make money or that you will be successful if you employ the business strategies
+              discussed. Consequently, your results may significantly vary. We do not give investment, tax, or other
+              professional advice. Specific transactions and experiences are mentioned for informational purposes only.
+              The information contained within this website is the property of Terramore.io. Any use of the images,
+              content, or ideas expressed herein without the express written consent of Terramore.io is prohibited.
+              Copyright © 2025 Terramore.io, LLC. All Rights Reserved.
             </p>
           </div>
         </div>
