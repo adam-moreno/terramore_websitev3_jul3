@@ -320,7 +320,7 @@ export default function SolutionsPage() {
             </div>
 
             {/* Public Relations */}
-            <div className="bg-white rounded-lg shadow-md p-4 md:p-6 border border-gray-200 hover:shadow-lg transition-shadow">
+            <div className="bg-white rounded-lg shadow-md p-4 md:p-6 border border-gray-200 hover:shadow-lg transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 cursor-pointer">
               <div className="w-10 h-10 md:w-12 md:h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-3 md:mb-4">
                 <Megaphone className="w-5 h-5 md:w-6 md:h-6 text-purple-600" />
               </div>
@@ -345,7 +345,7 @@ export default function SolutionsPage() {
             </div>
 
             {/* Automations */}
-            <div className="bg-white rounded-lg shadow-md p-4 md:p-6 border border-gray-200 hover:shadow-lg transition-shadow">
+            <div className="bg-white rounded-lg shadow-md p-4 md:p-6 border border-gray-200 hover:shadow-lg transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 cursor-pointer">
               <div className="w-10 h-10 md:w-12 md:h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-3 md:mb-4">
                 <Settings className="w-5 h-5 md:w-6 md:h-6 text-orange-600" />
               </div>
@@ -353,7 +353,7 @@ export default function SolutionsPage() {
               <p className="text-gray-600 text-sm md:text-base mb-3 md:mb-4">
                 Streamline your business processes with intelligent automation systems.
               </p>
-              <ul className="space-y-1 md:space-y-2 mb-4 md:mb-6">
+              <ul className="space-y-1 md:text-sm">
                 <li className="flex items-center text-xs md:text-sm">
                   <CheckCircle className="w-3 h-3 md:w-4 md:h-4 text-green-500 mr-2 flex-shrink-0" />
                   <span>Workflow Automation</span>
@@ -370,7 +370,7 @@ export default function SolutionsPage() {
             </div>
 
             {/* Digital Marketing */}
-            <div className="bg-white rounded-lg shadow-md p-4 md:p-6 border border-gray-200 hover:shadow-lg transition-shadow">
+            <div className="bg-white rounded-lg shadow-md p-4 md:p-6 border border-gray-200 hover:shadow-lg transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 cursor-pointer">
               <div className="w-10 h-10 md:w-12 md:h-12 bg-red-100 rounded-lg flex items-center justify-center mb-3 md:mb-4">
                 <TrendingUp className="w-5 h-5 md:w-6 md:h-6 text-red-600" />
               </div>
@@ -395,7 +395,7 @@ export default function SolutionsPage() {
             </div>
 
             {/* Website */}
-            <div className="bg-white rounded-lg shadow-md p-4 md:p-6 border border-gray-200 hover:shadow-lg transition-shadow">
+            <div className="bg-white rounded-lg shadow-md p-4 md:p-6 border border-gray-200 hover:shadow-lg transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 cursor-pointer">
               <div className="w-10 h-10 md:w-12 md:h-12 bg-yellow-100 rounded-lg flex items-center justify-center mb-3 md:mb-4">
                 <Globe className="w-5 h-5 md:w-6 md:h-6 text-yellow-600" />
               </div>
@@ -420,7 +420,7 @@ export default function SolutionsPage() {
             </div>
 
             {/* Influencer Marketing */}
-            <div className="bg-white rounded-lg shadow-md p-4 md:p-6 border border-gray-200 hover:shadow-lg transition-shadow">
+            <div className="bg-white rounded-lg shadow-md p-4 md:p-6 border border-gray-200 hover:shadow-lg transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 cursor-pointer">
               <div className="w-10 h-10 md:w-12 md:h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-3 md:mb-4">
                 <Camera className="w-5 h-5 md:w-6 md:h-6 text-indigo-600" />
               </div>
@@ -445,7 +445,7 @@ export default function SolutionsPage() {
             </div>
 
             {/* Graphic Design */}
-            <div className="bg-white rounded-lg shadow-md p-4 md:p-6 border border-gray-200 hover:shadow-lg transition-shadow">
+            <div className="bg-white rounded-lg shadow-md p-4 md:p-6 border border-gray-200 hover:shadow-lg transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 cursor-pointer">
               <div className="w-10 h-10 md:w-12 md:h-12 bg-pink-100 rounded-lg flex items-center justify-center mb-3 md:mb-4">
                 <Palette className="w-5 h-5 md:w-6 md:h-6 text-pink-600" />
               </div>
@@ -470,7 +470,7 @@ export default function SolutionsPage() {
             </div>
 
             {/* Email Marketing */}
-            <div className="bg-white rounded-lg shadow-md p-4 md:p-6 border border-gray-200 hover:shadow-lg transition-shadow">
+            <div className="bg-white rounded-lg shadow-md p-4 md:p-6 border border-gray-200 hover:shadow-lg transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 cursor-pointer">
               <div className="w-10 h-10 md:w-12 md:h-12 bg-teal-100 rounded-lg flex items-center justify-center mb-3 md:mb-4">
                 <Mail className="w-5 h-5 md:w-6 md:h-6 text-teal-600" />
               </div>
@@ -495,7 +495,7 @@ export default function SolutionsPage() {
             </div>
 
             {/* Branding */}
-            <div className="bg-white rounded-lg shadow-md p-4 md:p-6 border border-gray-200 hover:shadow-lg transition-shadow">
+            <div className="bg-white rounded-lg shadow-md p-4 md:p-6 border border-gray-200 hover:shadow-lg transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 cursor-pointer">
               <div className="w-10 h-10 md:w-12 md:h-12 bg-cyan-100 rounded-lg flex items-center justify-center mb-3 md:mb-4">
                 <Award className="w-5 h-5 md:w-6 md:h-6 text-cyan-600" />
               </div>
@@ -520,7 +520,7 @@ export default function SolutionsPage() {
             </div>
 
             {/* Launch Campaign */}
-            <div className="bg-white rounded-lg shadow-md p-4 md:p-6 border border-gray-200 hover:shadow-lg transition-shadow">
+            <div className="bg-white rounded-lg shadow-md p-4 md:p-6 border border-gray-200 hover:shadow-lg transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 cursor-pointer">
               <div className="w-10 h-10 md:w-12 md:h-12 bg-emerald-100 rounded-lg flex items-center justify-center mb-3 md:mb-4">
                 <Rocket className="w-5 h-5 md:w-6 md:h-6 text-emerald-600" />
               </div>

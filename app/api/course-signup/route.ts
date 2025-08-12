@@ -29,6 +29,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
+
+
     // Check if email already exists
     const { data: existingUser } = await supabase
       .from('free_courses_signups')
