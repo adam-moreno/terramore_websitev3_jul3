@@ -280,7 +280,7 @@ export default function TerramoreHomepage() {
 
 
       {/* Navigation */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 bg-slate-900 text-white py-4 px-6 transition-transform duration-300 ${
+      <nav className={`fixed top-0 left-0 right-0 z-50 bg-slate-900 text-white py-6 px-6 transition-transform duration-300 overflow-visible ${
         isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
       }`}>
         <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -528,7 +528,7 @@ export default function TerramoreHomepage() {
             <div className="text-center text-white">
               <div className="flex items-center justify-center mb-2">
                 <span className="text-2xl mr-2">🎉</span>
-                <h3 className="text-xl font-bold">FREE Courses Coming by End of August!</h3>
+                <h3 className="text-xl font-bold">FREE Courses Coming Beginning of 2026!</h3>
               </div>
               <p className="text-blue-100 text-lg">
                 Click here to sign up for email notifications when new course videos are uploaded!

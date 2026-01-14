@@ -57,8 +57,8 @@ export default function AboutPage() {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Link href="/" className="flex items-center space-x-2">
-              <img src="/images/terramore-logo-clean.png" alt="Terramore Logo" className="w-10 h-10 object-contain" />
-              <span className="text-xl font-bold">TERRAMORE.IO</span>
+              <img src="https://res.cloudinary.com/dzzzkruux/image/upload/v1768374924/Screenshot_2026-01-13_at_11_10_56_PM-Picsart-BackgroundRemover_dsdhua.png" alt="Terramore Logo" className="w-10 h-10 object-contain" />
+              <img src="https://res.cloudinary.com/dzzzkruux/image/upload/v1768374924/Screenshot_2026-01-13_at_11_11_07_PM-Picsart-BackgroundRemover_vwxvqo.png" alt="TERRAMORE.IO" className="h-10 object-contain" />
             </Link>
           </div>
 
@@ -317,8 +317,8 @@ export default function AboutPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center space-x-2 mb-6">
-                <img src="/images/terramore-logo-clean.png" alt="Terramore Logo" className="w-10 h-10 object-contain" />
-                <span className="text-xl font-bold">TERRAMORE.IO</span>
+                <img src="https://res.cloudinary.com/dzzzkruux/image/upload/v1768374924/Screenshot_2026-01-13_at_11_10_56_PM-Picsart-BackgroundRemover_dsdhua.png" alt="Terramore Logo" className="w-10 h-10 object-contain" />
+                <img src="https://res.cloudinary.com/dzzzkruux/image/upload/v1768374924/Screenshot_2026-01-13_at_11_11_07_PM-Picsart-BackgroundRemover_vwxvqo.png" alt="TERRAMORE.IO" className="h-10 object-contain" />
               </div>
               <p className="text-gray-400 text-sm">
                 Helping businesses scale through proven systems, strategic marketing, and operational excellence.
