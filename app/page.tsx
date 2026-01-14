@@ -265,6 +265,7 @@ export default function TerramoreHomepage() {
 
   return (
     <div className="min-h-screen bg-white">
+      {/* Test push verification - 2026-01-14 */}
       {/* Floating Corner Buttons */}
       <div className="fixed bottom-4 right-4 z-50">
         <Button
