@@ -2,9 +2,9 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Terramore.io - Business Scaling Solutions',
-  description: 'Transform your business with proven scaling strategies and AI-powered marketing solutions. Expert consulting for sustainable growth.',
-  keywords: 'business scaling, marketing automation, growth strategy, AI marketing, business consulting',
+  title: 'Terramore.io | Consulting | Marketing | Free Courses & Consultations',
+  description: 'Consulting & marketing for new and existing businesses. Free courses | Free consultations.',
+  keywords: 'business consulting | marketing | free courses | free consultations | new business | existing business | scaling',
   authors: [{ name: 'Adam Moreno' }],
   creator: 'Terramore.io',
   publisher: 'Terramore.io',
@@ -20,26 +20,26 @@ export const metadata: Metadata = {
     apple: 'https://res.cloudinary.com/dzzzkruux/image/upload/v1768374905/Screenshot_2026-01-13_at_11.10.56_PM_eqtvoj.png',
   },
   openGraph: {
-    title: 'Terramore.io - Business Scaling Solutions',
-    description: 'Transform your business with proven scaling strategies and AI-powered marketing solutions.',
+    title: 'Terramore.io | Consulting | Marketing | Free Courses & Consultations',
+    description: 'Consulting & marketing for new and existing businesses. Free courses | Free consultations.',
     url: 'https://terramore.io',
     siteName: 'Terramore.io',
     locale: 'en_US',
     type: 'website',
     images: [
       {
-        url: '/og-image.png',
+        url: 'https://res.cloudinary.com/dzzzkruux/image/upload/v1768374905/Screenshot_2026-01-13_at_11.10.56_PM_eqtvoj.png',
         width: 1200,
         height: 630,
-        alt: 'Terramore.io - Business Scaling Solutions',
+        alt: 'Terramore.io | Consulting | Marketing | Free Courses | Free Consultations',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Terramore.io - Business Scaling Solutions',
-    description: 'Transform your business with proven scaling strategies and AI-powered marketing solutions.',
-    images: ['/og-image.png'],
+    title: 'Terramore.io | Consulting | Marketing | Free Courses & Consultations',
+    description: 'Consulting & marketing for new and existing businesses. Free courses | Free consultations.',
+    images: ['https://res.cloudinary.com/dzzzkruux/image/upload/v1768374905/Screenshot_2026-01-13_at_11.10.56_PM_eqtvoj.png'],
   },
   robots: {
     index: true,
