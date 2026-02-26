@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import { GoogleAnalytics } from '@/components/google-analytics'
 
 export const metadata: Metadata = {
   title: 'Terramore.io | Consulting | Marketing | Free Courses & Consultations',
@@ -62,6 +63,18 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <head>
+        {/* Google tag (gtag.js) - single tag on every page, first in head */}
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-BQN6VCY579"></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-BQN6VCY579');
+            `,
+          }}
+        />
         <link rel="icon" type="image/png" href="https://res.cloudinary.com/dzzzkruux/image/upload/v1768374905/Screenshot_2026-01-13_at_11.10.56_PM_eqtvoj.png" />
         <link rel="apple-touch-icon" href="https://res.cloudinary.com/dzzzkruux/image/upload/v1768374905/Screenshot_2026-01-13_at_11.10.56_PM_eqtvoj.png" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -70,6 +83,7 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://www.loom.com" />
       </head>
       <body className="antialiased">
+        <GoogleAnalytics />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
