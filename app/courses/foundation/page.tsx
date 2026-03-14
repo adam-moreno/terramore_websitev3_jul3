@@ -142,8 +142,13 @@ export default function FoundationCoursePage() {
 
   const handleVideoError = useCallback(() => {
     setVideoLoading(false)
-    setVideoError("This video couldn’t be loaded. Try another module or check your connection.")
+    setVideoError("This video couldn’t be loaded. .mov works best in Safari; try another browser or check your connection.")
   }, [])
+
+  // Preload next/prev module URLs so when user switches, browser may use cache (faster than ~1min re-buffer).
+  // For even faster load: ensure R2 (or CDN) supports Range requests; consider H.264 MP4 for broader support.
+  const nextModuleSrc = selectedVideo < modules.length - 1 ? modules[selectedVideo + 1].src : null
+  const prevModuleSrc = selectedVideo > 0 ? modules[selectedVideo - 1].src : null
 
   const handleCourseSignup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -196,6 +201,14 @@ export default function FoundationCoursePage() {
 
   return (
     <div className="min-h-screen bg-white">
+      {/* Preload adjacent modules so switching buffers faster */}
+      {nextModuleSrc && (
+        <video preload="auto" src={nextModuleSrc} className="hidden" aria-hidden />
+      )}
+      {prevModuleSrc && (
+        <video preload="auto" src={prevModuleSrc} className="hidden" aria-hidden />
+      )}
+
       {/* Floating Corner Buttons */}
       <div className="fixed bottom-4 right-4 z-50">
         <Button
@@ -368,7 +381,7 @@ export default function FoundationCoursePage() {
           <div className="mt-4 space-y-4">
             <div>
               <h3 className="text-sm font-semibold text-gray-900 mb-1">Who benefits from this module</h3>
-              <ul className="list-disc list-inside text-sm text-gray-600 space-y-0.5">
+              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-0.5 list-disc list-inside text-sm text-gray-600">
                 {modules[selectedVideo].whoBenefits.map((item, i) => (
                   <li key={i}>{item}</li>
                 ))}
@@ -376,7 +389,7 @@ export default function FoundationCoursePage() {
             </div>
             <div>
               <h3 className="text-sm font-semibold text-gray-900 mb-1">What you&apos;ll learn</h3>
-              <ul className="list-disc list-inside text-sm text-gray-600 space-y-0.5">
+              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-0.5 list-disc list-inside text-sm text-gray-600">
                 {modules[selectedVideo].whatYouLearn.map((item, i) => (
                   <li key={i}>{item}</li>
                 ))}
@@ -589,7 +602,7 @@ export default function FoundationCoursePage() {
               <div className="mt-4 space-y-4">
                 <div>
                   <h3 className="text-sm font-semibold text-gray-900 mb-1">Who benefits from this module</h3>
-                  <ul className="list-disc list-inside text-gray-600 space-y-0.5">
+                  <ul className="grid grid-cols-2 gap-x-6 gap-y-0.5 list-disc list-inside text-gray-600">
                     {modules[selectedVideo].whoBenefits.map((item, i) => (
                       <li key={i}>{item}</li>
                     ))}
@@ -597,7 +610,7 @@ export default function FoundationCoursePage() {
                 </div>
                 <div>
                   <h3 className="text-sm font-semibold text-gray-900 mb-1">What you&apos;ll learn</h3>
-                  <ul className="list-disc list-inside text-gray-600 space-y-0.5">
+                  <ul className="grid grid-cols-2 gap-x-6 gap-y-0.5 list-disc list-inside text-gray-600">
                     {modules[selectedVideo].whatYouLearn.map((item, i) => (
                       <li key={i}>{item}</li>
                     ))}

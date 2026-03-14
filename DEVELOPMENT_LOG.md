@@ -220,3 +220,23 @@ The iClosed scheduling integration was not working properly for the business. A 
   - `/courses/make-it-real` → `courseType: 'make-it-real'`, `signupSource: 'make-it-real'`
   - `/courses/build-to-grow` → `courseType: 'build-to-grow'`, `signupSource: 'build-to-grow'`
 - **Implementation:** All three course pages now submit their forms to `POST /api/course-signup` with the above values. No API route code changes; the API already accepts and stores whatever `courseType` and `signupSource` are sent. TerraIQ dashboard can display these as-is; optional label mapping and backfill for legacy `scaling`/`offers`/`leads` are documented in the TerraIQ repo checklist.
+
+---
+
+## Foundation Video Loading & Preload – March 14, 2026
+
+### Problem
+- “This video couldn’t be loaded” on some modules (e.g. Module 1); .mov has limited support outside Safari.
+- ~1 minute from click to video rendering due to large file sizes and no preloading.
+
+### Changes
+1. **Preload adjacent modules**  
+   Hidden `<video preload="auto">` elements for the next and previous module URLs. When the user switches module, the browser may serve from cache so playback starts faster. Preload runs in the background; no refs or play() on these elements.
+2. **Error message**  
+   Updated to: “This video couldn’t be loaded. .mov works best in Safari; try another browser or check your connection.”
+3. **No crossOrigin**  
+   `crossOrigin="anonymous"` was not added; it can break playback if R2 does not send CORS headers.
+
+### Notes for team
+- Long buffering is largely due to large .mov file sizes. For faster load: ensure R2 (or CDN) supports **Range requests**; consider providing **H.264 MP4** for broader support and smaller size.
+- If Module 1 (or others) still fail, verify the URL and that the object exists in R2; consider MP4 fallbacks via `<source type="video/mp4" src="..." />` if available.
