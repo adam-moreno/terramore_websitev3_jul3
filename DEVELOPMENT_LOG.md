@@ -170,4 +170,53 @@ The iClosed scheduling integration was not working properly for the business. A 
 - **Visual Testing**: Ensured identical appearance and behavior
 - **Functionality Testing**: Verified all scheduling flows work correctly
 - **Cross-browser Testing**: Confirmed compatibility across browsers
-- **Mobile Testing**: Verified responsive behavior on mobile devices 
+- **Mobile Testing**: Verified responsive behavior on mobile devices
+
+---
+
+## Local Dev Setup & Production Parity - March 14, 2026
+
+### Initialization Steps
+1. **Prerequisites**: Node.js 18+, pnpm (recommended).
+2. **Install dependencies**: From project root run `pnpm install`. If you see `ERR_PNPM_EPERM` when downloading packages, run with full network/permissions (e.g. outside sandbox or with `pnpm install` in a normal terminal).
+3. **Start dev server**: `pnpm dev` — app runs at [http://localhost:3000](http://localhost:3000).
+4. **Production build**: `pnpm build` then `pnpm start` to run the production build locally.
+
+### What the Production Version Looks Like (Local Dev)
+- **Homepage** (`/`): Terramore marketing site with hero, flash cards, founder carousel, Calendly/schedule popups, roadmap modal, Do Not Sell and Free Courses popups, FAQs, footer. Metadata points to production URL `https://terramore.io`.
+- **Routes**: About, Careers, Courses (foundation, make-it-real, build-to-grow), Disclosure, DMCA, Partner, Privacy, Resources, Solutions, Terms, Workshops.
+- **Integrations**: Google Analytics (via `GoogleAnalytics` in root layout), Calendly, Cloudinary images. No `.env` files in repo; add `.env.local` if you need Supabase or other env vars (see SUPABASE_SETUP.md if using Supabase).
+- **Config**: `next.config.mjs` has `images.unoptimized: true`, ESLint/TypeScript ignore during builds. Same codebase serves both dev and production; production is typically deployed (e.g. Vercel) from this repo.
+
+### Decisions This Session
+- Confirmed pnpm as package manager and Next.js 15 App Router structure.
+- Documented that local `pnpm dev` mirrors production behavior; only environment variables and deployment platform differ.
+
+---
+
+## Course URL & Foundation Video Spec – March 14, 2026
+
+### URL changes
+- **The Foundation**: `/courses/scaling` → `/courses/foundation` (new route, old URL redirects).
+- **Make It Real**: `/courses/offers` → `/courses/make-it-real` (new route, old URL redirects).
+- **Build to Grow**: `/courses/leads` → `/courses/build-to-grow` (new route, old URL redirects).
+
+### Implementation
+- **New pages**: `app/courses/foundation/page.tsx`, `app/courses/make-it-real/page.tsx`, `app/courses/build-to-grow/page.tsx`. Old pages (`scaling`, `offers`, `leads`) removed.
+- **Redirects** in `next.config.mjs`: permanent 308 redirects from old paths to new paths.
+- **Internal links**: All nav, footer, and in-page links updated across the site (home, about, careers, workshops, resources, disclosure, partner, terms, solutions, dmca, privacy) to use the new course paths.
+- **Sitemap & llms.txt**: Updated to list new course URLs.
+
+### Foundation course – video embeds
+- **Source**: R2 bucket `https://pub-ebfd3500fb2e4d449346ae4c5c507e84.r2.dev/`.
+- **Videos**: 12 modules (Module 0–10 + Bonus) using filenames `Foundations_Portrait_Mar1426_Module0.mov` … `Module10.mov` and `Foundations_Portrait_Mar1426_Bonus.mov`.
+- **Embed**: Native `<video src="..." controls />` per module; module list shows title only (no duration).
+- **Titles**: Module 0 — Introduction; Module 1 … Module 10; Bonus (per spec; content-specific titles can be updated later).
+
+### API — Option B (course_type / signup_source)
+- **Decision:** Use new course slugs in the API so URL, course name, and stored value match (per handoff spec Option B).
+- **Values sent:** When the signup form is submitted on each course page, we send:
+  - `/courses/foundation` → `courseType: 'foundation'`, `signupSource: 'foundation'`
+  - `/courses/make-it-real` → `courseType: 'make-it-real'`, `signupSource: 'make-it-real'`
+  - `/courses/build-to-grow` → `courseType: 'build-to-grow'`, `signupSource: 'build-to-grow'`
+- **Implementation:** All three course pages now submit their forms to `POST /api/course-signup` with the above values. No API route code changes; the API already accepts and stores whatever `courseType` and `signupSource` are sent. TerraIQ dashboard can display these as-is; optional label mapping and backfill for legacy `scaling`/`offers`/`leads` are documented in the TerraIQ repo checklist.

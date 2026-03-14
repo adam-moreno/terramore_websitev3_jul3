@@ -303,19 +303,19 @@ export default function TerramoreHomepage() {
                 <div className="absolute top-full left-0 mt-0 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 delay-100 z-50">
                   <div className="py-2">
                     <Link
-                      href="/courses/scaling"
+                      href="/courses/foundation"
                       className="block px-4 py-2 text-gray-800 hover:bg-blue-50 hover:text-blue-600 transition-colors"
                     >
                       The Foundation
                     </Link>
                     <Link
-                      href="/courses/offers"
+                      href="/courses/make-it-real"
                       className="block px-4 py-2 text-gray-800 hover:bg-blue-50 hover:text-blue-600 transition-colors"
                     >
                       Make It Real
                     </Link>
                     <Link
-                      href="/courses/leads"
+                      href="/courses/build-to-grow"
                       className="block px-4 py-2 text-gray-800 hover:bg-blue-50 hover:text-blue-600 transition-colors"
                     >
                       Build to Grow
@@ -359,21 +359,21 @@ export default function TerramoreHomepage() {
                   <div className="text-white mb-2">Courses</div>
                   <div className="pl-4 space-y-2">
                     <Link
-                      href="/courses/scaling"
+                      href="/courses/foundation"
                       className="block text-gray-300 hover:text-blue-300 transition-colors py-1"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       The Foundation
                     </Link>
                     <Link
-                      href="/courses/offers"
+                      href="/courses/make-it-real"
                       className="block text-gray-300 hover:text-blue-300 transition-colors py-1"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       Make It Real
                     </Link>
                     <Link
-                      href="/courses/leads"
+                      href="/courses/build-to-grow"
                       className="block text-gray-300 hover:text-blue-300 transition-colors py-1"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
@@ -549,7 +549,7 @@ export default function TerramoreHomepage() {
           {/* Desktop Layout */}
           <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {/* The Foundation Course */}
-            <Link href="/courses/scaling" className="group">
+            <Link href="/courses/foundation" className="group">
               <div className="bg-white rounded-lg shadow-2xl border border-gray-100 overflow-hidden hover:shadow-3xl hover:-translate-y-1 transition-all duration-300 cursor-pointer h-80">
                 <div className="p-6 h-full flex flex-col">
                   <Badge className="mb-4 bg-green-500 hover:bg-green-600 w-fit">🚀 Launch Your Business</Badge>
@@ -580,7 +580,7 @@ export default function TerramoreHomepage() {
             </Link>
 
             {/* Make It Real Course */}
-            <Link href="/courses/offers" className="group">
+            <Link href="/courses/make-it-real" className="group">
               <div className="bg-white rounded-lg shadow-2xl border border-gray-100 overflow-hidden hover:shadow-3xl hover:-translate-y-1 transition-all duration-300 cursor-pointer h-80">
                 <div className="p-6 h-full flex flex-col">
                   <Badge className="mb-4 bg-purple-500 hover:bg-purple-600 w-fit">⚡ Scale Your Systems</Badge>
@@ -611,7 +611,7 @@ export default function TerramoreHomepage() {
             </Link>
 
             {/* Build to Grow Course */}
-            <Link href="/courses/leads" className="group">
+            <Link href="/courses/build-to-grow" className="group">
               <div className="bg-white rounded-lg shadow-2xl border border-gray-100 overflow-hidden hover:shadow-3xl hover:-translate-y-1 transition-all duration-300 cursor-pointer h-80">
                 <div className="p-6 h-full flex flex-col">
                   <Badge className="mb-4 bg-orange-500 hover:bg-orange-600 w-fit">🌟 Build Your Legacy</Badge>
@@ -673,7 +673,7 @@ export default function TerramoreHomepage() {
           {/* Mobile Layout */}
           <div className="md:hidden space-y-6">
             {/* The Foundation Course */}
-            <Link href="/courses/scaling" className="group block">
+            <Link href="/courses/foundation" className="group block">
               <div className="bg-white rounded-lg shadow-2xl border border-gray-100 overflow-hidden hover:shadow-3xl hover:-translate-y-1 transition-all duration-300 cursor-pointer">
                 <div className="p-6">
                   <Badge className="mb-4 bg-green-500 hover:bg-green-600 w-fit">🚀 Launch Your Business</Badge>
@@ -689,7 +689,7 @@ export default function TerramoreHomepage() {
             </Link>
 
             {/* Make It Real Course */}
-            <Link href="/courses/offers" className="group block">
+            <Link href="/courses/make-it-real" className="group block">
               <div className="bg-white rounded-lg shadow-2xl border border-gray-100 overflow-hidden hover:shadow-3xl hover:-translate-y-1 transition-all duration-300 cursor-pointer">
                 <div className="p-6">
                   <Badge className="mb-4 bg-purple-500 hover:bg-purple-600 w-fit">⚡ Scale Your Systems</Badge>
@@ -705,7 +705,7 @@ export default function TerramoreHomepage() {
             </Link>
 
             {/* Build to Grow Course */}
-            <Link href="/courses/leads" className="group block">
+            <Link href="/courses/build-to-grow" className="group block">
               <div className="bg-white rounded-lg shadow-2xl border border-gray-100 overflow-hidden hover:shadow-3xl hover:-translate-y-1 transition-all duration-300 cursor-pointer">
                 <div className="p-6">
                   <Badge className="mb-4 bg-orange-500 hover:bg-orange-600 w-fit">🌟 Build Your Legacy</Badge>
@@ -1184,19 +1184,19 @@ export default function TerramoreHomepage() {
                 <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                   <div className="py-2">
                     <button
-                      onClick={() => handleFooterNavigation("/courses/scaling")}
+                      onClick={() => handleFooterNavigation("/courses/foundation")}
                       className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-blue-50 hover:text-blue-600 bg-transparent border-none cursor-pointer"
                     >
                       The Foundation
                     </button>
                     <button
-                      onClick={() => handleFooterNavigation("/courses/offers")}
+                      onClick={() => handleFooterNavigation("/courses/make-it-real")}
                       className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-blue-50 hover:text-blue-600 bg-transparent border-none cursor-pointer"
                     >
                       Make It Real
                     </button>
                     <button
-                      onClick={() => handleFooterNavigation("/courses/leads")}
+                      onClick={() => handleFooterNavigation("/courses/build-to-grow")}
                       className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-blue-50 hover:text-blue-600 bg-transparent border-none cursor-pointer"
                     >
                       Build to Grow

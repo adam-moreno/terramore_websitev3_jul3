@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Calendar, Cookie, ChevronDown, Menu, Play } from "lucide-react"
@@ -15,27 +14,80 @@ import { DoNotSellPopup } from "@/components/do-not-sell-popup"
 import { RoadmapModal } from "@/components/roadmap-modal"
 import { Logo } from "@/components/logo"
 
-export default function ScalingCoursePage() {
+const R2_BASE = "https://pub-ebfd3500fb2e4d449346ae4c5c507e84.r2.dev"
+
+/** Option B: course_type and signup_source match the new URL slug for dashboard consistency. */
+const COURSE_SLUG = "foundation" as const
+
+const modules = [
+  { title: "Module 0 — Introduction", src: `${R2_BASE}/Foundations_Portrait_Mar1426_Module0.mov` },
+  { title: "Module 1", src: `${R2_BASE}/Foundations_Portrait_Mar1426_Module1.mov` },
+  { title: "Module 2", src: `${R2_BASE}/Foundations_Portrait_Mar1426_Module2.mov` },
+  { title: "Module 3", src: `${R2_BASE}/Foundations_Portrait_Mar1426_Module3.mov` },
+  { title: "Module 4", src: `${R2_BASE}/Foundations_Portrait_Mar1426_Module4.mov` },
+  { title: "Module 5", src: `${R2_BASE}/Foundations_Portrait_Mar1426_Module5.mov` },
+  { title: "Module 6", src: `${R2_BASE}/Foundations_Portrait_Mar1426_Module6.mov` },
+  { title: "Module 7", src: `${R2_BASE}/Foundations_Portrait_Mar1426_Module7.mov` },
+  { title: "Module 8", src: `${R2_BASE}/Foundations_Portrait_Mar1426_Module8.mov` },
+  { title: "Module 9", src: `${R2_BASE}/Foundations_Portrait_Mar1426_Module9.mov` },
+  { title: "Module 10", src: `${R2_BASE}/Foundations_Portrait_Mar1426_Module10.mov` },
+  { title: "Bonus", src: `${R2_BASE}/Foundations_Portrait_Mar1426_Bonus.mov` },
+]
+
+export default function FoundationCoursePage() {
   const { isPopupOpen, setIsPopupOpen } = useSchedulePopup()
   const { isOpen: isDoNotSellOpen, openPopup: openDoNotSell, closePopup: closeDoNotSell } = useDoNotSellPopup()
   const { isOpen: isRoadmapOpen, setIsOpen: setIsRoadmapOpen } = useRoadmapModal()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [selectedVideo, setSelectedVideo] = useState(0)
   const [isModulesOpen, setIsModulesOpen] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitMessage, setSubmitMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
 
-  const videos = [
-    { title: "Start Here – Your Guide to Making Your First Dollar", duration: "12:34" },
-    { title: "The Modern Entrepreneur's Mindset – Avoiding Analysis Paralysis", duration: "15:22" },
-    { title: "Finding the Right Niche – Solving Real Problems", duration: "18:45" },
-    { title: "Offer Building 101 – Value > Product", duration: "14:12" },
-    { title: "MVPs and Service Simplicity – Launch Without Perfection", duration: "16:33" },
-    { title: "Getting Your First Client – Warm Outreach and Local Networks", duration: "19:28" },
-    { title: "Money-Making Platforms – Which Tools Make You Profitable Fast?", duration: "13:56" },
-    { title: "How to Price When You're Just Starting", duration: "11:47" },
-    { title: "Delivering Results (Even If You're New)", duration: "17:15" },
-    { title: "Tracking Progress & Feedback Loops", duration: "12:08" },
-    { title: "BONUS: How I'd Make $1K in 7 Days From Scratch – Real-World Scenario Breakdown", duration: "25:43" },
-  ]
+  const handleCourseSignup = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    const form = e.currentTarget
+    const fd = new FormData(form)
+    const firstName = (fd.get("firstName") as string)?.trim() ?? ""
+    const lastName = (fd.get("lastName") as string)?.trim() ?? ""
+    const email = (fd.get("email") as string)?.trim() ?? ""
+    const phone = (fd.get("phone") as string)?.trim() || null
+    const company = (fd.get("company") as string)?.trim() || null
+    if (!firstName || !lastName || !email) {
+      setSubmitMessage({ type: "error", text: "Please fill in required fields." })
+      return
+    }
+    setIsSubmitting(true)
+    setSubmitMessage(null)
+    try {
+      const res = await fetch("/api/course-signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firstName,
+          lastName,
+          email,
+          phone,
+          company,
+          courseType: COURSE_SLUG,
+          signupSource: COURSE_SLUG,
+        }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (res.ok) {
+        setSubmitMessage({ type: "success", text: "Thanks! You're signed up." })
+        form.reset()
+      } else if (res.status === 409) {
+        setSubmitMessage({ type: "error", text: "This email is already registered." })
+      } else {
+        setSubmitMessage({ type: "error", text: (data.error as string) || "Something went wrong. Please try again." })
+      }
+    } catch {
+      setSubmitMessage({ type: "error", text: "Something went wrong. Please try again." })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   const handleFooterNavigation = (href: string) => {
     window.location.href = href
@@ -72,17 +124,17 @@ export default function ScalingCoursePage() {
                 </div>
                 <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                   <div className="py-2">
-                    <Link href="/courses/scaling" className="block px-4 py-2 text-gray-800 bg-blue-50 text-blue-600">
+                    <Link href="/courses/foundation" className="block px-4 py-2 text-gray-800 bg-blue-50 text-blue-600">
                       The Foundation
                     </Link>
                     <Link
-                      href="/courses/offers"
+                      href="/courses/make-it-real"
                       className="block px-4 py-2 text-gray-800 hover:bg-blue-50 hover:text-blue-600"
                     >
                       Make It Real
                     </Link>
                     <Link
-                      href="/courses/leads"
+                      href="/courses/build-to-grow"
                       className="block px-4 py-2 text-gray-800 hover:bg-blue-50 hover:text-blue-600"
                     >
                       Build to Grow
@@ -116,13 +168,13 @@ export default function ScalingCoursePage() {
         {isMobileMenuOpen && (
           <div className="lg:hidden mt-4 pb-4">
             <div className="flex flex-col space-y-2">
-              <Link href="/courses/scaling" className="block text-white hover:text-blue-300 transition-colors">
+              <Link href="/courses/foundation" className="block text-white hover:text-blue-300 transition-colors">
                 The Foundation
               </Link>
-              <Link href="/courses/offers" className="block text-white hover:text-blue-300 transition-colors">
+              <Link href="/courses/make-it-real" className="block text-white hover:text-blue-300 transition-colors">
                 Make It Real
               </Link>
-              <Link href="/courses/leads" className="block text-white hover:text-blue-300 transition-colors">
+              <Link href="/courses/build-to-grow" className="block text-white hover:text-blue-300 transition-colors">
                 Build to Grow
               </Link>
               <Link href="/solutions" className="text-white hover:text-blue-300 transition-colors py-2">
@@ -157,7 +209,7 @@ export default function ScalingCoursePage() {
           {isModulesOpen && (
             <div className="px-6 pb-6">
               <div className="space-y-2">
-                {videos.map((video, index) => (
+                {modules.map((module, index) => (
                   <div
                     key={index}
                     className={`p-3 rounded-lg cursor-pointer transition-colors ${
@@ -170,8 +222,7 @@ export default function ScalingCoursePage() {
                         <Play className="w-4 h-4 text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="text-sm font-medium text-white">{video.title}</h4>
-                        <p className="text-xs text-gray-300 mt-1">{video.duration}</p>
+                        <h4 className="text-sm font-medium text-white">{module.title}</h4>
                       </div>
                     </div>
                   </div>
@@ -183,15 +234,16 @@ export default function ScalingCoursePage() {
 
         {/* Video Player */}
         <div className="p-6">
-          <div className="relative aspect-video bg-gray-900 rounded-lg overflow-hidden shadow-lg mb-6">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center cursor-pointer hover:bg-white/30 transition-colors">
-                <Play className="w-8 h-8 text-white ml-1" />
-              </div>
-            </div>
-            <div className="absolute bottom-4 left-4 text-white text-sm">{videos[selectedVideo].title}</div>
-            <div className="absolute bottom-4 right-4 text-white text-sm">{videos[selectedVideo].duration}</div>
+          <div className="aspect-video bg-gray-900 rounded-lg overflow-hidden shadow-lg mb-6">
+            <video
+              key={modules[selectedVideo].src}
+              src={modules[selectedVideo].src}
+              controls
+              className="w-full h-full object-contain"
+              playsInline
+            />
           </div>
+          <p className="text-sm text-gray-600 mt-2">{modules[selectedVideo].title}</p>
         </div>
 
         {/* CTA Buttons */}
@@ -202,8 +254,6 @@ export default function ScalingCoursePage() {
           >
             Get My Custom Business Roadmap
           </Button>
-
-
         </div>
 
         {/* Mobile Form */}
@@ -217,13 +267,14 @@ export default function ScalingCoursePage() {
             </p>
           </div>
 
-          <form className="space-y-4">
+          <form className="space-y-4" onSubmit={handleCourseSignup}>
             <div>
-              <Label htmlFor="firstName" className="text-sm font-medium text-gray-700">
+              <Label htmlFor="mobile-firstName" className="text-sm font-medium text-gray-700">
                 First Name *
               </Label>
               <Input
-                id="firstName"
+                id="mobile-firstName"
+                name="firstName"
                 type="text"
                 required
                 className="mt-1 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
@@ -231,11 +282,12 @@ export default function ScalingCoursePage() {
             </div>
 
             <div>
-              <Label htmlFor="lastName" className="text-sm font-medium text-gray-700">
+              <Label htmlFor="mobile-lastName" className="text-sm font-medium text-gray-700">
                 Last Name *
               </Label>
               <Input
-                id="lastName"
+                id="mobile-lastName"
+                name="lastName"
                 type="text"
                 required
                 className="mt-1 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
@@ -243,11 +295,12 @@ export default function ScalingCoursePage() {
             </div>
 
             <div>
-              <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+              <Label htmlFor="mobile-email" className="text-sm font-medium text-gray-700">
                 Email *
               </Label>
               <Input
-                id="email"
+                id="mobile-email"
+                name="email"
                 type="email"
                 required
                 className="mt-1 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
@@ -255,29 +308,35 @@ export default function ScalingCoursePage() {
             </div>
 
             <div>
-              <Label htmlFor="phone" className="text-sm font-medium text-gray-700">
+              <Label htmlFor="mobile-phone" className="text-sm font-medium text-gray-700">
                 Phone Number *
               </Label>
               <Input
-                id="phone"
+                id="mobile-phone"
+                name="phone"
                 type="tel"
-                required
                 className="mt-1 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
               />
             </div>
 
             <div>
-              <Label htmlFor="company" className="text-sm font-medium text-gray-700">
+              <Label htmlFor="mobile-company" className="text-sm font-medium text-gray-700">
                 Company Name
               </Label>
               <Input
-                id="company"
+                id="mobile-company"
+                name="company"
                 type="text"
                 className="mt-1 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
               />
             </div>
 
             <div className="pt-4">
+              {submitMessage && (
+                <p className={`text-sm mb-4 ${submitMessage.type === "success" ? "text-green-600" : "text-red-600"}`}>
+                  {submitMessage.text}
+                </p>
+              )}
               <p className="text-xs text-gray-500 leading-relaxed mb-6">
                 By providing your information today, you are giving consent for us or our partners, to contact you by
                 mail, phone, text, or email using automated technology to the data provided, even if the phone number
@@ -303,9 +362,10 @@ export default function ScalingCoursePage() {
 
               <Button
                 type="submit"
+                disabled={isSubmitting}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all"
               >
-                Go to Step 2
+                {isSubmitting ? "Submitting…" : "Go to Step 2"}
               </Button>
             </div>
           </form>
@@ -327,7 +387,7 @@ export default function ScalingCoursePage() {
           <div>
             <h3 className="text-lg font-bold text-gray-900 mb-4">Course Content</h3>
             <div className="space-y-2">
-              {videos.map((video, index) => (
+              {modules.map((module, index) => (
                 <div
                   key={index}
                   className={`p-3 rounded-lg cursor-pointer transition-colors ${
@@ -343,9 +403,8 @@ export default function ScalingCoursePage() {
                       <h4
                         className={`text-sm font-medium ${selectedVideo === index ? "text-blue-600" : "text-gray-900"}`}
                       >
-                        {video.title}
+                        {module.title}
                       </h4>
-                      <p className="text-xs text-gray-500 mt-1">{video.duration}</p>
                     </div>
                   </div>
                 </div>
@@ -359,43 +418,16 @@ export default function ScalingCoursePage() {
           {/* Video Section */}
           <div className="flex-1 p-8">
             <div className="mb-8">
-              <div className="relative aspect-video bg-gray-900 rounded-lg overflow-hidden shadow-lg">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center cursor-pointer hover:bg-white/30 transition-colors">
-                    <Play className="w-8 h-8 text-white ml-1" />
-                  </div>
-                </div>
-                <div className="absolute bottom-4 left-4 text-white text-sm">{videos[selectedVideo].title}</div>
-                <div className="absolute bottom-4 right-4 text-white text-sm">{videos[selectedVideo].duration}</div>
+              <div className="aspect-video bg-gray-900 rounded-lg overflow-hidden shadow-lg">
+                <video
+                  key={modules[selectedVideo].src}
+                  src={modules[selectedVideo].src}
+                  controls
+                  className="w-full h-full object-contain"
+                  playsInline
+                />
               </div>
-            </div>
-
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 mb-4">{videos[selectedVideo].title}</h1>
-              <p className="text-gray-600 leading-relaxed">
-                {selectedVideo === 0 &&
-                  "Welcome to The Foundation course! This video will guide you through the entire course structure and help you understand how to make your first dollar online. We'll cover the mindset, tools, and strategies you need to go from idea to income."}
-                {selectedVideo === 1 &&
-                  "Develop the right entrepreneurial mindset to overcome analysis paralysis and take action. Learn how successful entrepreneurs think differently and how to build confidence in your business decisions."}
-                {selectedVideo === 2 &&
-                  "Discover how to identify profitable niches by solving real problems. We'll show you research techniques to validate your ideas and find markets with genuine demand."}
-                {selectedVideo === 3 &&
-                  "Learn the fundamentals of creating valuable offers that customers actually want to buy. Focus on value creation over product features to build compelling propositions."}
-                {selectedVideo === 4 &&
-                  "Master the art of launching without perfection using MVPs and simple service models. Get to market quickly and iterate based on real customer feedback."}
-                {selectedVideo === 5 &&
-                  "Proven strategies for acquiring your first clients through warm outreach and local networking. Build relationships that convert into paying customers."}
-                {selectedVideo === 6 &&
-                  "Compare different platforms and tools to find the ones that will make you profitable fastest. Focus on revenue-generating activities from day one."}
-                {selectedVideo === 7 &&
-                  "Learn pricing psychology and strategies for new businesses. Price confidently even when you're just starting out and don't have extensive experience."}
-                {selectedVideo === 8 &&
-                  "Deliver exceptional results to your first clients even if you're new to the industry. Build systems for consistent quality and customer satisfaction."}
-                {selectedVideo === 9 &&
-                  "Set up tracking systems and feedback loops to measure progress and continuously improve your business operations and customer experience."}
-                {selectedVideo === 10 &&
-                  "BONUS: A complete real-world breakdown of how to make $1,000 in 7 days starting from scratch. Step-by-step scenario with actual tactics and timelines."}
-              </p>
+              <h1 className="text-xl font-bold text-gray-900 mt-4">{modules[selectedVideo].title}</h1>
             </div>
           </div>
 
@@ -410,13 +442,14 @@ export default function ScalingCoursePage() {
               </p>
             </div>
 
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={handleCourseSignup}>
               <div>
-                <Label htmlFor="firstName" className="text-sm font-medium text-gray-700">
+                <Label htmlFor="desktop-firstName" className="text-sm font-medium text-gray-700">
                   First Name *
                 </Label>
                 <Input
-                  id="firstName"
+                  id="desktop-firstName"
+                  name="firstName"
                   type="text"
                   required
                   className="mt-1 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
@@ -424,11 +457,12 @@ export default function ScalingCoursePage() {
               </div>
 
               <div>
-                <Label htmlFor="lastName" className="text-sm font-medium text-gray-700">
+                <Label htmlFor="desktop-lastName" className="text-sm font-medium text-gray-700">
                   Last Name *
                 </Label>
                 <Input
-                  id="lastName"
+                  id="desktop-lastName"
+                  name="lastName"
                   type="text"
                   required
                   className="mt-1 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
@@ -436,11 +470,12 @@ export default function ScalingCoursePage() {
               </div>
 
               <div>
-                <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+                <Label htmlFor="desktop-email" className="text-sm font-medium text-gray-700">
                   Email *
                 </Label>
                 <Input
-                  id="email"
+                  id="desktop-email"
+                  name="email"
                   type="email"
                   required
                   className="mt-1 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
@@ -448,29 +483,35 @@ export default function ScalingCoursePage() {
               </div>
 
               <div>
-                <Label htmlFor="phone" className="text-sm font-medium text-gray-700">
+                <Label htmlFor="desktop-phone" className="text-sm font-medium text-gray-700">
                   Phone Number *
                 </Label>
                 <Input
-                  id="phone"
+                  id="desktop-phone"
+                  name="phone"
                   type="tel"
-                  required
                   className="mt-1 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                 />
               </div>
 
               <div>
-                <Label htmlFor="company" className="text-sm font-medium text-gray-700">
+                <Label htmlFor="desktop-company" className="text-sm font-medium text-gray-700">
                   Company Name
                 </Label>
                 <Input
-                  id="company"
+                  id="desktop-company"
+                  name="company"
                   type="text"
                   className="mt-1 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                 />
               </div>
 
               <div className="pt-4">
+                {submitMessage && (
+                  <p className={`text-sm mb-4 ${submitMessage.type === "success" ? "text-green-600" : "text-red-600"}`}>
+                    {submitMessage.text}
+                  </p>
+                )}
                 <p className="text-xs text-gray-500 leading-relaxed mb-6">
                   By providing your information today, you are giving consent for us or our partners, to contact you by
                   mail, phone, text, or email using automated technology to the data provided, even if the phone number
@@ -496,17 +537,16 @@ export default function ScalingCoursePage() {
 
                 <Button
                   type="submit"
+                  disabled={isSubmitting}
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all"
                 >
-                  Go to Step 2
+                  {isSubmitting ? "Submitting…" : "Go to Step 2"}
                 </Button>
               </div>
             </form>
           </div>
         </div>
       </div>
-
-
 
       {/* Footer */}
       <footer className="bg-slate-900 text-white py-12 px-4">
@@ -530,7 +570,7 @@ export default function ScalingCoursePage() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/courses/scaling" className="text-gray-400 hover:text-white transition-colors">
+                  <Link href="/courses/foundation" className="text-gray-400 hover:text-white transition-colors">
                     Courses
                   </Link>
                 </li>
@@ -585,10 +625,10 @@ export default function ScalingCoursePage() {
 
       {/* Schedule Popup */}
       <CalendlyWidget isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)} />
-      
+
       {/* Roadmap Modal */}
       <RoadmapModal isOpen={isRoadmapOpen} onClose={() => setIsRoadmapOpen(false)} />
-      
+
       {/* Do Not Sell Popup */}
       <DoNotSellPopup isOpen={isDoNotSellOpen} onClose={closeDoNotSell} />
     </div>

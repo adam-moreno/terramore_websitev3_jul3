@@ -15,9 +15,9 @@ Terramore.io offers consulting, marketing services, free courses, and free consu
 
 ## Courses
 
-- [Foundation Course – Leads](https://terramore.io/courses/leads): Foundation course for lead generation
-- [Make It Real – Offers](https://terramore.io/courses/offers): Offers and conversion
-- [Build to Grow – Scaling](https://terramore.io/courses/scaling): Scaling your business
+- [The Foundation](https://terramore.io/courses/foundation): Foundation course – from idea to income
+- [Make It Real](https://terramore.io/courses/make-it-real): Monetization and systems
+- [Build to Grow](https://terramore.io/courses/build-to-grow): Audience, brand, and legacy
 
 ## Optional
 

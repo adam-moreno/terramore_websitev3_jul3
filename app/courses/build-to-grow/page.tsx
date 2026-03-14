@@ -15,13 +15,63 @@ import { DoNotSellPopup } from "@/components/do-not-sell-popup"
 import { RoadmapModal } from "@/components/roadmap-modal"
 import { Logo } from "@/components/logo"
 
-export default function LeadsCoursePage() {
+/** Option B: course_type and signup_source match the new URL slug. */
+const COURSE_SLUG = "build-to-grow" as const
+
+export default function BuildToGrowCoursePage() {
   const { isPopupOpen, setIsPopupOpen } = useSchedulePopup()
   const { isOpen: isDoNotSellOpen, openPopup: openDoNotSell, closePopup: closeDoNotSell } = useDoNotSellPopup()
   const { isOpen: isRoadmapOpen, setIsOpen: setIsRoadmapOpen } = useRoadmapModal()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [selectedVideo, setSelectedVideo] = useState(0)
   const [isModulesOpen, setIsModulesOpen] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitMessage, setSubmitMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
+
+  const handleCourseSignup = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    const form = e.currentTarget
+    const fd = new FormData(form)
+    const firstName = (fd.get("firstName") as string)?.trim() ?? ""
+    const lastName = (fd.get("lastName") as string)?.trim() ?? ""
+    const email = (fd.get("email") as string)?.trim() ?? ""
+    const phone = (fd.get("phone") as string)?.trim() || null
+    const company = (fd.get("company") as string)?.trim() || null
+    if (!firstName || !lastName || !email) {
+      setSubmitMessage({ type: "error", text: "Please fill in required fields." })
+      return
+    }
+    setIsSubmitting(true)
+    setSubmitMessage(null)
+    try {
+      const res = await fetch("/api/course-signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firstName,
+          lastName,
+          email,
+          phone,
+          company,
+          courseType: COURSE_SLUG,
+          signupSource: COURSE_SLUG,
+        }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (res.ok) {
+        setSubmitMessage({ type: "success", text: "Thanks! You're signed up." })
+        form.reset()
+      } else if (res.status === 409) {
+        setSubmitMessage({ type: "error", text: "This email is already registered." })
+      } else {
+        setSubmitMessage({ type: "error", text: (data.error as string) || "Something went wrong. Please try again." })
+      }
+    } catch {
+      setSubmitMessage({ type: "error", text: "Something went wrong. Please try again." })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   const videos = [
     { title: "Branding That Actually Matters – You > Logo", duration: "18:34" },
@@ -72,18 +122,18 @@ export default function LeadsCoursePage() {
                 <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                   <div className="py-2">
                     <Link
-                      href="/courses/scaling"
+                      href="/courses/foundation"
                       className="block px-4 py-2 text-gray-800 hover:bg-blue-50 hover:text-blue-600"
                     >
                       The Foundation
                     </Link>
                     <Link
-                      href="/courses/offers"
+                      href="/courses/make-it-real"
                       className="block px-4 py-2 text-gray-800 hover:bg-blue-50 hover:text-blue-600"
                     >
                       Make It Real
                     </Link>
-                    <Link href="/courses/leads" className="block px-4 py-2 text-gray-800 bg-blue-50 text-blue-600">
+                    <Link href="/courses/build-to-grow" className="block px-4 py-2 text-gray-800 bg-blue-50 text-blue-600">
                       Build to Grow
                     </Link>
                   </div>
@@ -118,13 +168,13 @@ export default function LeadsCoursePage() {
               <div className="py-2">
                 <span className="text-blue-300">Courses</span>
                 <div className="ml-4 mt-2 space-y-2">
-                  <Link href="/courses/scaling" className="block text-white hover:text-blue-300 transition-colors">
+                  <Link href="/courses/foundation" className="block text-white hover:text-blue-300 transition-colors">
                     The Foundation
                   </Link>
-                  <Link href="/courses/offers" className="block text-white hover:text-blue-300 transition-colors">
+                  <Link href="/courses/make-it-real" className="block text-white hover:text-blue-300 transition-colors">
                     Make It Real
                   </Link>
-                  <Link href="/courses/leads" className="block text-white hover:text-blue-300 transition-colors">
+                  <Link href="/courses/build-to-grow" className="block text-white hover:text-blue-300 transition-colors">
                     Build to Grow
                   </Link>
                 </div>
@@ -144,7 +194,7 @@ export default function LeadsCoursePage() {
       <div className="lg:hidden">
         {/* Mobile Hero */}
         <div className="bg-white text-center py-6 px-6">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-2">Leads</h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-2">Build to Grow</h1>
           <div className="w-16 h-1 bg-blue-600 mx-auto mb-4"></div>
         </div>
 
@@ -221,13 +271,14 @@ export default function LeadsCoursePage() {
             </p>
           </div>
 
-          <form className="space-y-4">
+          <form className="space-y-4" onSubmit={handleCourseSignup}>
             <div>
-              <Label htmlFor="firstName" className="text-sm font-medium text-gray-700">
+              <Label htmlFor="mobile-firstName" className="text-sm font-medium text-gray-700">
                 First Name *
               </Label>
               <Input
-                id="firstName"
+                id="mobile-firstName"
+                name="firstName"
                 type="text"
                 required
                 className="mt-1 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
@@ -235,11 +286,12 @@ export default function LeadsCoursePage() {
             </div>
 
             <div>
-              <Label htmlFor="lastName" className="text-sm font-medium text-gray-700">
+              <Label htmlFor="mobile-lastName" className="text-sm font-medium text-gray-700">
                 Last Name *
               </Label>
               <Input
-                id="lastName"
+                id="mobile-lastName"
+                name="lastName"
                 type="text"
                 required
                 className="mt-1 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
@@ -247,11 +299,12 @@ export default function LeadsCoursePage() {
             </div>
 
             <div>
-              <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+              <Label htmlFor="mobile-email" className="text-sm font-medium text-gray-700">
                 Email *
               </Label>
               <Input
-                id="email"
+                id="mobile-email"
+                name="email"
                 type="email"
                 required
                 className="mt-1 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
@@ -259,29 +312,35 @@ export default function LeadsCoursePage() {
             </div>
 
             <div>
-              <Label htmlFor="phone" className="text-sm font-medium text-gray-700">
+              <Label htmlFor="mobile-phone" className="text-sm font-medium text-gray-700">
                 Phone Number *
               </Label>
               <Input
-                id="phone"
+                id="mobile-phone"
+                name="phone"
                 type="tel"
-                required
                 className="mt-1 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
               />
             </div>
 
             <div>
-              <Label htmlFor="company" className="text-sm font-medium text-gray-700">
+              <Label htmlFor="mobile-company" className="text-sm font-medium text-gray-700">
                 Company Name
               </Label>
               <Input
-                id="company"
+                id="mobile-company"
+                name="company"
                 type="text"
                 className="mt-1 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
               />
             </div>
 
             <div className="pt-4">
+              {submitMessage && (
+                <p className={`text-sm mb-4 ${submitMessage.type === "success" ? "text-green-600" : "text-red-600"}`}>
+                  {submitMessage.text}
+                </p>
+              )}
               <p className="text-xs text-gray-500 leading-relaxed mb-6">
                 By providing your information today, you are giving consent for us or our partners, to contact you by
                 mail, phone, text, or email using automated technology to the data provided, even if the phone number is
@@ -307,9 +366,10 @@ export default function LeadsCoursePage() {
 
               <Button
                 type="submit"
+                disabled={isSubmitting}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all"
               >
-                Go to Step 2
+                {isSubmitting ? "Submitting…" : "Go to Step 2"}
               </Button>
             </div>
           </form>
@@ -412,13 +472,14 @@ export default function LeadsCoursePage() {
               </p>
             </div>
 
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={handleCourseSignup}>
               <div>
-                <Label htmlFor="firstName" className="text-sm font-medium text-gray-700">
+                <Label htmlFor="desktop-firstName" className="text-sm font-medium text-gray-700">
                   First Name *
                 </Label>
                 <Input
-                  id="firstName"
+                  id="desktop-firstName"
+                  name="firstName"
                   type="text"
                   required
                   className="mt-1 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
@@ -426,11 +487,12 @@ export default function LeadsCoursePage() {
               </div>
 
               <div>
-                <Label htmlFor="lastName" className="text-sm font-medium text-gray-700">
+                <Label htmlFor="desktop-lastName" className="text-sm font-medium text-gray-700">
                   Last Name *
                 </Label>
                 <Input
-                  id="lastName"
+                  id="desktop-lastName"
+                  name="lastName"
                   type="text"
                   required
                   className="mt-1 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
@@ -438,11 +500,12 @@ export default function LeadsCoursePage() {
               </div>
 
               <div>
-                <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+                <Label htmlFor="desktop-email" className="text-sm font-medium text-gray-700">
                   Email *
                 </Label>
                 <Input
-                  id="email"
+                  id="desktop-email"
+                  name="email"
                   type="email"
                   required
                   className="mt-1 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
@@ -450,29 +513,35 @@ export default function LeadsCoursePage() {
               </div>
 
               <div>
-                <Label htmlFor="phone" className="text-sm font-medium text-gray-700">
+                <Label htmlFor="desktop-phone" className="text-sm font-medium text-gray-700">
                   Phone Number *
                 </Label>
                 <Input
-                  id="phone"
+                  id="desktop-phone"
+                  name="phone"
                   type="tel"
-                  required
                   className="mt-1 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                 />
               </div>
 
               <div>
-                <Label htmlFor="company" className="text-sm font-medium text-gray-700">
+                <Label htmlFor="desktop-company" className="text-sm font-medium text-gray-700">
                   Company Name
                 </Label>
                 <Input
-                  id="company"
+                  id="desktop-company"
+                  name="company"
                   type="text"
                   className="mt-1 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                 />
               </div>
 
               <div className="pt-4">
+                {submitMessage && (
+                  <p className={`text-sm mb-4 ${submitMessage.type === "success" ? "text-green-600" : "text-red-600"}`}>
+                    {submitMessage.text}
+                  </p>
+                )}
                 <p className="text-xs text-gray-500 leading-relaxed mb-6">
                   By providing your information today, you are giving consent for us or our partners, to contact you by
                   mail, phone, text, or email using automated technology to the data provided, even if the phone number
@@ -498,9 +567,10 @@ export default function LeadsCoursePage() {
 
                 <Button
                   type="submit"
+                  disabled={isSubmitting}
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all"
                 >
-                  Go to Step 2
+                  {isSubmitting ? "Submitting…" : "Go to Step 2"}
                 </Button>
               </div>
             </form>
@@ -532,7 +602,7 @@ export default function LeadsCoursePage() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/courses/leads" className="text-gray-400 hover:text-white transition-colors">
+                  <Link href="/courses/build-to-grow" className="text-gray-400 hover:text-white transition-colors">
                     Courses
                   </Link>
                 </li>

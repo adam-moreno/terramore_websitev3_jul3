@@ -18,9 +18,9 @@
 | 4 | Partner (Contact) | `/partner` | Yes |
 | 5 | Resources (Case Studies) | `/resources` | Yes |
 | 6 | Workshops (Book consultation) | `/workshops` | Yes |
-| 7 | Courses – Leads (Foundation) | `/courses/leads` | Yes |
-| 8 | Courses – Offers (Make It Real) | `/courses/offers` | Yes |
-| 9 | Courses – Scaling (Build to Grow) | `/courses/scaling` | Yes |
+| 7 | Courses – The Foundation | `/courses/foundation` | Yes |
+| 8 | Courses – Make It Real | `/courses/make-it-real` | Yes |
+| 9 | Courses – Build to Grow | `/courses/build-to-grow` | Yes |
 | 10 | Privacy | `/privacy` | Yes |
 | 11 | Terms | `/terms` | Yes |
 | 12 | Careers | `/careers` | Yes |

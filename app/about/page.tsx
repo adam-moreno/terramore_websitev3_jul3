@@ -73,19 +73,19 @@ export default function AboutPage() {
                 <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                   <div className="py-2">
                     <Link
-                      href="/courses/scaling"
+                      href="/courses/foundation"
                       className="block px-4 py-2 text-gray-800 hover:bg-blue-50 hover:text-blue-600"
                     >
                       Scaling
                     </Link>
                     <Link
-                      href="/courses/offers"
+                      href="/courses/make-it-real"
                       className="block px-4 py-2 text-gray-800 hover:bg-blue-50 hover:text-blue-600"
                     >
                       Offers
                     </Link>
                     <Link
-                      href="/courses/leads"
+                      href="/courses/build-to-grow"
                       className="block px-4 py-2 text-gray-800 hover:bg-blue-50 hover:text-blue-600"
                     >
                       Leads
@@ -128,13 +128,13 @@ export default function AboutPage() {
                   <ChevronDown className="w-4 h-4" />
                 </div>
                 <div className="pl-4 mt-1 space-y-2">
-                  <Link href="/courses/scaling" className="block text-gray-300 hover:text-blue-300">
+                  <Link href="/courses/foundation" className="block text-gray-300 hover:text-blue-300">
                     Scaling
                   </Link>
-                  <Link href="/courses/offers" className="block text-gray-300 hover:text-blue-300">
+                  <Link href="/courses/make-it-real" className="block text-gray-300 hover:text-blue-300">
                     Offers
                   </Link>
-                  <Link href="/courses/leads" className="block text-gray-300 hover:text-blue-300">
+                  <Link href="/courses/build-to-grow" className="block text-gray-300 hover:text-blue-300">
                     Leads
                   </Link>
                 </div>
@@ -334,7 +334,7 @@ export default function AboutPage() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/courses/scaling" className="text-gray-400 hover:text-white transition-colors">
+                  <Link href="/courses/foundation" className="text-gray-400 hover:text-white transition-colors">
                     Courses
                   </Link>
                 </li>
