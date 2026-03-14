@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -19,19 +19,69 @@ const R2_BASE = "https://pub-ebfd3500fb2e4d449346ae4c5c507e84.r2.dev"
 /** Option B: course_type and signup_source match the new URL slug for dashboard consistency. */
 const COURSE_SLUG = "foundation" as const
 
+const COURSE_NAME = "The Foundation – From Idea to Income"
+
 const modules = [
-  { title: "Module 0 — Introduction", src: `${R2_BASE}/Foundations_Portrait_Mar1426_Module0.mov` },
-  { title: "Module 1", src: `${R2_BASE}/Foundations_Portrait_Mar1426_Module1.mov` },
-  { title: "Module 2", src: `${R2_BASE}/Foundations_Portrait_Mar1426_Module2.mov` },
-  { title: "Module 3", src: `${R2_BASE}/Foundations_Portrait_Mar1426_Module3.mov` },
-  { title: "Module 4", src: `${R2_BASE}/Foundations_Portrait_Mar1426_Module4.mov` },
-  { title: "Module 5", src: `${R2_BASE}/Foundations_Portrait_Mar1426_Module5.mov` },
-  { title: "Module 6", src: `${R2_BASE}/Foundations_Portrait_Mar1426_Module6.mov` },
-  { title: "Module 7", src: `${R2_BASE}/Foundations_Portrait_Mar1426_Module7.mov` },
-  { title: "Module 8", src: `${R2_BASE}/Foundations_Portrait_Mar1426_Module8.mov` },
-  { title: "Module 9", src: `${R2_BASE}/Foundations_Portrait_Mar1426_Module9.mov` },
-  { title: "Module 10", src: `${R2_BASE}/Foundations_Portrait_Mar1426_Module10.mov` },
-  { title: "Bonus", src: `${R2_BASE}/Foundations_Portrait_Mar1426_Bonus.mov` },
+  {
+    title: "Module 0 — Introduction",
+    description: "Welcome to The Foundation course. This video will guide you through the entire course structure and help you understand how to make your first dollar online. We'll cover the mindset, tools, and strategies you need to go from idea to income.",
+    src: `${R2_BASE}/Foundations_Portrait_Mar1426_Module0.mov`,
+  },
+  {
+    title: "Module 1",
+    description: "Develop the right entrepreneurial mindset to overcome analysis paralysis and take action. Learn how successful entrepreneurs think differently and how to build confidence in your business decisions.",
+    src: `${R2_BASE}/Foundations_Portrait_Mar1426_Module1.mov`,
+  },
+  {
+    title: "Module 2",
+    description: "Discover how to identify profitable niches by solving real problems. We'll show you research techniques to validate your ideas and find markets with genuine demand.",
+    src: `${R2_BASE}/Foundations_Portrait_Mar1426_Module2.mov`,
+  },
+  {
+    title: "Module 3",
+    description: "Learn the fundamentals of creating valuable offers that customers actually want to buy. Focus on value creation over product features to build compelling propositions.",
+    src: `${R2_BASE}/Foundations_Portrait_Mar1426_Module3.mov`,
+  },
+  {
+    title: "Module 4",
+    description: "Master the art of launching without perfection using MVPs and simple service models. Get to market quickly and iterate based on real customer feedback.",
+    src: `${R2_BASE}/Foundations_Portrait_Mar1426_Module4.mov`,
+  },
+  {
+    title: "Module 5",
+    description: "Proven strategies for acquiring your first clients through warm outreach and local networking. Build relationships that convert into paying customers.",
+    src: `${R2_BASE}/Foundations_Portrait_Mar1426_Module5.mov`,
+  },
+  {
+    title: "Module 6",
+    description: "Compare different platforms and tools to find the ones that will make you profitable fastest. Focus on revenue-generating activities from day one.",
+    src: `${R2_BASE}/Foundations_Portrait_Mar1426_Module6.mov`,
+  },
+  {
+    title: "Module 7",
+    description: "Learn pricing psychology and strategies for new businesses. Price confidently even when you're just starting out and don't have extensive experience.",
+    src: `${R2_BASE}/Foundations_Portrait_Mar1426_Module7.mov`,
+  },
+  {
+    title: "Module 8",
+    description: "Deliver exceptional results to your first clients even if you're new to the industry. Build systems for consistent quality and customer satisfaction.",
+    src: `${R2_BASE}/Foundations_Portrait_Mar1426_Module8.mov`,
+  },
+  {
+    title: "Module 9",
+    description: "Set up tracking systems and feedback loops to measure progress and continuously improve your business operations and customer experience.",
+    src: `${R2_BASE}/Foundations_Portrait_Mar1426_Module9.mov`,
+  },
+  {
+    title: "Module 10",
+    description: "Bring it all together with a clear path from where you are now to your first consistent revenue. Plan your next steps with confidence.",
+    src: `${R2_BASE}/Foundations_Portrait_Mar1426_Module10.mov`,
+  },
+  {
+    title: "Bonus",
+    description: "A complete real-world breakdown of how to make $1,000 in 7 days starting from scratch. Step-by-step scenario with actual tactics and timelines.",
+    src: `${R2_BASE}/Foundations_Portrait_Mar1426_Bonus.mov`,
+  },
 ]
 
 export default function FoundationCoursePage() {
@@ -43,6 +93,26 @@ export default function FoundationCoursePage() {
   const [isModulesOpen, setIsModulesOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitMessage, setSubmitMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
+  const [videoLoading, setVideoLoading] = useState(true)
+  const [videoError, setVideoError] = useState<string | null>(null)
+
+  const handleSelectModule = useCallback((index: number) => {
+    setSelectedVideo(index)
+    setVideoLoading(true)
+    setVideoError(null)
+  }, [])
+
+  const handleVideoReady = useCallback((e: React.SyntheticEvent<HTMLVideoElement>) => {
+    setVideoLoading(false)
+    setVideoError(null)
+    const video = e.currentTarget
+    video.play().catch(() => {})
+  }, [])
+
+  const handleVideoError = useCallback(() => {
+    setVideoLoading(false)
+    setVideoError("This video couldn’t be loaded. Try another module or check your connection.")
+  }, [])
 
   const handleCourseSignup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -192,8 +262,9 @@ export default function FoundationCoursePage() {
       <div className="lg:hidden">
         {/* Mobile Hero */}
         <div className="bg-white text-center py-6 px-6">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-2">Foundation</h1>
-          <div className="w-16 h-1 bg-blue-600 mx-auto mb-4"></div>
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-2">The Foundation</h1>
+          <p className="text-gray-600 text-sm md:text-base">From Idea to Income</p>
+          <div className="w-16 h-1 bg-blue-600 mx-auto mb-4 mt-2"></div>
         </div>
 
         {/* Course Modules Accordion */}
@@ -215,7 +286,7 @@ export default function FoundationCoursePage() {
                     className={`p-3 rounded-lg cursor-pointer transition-colors ${
                       selectedVideo === index ? "bg-blue-600" : "bg-slate-800 hover:bg-slate-700"
                     }`}
-                    onClick={() => setSelectedVideo(index)}
+                    onClick={() => handleSelectModule(index)}
                   >
                     <div className="flex items-start space-x-3">
                       <div className="flex-shrink-0 mt-1">
@@ -223,6 +294,7 @@ export default function FoundationCoursePage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <h4 className="text-sm font-medium text-white">{module.title}</h4>
+                        <p className="text-xs text-gray-300 mt-1 line-clamp-2">{module.description}</p>
                       </div>
                     </div>
                   </div>
@@ -234,16 +306,33 @@ export default function FoundationCoursePage() {
 
         {/* Video Player */}
         <div className="p-6">
-          <div className="aspect-video bg-gray-900 rounded-lg overflow-hidden shadow-lg mb-6">
+          <div className="relative aspect-video bg-slate-800 rounded-lg overflow-hidden shadow-lg mb-6">
             <video
               key={modules[selectedVideo].src}
               src={modules[selectedVideo].src}
               controls
-              className="w-full h-full object-contain"
+              preload="auto"
               playsInline
+              className="w-full h-full object-contain"
+              onLoadedData={handleVideoReady}
+              onCanPlay={handleVideoReady}
+              onError={handleVideoError}
             />
+            {videoLoading && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-800 text-white p-6">
+                <div className="w-10 h-10 border-2 border-white/30 border-t-white rounded-full animate-spin mb-4" />
+                <p className="text-sm font-medium">{modules[selectedVideo].title}</p>
+                <p className="text-xs text-gray-400 mt-1">Loading video…</p>
+              </div>
+            )}
+            {videoError && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-800 text-white p-6">
+                <p className="text-sm text-center text-gray-300">{videoError}</p>
+              </div>
+            )}
           </div>
-          <p className="text-sm text-gray-600 mt-2">{modules[selectedVideo].title}</p>
+          <h2 className="text-lg font-semibold text-gray-900 mt-2">{modules[selectedVideo].title}</h2>
+          <p className="text-sm text-gray-600 mt-2">{modules[selectedVideo].description}</p>
         </div>
 
         {/* CTA Buttons */}
@@ -377,7 +466,7 @@ export default function FoundationCoursePage() {
         {/* Left Sidebar */}
         <div className="w-80 bg-gray-50 p-6 border-r border-gray-200 overflow-y-auto h-screen sticky top-0">
           <div className="mb-8">
-            <h2 className="text-lg font-bold text-gray-900 mb-2">🚀 The Foundation – From Idea to Income</h2>
+            <h2 className="text-lg font-bold text-gray-900 mb-2">🚀 {COURSE_NAME}</h2>
             <p className="text-sm text-gray-600">
               Transform your business idea into your first profitable dollar online with proven strategies and
               actionable steps for solopreneurs.
@@ -393,7 +482,7 @@ export default function FoundationCoursePage() {
                   className={`p-3 rounded-lg cursor-pointer transition-colors ${
                     selectedVideo === index ? "bg-blue-100 border-l-4 border-blue-600" : "hover:bg-gray-100"
                   }`}
-                  onClick={() => setSelectedVideo(index)}
+                  onClick={() => handleSelectModule(index)}
                 >
                   <div className="flex items-start space-x-3">
                     <div className="flex-shrink-0 mt-1">
@@ -405,6 +494,7 @@ export default function FoundationCoursePage() {
                       >
                         {module.title}
                       </h4>
+                      <p className="text-xs text-gray-500 mt-1 line-clamp-2">{module.description}</p>
                     </div>
                   </div>
                 </div>
@@ -418,16 +508,33 @@ export default function FoundationCoursePage() {
           {/* Video Section */}
           <div className="flex-1 p-8">
             <div className="mb-8">
-              <div className="aspect-video bg-gray-900 rounded-lg overflow-hidden shadow-lg">
+              <div className="relative aspect-video bg-slate-800 rounded-lg overflow-hidden shadow-lg">
                 <video
                   key={modules[selectedVideo].src}
                   src={modules[selectedVideo].src}
                   controls
-                  className="w-full h-full object-contain"
+                  preload="auto"
                   playsInline
+                  className="w-full h-full object-contain"
+                  onLoadedData={handleVideoReady}
+                  onCanPlay={handleVideoReady}
+                  onError={handleVideoError}
                 />
+                {videoLoading && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-800 text-white p-6">
+                    <div className="w-10 h-10 border-2 border-white/30 border-t-white rounded-full animate-spin mb-4" />
+                    <p className="text-sm font-medium">{modules[selectedVideo].title}</p>
+                    <p className="text-xs text-gray-400 mt-1">Loading video…</p>
+                  </div>
+                )}
+                {videoError && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-800 text-white p-6">
+                    <p className="text-sm text-center text-gray-300">{videoError}</p>
+                  </div>
+                )}
               </div>
               <h1 className="text-xl font-bold text-gray-900 mt-4">{modules[selectedVideo].title}</h1>
+              <p className="text-gray-600 leading-relaxed mt-2">{modules[selectedVideo].description}</p>
             </div>
           </div>
 
