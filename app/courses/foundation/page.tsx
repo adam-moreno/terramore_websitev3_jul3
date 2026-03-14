@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -25,61 +25,85 @@ const modules = [
   {
     title: "Module 0 — Introduction",
     description: "Welcome to The Foundation course. This video will guide you through the entire course structure and help you understand how to make your first dollar online. We'll cover the mindset, tools, and strategies you need to go from idea to income.",
+    whoBenefits: ["Brand-new entrepreneurs", "People with an idea but no revenue yet", "Anyone feeling stuck in analysis paralysis"],
+    whatYouLearn: ["How the course is structured", "What it takes to go from idea to first dollar", "Mindset and tools you’ll need"],
     src: `${R2_BASE}/Foundations_Portrait_Mar1426_Module0.mov`,
   },
   {
     title: "Module 1",
     description: "Develop the right entrepreneurial mindset to overcome analysis paralysis and take action. Learn how successful entrepreneurs think differently and how to build confidence in your business decisions.",
+    whoBenefits: ["Overthinkers who delay launching", "First-time founders", "People who need more confidence to act"],
+    whatYouLearn: ["How successful entrepreneurs think", "Ways to overcome analysis paralysis", "How to build confidence in your decisions"],
     src: `${R2_BASE}/Foundations_Portrait_Mar1426_Module1.mov`,
   },
   {
     title: "Module 2",
     description: "Discover how to identify profitable niches by solving real problems. We'll show you research techniques to validate your ideas and find markets with genuine demand.",
+    whoBenefits: ["People unsure which niche to pick", "Anyone with multiple ideas", "Founders who want to validate before building"],
+    whatYouLearn: ["How to find profitable niches", "Research techniques to validate ideas", "How to spot real demand"],
     src: `${R2_BASE}/Foundations_Portrait_Mar1426_Module2.mov`,
   },
   {
     title: "Module 3",
     description: "Learn the fundamentals of creating valuable offers that customers actually want to buy. Focus on value creation over product features to build compelling propositions.",
+    whoBenefits: ["People with a product but no sales", "Service providers who undersell", "Anyone who struggles to explain their value"],
+    whatYouLearn: ["How to create offers people want to buy", "Value creation vs. product features", "How to build a compelling proposition"],
     src: `${R2_BASE}/Foundations_Portrait_Mar1426_Module3.mov`,
   },
   {
     title: "Module 4",
     description: "Master the art of launching without perfection using MVPs and simple service models. Get to market quickly and iterate based on real customer feedback.",
+    whoBenefits: ["Perfectionists who never launch", "People waiting for the “right” moment", "Solo founders who want to move fast"],
+    whatYouLearn: ["What an MVP is and why it matters", "Simple service models to start with", "How to iterate from real feedback"],
     src: `${R2_BASE}/Foundations_Portrait_Mar1426_Module4.mov`,
   },
   {
     title: "Module 5",
     description: "Proven strategies for acquiring your first clients through warm outreach and local networking. Build relationships that convert into paying customers.",
+    whoBenefits: ["People with no clients yet", "Introverts who dislike cold outreach", "Local or service-based businesses"],
+    whatYouLearn: ["Warm outreach that works", "How to use local networks", "Turning relationships into paying clients"],
     src: `${R2_BASE}/Foundations_Portrait_Mar1426_Module5.mov`,
   },
   {
     title: "Module 6",
     description: "Compare different platforms and tools to find the ones that will make you profitable fastest. Focus on revenue-generating activities from day one.",
+    whoBenefits: ["People overwhelmed by tool choices", "Solo founders on a budget", "Anyone who wants to focus on what makes money"],
+    whatYouLearn: ["Which platforms and tools matter most", "How to prioritize revenue-generating work", "Where to invest time and money first"],
     src: `${R2_BASE}/Foundations_Portrait_Mar1426_Module6.mov`,
   },
   {
     title: "Module 7",
     description: "Learn pricing psychology and strategies for new businesses. Price confidently even when you're just starting out and don't have extensive experience.",
+    whoBenefits: ["People who underprice their work", "New service providers", "Anyone afraid to raise prices"],
+    whatYouLearn: ["Pricing psychology that works", "How to price as a newcomer", "Ways to price with confidence"],
     src: `${R2_BASE}/Foundations_Portrait_Mar1426_Module7.mov`,
   },
   {
     title: "Module 8",
     description: "Deliver exceptional results to your first clients even if you're new to the industry. Build systems for consistent quality and customer satisfaction.",
+    whoBenefits: ["First-time service providers", "People who worry they’re not “ready”", "Anyone who wants repeat clients"],
+    whatYouLearn: ["How to deliver great results when you’re new", "Simple systems for quality and consistency", "How to keep clients satisfied"],
     src: `${R2_BASE}/Foundations_Portrait_Mar1426_Module8.mov`,
   },
   {
     title: "Module 9",
     description: "Set up tracking systems and feedback loops to measure progress and continuously improve your business operations and customer experience.",
+    whoBenefits: ["People who fly by the seat of their pants", "Founders who want to scale", "Anyone who wants to improve over time"],
+    whatYouLearn: ["What to track and why", "How to build feedback loops", "Ways to improve operations and experience"],
     src: `${R2_BASE}/Foundations_Portrait_Mar1426_Module9.mov`,
   },
   {
     title: "Module 10",
     description: "Bring it all together with a clear path from where you are now to your first consistent revenue. Plan your next steps with confidence.",
+    whoBenefits: ["People who’ve watched all modules but need a plan", "Anyone close to first revenue", "Founders who want a clear next step"],
+    whatYouLearn: ["How to tie everything together", "A clear path to first consistent revenue", "How to plan your next steps"],
     src: `${R2_BASE}/Foundations_Portrait_Mar1426_Module10.mov`,
   },
   {
     title: "Bonus",
     description: "A complete real-world breakdown of how to make $1,000 in 7 days starting from scratch. Step-by-step scenario with actual tactics and timelines.",
+    whoBenefits: ["Anyone who wants a concrete 7-day challenge", "People who learn best by example", "Founders who want a fast proof of concept"],
+    whatYouLearn: ["A real-world $1K-in-7-days scenario", "Exact tactics and timelines", "How to adapt the plan to your situation"],
     src: `${R2_BASE}/Foundations_Portrait_Mar1426_Bonus.mov`,
   },
 ]
@@ -95,8 +119,12 @@ export default function FoundationCoursePage() {
   const [submitMessage, setSubmitMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
   const [videoLoading, setVideoLoading] = useState(true)
   const [videoError, setVideoError] = useState<string | null>(null)
+  const mobileVideoRef = useRef<HTMLVideoElement>(null)
+  const desktopVideoRef = useRef<HTMLVideoElement>(null)
 
   const handleSelectModule = useCallback((index: number) => {
+    mobileVideoRef.current?.pause()
+    desktopVideoRef.current?.pause()
     setSelectedVideo(index)
     setVideoLoading(true)
     setVideoError(null)
@@ -105,8 +133,11 @@ export default function FoundationCoursePage() {
   const handleVideoReady = useCallback((e: React.SyntheticEvent<HTMLVideoElement>) => {
     setVideoLoading(false)
     setVideoError(null)
-    const video = e.currentTarget
-    video.play().catch(() => {})
+    mobileVideoRef.current?.pause()
+    desktopVideoRef.current?.pause()
+    const isDesktop = typeof window !== "undefined" && window.innerWidth >= 1024
+    const toPlay = isDesktop ? desktopVideoRef.current : mobileVideoRef.current
+    if (toPlay) toPlay.play().catch(() => {})
   }, [])
 
   const handleVideoError = useCallback(() => {
@@ -308,6 +339,7 @@ export default function FoundationCoursePage() {
         <div className="p-6">
           <div className="relative aspect-video bg-slate-800 rounded-lg overflow-hidden shadow-lg mb-6">
             <video
+              ref={mobileVideoRef}
               key={modules[selectedVideo].src}
               src={modules[selectedVideo].src}
               controls
@@ -333,6 +365,24 @@ export default function FoundationCoursePage() {
           </div>
           <h2 className="text-lg font-semibold text-gray-900 mt-2">{modules[selectedVideo].title}</h2>
           <p className="text-sm text-gray-600 mt-2">{modules[selectedVideo].description}</p>
+          <div className="mt-4 space-y-4">
+            <div>
+              <h3 className="text-sm font-semibold text-gray-900 mb-1">Who benefits from this module</h3>
+              <ul className="list-disc list-inside text-sm text-gray-600 space-y-0.5">
+                {modules[selectedVideo].whoBenefits.map((item, i) => (
+                  <li key={i}>{item}</li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-gray-900 mb-1">What you&apos;ll learn</h3>
+              <ul className="list-disc list-inside text-sm text-gray-600 space-y-0.5">
+                {modules[selectedVideo].whatYouLearn.map((item, i) => (
+                  <li key={i}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </div>
 
         {/* CTA Buttons */}
@@ -510,6 +560,7 @@ export default function FoundationCoursePage() {
             <div className="mb-8">
               <div className="relative aspect-video bg-slate-800 rounded-lg overflow-hidden shadow-lg">
                 <video
+                  ref={desktopVideoRef}
                   key={modules[selectedVideo].src}
                   src={modules[selectedVideo].src}
                   controls
@@ -535,6 +586,24 @@ export default function FoundationCoursePage() {
               </div>
               <h1 className="text-xl font-bold text-gray-900 mt-4">{modules[selectedVideo].title}</h1>
               <p className="text-gray-600 leading-relaxed mt-2">{modules[selectedVideo].description}</p>
+              <div className="mt-4 space-y-4">
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-900 mb-1">Who benefits from this module</h3>
+                  <ul className="list-disc list-inside text-gray-600 space-y-0.5">
+                    {modules[selectedVideo].whoBenefits.map((item, i) => (
+                      <li key={i}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-900 mb-1">What you&apos;ll learn</h3>
+                  <ul className="list-disc list-inside text-gray-600 space-y-0.5">
+                    {modules[selectedVideo].whatYouLearn.map((item, i) => (
+                      <li key={i}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
             </div>
           </div>
 
