@@ -183,8 +183,9 @@ export default function FoundationCoursePage() {
   // For even faster load: ensure R2 (or CDN) supports Range requests; consider H.264 MP4 for broader support.
   const nextModuleSrc = selectedVideo < modules.length - 1 ? modules[selectedVideo + 1].src : null
   const prevModuleSrc = selectedVideo > 0 ? modules[selectedVideo - 1].src : null
+  // Use same-origin proxy so the track loads without CORS (CC button appears reliably).
   const captionsVttSrc = modules[selectedVideo].src.toLowerCase().endsWith(".mov")
-    ? modules[selectedVideo].src.replace(/\.mov$/i, ".vtt")
+    ? `/api/captions/${modules[selectedVideo].src.replace(/\.mov$/i, ".vtt").split("/").pop()}`
     : null
 
   const handleCourseSignup = async (e: React.FormEvent<HTMLFormElement>) => {
