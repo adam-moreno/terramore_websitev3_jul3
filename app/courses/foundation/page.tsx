@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useRef } from "react"
+import { useState, useCallback, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -119,6 +119,9 @@ export default function FoundationCoursePage() {
   const [submitMessage, setSubmitMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
   const [videoLoading, setVideoLoading] = useState(true)
   const [videoError, setVideoError] = useState<string | null>(null)
+  const [loadingHelperText, setLoadingHelperText] = useState("Loading your free training… we cache aggressively so the next module starts faster.")
+  const [showSignupPrompt, setShowSignupPrompt] = useState(false)
+  const loadingTimeoutsRef = useRef<Array<ReturnType<typeof setTimeout>>>([])
   const mobileVideoRef = useRef<HTMLVideoElement>(null)
   const desktopVideoRef = useRef<HTMLVideoElement>(null)
 
@@ -144,6 +147,37 @@ export default function FoundationCoursePage() {
     setVideoLoading(false)
     setVideoError("This video couldn’t be loaded. .mov works best in Safari; try another browser or check your connection.")
   }, [])
+
+  // While the first chunks buffer, show an explanation + a cheeky CTA.
+  useEffect(() => {
+    loadingTimeoutsRef.current.forEach(clearTimeout)
+    loadingTimeoutsRef.current = []
+
+    if (!videoLoading) {
+      setLoadingHelperText("Loading your free training… we cache aggressively so the next module starts faster.")
+      setShowSignupPrompt(false)
+      return
+    }
+
+    setLoadingHelperText("Loading your free training… we cache aggressively so the next module starts faster.")
+    setShowSignupPrompt(false)
+
+    const t1 = setTimeout(() => {
+      setLoadingHelperText("Quick buffer… we’re pulling the first chunks so playback can start smoothly (without downloading the whole file).")
+    }, 600)
+
+    const t2 = setTimeout(() => {
+      setLoadingHelperText("While it loads: grab your free course pack + resources below.")
+      setShowSignupPrompt(true)
+    }, 1200)
+
+    loadingTimeoutsRef.current = [t1, t2]
+
+    return () => {
+      loadingTimeoutsRef.current.forEach(clearTimeout)
+      loadingTimeoutsRef.current = []
+    }
+  }, [videoLoading, selectedVideo])
 
   // Preload next/prev module URLs so when user switches, browser may use cache (faster than ~1min re-buffer).
   // For even faster load: ensure R2 (or CDN) supports Range requests; consider H.264 MP4 for broader support.
@@ -198,6 +232,12 @@ export default function FoundationCoursePage() {
   const handleFooterNavigation = (href: string) => {
     window.location.href = href
   }
+
+  const scrollToSignupForm = useCallback(() => {
+    const isDesktop = typeof window !== "undefined" && window.innerWidth >= 1024
+    const id = isDesktop ? "course-signup-form-desktop" : "course-signup-form-mobile"
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" })
+  }, [])
 
   return (
     <div className="min-h-screen bg-white">
@@ -367,7 +407,16 @@ export default function FoundationCoursePage() {
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-800 text-white p-6">
                 <div className="w-10 h-10 border-2 border-white/30 border-t-white rounded-full animate-spin mb-4" />
                 <p className="text-sm font-medium">{modules[selectedVideo].title}</p>
-                <p className="text-xs text-gray-400 mt-1">Loading video…</p>
+                <p className="text-xs text-gray-400 mt-1 text-center">{loadingHelperText}</p>
+                {showSignupPrompt && (
+                  <button
+                    type="button"
+                    onClick={scrollToSignupForm}
+                    className="mt-4 w-full bg-white/10 hover:bg-white/15 text-white text-sm font-semibold py-2 px-4 rounded-lg transition-colors"
+                  >
+                    Get the free pack while it buffers
+                  </button>
+                )}
               </div>
             )}
             {videoError && (
@@ -409,7 +458,7 @@ export default function FoundationCoursePage() {
         </div>
 
         {/* Mobile Form */}
-        <div className="px-6 pb-8">
+        <div id="course-signup-form-mobile" className="px-6 pb-8">
           <div className="bg-blue-600 text-white p-6 rounded-lg mb-6">
             <h2 className="text-xl font-bold mb-2">
               <span className="font-black">Get Custom Content & Direct Access</span>
@@ -588,7 +637,16 @@ export default function FoundationCoursePage() {
                   <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-800 text-white p-6">
                     <div className="w-10 h-10 border-2 border-white/30 border-t-white rounded-full animate-spin mb-4" />
                     <p className="text-sm font-medium">{modules[selectedVideo].title}</p>
-                    <p className="text-xs text-gray-400 mt-1">Loading video…</p>
+                    <p className="text-xs text-gray-400 mt-1 text-center">{loadingHelperText}</p>
+                    {showSignupPrompt && (
+                      <button
+                        type="button"
+                        onClick={scrollToSignupForm}
+                        className="mt-4 w-full bg-white/10 hover:bg-white/15 text-white text-sm font-semibold py-2 px-4 rounded-lg transition-colors"
+                      >
+                        Get the free pack while it buffers
+                      </button>
+                    )}
                   </div>
                 )}
                 {videoError && (
@@ -621,7 +679,7 @@ export default function FoundationCoursePage() {
           </div>
 
           {/* Right Form Section */}
-          <div className="w-96 bg-white p-8 border-l border-gray-200">
+          <div id="course-signup-form-desktop" className="w-96 bg-white p-8 border-l border-gray-200">
             <div className="mb-6">
               <h2 className="text-xl font-bold text-gray-900 mb-2">
                 <span className="font-black">Get Custom Content & Direct Access</span>
