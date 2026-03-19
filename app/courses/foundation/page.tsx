@@ -183,6 +183,9 @@ export default function FoundationCoursePage() {
   // For even faster load: ensure R2 (or CDN) supports Range requests; consider H.264 MP4 for broader support.
   const nextModuleSrc = selectedVideo < modules.length - 1 ? modules[selectedVideo + 1].src : null
   const prevModuleSrc = selectedVideo > 0 ? modules[selectedVideo - 1].src : null
+  const captionsVttSrc = modules[selectedVideo].src.toLowerCase().endsWith(".mov")
+    ? modules[selectedVideo].src.replace(/\.mov$/i, ".vtt")
+    : null
 
   const handleCourseSignup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -402,7 +405,11 @@ export default function FoundationCoursePage() {
               onLoadedData={handleVideoReady}
               onCanPlay={handleVideoReady}
               onError={handleVideoError}
-            />
+            >
+              {captionsVttSrc && (
+                <track kind="captions" srcLang="en" label="English" src={captionsVttSrc} default />
+              )}
+            </video>
             {videoLoading && (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-800 text-white p-6">
                 <div className="w-10 h-10 border-2 border-white/30 border-t-white rounded-full animate-spin mb-4" />
@@ -632,7 +639,11 @@ export default function FoundationCoursePage() {
                   onLoadedData={handleVideoReady}
                   onCanPlay={handleVideoReady}
                   onError={handleVideoError}
-                />
+                >
+                  {captionsVttSrc && (
+                    <track kind="captions" srcLang="en" label="English" src={captionsVttSrc} default />
+                  )}
+                </video>
                 {videoLoading && (
                   <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-800 text-white p-6">
                     <div className="w-10 h-10 border-2 border-white/30 border-t-white rounded-full animate-spin mb-4" />
