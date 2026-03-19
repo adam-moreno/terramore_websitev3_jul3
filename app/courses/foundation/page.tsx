@@ -14,7 +14,7 @@ import { DoNotSellPopup } from "@/components/do-not-sell-popup"
 import { RoadmapModal } from "@/components/roadmap-modal"
 import { Logo } from "@/components/logo"
 
-const R2_BASE = "https://pub-ebfd3500fb2e4d449346ae4c5c507e84.r2.dev"
+const R2_BASE = "https://videos.terramore.io"
 
 /** Option B: course_type and signup_source match the new URL slug for dashboard consistency. */
 const COURSE_SLUG = "foundation" as const
