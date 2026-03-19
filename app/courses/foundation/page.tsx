@@ -238,9 +238,17 @@ export default function FoundationCoursePage() {
   }
 
   const scrollToSignupForm = useCallback(() => {
-    const isDesktop = typeof window !== "undefined" && window.innerWidth >= 1024
-    const id = isDesktop ? "course-signup-form-desktop" : "course-signup-form-mobile"
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" })
+    if (typeof window === "undefined") return
+    const isDesktop = window.innerWidth >= 1024
+    const formId = isDesktop ? "course-signup-form-desktop" : "course-signup-form-mobile"
+    const firstInputId = isDesktop ? "desktop-firstName" : "mobile-firstName"
+    const formEl = document.getElementById(formId)
+    const focusEl = document.getElementById(firstInputId) as HTMLInputElement | null
+    // Put the cursor live in the First Name box immediately.
+    focusEl?.focus()
+    formEl?.scrollIntoView({ behavior: "smooth", block: "start" })
+    // Mobile browsers can drop focus during smooth scroll; refocus shortly after.
+    window.setTimeout(() => focusEl?.focus(), 250)
   }, [])
 
   return (
@@ -422,7 +430,7 @@ export default function FoundationCoursePage() {
                     onClick={scrollToSignupForm}
                     className="mt-4 w-full bg-white/10 hover:bg-white/15 text-white text-sm font-semibold py-2 px-4 rounded-lg transition-colors"
                   >
-                    Get the free pack while it buffers
+                    Enter your name & email in the form below to get the free pack
                   </button>
                 )}
               </div>
@@ -656,7 +664,7 @@ export default function FoundationCoursePage() {
                         onClick={scrollToSignupForm}
                         className="mt-4 w-full bg-white/10 hover:bg-white/15 text-white text-sm font-semibold py-2 px-4 rounded-lg transition-colors"
                       >
-                        Get the free pack while it buffers
+                        Enter your name & email in the form next to this video to get the free pack
                       </button>
                     )}
                   </div>
