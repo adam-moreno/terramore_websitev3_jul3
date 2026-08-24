@@ -17,6 +17,84 @@
   animation: fade-in 0.5s ease-out;
 }
 
+@keyframes hero-ken-burns {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.08);
+  }
+}
+
+.animate-hero-ken-burns {
+  animation: hero-ken-burns 7s ease-out forwards;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+@keyframes hero-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.animate-hero-float {
+  animation: hero-float 5s ease-in-out infinite;
+}
+
+.animate-hero-float-delayed {
+  animation: hero-float 6s ease-in-out 0.8s infinite;
+}
+
+@keyframes hero-bar-grow {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+.hero-bar {
+  transform-origin: bottom;
+  animation: hero-bar-grow 1.1s ease-out both;
+}
+
+@keyframes hero-spark {
+  from {
+    stroke-dashoffset: 240;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.hero-sparkline {
+  stroke-dasharray: 240;
+  animation: hero-spark 1.6s ease-out both;
+}
+
+@keyframes hero-progress {
+  from {
+    width: 0;
+  }
+}
+
+.hero-progress {
+  animation: hero-progress 1.2s ease-out both;
+}
+
 body {
   font-family: Arial, Helvetica, sans-serif;
 }

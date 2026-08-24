@@ -19,7 +19,7 @@ import { useFreeCoursesPopup } from "@/hooks/use-free-courses-popup"
 import { useEffect, useState } from "react"
 import "@/styles/fadeInUp.css"
 import { Logo } from "@/components/logo"
-import { TerramoreVideoSimple } from "@/components/terramore-video-simple"
+import { HeroAnalytics } from "@/components/hero-analytics"
 
 export default function TerramoreHomepage() {
   const { isPopupOpen, setIsPopupOpen } = useSchedulePopup()
@@ -280,23 +280,20 @@ export default function TerramoreHomepage() {
 
 
 
-      {/* Navigation */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 bg-slate-900 text-white py-6 px-6 transition-transform duration-300 overflow-visible ${
+      {/* Navigation — light Semrush-style bar over the product hero */}
+      <nav className={`fixed top-0 left-0 right-0 z-50 text-slate-800 py-4 px-6 transition-all duration-300 overflow-visible ${
         isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
-      }`}>
+      } ${lastScrollY > 40 ? 'bg-white/90 backdrop-blur-md border-b border-slate-200/70 shadow-sm' : 'bg-transparent'}`}>
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <Logo size="lg" className="text-white" />
+            <Logo size="lg" />
           </div>
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center justify-center flex-1">
-            <div className="flex items-center space-x-8">
-              {/* <Link href="/workshops" className="hover:text-blue-300 transition-colors">
-                Workshops
-              </Link> */}
+            <div className="flex items-center space-x-8 text-sm font-medium">
               <div className="relative group">
-                <div className="flex items-center space-x-1 hover:text-blue-300 transition-colors cursor-pointer">
+                <div className="flex items-center space-x-1 hover:text-blue-600 transition-colors cursor-pointer">
                   <span>Courses</span>
                   <ChevronDown className="w-4 h-4" />
                 </div>
@@ -323,10 +320,10 @@ export default function TerramoreHomepage() {
                   </div>
                 </div>
               </div>
-              <Link href="/solutions" className="hover:text-blue-300 transition-colors">
+              <Link href="/solutions" className="hover:text-blue-600 transition-colors">
                 Solutions
               </Link>
-              <Link href="/partner" className="hover:text-blue-300 transition-colors">
+              <Link href="/partner" className="hover:text-blue-600 transition-colors">
                 Partner With Us
               </Link>
             </div>
@@ -337,7 +334,7 @@ export default function TerramoreHomepage() {
             <Button
               variant="ghost"
               size="sm"
-              className="text-white hover:text-blue-300"
+              className="text-slate-800 hover:text-blue-600"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
               <Menu className="w-6 h-6" />
@@ -346,35 +343,28 @@ export default function TerramoreHomepage() {
 
           {/* Mobile Navigation Menu - Inside Header */}
           {isMobileMenuOpen && (
-            <div className="absolute top-full left-0 right-0 lg:hidden bg-slate-800 text-white py-4 px-6 border-t border-slate-700 z-50">
+            <div className="absolute top-full left-0 right-0 lg:hidden bg-white text-slate-800 py-4 px-6 border-t border-slate-200 shadow-lg z-50">
               <div className="flex flex-col space-y-4">
-                {/* <Link
-                  href="/workshops"
-                  className="hover:text-blue-300 transition-colors py-2"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Workshops
-                </Link> */}
                 <div className="py-2">
-                  <div className="text-white mb-2">Courses</div>
+                  <div className="text-slate-900 mb-2 font-medium">Courses</div>
                   <div className="pl-4 space-y-2">
                     <Link
                       href="/courses/foundation"
-                      className="block text-gray-300 hover:text-blue-300 transition-colors py-1"
+                      className="block text-slate-600 hover:text-blue-600 transition-colors py-1"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       The Foundation
                     </Link>
                     <Link
                       href="/courses/make-it-real"
-                      className="block text-gray-300 hover:text-blue-300 transition-colors py-1"
+                      className="block text-slate-600 hover:text-blue-600 transition-colors py-1"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       Make It Real
                     </Link>
                     <Link
                       href="/courses/build-to-grow"
-                      className="block text-gray-300 hover:text-blue-300 transition-colors py-1"
+                      className="block text-slate-600 hover:text-blue-600 transition-colors py-1"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       Build to Grow
@@ -383,14 +373,14 @@ export default function TerramoreHomepage() {
                 </div>
                 <Link
                   href="/solutions"
-                  className="hover:text-blue-300 transition-colors py-2"
+                  className="hover:text-blue-600 transition-colors py-2"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Solutions
                 </Link>
                 <Link
                   href="/partner"
-                  className="hover:text-blue-300 transition-colors py-2"
+                  className="hover:text-blue-600 transition-colors py-2"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Partner With Us
@@ -401,63 +391,53 @@ export default function TerramoreHomepage() {
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <div className="relative px-6 bg-white pt-32 md:pt-40 lg:pt-52 pb-12 md:pb-16 lg:pb-16">
-        <div className="max-w-7xl mx-auto">
-          <div className="relative flex flex-col lg:flex-row items-center justify-center lg:justify-start gap-4 lg:gap-16">
-            {/* Left Content */}
-            <div className="text-center lg:text-left w-full lg:max-w-2xl px-2 lg:pl-0">
-              <h1 className="text-4xl md:text-6xl font-bold text-slate-900 mb-4 md:mb-6 leading-tight uppercase">
-                WHY IS YOUR<br />BUSINESS STUCK?
-              </h1>
-              
-              {/* Video Placeholder - Mobile Only */}
-              <div className="mb-6 lg:hidden">
-                <TerramoreVideoSimple 
-                  aspectRatio="16:9"
-                  className="w-full max-w-3xl mx-auto"
-                />
-                <p className="text-xs text-slate-500 text-center mt-2">
-                  💡 Tip: Click the full-screen button in the bottom-right corner for a larger view
-                </p>
-              </div>
-              
-              <div className="text-lg md:text-xl lg:text-2xl font-medium text-slate-700 mb-6 md:mb-8 max-w-2xl mx-auto">
-                <span className="block">
-                  Learn from a team that's spent 10+ years building scalable frameworks that power marketing, automation, and growth.
-                </span>
-              </div>
-              <div className="mt-4 md:mt-6 lg:mt-10">
-                <Button
-                  size="lg"
-                  className="bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white px-8 py-4 rounded-full text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
-                  onClick={openCalendly}
-                >
-                  I'M READY FOR CHANGE
-                </Button>
-              </div>
+      {/* Product hero — Semrush-style: clear copy, then teased analytics visual */}
+      <section className="relative bg-gradient-to-b from-slate-50 via-white to-white pt-28 md:pt-32">
+        <div className="relative z-10 w-full px-6 text-center">
+          <div className="max-w-3xl mx-auto">
+            <p className="text-blue-600 text-xs sm:text-sm font-semibold tracking-[0.22em] uppercase mb-4">
+              Marketing · Automation · Growth
+            </p>
+
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-slate-900 leading-[1.08] mb-5">
+              Why is your business stuck?
+            </h1>
+
+            <p className="text-slate-600 text-base sm:text-lg md:text-xl max-w-2xl mx-auto mb-8 leading-relaxed">
+              Learn from a team that&apos;s spent 10+ years building scalable frameworks that power marketing, automation, and growth.
+            </p>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
+              <Button
+                size="lg"
+                onClick={openCalendly}
+                className="min-w-[200px] rounded-lg bg-blue-600 hover:bg-blue-700 text-white px-8 py-6 text-base font-semibold transition-all shadow-sm"
+              >
+                Let&apos;s Talk
+              </Button>
+              <Button
+                size="lg"
+                asChild
+                variant="outline"
+                className="min-w-[200px] rounded-lg border-slate-300 bg-white text-slate-800 hover:bg-slate-50 px-8 py-6 text-base font-semibold transition-all"
+              >
+                <Link href="/courses/foundation">
+                  Start Free Course
+                </Link>
+              </Button>
             </div>
 
-            {/* Right Video Placeholder */}
-            <div className="hidden lg:flex flex-shrink-0 absolute right-0 top-1/2 -translate-y-1/2">
-              <TerramoreVideoSimple 
-                aspectRatio="16:9"
-                className="w-[36rem] h-[20.25rem] transition-transform duration-300 hover:scale-110"
-              />
-            </div>
-            <div className="hidden lg:block absolute right-0 top-1/2 translate-y-44">
-              <div className="w-[36rem] flex justify-center">
-                <p className="text-xs text-slate-500 text-center">
-                  💡 Tip: Click the full-screen button in the bottom-right corner for a larger view
-                </p>
-              </div>
-            </div>
+            <p className="text-[11px] sm:text-xs tracking-[0.14em] uppercase text-slate-400 mb-10">
+              E-commerce · Fitness · Home Services · Professional · Tech · Creators · Skincare · Apparel · Loungewear · Construction
+            </p>
           </div>
         </div>
-      </div>
+
+        <HeroAnalytics />
+      </section>
 
       {/* Animated Flashcard Section */}
-      <div className="py-4 md:py-6 lg:pt-0 lg:pb-0 px-6 bg-slate-50 -mt-8 lg:-mt-8">
+      <div className="py-10 md:py-14 px-6 bg-slate-50">
         <div className="max-w-4xl mx-auto text-center">
           <div 
             className="flashcard-carousel relative min-h-[300px] md:min-h-[400px] overflow-hidden lg:mb-4"

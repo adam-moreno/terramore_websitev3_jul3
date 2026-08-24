@@ -240,3 +240,107 @@ The iClosed scheduling integration was not working properly for the business. A 
 ### Notes for team
 - Long buffering is largely due to large .mov file sizes. For faster load: ensure R2 (or CDN) supports **Range requests**; consider providing **H.264 MP4** for broader support and smaller size.
 - If Module 1 (or others) still fail, verify the URL and that the object exists in R2; consider MP4 fallbacks via `<source type="video/mp4" src="..." />` if available.
+
+---
+
+## Foundation Captions (WebVTT) – March 19, 2026
+
+### Approach
+- Generate captions locally with **Whisper** and upload `.vtt` files to R2 alongside the `.mov` videos.
+- In the course player, attach captions using HTML5 `<track kind="captions" ...>` on the `<video>` element.
+
+### Convention
+- Use the same basename for captions, swapping extension:
+  - `Foundations_Portrait_Mar1426_Module1.mov` → `Foundations_Portrait_Mar1426_Module1.vtt`
+  - `Foundations_Portrait_Mar1426_Bonus.mov` → `Foundations_Portrait_Mar1426_Bonus.vtt`
+
+### Implementation
+- `app/courses/foundation/page.tsx` now derives the caption URL automatically by replacing `.mov` with `.vtt` for the selected module and renders an English captions track when applicable.
+
+---
+
+## Homepage Hero Redesign (Odyssey-inspired) – August 2, 2026
+
+### Goal
+Completely redo the homepage hero to resemble [odysseymovie.com](https://www.odysseymovie.com/): full-viewport cinematic feel, large centered brand title, accent tagline, ghost/outline CTA buttons, transparent nav overlay.
+
+### Decisions
+- **Background media:** AI video generation is not available in this environment. Instead, generated 4 cinematic AI stills (motivational / workout / growth / team celebration) and animated them with crossfade + Ken Burns zoom for a video-like feel.
+- **Headline:** Large “TERRAMORE” title (movie-title treatment), with existing “Why Is Your Business Stuck?” as the accent tagline below.
+- **Intro video:** Removed from the hero for a cleaner cinematic layout (was previously a side-by-side Loom embed).
+- **Height:** Full viewport (`min-h-screen`) with nav overlaid transparently; nav gains a frosted dark background after scrolling past ~80px.
+
+### Implementation
+- New component: `components/hero-background.tsx` — cycles through 4 images every 7s with 2s opacity crossfade + `animate-hero-ken-burns` scale.
+- Assets in `public/hero/` (`hero-bg-1` … `hero-bg-4`).
+- Ken Burns keyframes added to `app/globals.css`.
+- Homepage hero + nav updated in `app/page.tsx`.
+- Primary CTA: “I’m Ready for Change” (Calendly). Secondary: “Start Free Course” → `/courses/foundation`.
+
+---
+
+## Hero Verticals Strip (Hawke-inspired) – August 6, 2026
+
+### Goal
+Mirror [hawkemedia.com](https://hawkemedia.com)’s client logo row under the hero CTA, but show **vertical names** with brand-lifestyle photos instead of client brand logos/names.
+
+### Decisions
+- Primary CTA renamed to **“Let’s Talk”** (opens Calendly), matching Hawke’s hero CTA language.
+- Strip sits directly under the CTA group inside the cinematic hero — not a separate below-the-fold logos section.
+- Six verticals: E-commerce, Fitness, Home Services, Professional Services, Tech & Startups, Creators.
+- Each item is a compact photo tile + uppercase vertical label (no brand names).
+- Mobile: horizontal snap-scroll row. Desktop: centered flex row.
+- Staggered fade-in + subtle hover zoom for presence without clutter.
+
+### Implementation
+- New component: `components/hero-verticals.tsx`
+- Assets in `public/hero/verticals/` (`vertical-ecommerce` … `vertical-creators`)
+- `scrollbar-hide` utility added in `app/globals.css`
+- Wired into homepage hero in `app/page.tsx`
+
+### Update – August 6, 2026 (afternoon)
+- Expanded strip to 10 verticals by adding: Skincare, Apparel, Loungewear, Construction.
+- New assets: `vertical-skincare.png`, `vertical-apparel.png`, `vertical-loungewear.png`, `vertical-construction.png`.
+
+---
+
+## Hero Background: Business Verticals + Loop Video – August 6, 2026
+
+### Goal
+Replace inspirational “heavenly” / raised-hands hero backgrounds with business-oriented vertical imagery. Prefer gif-style motion when possible.
+
+### Decisions
+- Removed `hero-bg-1-triumph-sunrise.png` and `hero-bg-4-team-celebration.png` from the active rotation.
+- First slide is a short muted looping MP4 (apparel boutique slow-zoom) — same feel as a GIF, but ~167KB vs multi-MB GIF.
+- Also kept a lighter GIF sibling (`hero-bg-1-apparel-loop.gif`) for reference; hero uses the MP4 for performance.
+- Second slide: e-commerce ops still. Fourth slide: business meeting still.
+- Dropped workout energy from the rotation in favor of ecommerce ops (still more business than inspirational).
+- Videos skip Ken Burns CSS (motion already in the loop); stills keep Ken Burns.
+
+### Implementation
+- Updated `components/hero-background.tsx` to support `{ type: "video" | "image" }` slides.
+- New assets in `public/hero/`:
+  - `hero-bg-1-apparel-loop.mp4`
+  - `hero-bg-1-apparel-loop.gif`
+  - `hero-bg-1-ecommerce-ops.png`
+  - `hero-bg-4-business-meeting.png`
+
+---
+
+## Semrush-style Product Hero – August 24, 2026
+
+### Goal
+Rebuild only the homepage hero to match the [semrush.com](https://www.semrush.com/) first-screen pattern: a readable headline/CTA, then a product analytics visual that is mostly visible but clipped so the user scrolls a little to see it fully.
+
+### Decisions
+- Dropped the cinematic full-bleed photo banner and the Hawke photo-strip. Top of page is now copy + two CTAs only.
+- Did not copy Semrush’s promotional top banner (event/promo strip).
+- Light background + Terramore blue (`blue-600`) instead of Semrush purple.
+- New `HeroAnalytics` product frame: browser chrome, sidebar, live campaign video, KPI tiles, and floating Traffic / Vertical mix / Conversion / Pipeline widgets.
+- Visual well is shorter than the dashboard (about 420–540px clip vs ~720px content) with a white fade at the bottom — the “tease.”
+- Nav restyled for a light hero: dark text, frosted white after scroll.
+
+### Implementation
+- New: `components/hero-analytics.tsx`
+- Hero + nav in `app/page.tsx`
+- Float / bar / sparkline / progress keyframes in `app/globals.css`
