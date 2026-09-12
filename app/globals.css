@@ -18,6 +18,52 @@
   margin-right: auto;
 }
 
+/*
+  Mobile rhythm, measured on lindy.ai at 390px (Sep 2026):
+  49px section padding top and bottom, 49px from heading block to first card,
+  12 to 16px between stacked cards, 12 to 24px card radius, 16 to 20px card padding,
+  h2 41px at line-height 1.05, body 16px at 1.5.
+  These classes only carry the phone values. Every use adds its own md: utilities,
+  so desktop keeps the exact spacing it had before.
+*/
+:root {
+  --section-y: 3rem;
+  --stack-gap: 1rem;
+  --card-pad: 1.25rem;
+  --card-radius: 1.5rem;
+}
+
+@layer components {
+  .section-y {
+    padding-top: var(--section-y);
+    padding-bottom: var(--section-y);
+  }
+
+  .stack-gap {
+    gap: var(--stack-gap);
+  }
+
+  .card-pad {
+    padding: var(--card-pad);
+  }
+
+  .card-radius {
+    border-radius: var(--card-radius);
+  }
+
+  .section-title {
+    font-size: 2.25rem;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+  }
+
+  .section-lede {
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+}
+
 .text-gold {
   background-image: linear-gradient(var(--gold-from), var(--gold-to));
   -webkit-background-clip: text;
@@ -175,6 +221,13 @@
 .review-marquee:hover,
 .review-marquee-reverse:hover {
   animation-play-state: paused;
+}
+
+/* Phones: slower drift so the row reads as a stack of quotes, not motion. lindy.ai runs 60s. */
+@media (max-width: 767px) {
+  .review-marquee {
+    animation-duration: 64s;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -31,7 +31,7 @@ export function SiteFooter() {
   const { isOpen, openPopup, closePopup } = useDoNotSellPopup()
 
   return (
-    <footer className="border-t border-black/[0.06] bg-white py-16">
+    <footer className="section-y border-t border-black/[0.06] bg-white md:py-16">
       <div className="page-shell">
         <div className="flex flex-col gap-10 md:flex-row md:items-start md:justify-between">
           <div className="max-w-sm">

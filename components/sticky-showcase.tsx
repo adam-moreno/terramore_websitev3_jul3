@@ -52,17 +52,18 @@ export function StickyShowcase({
   }, [])
 
   return (
-    <section className="bg-cream py-16 md:py-24">
+    <section className="section-y bg-cream md:py-24">
       <div className="page-shell">
         <div className="mx-auto max-w-[560px] text-center">
-          <h2 className="text-[1.85rem] font-bold tracking-[-0.04em] text-ink md:text-[2.5rem]">
+          <h2 className="section-title text-ink md:text-[2.5rem] md:leading-normal md:tracking-[-0.04em]">
             {title} <span className="text-gold">{accent}</span>
           </h2>
-          <p className="mx-auto mt-4 max-w-md text-[15px] leading-relaxed text-ink/70">{subtitle}</p>
+          <p className="section-lede mx-auto mt-4 max-w-md text-ink/70 md:text-[15px] md:leading-relaxed">{subtitle}</p>
         </div>
 
-        <div className="mt-7 grid lg:mt-8 lg:grid-cols-[minmax(0,1fr)_minmax(420px,49%)] lg:gap-12 xl:gap-16">
-          <ol>
+        {/* Phones: each step is one full-width card (number, title, copy, visual) in a plain 16px stack, the way lindy.ai collapses its sticky showcase. From md up the list is unchanged. */}
+        <div className="mt-12 grid md:mt-7 lg:mt-8 lg:grid-cols-[minmax(0,1fr)_minmax(420px,49%)] lg:gap-12 xl:gap-16">
+          <ol className="stack-gap flex flex-col md:block">
             {items.map((item, index) => {
               const Visual = item.visual
               return (
@@ -71,17 +72,17 @@ export function StickyShowcase({
                   ref={(node) => {
                     itemRefs.current[index] = node
                   }}
-                  className={`flex flex-col justify-center py-10 transition-opacity duration-300 lg:min-h-[70vh] lg:py-16 ${
+                  className={`card-radius card-pad flex flex-col justify-center border border-black/[0.06] bg-white transition-opacity duration-300 md:rounded-none md:border-0 md:bg-transparent md:p-0 md:py-10 lg:min-h-[70vh] lg:py-16 ${
                     active === index ? "opacity-100" : "lg:opacity-35"
                   }`}
                 >
                   <p className="text-[13px] font-medium text-gold-to">{String(index + 1).padStart(2, "0")}</p>
-                  <h3 className="mt-3 text-[1.2rem] font-semibold tracking-tight text-ink sm:text-[1.35rem] md:whitespace-nowrap md:text-[1.75rem]">
+                  <h3 className="mt-3 text-[1.5rem] font-semibold leading-[1.15] tracking-tight text-ink md:whitespace-nowrap md:text-[1.75rem] md:leading-normal">
                     {item.title}
                   </h3>
-                  <p className="mt-3 max-w-[26rem] text-[15px] leading-relaxed text-ink/70">{item.copy}</p>
+                  <p className="mt-3 max-w-[26rem] text-[16px] leading-[1.5] text-ink/70 md:text-[15px] md:leading-relaxed">{item.copy}</p>
                   {/* Below lg the visuals stack in flow. Under md each visual sets its own height, so nothing inside can overlap or clip. */}
-                  <div className="mt-6 max-w-md overflow-hidden rounded-[24px] border border-black/[0.06] bg-white lg:hidden">
+                  <div className="mt-5 max-w-md overflow-hidden rounded-[16px] border border-black/[0.06] bg-white md:mt-6 md:rounded-[24px] lg:hidden">
                     <div className="relative md:aspect-square">
                       <Visual />
                     </div>

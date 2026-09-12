@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import Image from "next/image"
 import { DualCtas } from "@/components/dual-ctas"
 import { SiteFooter } from "@/components/site-footer"
 
@@ -71,9 +72,15 @@ export default function AboutPage() {
 
       <section className="page-shell py-10 md:py-14">
         <div className="grid items-start gap-10 md:grid-cols-[auto_1fr] md:gap-16">
-          <div className="flex h-32 w-32 items-center justify-center rounded-[1.75rem] bg-ink text-[2.4rem] font-semibold tracking-tight text-cream">
-            AM
-          </div>
+          <Image
+            src="/founder/adam-moreno-headshot.png"
+            alt="Adam Moreno, founder of Terramore"
+            width={864}
+            height={1152}
+            sizes="(min-width: 768px) 224px, 176px"
+            priority
+            className="h-52 w-44 rounded-[1.75rem] object-cover object-top shadow-[0_8px_30px_rgba(15,30,46,0.08)] md:h-64 md:w-56"
+          />
           <div className="max-w-2xl space-y-5 text-[1.05rem] leading-relaxed text-ink/75">
             <p className="text-[13px] font-medium uppercase tracking-[0.16em] text-ink/40">Adam Moreno, founder</p>
             <p>

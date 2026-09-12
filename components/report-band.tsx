@@ -46,21 +46,21 @@ export function ReportBand() {
   const chapter = CHAPTERS[active]
 
   return (
-    <section id="report" className="scroll-mt-28 py-20 md:py-24">
+    <section id="report" className="section-y scroll-mt-28 md:py-24">
       <div className="page-shell">
         <p className="text-center text-[13px] font-medium uppercase tracking-[0.16em] text-ink/40">
           Free Digital Footprint report
         </p>
-        <h2 className="mx-auto mt-3 max-w-[720px] text-center text-[2.15rem] font-semibold tracking-[-0.03em] text-ink md:text-[3rem]">
+        <h2 className="section-title mx-auto mt-3 max-w-[720px] text-center text-ink md:text-[3rem] md:font-semibold md:leading-normal md:tracking-[-0.03em]">
           See the business the way a new customer already can.
         </h2>
-        <p className="mx-auto mt-5 max-w-[560px] text-center text-[1.05rem] leading-relaxed text-ink/70">
+        <p className="section-lede mx-auto mt-4 max-w-[560px] text-center text-ink/70 md:mt-5 md:text-[1.05rem] md:leading-relaxed">
           We read what a stranger can already see: your site, ads, Maps, and listings. A person writes what is working,
           where you are losing sales, and what we would fix first. It lands in your inbox in two to three business days.
         </p>
 
-        <div className="mx-auto mt-12 grid max-w-[980px] overflow-hidden rounded-[1.75rem] border border-black/[0.06] bg-white shadow-[0_20px_50px_-28px_rgba(15,23,42,0.22)] lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
-          <div className="relative flex min-h-[26rem] flex-col bg-ink p-6 text-cream md:p-7">
+        <div className="card-radius mx-auto mt-12 grid max-w-[980px] overflow-hidden border border-black/[0.06] bg-white shadow-[0_20px_50px_-28px_rgba(15,23,42,0.22)] md:rounded-[1.75rem] lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
+          <div className="card-pad relative flex min-h-[26rem] flex-col bg-ink text-cream md:p-7">
             <div className="min-h-0 flex-1">
               <ReportScanVisual />
             </div>
@@ -73,7 +73,7 @@ export function ReportBand() {
             </div>
           </div>
 
-          <div className="flex flex-col p-6 md:p-8">
+          <div className="card-pad flex flex-col md:p-8">
             <p className="text-[12px] font-medium uppercase tracking-[0.14em] text-ink/40">Inside the report</p>
             <div className="mt-4 space-y-2">
               {CHAPTERS.map((item, index) => {
@@ -108,11 +108,11 @@ export function ReportBand() {
           </div>
         </div>
 
-        <div className="mt-10 flex flex-col items-center gap-3">
+        <div className="mt-12 flex flex-col items-center gap-3 md:mt-10">
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="inline-flex h-11 items-center justify-center rounded-full bg-brand px-6 text-[15px] font-medium text-white hover:bg-brand-hover"
+            className="inline-flex h-12 items-center justify-center rounded-full bg-brand px-6 text-[16px] font-medium text-white hover:bg-brand-hover md:h-11 md:text-[15px]"
           >
             Send me the free report
           </button>

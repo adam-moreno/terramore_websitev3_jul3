@@ -36,17 +36,17 @@ const FAQS = [
 
 export function HomeFaq() {
   return (
-    <section id="faq" className="scroll-mt-28 py-20 md:py-24">
+    <section id="faq" className="section-y scroll-mt-28 md:py-24">
       <div className="page-shell">
-        <h2 className="max-w-3xl text-[2.15rem] font-semibold tracking-[-0.03em] text-ink md:text-[3rem]">
+        <h2 className="section-title max-w-3xl text-ink md:text-[3rem] md:font-semibold md:leading-normal md:tracking-[-0.03em]">
           Questions owners ask first.
         </h2>
-        <Accordion type="single" collapsible className="mt-10 space-y-3">
+        <Accordion type="single" collapsible className="stack-gap mt-12 grid md:mt-10 md:block md:space-y-3">
           {FAQS.map((item, index) => (
             <AccordionItem
               key={item.q}
               value={`faq-${index}`}
-              className="rounded-[1.25rem] border-none bg-white px-6 shadow-[0_8px_30px_rgba(15,30,46,0.04)]"
+              className="card-radius border-none bg-white px-5 shadow-[0_8px_30px_rgba(15,30,46,0.04)] md:rounded-[1.25rem] md:px-6"
             >
               <AccordionTrigger className="text-left text-[17px] font-semibold text-ink hover:no-underline">
                 {item.q}
@@ -92,7 +92,7 @@ export function HomeFaq() {
             </AccordionItem>
           ))}
         </Accordion>
-        <DualCtas className="mt-10" />
+        <DualCtas className="mt-12 md:mt-10" />
       </div>
     </section>
   )
