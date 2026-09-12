@@ -13,6 +13,8 @@
  * - SMS (to the user): TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM_NUMBER
  */
 
+import { emailShell, emailButton, emailP, emailDetail, emailSignoff } from "./email-template"
+
 export type Attachment = { filename: string; content: Buffer; contentType: string }
 
 export type EmailInput = {
@@ -295,12 +297,26 @@ export async function notifyAdminOfLead(lead: Lead): Promise<SendResult[]> {
     { type: "context", elements: [{ type: "mrkdwn", text: `${rowNote}. ${link}` }] },
   ]
 
+  const html = emailShell({
+    heading: title,
+    previewText: `${lead.name} <${lead.email}>`,
+    bodyHtml: [
+      ...lines.map((line) => {
+        const [label, ...rest] = line.split(": ")
+        return emailDetail(label, rest.join(": "))
+      }),
+      emailP(rowNote),
+      lead.tableUrl ? emailButton("Open in Supabase", lead.tableUrl) : "",
+    ].join(""),
+  })
+
   const results = await Promise.all([
     postSlack(`${title}: ${lead.name} <${lead.email}>`, blocks),
     sendEmail({
       to: ADMIN_EMAIL,
       subject: `${title}: ${lead.name}`,
       text: [title, "", ...lines, "", rowNote, lead.tableUrl || ""].join("\n").trim(),
+      html,
     }),
   ])
   return results
@@ -336,8 +352,32 @@ export async function confirmLeadToUser(lead: Lead): Promise<SendResult[]> {
     ? `Terramore: we got it, ${first}. The report lands in two to three business days.`
     : `Terramore: we got it, ${first}. We read the site before we reply, usually within one business day.`
 
+  const html = isReport
+    ? emailShell({
+        heading: "Your Digital Footprint report is on the way",
+        previewText: "The report lands in two to three business days.",
+        bodyHtml: [
+          emailP(`Hi ${first},`),
+          emailP("We got it. The report lands in two to three business days."),
+          emailP("Until then, the sample shows the shape:"),
+          emailButton("See a sample report", `${SITE}/report/example`),
+          emailSignoff("Adam Moreno", "Terramore"),
+        ].join(""),
+      })
+    : emailShell({
+        heading: "We read the site before we reply",
+        previewText: "Usually within one business day.",
+        bodyHtml: [
+          emailP(`Hi ${first},`),
+          emailP("We got it. We read the site before we reply, usually within one business day."),
+          emailP("Want to skip the wait? Pick a time:"),
+          emailButton("Book a time", BOOK_URL),
+          emailSignoff("Adam Moreno", "Terramore"),
+        ].join(""),
+      })
+
   return Promise.all([
-    sendEmail({ to: lead.email, subject, text: body.join("\n") }),
+    sendEmail({ to: lead.email, subject, text: body.join("\n"), html }),
     lead.phone ? sendSms(lead.phone, sms) : Promise.resolve(skip("sms", "no phone on this form")),
   ])
 }
@@ -410,8 +450,24 @@ export async function confirmBookingToUser(b: BookingNotice): Promise<SendResult
   ].join("\n")
   const sms = `Terramore: you are booked, ${first}. ${timeLine}.${b.meetUrl ? ` Join: ${b.meetUrl}` : ""}`
 
+  const html = emailShell({
+    heading: "You are booked",
+    previewText: `${timeLine} (${b.tz})`,
+    bodyHtml: [
+      emailP(`Hi ${first},`),
+      emailDetail("When", `${timeLine} (${b.tz})`),
+      b.meetUrl
+        ? emailButton("Join on Google Meet", b.meetUrl)
+        : emailP("The calendar invite from adam.moreno@terramore.io has the join link."),
+      emailP("A calendar invite is on its way from adam.moreno@terramore.io. Accept it and the reminder is set."),
+      emailP("Need to move or cancel?"),
+      emailButton("Reschedule or cancel", b.manageUrl),
+      emailSignoff("Adam Moreno", "Terramore"),
+    ].join(""),
+  })
+
   return Promise.all([
-    sendEmail({ to: b.email, subject: `Booked: your call with Adam, ${timeLine}`, text }),
+    sendEmail({ to: b.email, subject: `Booked: your call with Adam, ${timeLine}`, text, html }),
     b.phone ? sendSms(b.phone, sms) : Promise.resolve(skip("sms", "no phone on this booking")),
   ])
 }

@@ -871,3 +871,22 @@ Eight concrete mobile-focused fixes to the home page (`app/page.tsx` and its com
 **Anchors.** Added `id="chapter-01"` through `id="chapter-04"` with `scroll-mt-24` to the matching slides in `components/example-report.tsx` (footprint, audience, wins, openings) so the chapter links land in the right place under the fixed header.
 
 **Files.** New: `lib/report/chapters.ts`. Changed: `components/report-scan-visual.tsx`, `components/report-band.tsx`, `components/example-report.tsx`, `app/globals.css`. `pnpm build` passed.
+
+## Branded HTML transactional emails – September 12, 2026
+
+**Goal.** The transactional emails from `lib/notify.ts` were plain text only, so raw long URLs (especially the booking manage link `https://terramore.io/book/manage?token=<hmac>`) showed in full and read like jargon. Adam wanted branded, mobile-safe HTML: a logo banner, key info in a clean format, and ugly URLs hidden behind buttons, while still degrading gracefully.
+
+**Layout helper (`lib/email-template.ts`).** One small reusable shell built for email-client limits (Gmail, Outlook): a centered 600px table with all-inline CSS, no flex/grid, no external or head-only `<style>`, no SVG. `emailShell({ heading, bodyHtml, previewText })` renders a dark ink banner with the logo, a white content card, and a muted footer ("Terramore" + reply-to note). Helpers: `emailButton(label, href)` (a table-based brand-blue button whose href keeps the raw link and any token, but never shows the URL as text), `emailP`, `emailDetail` (labelled "Key: value" row), `emailSignoff`, and `esc` for HTML-escaping user input (names, notes).
+
+**Logo.** Email clients do not reliably render SVG and the site logo is an `<img>` React component, not inline SVG. Rather than create a new PNG and fight the selective `public/*` gitignore, the banner reuses the same hosted white Terramore wordmark PNG the site already serves from Cloudinary (`res.cloudinary.com/dzzzkruux/.../vwxvqo.png`), a reliable absolute URL that renders on the dark banner. No new asset and no gitignore change were needed.
+
+**Brand colors.** Read from `tailwind.config.ts`: banner ink `#0f1e2e`, page cream `#fcf9f8`, buttons brand blue `#2a66ff`, plus muted `#6b7280` and a soft border `#e6e2df`. The gold token (`#f7b844`) was left for future accents.
+
+**Emails updated (`lib/notify.ts`).** All three now pass `html` alongside the unchanged `text` (multipart, graceful degradation):
+- `confirmBookingToUser`: date/time in the lead's zone as a detail row, a "Join on Google Meet" button when `meetUrl` exists (otherwise the note that the calendar invite from adam.moreno@terramore.io carries the join link), the invite note, and a "Reschedule or cancel" button on the `manageUrl` token link.
+- `notifyAdminOfLead` (email copy): lead details as clean labelled rows, the Supabase row note, and an "Open in Supabase" button when a table URL exists.
+- `confirmLeadToUser`: branded version of the existing copy; report variant gets a "See a sample report" button to `/report/example`, talk variant gets a "Book a time" button to `/book`.
+
+**Copy rules.** No em dashes, the word "tiles" is not used, and no business facts or numbers were invented; wording and voice match the existing text versions.
+
+**Files.** New: `lib/email-template.ts`. Changed: `lib/notify.ts`. `pnpm build` passed.
