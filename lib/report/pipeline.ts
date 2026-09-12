@@ -1,5 +1,5 @@
 import { getServerSupabase, isMissingColumnError } from "@/lib/supabase-server"
-import { ADMIN_EMAIL, emailProvider, postSlack, sendEmail } from "@/lib/notify"
+import { ADMIN_EMAIL, REPLY_TO, emailProvider, postSlack, sendEmail } from "@/lib/notify"
 import { footprintToFacts, readFootprint } from "@/lib/report/footprint"
 import { renderReportPdf } from "@/lib/report/pdf"
 import { modelProvider, reportToText, writeReport } from "@/lib/report/write"
@@ -91,6 +91,8 @@ export async function runReportPipeline(request: ReportRequest): Promise<Pipelin
     const emailResult = await sendEmail({
       to: request.email,
       bcc: ADMIN_EMAIL,
+      // Replies to the report land with Adam (EMAIL_REPLY_TO), not the no-reply sender.
+      replyTo: REPLY_TO,
       subject: `Your Digital Footprint report: ${subjectName}`,
       text: [
         `Hi ${first},`,
@@ -99,7 +101,7 @@ export async function runReportPipeline(request: ReportRequest): Promise<Pipelin
         "",
         "It says only what we could see on the public web. Anything marked Not found was not visible to us. If a chapter is thin, reply with a link and we read it.",
         "",
-        "Want it fixed? Pick a time: https://calendly.com/terramore/30min",
+        "Want it fixed? Pick a time: https://terramore.io/book",
         "",
         "Adam Moreno",
         "Terramore",

@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { FormEvent, useState } from "react"
+import { BookingLink } from "@/components/booking-popup"
 
 const JOBS = [
   "Carts start but do not finish",
@@ -87,7 +88,7 @@ export function TalkForm() {
       }
       setSent(true)
     } catch {
-      setError("We could not send that just now. Try again, or pick a time on the calendar.")
+      setError("We could not send that just now. Try again, or book a call at terramore.io/book.")
     } finally {
       setBusy(false)
     }
@@ -105,14 +106,10 @@ export function TalkForm() {
           We read the site before we reply, so the first note already says what we would look at. Expect it within one
           business day.
         </p>
-        <a
-          href="https://calendly.com/terramore/30min"
-          target="_blank"
-          rel="noreferrer"
+        <BookingLink
+          label="Pick a time for the call"
           className="mt-6 inline-flex h-11 items-center rounded-full bg-brand px-5 text-[15px] font-medium text-white hover:bg-brand-hover"
-        >
-          Pick a time for the call
-        </a>
+        />
         <p className="mt-6 text-[14px] text-slate-500">
           While you wait,{" "}
           <Link href="/report/example" className="font-medium text-brand hover:text-brand-hover">

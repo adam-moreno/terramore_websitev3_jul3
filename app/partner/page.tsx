@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
+import { BookingLink } from "@/components/booking-popup"
 import { ReportPopupLink } from "@/components/report-popup"
 import { SiteFooter } from "@/components/site-footer"
 import { TalkForm } from "@/components/talk-form"
@@ -62,14 +63,10 @@ export default function TalkPage() {
             <div className="mt-8 border-t border-ink/[0.06] pt-6">
               <p className="text-[15px] font-semibold text-ink">Already know you want the call?</p>
               <p className="mt-1 text-[14px] text-slate-600">Skip the form and pick a time.</p>
-              <a
-                href="https://calendly.com/terramore/30min"
-                target="_blank"
-                rel="noreferrer"
+              <BookingLink
+                label="Open the calendar"
                 className="mt-4 inline-flex h-11 items-center rounded-full border border-ink/15 px-5 text-[15px] font-medium text-ink hover:border-ink/40"
-              >
-                Open the calendar
-              </a>
+              />
             </div>
             <p className="mt-6 text-[13px] text-slate-500">
               What it costs after the call is on the{" "}

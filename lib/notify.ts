@@ -9,6 +9,7 @@
  * - Email:             RESEND_API_KEY | SENDGRID_API_KEY | POSTMARK_SERVER_TOKEN   first one found wins
  *                      RESEND_FROM_EMAIL (the dashboard's name) then EMAIL_FROM   e.g. "Terramore <reports@terramore.io>"
  *                      NOTIFY_EMAIL_TO   admin copy, default adam.moreno@terramore.io
+ *                      EMAIL_REPLY_TO    reply-to on every outbound email, default adam.moreno@terramore.io
  * - SMS (to the user): TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM_NUMBER
  */
 
@@ -20,6 +21,8 @@ export type EmailInput = {
   text: string
   html?: string
   bcc?: string
+  /** Overrides EMAIL_REPLY_TO for one message. */
+  replyTo?: string
   attachments?: Attachment[]
 }
 
@@ -28,7 +31,10 @@ export type SendResult = { ok: boolean; channel: string; skipped?: boolean; erro
 export const ADMIN_EMAIL = process.env.NOTIFY_EMAIL_TO?.trim() || "adam.moreno@terramore.io"
 /** Same value the Terra IQ dashboard uses (RESEND_FROM_EMAIL) so one address is set once; EMAIL_FROM is the local name. */
 export const FROM = process.env.RESEND_FROM_EMAIL?.trim() || process.env.EMAIL_FROM?.trim() || "Terramore <no-reply@terramore.io>"
+/** Replies to a no-reply sender land with Adam. */
+export const REPLY_TO = process.env.EMAIL_REPLY_TO?.trim() || "adam.moreno@terramore.io"
 const SITE = "https://terramore.io"
+const BOOK_URL = `${SITE}/book`
 
 function skip(channel: string, why: string): SendResult {
   console.info(`[notify] ${channel} skipped: ${why}`)
@@ -82,6 +88,8 @@ export async function sendEmail(input: EmailInput): Promise<SendResult> {
   const provider = emailProvider()
   if (!provider) return skip("email", "no RESEND_API_KEY, SENDGRID_API_KEY, or POSTMARK_SERVER_TOKEN")
 
+  const replyTo = input.replyTo?.trim() || REPLY_TO
+
   try {
     let response: Response
     if (provider === "resend") {
@@ -92,6 +100,7 @@ export async function sendEmail(input: EmailInput): Promise<SendResult> {
           from: FROM,
           to: [input.to],
           bcc: input.bcc ? [input.bcc] : undefined,
+          reply_to: replyTo,
           subject: input.subject,
           text: input.text,
           html: input.html,
@@ -110,6 +119,7 @@ export async function sendEmail(input: EmailInput): Promise<SendResult> {
         headers: { Authorization: `Bearer ${process.env.SENDGRID_API_KEY}`, "Content-Type": "application/json" },
         body: JSON.stringify({
           from,
+          reply_to: { email: replyTo },
           personalizations: [{ to: [{ email: input.to }], bcc: input.bcc ? [{ email: input.bcc }] : undefined }],
           subject: input.subject,
           content: [
@@ -136,6 +146,7 @@ export async function sendEmail(input: EmailInput): Promise<SendResult> {
           From: FROM,
           To: input.to,
           Bcc: input.bcc,
+          ReplyTo: replyTo,
           Subject: input.subject,
           TextBody: input.text,
           HtmlBody: input.html,
@@ -315,7 +326,7 @@ export async function confirmLeadToUser(lead: Lead): Promise<SendResult[]> {
         `Hi ${first},`,
         "",
         "We got it. We read the site before we reply, usually within one business day.",
-        `Want to skip the wait? Pick a time: https://calendly.com/terramore/30min`,
+        `Want to skip the wait? Pick a time: ${BOOK_URL}`,
         "",
         "Adam Moreno",
         "Terramore",
@@ -328,5 +339,79 @@ export async function confirmLeadToUser(lead: Lead): Promise<SendResult[]> {
   return Promise.all([
     sendEmail({ to: lead.email, subject, text: body.join("\n") }),
     lead.phone ? sendSms(lead.phone, sms) : Promise.resolve(skip("sms", "no phone on this form")),
+  ])
+}
+
+/* ------------------------------------------------------------ booking */
+
+export type BookingNotice = {
+  name: string
+  email: string
+  phone?: string | null
+  business?: string | null
+  website?: string | null
+  note?: string | null
+  startIso: string
+  endIso: string
+  /** Visitor's IANA zone, used for their copy. */
+  tz: string
+  meetUrl: string | null
+  meetProvider: "google_meet" | "teams" | null
+  manageUrl: string
+}
+
+const PT = "America/Los_Angeles"
+
+function when(iso: string, tz: string): string {
+  const day = new Intl.DateTimeFormat("en-US", { timeZone: tz, weekday: "long", month: "long", day: "numeric" }).format(new Date(iso))
+  const time = new Intl.DateTimeFormat("en-US", { timeZone: tz, hour: "numeric", minute: "2-digit", timeZoneName: "short" }).format(new Date(iso))
+  return `${day} at ${time}`
+}
+
+/** Slack to Adam: who, business, time in PT, the Meet link (or the Teams fallback note). Never throws. */
+export async function notifyAdminOfBooking(b: BookingNotice): Promise<SendResult> {
+  const title = "New call booked"
+  const link = b.meetUrl ? `<${b.meetUrl}|Google Meet>` : "No Meet link. Teams link is on the Outlook invite (connect Google Meet in Terra IQ)."
+  const lines = [
+    `When: ${when(b.startIso, PT)}`,
+    `Name: ${b.name}`,
+    `Email: ${b.email}`,
+    b.phone ? `Phone: ${b.phone}` : "",
+    b.business ? `Business: ${b.business}` : "",
+    b.website ? `Site: ${b.website}` : "",
+    b.note ? `Note: ${b.note}` : "",
+    `Their zone: ${b.tz}`,
+    `Join: ${link}`,
+  ].filter(Boolean)
+  const blocks = [
+    { type: "header", text: { type: "plain_text", text: title } },
+    { type: "section", text: { type: "mrkdwn", text: lines.map((line) => `• ${line}`).join("\n") } },
+    { type: "context", elements: [{ type: "mrkdwn", text: "Booked on terramore.io. The event is on the Outlook calendar and in Terra IQ under Leads." }] },
+  ]
+  return postSlack(`${title}: ${b.name}${b.business ? ` (${b.business})` : ""}, ${when(b.startIso, PT)}`, blocks)
+}
+
+/** Confirmation to the lead: time in their zone, the join link, the manage link. SMS only with a phone. Never throws. */
+export async function confirmBookingToUser(b: BookingNotice): Promise<SendResult[]> {
+  const first = b.name.split(/\s+/)[0] || "there"
+  const timeLine = when(b.startIso, b.tz)
+  const joinLine = b.meetUrl ? `Join on Google Meet: ${b.meetUrl}` : "The calendar invite from adam.moreno@terramore.io has the join link."
+  const text = [
+    `Hi ${first},`,
+    "",
+    `You are booked. ${timeLine} (${b.tz}).`,
+    joinLine,
+    "",
+    "A calendar invite is on its way from adam.moreno@terramore.io. Accept it and the reminder is set.",
+    `Need to move or cancel? ${b.manageUrl}`,
+    "",
+    "Adam Moreno",
+    "Terramore",
+  ].join("\n")
+  const sms = `Terramore: you are booked, ${first}. ${timeLine}.${b.meetUrl ? ` Join: ${b.meetUrl}` : ""}`
+
+  return Promise.all([
+    sendEmail({ to: b.email, subject: `Booked: your call with Adam, ${timeLine}`, text }),
+    b.phone ? sendSms(b.phone, sms) : Promise.resolve(skip("sms", "no phone on this booking")),
   ])
 }

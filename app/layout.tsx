@@ -3,7 +3,12 @@ import './globals.css'
 import { GoogleAnalytics } from '@/components/google-analytics'
 import { SiteChrome } from '@/components/site-header'
 
+// Vercel has the token under the misspelled name GOOGLE_SITE_VERIFICAITON; accept both so either works.
+const googleSiteVerification =
+  process.env.GOOGLE_SITE_VERIFICATION?.trim() || process.env.GOOGLE_SITE_VERIFICAITON?.trim() || undefined
+
 export const metadata: Metadata = {
+  ...(googleSiteVerification ? { verification: { google: googleSiteVerification } } : {}),
   title: 'Terramore | A growth team for owners',
   description: 'Terramore works inside your store, ads, and email to find where you lose sales and fix it. For owners with a shop, a service, or a list. Talk first, or ask for a free Digital Footprint report.',
   keywords: 'growth team, small business marketing, ecommerce, email marketing, advertising, digital footprint report',

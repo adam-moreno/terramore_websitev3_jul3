@@ -202,7 +202,7 @@ export async function renderReportPdf(report: ReportContent): Promise<Buffer> {
   ctx.y -= 10
   paragraph(ctx, "The first call is free. You see the step where you lose sales before you pay to fix it. At day 90 you have a written plan with owners and dates.", 12, ctx.regular, SLATE)
   ctx.y -= 10
-  paragraph(ctx, "Book: calendly.com/terramore/30min", 12, ctx.bold, INK)
+  paragraph(ctx, "Book: terramore.io/book", 12, ctx.bold, INK)
   paragraph(ctx, "Reply to this email or write adam.moreno@terramore.io", 12, ctx.regular, SLATE)
   ctx.y -= 24
   paragraph(

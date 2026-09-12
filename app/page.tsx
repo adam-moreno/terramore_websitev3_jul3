@@ -1,8 +1,7 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
 import { Calendar } from "lucide-react"
-import { CalendlyWidget } from "@/components/calendly-widget"
+import { BookingLink } from "@/components/booking-popup"
 import Link from "next/link"
 import { HomeFaq } from "@/components/home-faq"
 import { ReportBand } from "@/components/report-band"
@@ -14,22 +13,15 @@ import { HeroLogoMarquee } from "@/components/hero-logo-marquee"
 import { HeroLogoMobius } from "@/components/hero-logo-mobius"
 import { TerramoreToolkit } from "@/components/terramore-toolkit"
 import { TerramoreUseCases } from "@/components/terramore-use-cases"
-import { useSchedulePopup } from "@/hooks/use-schedule-popup"
 
 export default function TerramoreHomepage() {
-  const { isPopupOpen, setIsPopupOpen } = useSchedulePopup()
-
   return (
     <div className="min-h-screen bg-cream">
       <div className="fixed bottom-4 right-4 z-50">
-        <Button
-          size="sm"
-          onClick={() => setIsPopupOpen(true)}
-          className="rounded-full bg-brand shadow-lg transition-shadow hover:bg-brand-hover hover:shadow-xl"
-        >
-          <Calendar className="w-4 h-4 mr-2" />
+        <BookingLink className="inline-flex h-9 items-center rounded-full bg-brand px-4 text-[14px] font-medium text-white shadow-lg transition-shadow hover:bg-brand-hover hover:shadow-xl">
+          <Calendar className="mr-2 h-4 w-4" />
           Schedule
-        </Button>
+        </BookingLink>
       </div>
 
       <section className="relative isolate overflow-hidden bg-cream pt-28 pb-16 md:pt-32 md:pb-24">
@@ -76,8 +68,6 @@ export default function TerramoreHomepage() {
       <ReportBand />
       <HomeFaq />
       <SiteFooter />
-
-      <CalendlyWidget isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)} />
     </div>
   )
 }
