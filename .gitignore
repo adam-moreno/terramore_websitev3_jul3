@@ -100,7 +100,12 @@ dist
 
 # Gatsby files
 .cache/
-public
+# Next.js serves static files from public/. Ignore it by default (large/unused media),
+# but track the folders the site references by absolute path (/founder, /reviews, /vlair).
+public/*
+!public/founder/
+!public/reviews/
+!public/vlair/
 
 # Storybook build outputs
 .out

@@ -1,27 +1,40 @@
-const LLMS_TXT = `# Terramore.io
+const LLMS_TXT = `# Terramore
 
-> Top performance marketing and consulting agency. We help new and existing businesses scale with data-driven marketing, free courses, and free consultations.
+> A growth team for owners. Terramore works inside the store, ads, and email a business already pays for, finds where it loses sales, fixes that step, and leaves a 90-day plan the team can run.
 
-Terramore.io offers consulting, marketing services, free courses, and free consultations. We serve both new and existing businesses with flexible, performance-focused solutions.
+Terramore serves owners with a shop, a service, or a customer list. Work starts with a free call or a free Digital Footprint report. The client dashboard (Terra IQ) is invite only for current clients.
 
 ## Main
 
-- [Home](https://terramore.io): Terramore.io – consulting, marketing, free courses & free consultations
-- [About Terramore](https://terramore.io/about): Who we are – scale and grow with expert support
-- [Services](https://terramore.io/solutions): Marketing and consulting services for your business
-- [Contact & Partner](https://terramore.io/partner): Contact Terramore, partner with us, get in touch
-- [Book a Free Consultation](https://terramore.io/workshops): Schedule a free consultation – data-driven marketing and consulting
-- [Case Studies & Resources](https://terramore.io/resources): Results, case studies, and learning resources
+- [Home](https://terramore.io): What Terramore does, how the work happens, use cases, reviews, and the free report
+- [Talk with us](https://terramore.io/partner): Book a free call and tell us where the business is stuck
+- [Pricing](https://terramore.io/pricing): Talk is free, Start is a deposit, Stay is monthly
+- [Free Digital Footprint report](https://terramore.io/report): What is in the report, how long it takes, and how we send it
+- [Sample report](https://terramore.io/report/example): Northline Atelier sample report
+- [About](https://terramore.io/about): Adam Moreno and why the work looks like a growth team
+- [Security](https://terramore.io/security): CCPA and HIPAA handling of client data
+- [Start here](https://terramore.io/resources): Every page in the order owners ask about them
 
-## Courses
+## Solutions
 
-- [The Foundation](https://terramore.io/courses/foundation): Foundation course – from idea to income
-- [Make It Real](https://terramore.io/courses/make-it-real): Monetization and systems
-- [Build to Grow](https://terramore.io/courses/build-to-grow): Audience, brand, and legacy
+- [All solutions](https://terramore.io/solutions): Pick the job, then the capability behind it
+- [Marketing and Sales](https://terramore.io/solutions/marketing-and-sales): Advertising, the store, and follow-up as one path
+- [Get found](https://terramore.io/solutions/discoverability): Maps, search, stores, and listing sites
+- [Audience](https://terramore.io/solutions/audience): Reach the people who already looked
+- [Artificial Intelligence](https://terramore.io/solutions/artificial-intelligence): An assistant that answers, drafts, and books, with a person in charge
+- [Operations](https://terramore.io/solutions/operations): After-hours coverage, a shared lead, and ship dates you can hit
 
-## Optional
+## Integrations
 
-- [Workshops](https://terramore.io/workshops): Workshops and free consultation booking
+- [All integrations](https://terramore.io/integrations): The tools we sit in
+- [Email Marketing](https://terramore.io/integrations/email-marketing): Connect the list to the store so the next note can become an order
+- [Calls, texts, and chat](https://terramore.io/integrations/communications): Missed calls and DMs that become a booked job
+- [Advertising](https://terramore.io/integrations/advertising): Google Ads, Meta, TikTok, and Pinterest tied to a page that can finish
+- [Ecommerce](https://terramore.io/integrations/ecommerce): Shopify, WooCommerce, WordPress, and Etsy
+- [Payments](https://terramore.io/integrations/payments): Stripe, PayPal, and Square
+
+## Legal
+
 - [Privacy Policy](https://terramore.io/privacy): Privacy policy
 - [Terms of Service](https://terramore.io/terms): Terms of service
 `

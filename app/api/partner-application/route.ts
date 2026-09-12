@@ -1,17 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-
-// Helper function to get Supabase client (lazy initialization)
-function getSupabaseClient() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-  if (!supabaseUrl || !supabaseServiceKey) {
-    throw new Error('Supabase configuration is missing')
-  }
-
-  return createClient(supabaseUrl, supabaseServiceKey)
-}
+import { after } from 'next/server'
+import { getServerSupabase, supabaseTableUrl } from '@/lib/supabase-server'
+import { confirmLeadToUser, notifyAdminOfLead } from '@/lib/notify'
 
 export async function POST(request: NextRequest) {
   try {
@@ -30,8 +20,9 @@ export async function POST(request: NextRequest) {
       message
     } = body
 
-    // Validate required fields
-    if (!location || !businessType || !revenue || !teamSize || !goal || !timeline || !budget || !name || !email) {
+    // Validate required fields. The Talk form asks for the job, a name, and an email.
+    // The other fields are optional and arrive as "Not shared" or "Not asked".
+    if (!goal || !name || !email) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -47,17 +38,52 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Initialize Supabase client
-    const supabase = getSupabaseClient()
+    const cleanEmail = String(email).trim().toLowerCase()
+    const cleanName = String(name).trim()
+    const cleanPhone = phone ? String(phone).trim() : null
+    const note = message ? String(message) : null
+    const businessName = note?.match(/^Business:\s*(.+)$/m)?.[1]?.trim() || null
+    const website = note?.match(/^Site:\s*(.+)$/m)?.[1]?.trim() || null
+
+    const lead = {
+      kind: 'talk' as const,
+      name: cleanName,
+      email: cleanEmail,
+      phone: cleanPhone,
+      business: businessName,
+      website,
+      details: {
+        Job: String(goal),
+        'Business type': businessType && businessType !== 'Not shared' ? String(businessType) : null,
+        Revenue: revenue && revenue !== 'Not shared' ? String(revenue) : null,
+        Note: note?.split('\n').filter((line) => !/^(Business|Site):/.test(line)).join(' ').trim() || null,
+      },
+      rowId: null as string | null,
+      tableUrl: supabaseTableUrl('partner_applications'),
+    }
+
+    const supabase = getServerSupabase()
+    if (!supabase) {
+      // Keys missing. Do not lose the lead: log it and still send the alerts.
+      console.warn('Talk request (no Supabase):', { name: cleanName, email: cleanEmail, goal, businessName, website })
+      after(async () => {
+        await Promise.all([notifyAdminOfLead(lead), confirmLeadToUser(lead)])
+      })
+      return NextResponse.json({ success: true, message: 'Request received' }, { status: 201 })
+    }
 
     // Check if email already exists in partner applications
     const { data: existingApplication } = await supabase
       .from('partner_applications')
       .select('id')
-      .eq('email', email)
-      .single()
+      .eq('email', cleanEmail)
+      .maybeSingle()
 
     if (existingApplication) {
+      // The form treats 409 as sent. Still tell Adam they came back.
+      after(async () => {
+        await notifyAdminOfLead({ ...lead, rowId: String(existingApplication.id), details: { ...lead.details, Repeat: 'yes' } })
+      })
       return NextResponse.json(
         { error: 'An application with this email already exists' },
         { status: 409 }
@@ -69,17 +95,17 @@ export async function POST(request: NextRequest) {
       .from('partner_applications')
       .insert([
         {
-          location,
-          business_type: businessType,
-          revenue,
-          team_size: teamSize,
+          location: location || 'Not asked',
+          business_type: businessType || 'Not shared',
+          revenue: revenue || 'Not shared',
+          team_size: teamSize || 'Not asked',
           goal,
-          timeline,
-          budget,
-          name,
-          email,
-          phone: phone || null,
-          message: message || null,
+          timeline: timeline || 'Not asked',
+          budget: budget || 'Not asked',
+          name: cleanName,
+          email: cleanEmail,
+          phone: cleanPhone,
+          message: note,
           application_date: new Date().toISOString(),
           status: 'pending_review'
         }
@@ -94,15 +120,17 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // TODO: Send notification email to admin team
-    // await sendPartnerApplicationNotification(data[0])
+    lead.rowId = data?.[0]?.id ? String(data[0].id) : null
 
-    // TODO: Send confirmation email to applicant
-    // await sendPartnerApplicationConfirmation(email, name)
+    // Slack + email copy to Adam, confirmation email and optional SMS to the requester.
+    // Runs after the response; failures are logged and never reach the form.
+    after(async () => {
+      await Promise.all([notifyAdminOfLead(lead), confirmLeadToUser(lead)])
+    })
 
     return NextResponse.json(
-      { 
-        success: true, 
+      {
+        success: true,
         message: 'Partner application submitted successfully',
         data: data[0]
       },
@@ -116,4 +144,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     )
   }
-} 
+}

@@ -1,89 +1,8 @@
-"use client"
-
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Calendar, Cookie, ChevronDown, Menu } from "lucide-react"
-import Link from "next/link"
-import { CalendlyWidget } from "@/components/calendly-widget"
-import { useSchedulePopup } from "@/hooks/use-schedule-popup"
-import { useDoNotSellPopup } from "@/hooks/use-do-not-sell-popup"
-import { DoNotSellPopup } from "@/components/do-not-sell-popup"
-import { Logo } from "@/components/logo"
+import { SiteFooter } from "@/components/site-footer"
 
 export default function DMCAPage() {
-  const { isPopupOpen, setIsPopupOpen } = useSchedulePopup()
-  const { isOpen: isDoNotSellOpen, openPopup: openDoNotSell, closePopup: closeDoNotSell } = useDoNotSellPopup()
-
   return (
     <div className="min-h-screen bg-white">
-      {/* Floating Corner Buttons */}
-      <div className="fixed bottom-4 right-4 z-50">
-        <Button
-          size="sm"
-          onClick={() => setIsPopupOpen(true)}
-          className="rounded-full shadow-lg hover:shadow-xl transition-shadow bg-blue-600 hover:bg-blue-700"
-        >
-          <Calendar className="w-4 h-4 mr-2" />
-          Schedule
-        </Button>
-      </div>
-
-      {/* Navigation */}
-      <nav className="bg-slate-900 text-white py-4 px-6">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Logo size="lg" className="text-white" />
-          </div>
-
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center justify-center flex-1">
-            <div className="flex items-center space-x-8">
-              <div className="relative group">
-                <div className="flex items-center space-x-1 hover:text-blue-300 transition-colors cursor-pointer">
-                  <span>Courses</span>
-                  <ChevronDown className="w-4 h-4" />
-                </div>
-                <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                  <div className="py-2">
-                    <Link
-                      href="/courses/foundation"
-                      className="block px-4 py-2 text-gray-800 hover:bg-blue-50 hover:text-blue-600"
-                    >
-                      Scaling
-                    </Link>
-                    <Link
-                      href="/courses/make-it-real"
-                      className="block px-4 py-2 text-gray-800 hover:bg-blue-50 hover:text-blue-600"
-                    >
-                      Offers
-                    </Link>
-                    <Link
-                      href="/courses/build-to-grow"
-                      className="block px-4 py-2 text-gray-800 hover:bg-blue-50 hover:text-blue-600"
-                    >
-                      Leads
-                    </Link>
-                  </div>
-                </div>
-              </div>
-              <Link href="/solutions" className="hover:text-blue-300 transition-colors">
-                Solutions
-              </Link>
-              <Link href="/partner" className="hover:text-blue-300 transition-colors">
-                Partner With Us
-              </Link>
-            </div>
-          </div>
-
-          {/* Mobile Menu Button */}
-          <div className="lg:hidden">
-            <Button variant="ghost" size="sm" className="text-white hover:text-blue-300">
-              <Menu className="w-6 h-6" />
-            </Button>
-          </div>
-        </div>
-      </nav>
-
       {/* Main Content */}
       <div className="max-w-4xl mx-auto py-12 px-6">
         <div className="bg-white rounded-lg shadow-lg p-8">
@@ -232,69 +151,7 @@ export default function DMCAPage() {
         </div>
       </div>
 
-      {/* Footer */}
-      <footer className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-16 px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-8">
-            <div className="flex items-center justify-center mb-6">
-              <Logo size="md" className="text-white" />
-            </div>
-
-            <div className="flex flex-wrap justify-center gap-6 mb-8">
-              <Link href="/courses/foundation" className="hover:text-blue-200 transition-colors">
-                Courses
-              </Link>
-              <div className="hover:text-blue-200 transition-colors cursor-pointer">Books</div>
-              <div className="hover:text-blue-200 transition-colors cursor-pointer">Media</div>
-              <Link href="/partner" className="hover:text-blue-200 transition-colors">
-                Partner With Us
-              </Link>
-            </div>
-
-            <div className="flex flex-wrap justify-center gap-6 mb-8 text-sm">
-              <Link href="/privacy" className="text-blue-200 transition-colors">
-                Privacy Policy
-              </Link>
-              <Link href="/terms" className="text-blue-200 transition-colors">
-                Terms of Service
-              </Link>
-              <Link href="/disclosure" className="text-blue-200 transition-colors">
-                Disclosure
-              </Link>
-              <Link href="/dmca" className="text-blue-200 transition-colors">
-                DMCA POLICY
-              </Link>
-              <button
-                onClick={openDoNotSell}
-                className="hover:text-blue-200 transition-colors text-sm cursor-pointer bg-transparent border-none text-white"
-              >
-                Do Not Sell My Personal Information
-              </button>
-            </div>
-          </div>
-
-          {/* Disclaimer */}
-          <div className="text-center text-sm leading-relaxed opacity-90 max-w-6xl mx-auto">
-            <p>
-              Results mentioned on this website are not typical and are not a guarantee of your success. Individual
-              results will vary depending on education, effort, application, experience, and background. Due to the
-              sensitivity of financial information, we do not track the typical results of our students. We cannot
-              guarantee that you will make money or that you will be successful if you employ the business strategies
-              discussed. Consequently, your results may significantly vary. We do not give investment, tax, or other
-              professional advice. Specific transactions and experiences are mentioned for informational purposes only.
-              The information contained within this website is the property of Terramore.io. Any use of the images,
-              content, or ideas expressed herein without the express written consent of Terramore.io is prohibited.
-              Copyright © 2025 Terramore.io, LLC. All Rights Reserved.
-            </p>
-          </div>
-        </div>
-      </footer>
-
-      {/* Schedule Popup */}
-      <CalendlyWidget isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)} />
-      
-      {/* Do Not Sell Popup */}
-      <DoNotSellPopup isOpen={isDoNotSellOpen} onClose={closeDoNotSell} />
+      <SiteFooter />
     </div>
   )
-} 
+}

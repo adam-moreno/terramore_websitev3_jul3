@@ -8,16 +8,8 @@ export function useSchedulePopup() {
   const pathname = usePathname()
 
   useEffect(() => {
-    // Reset popup state when navigating to a new page
     setIsPopupOpen(false)
-
-    // Auto-open popup after 5.5 seconds on any page load or navigation
-    const timer = setTimeout(() => {
-      setIsPopupOpen(true)
-    }, 5500)
-
-    return () => clearTimeout(timer)
-  }, [pathname]) // Trigger effect when pathname changes
+  }, [pathname])
 
   return {
     isPopupOpen,

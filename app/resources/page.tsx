@@ -1,246 +1,83 @@
-"use client"
+import type { Metadata } from "next"
+import { LindyCard, LindyPage } from "@/components/lindy-page"
+import { DASHBOARD_LOGIN_URL } from "@/lib/dashboard"
 
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { CalendlyWidget } from "@/components/calendly-widget"
-import { useSchedulePopup } from "@/hooks/use-schedule-popup"
-import { useDoNotSellPopup } from "@/hooks/use-do-not-sell-popup"
-import { DoNotSellPopup } from "@/components/do-not-sell-popup"
-import { Logo } from "@/components/logo"
-import { Calendar } from "lucide-react"
-import { useState } from "react"
-import { Cookie, ChevronDown, Menu } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
+export const metadata: Metadata = {
+  title: "Start here | Terramore",
+  description:
+    "Every Terramore page in the order owners ask about them: what we do, what it costs, how the work happens, and how to start.",
+}
 
 export default function ResourcesPage() {
-  const { isPopupOpen, setIsPopupOpen } = useSchedulePopup()
-  const { isOpen: isDoNotSellOpen, openPopup: openDoNotSell, closePopup: closeDoNotSell } = useDoNotSellPopup()
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-
-  const handleFooterNavigation = (href: string) => {
-    window.location.href = href
-  }
-
   return (
-    <div className="min-h-screen bg-white">
-      {/* Floating Corner Buttons */}
-      <div className="fixed bottom-4 right-4 z-50">
-        <Button
-          size="sm"
-          onClick={() => setIsPopupOpen(true)}
-          className="rounded-full shadow-lg hover:shadow-xl transition-shadow bg-blue-600 hover:bg-blue-700"
-        >
-          <Calendar className="w-4 h-4 mr-2" />
-          Schedule
-        </Button>
-      </div>
-
-      {/* Navigation */}
-      <nav className="bg-slate-900 text-white py-4 px-6">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Logo size="lg" className="text-white" />
-          </div>
-
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center justify-center flex-1">
-            <div className="flex items-center space-x-8">
-              <div className="relative group">
-                <div className="flex items-center space-x-1 hover:text-blue-300 transition-colors cursor-pointer">
-                  <span>Courses</span>
-                  <ChevronDown className="w-4 h-4" />
-                </div>
-                <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                  <div className="py-2">
-                    <Link
-                      href="/courses/foundation"
-                      className="block px-4 py-2 text-gray-800 hover:bg-blue-50 hover:text-blue-600"
-                    >
-                      Scaling
-                    </Link>
-                    <Link
-                      href="/courses/make-it-real"
-                      className="block px-4 py-2 text-gray-800 hover:bg-blue-50 hover:text-blue-600"
-                    >
-                      Offers
-                    </Link>
-                    <Link
-                      href="/courses/build-to-grow"
-                      className="block px-4 py-2 text-gray-800 hover:bg-blue-50 hover:text-blue-600"
-                    >
-                      Leads
-                    </Link>
-                  </div>
-                </div>
-              </div>
-              <Link href="/solutions" className="hover:text-blue-300 transition-colors">
-                Solutions
-              </Link>
-              <Link href="/partner" className="hover:text-blue-300 transition-colors">
-                Partner With Us
-              </Link>
-            </div>
-          </div>
-
-          {/* Mobile Menu Button */}
-          <div className="lg:hidden">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-white hover:text-blue-300"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            >
-              <Menu className="w-6 h-6" />
-            </Button>
-          </div>
+    <LindyPage
+      title="Start here."
+      accent="Every page, in order."
+      subtitle="The questions owners ask first, and the page that answers each one."
+      ctaHref="/partner"
+      ctaLabel="Let's talk"
+    >
+      <section className="pb-20">
+        <div className="page-shell grid gap-5 md:grid-cols-2">
+          <LindyCard
+            title="What do you actually do?"
+            body="We work inside the store, ads, and email you already pay for. We find the step where you lose sales, fix it, and leave a 90-day plan."
+            href="/#how-we-work"
+          />
+          <LindyCard
+            title="What does it cost?"
+            body="The call is free. A deposit starts the 90-day plan. A monthly fee keeps us in your tools. You never pay to find out what is broken."
+            href="/pricing"
+          />
+          <LindyCard
+            title="Have you done my kind of job before?"
+            body="Checkout, the appointment book, missed calls, a launch, repeat orders, getting found on Maps, and reaching people ready to buy."
+            href="/#use-cases"
+          />
+          <LindyCard
+            title="What is the free report?"
+            body="We read your site, ads, Maps, and listings and write what is working, what is leaking, and what we would fix first. It lands in your inbox."
+            href="/report"
+          />
+          <LindyCard
+            title="What does a report look like?"
+            body="A full sample for a small apparel brand, with names and numbers changed."
+            href="/report/example"
+          />
+          <LindyCard
+            title="Do I have to switch tools?"
+            body="No. Shopify, Mailchimp, Google, Meta, Stripe, Calendly. See how we connect each one."
+            href="/integrations"
+          />
+          <LindyCard
+            title="Who is behind it?"
+            body="Adam Moreno. A decade reading what people watch and buy for large advertisers, now pointed at owners."
+            href="/about"
+          />
+          <LindyCard
+            title="Is my customer data safe?"
+            body="CCPA and HIPAA standards. Your lists and ads stay in your accounts. We do not sell or train on your data."
+            href="/security"
+          />
+          <LindyCard
+            title="Other questions"
+            body="Do you run ads? Can I use the dashboard? What if I do not have a site yet?"
+            href="/#faq"
+          />
+          <LindyCard
+            title="Ready to talk?"
+            body="Tell us where the business is stuck. We map the work and tell you if we are the right team."
+            href="/partner"
+          />
         </div>
-      </nav>
-
-      {/* Mobile Navigation Menu */}
-      {isMobileMenuOpen && (
-        <div className="lg:hidden bg-slate-800 text-white py-4 px-6 border-t border-slate-700">
-          <div className="flex flex-col space-y-4">
-            <Link
-              href="/workshops"
-              className="hover:text-blue-300 transition-colors py-2"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Workshops
-            </Link>
-            <div className="py-2">
-              <div className="text-white mb-2">Courses</div>
-              <div className="pl-4 space-y-2">
-                <Link
-                  href="/courses/foundation"
-                  className="block text-gray-300 hover:text-blue-300 transition-colors py-1"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Scaling
-                </Link>
-                <Link
-                  href="/courses/make-it-real"
-                  className="block text-gray-300 hover:text-blue-300 transition-colors py-1"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Offers
-                </Link>
-                <Link
-                  href="/courses/build-to-grow"
-                  className="block text-gray-300 hover:text-blue-300 transition-colors py-1"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Leads
-                </Link>
-              </div>
-            </div>
-            <Link
-              href="/solutions"
-              className="hover:text-blue-300 transition-colors py-2"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Solutions
-            </Link>
-            <Link
-              href="/partner"
-              className="hover:text-blue-300 transition-colors py-2"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Partner With Us
-            </Link>
-          </div>
-        </div>
-      )}
-
-      <div className="flex items-center justify-center" style={{ minHeight: "calc(100vh - 200px)" }}>
-        <div className="text-center">
-          <h1 className="text-4xl font-bold text-slate-900 mb-4">Resources</h1>
-          <p className="text-lg text-slate-600 mb-8">This page is coming soon!</p>
-          <Link href="/">
-            <Button className="bg-blue-600 hover:bg-blue-700">Back to Home</Button>
-          </Link>
-        </div>
-      </div>
-
-      {/* Footer */}
-      <footer className="bg-slate-900 text-white py-12 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center space-x-2 mb-6">
-                <Logo size="md" className="text-white" />
-              </div>
-              <p className="text-gray-400 text-sm">
-                Helping businesses scale through proven systems, strategic marketing, and operational excellence.
-              </p>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
-              <ul className="space-y-2">
-                <li>
-                  <Link href="/workshops" className="text-gray-400 hover:text-white transition-colors">
-                    Workshops
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/courses/foundation" className="text-gray-400 hover:text-white transition-colors">
-                    Courses
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/solutions" className="text-gray-400 hover:text-white transition-colors">
-                    Solutions
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Legal</h3>
-              <ul className="space-y-2">
-                <li>
-                  <Link href="/privacy" className="text-gray-400 hover:text-white transition-colors">
-                    Privacy Policy
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/terms" className="text-gray-400 hover:text-white transition-colors">
-                    Terms of Service
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/disclosure" className="text-gray-400 hover:text-white transition-colors">
-                    Disclosure
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/dmca" className="text-gray-400 hover:text-white transition-colors">
-                    DMCA Policy
-                  </Link>
-                </li>
-                <li>
-                  <button
-                    onClick={openDoNotSell}
-                    className="text-gray-400 hover:text-white transition-colors text-sm cursor-pointer bg-transparent border-none"
-                  >
-                    Do Not Sell My Personal Information
-                  </button>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="mt-12 pt-8 border-t border-gray-800 text-center">
-            <p className="text-gray-500 text-sm">© {new Date().getFullYear()} Terramore.io. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
-
-      {/* Schedule Popup */}
-      <CalendlyWidget isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)} />
-      
-      {/* Do Not Sell Popup */}
-      <DoNotSellPopup isOpen={isDoNotSellOpen} onClose={closeDoNotSell} />
-    </div>
+        <p className="page-shell mt-10 text-center text-[15px] text-ink/70">
+          Already a client?{" "}
+          <a href={DASHBOARD_LOGIN_URL} className="font-medium text-brand hover:text-brand-hover">
+            Log in
+          </a>
+          . Invite only. New work starts with a talk.
+        </p>
+      </section>
+    </LindyPage>
   )
 }

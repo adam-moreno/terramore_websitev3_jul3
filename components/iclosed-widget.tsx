@@ -63,7 +63,7 @@ export function IClosedWidget({ isOpen, onClose }: IClosedWidgetProps) {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-end p-4">
+    <div className="fixed inset-0 z-40 flex items-end justify-end p-4">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/20" onClick={onClose} />
       <div className="relative bg-white rounded-xl shadow-xl border border-gray-200 w-80 max-w-sm overflow-hidden">
@@ -78,15 +78,12 @@ export function IClosedWidget({ isOpen, onClose }: IClosedWidgetProps) {
         </button>
         {/* Profile & Title */}
         <div className="flex items-center space-x-3 p-4 pb-2 pt-6">
-          <div className="w-12 h-12 rounded-full overflow-hidden bg-white border border-gray-200">
+          <div className="w-12 h-12 rounded-full overflow-hidden bg-[#f4efe4] border border-gray-200">
             <img
-              src="https://res.cloudinary.com/dx7id04uv/image/upload/f_auto,q_auto,w_48,h_48,c_fill/v1752608693/adam-moreno-profile-new_jb3lr7.jpg"
+              src="/founder/adam-moreno-cartoon.png?v=2"
               alt="Adam Moreno"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover object-top"
               loading="eager"
-              style={{
-                imageRendering: 'crisp-edges'
-              }}
             />
           </div>
           <div>

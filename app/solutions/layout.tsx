@@ -1,11 +1,11 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Services | Terramore | Marketing & Consulting for Your Business',
-  description: 'Find the services and expertise you need. Data-driven marketing and consulting from Terramore. Flexible solutions for new and existing businesses.',
+  title: 'Solutions | Terramore',
+  description: 'Pick the job that is stuck. Sell more from the store, fill the appointment book, bring customers back, get found, reach people ready to buy, or spend less.',
   openGraph: {
-    title: 'Services | Terramore | Marketing & Consulting for Your Business',
-    description: 'Find the services and expertise you need. Data-driven marketing and consulting from Terramore. Flexible solutions for new and existing businesses.',
+    title: 'Solutions | Terramore',
+    description: 'Pick the job that is stuck. Sell more from the store, fill the appointment book, bring customers back, get found, reach people ready to buy, or spend less.',
     url: 'https://terramore.io/solutions',
   },
 }

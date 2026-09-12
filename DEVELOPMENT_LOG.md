@@ -344,3 +344,391 @@ Rebuild only the homepage hero to match the [semrush.com](https://www.semrush.co
 - New: `components/hero-analytics.tsx`
 - Hero + nav in `app/page.tsx`
 - Float / bar / sparkline / progress keyframes in `app/globals.css`
+
+### Update – August 24, 2026 (afternoon)
+- Product window now loads live `https://dashboard.terramore.io` (iframe) instead of the apparel lifestyle clip.
+- Hero wash uses Semrush-like mint/lavender (`#f4f7f7`, `#ddeced`, `#c190ff`).
+- Primary CTA is dark (`#111`), secondary is white — matching Semrush’s button treatment.
+- Added infinite logo marquee (`components/hero-logo-marquee.tsx`) with platform/social marks (Google, Amazon, TikTok, Meta, Shopify, YouTube, Instagram, LinkedIn, Facebook, X, Pinterest, Reddit, Snapchat, WhatsApp, Spotify) — logos only, no names.
+- A true Semrush-style *recorded* product video still needs Screen Studio / Tella / Loom of the dashboard; drop that MP4 in later if the iframe is blocked or too live.
+
+---
+
+## Lindy-style Hero – September 10, 2026
+
+### Goal
+Rebuild the homepage hero (and only the first-screen chrome) to match [lindy.ai](https://www.lindy.ai/): floating pill header, large centered headline with a gold accent, one blue “Try for free” CTA, floating integration marks, Slack-style product card.
+
+### Wiring
+- Header labels match Lindy: Solutions, Integrations, Pricing, Security, Enterprise, Resources, Log in, Try for free.
+- Terramore destinations: `/solutions`, `/partner`, `/privacy`, courses under Resources, `dashboard.terramore.io` for Log in, `/courses/foundation` for Try for free.
+- Calendly stays as “Or let’s talk” under the hero CTA.
+- Product card channels are Terramore verticals (e-commerce, fitness, home services, apparel) instead of Lindy’s Slack channels.
+
+### Removed from the hero
+- Semrush mint/purple wash, logo marquee, dashboard iframe, hide-on-scroll header.
+
+---
+
+## Founder Calendar Avatar – September 10, 2026
+
+### Problem
+The Adam Moreno / Founder photo in the scheduling popup (`components/calendly-widget.tsx`) pointed at Cloudinary cloud `dx7id04uv`, which is disabled (`x-cld-error: cloud_name dx7id04uv is disabled`). The avatar rendered as a broken image on the white popup.
+
+### Decision
+Stop depending on that Cloudinary account for this avatar. Use a local illustrated cartoon of Adam in business formal (navy suit, white shirt, gold tie) at `public/founder/adam-moreno-cartoon.png`.
+
+### Implementation
+- New asset: `public/founder/adam-moreno-cartoon.png`
+- `CalendlyWidget` and `IClosedWidget` both load `/founder/adam-moreno-cartoon.png`
+- Homepage / About founder carousels still use the disabled Cloudinary URLs (separate from this popup fix)
+
+---
+
+## Header, inner pages, Möbius logos – September 10, 2026
+
+### Header clicks
+The pill header sat at `z-50` with the Calendly overlay, which auto-opened after 5.5s and ate every click. Solutions/Resources were also `<button>`s with no destination.
+
+- `SiteHeader` now lives in root layout (`SiteChrome`) so it persists on every page
+- Header is `z-[80]`; scheduling overlay is `z-40`
+- Auto-open popup removed
+- Menu labels are real links; dropdowns use a hover bridge (`pt-3`) so they stay open
+- New routes: `/integrations`, `/pricing`, `/security`, `/enterprise`; `/resources` is no longer a placeholder
+
+### Inner pages
+Lindy cream (`#fbfaf7`), gold accent headlines, white cards. Solutions/partner heroes restyled; service grid and partner form kept. Legacy dark `nav.bg-slate-900` bars are hidden in CSS.
+
+### Avatar
+Popup photo regenerated from Adam’s real headshot with light cartoon stylization (`public/founder/adam-moreno-cartoon.png`).
+
+### Hero logos
+`HeroLogoMobius` walks Simple Icons (ads, commerce, CRM, email, analytics, creative) along an infinity path with a front/back opacity cycle.
+
+---
+
+## Homepage density, toolkit, channel analytics – September 10, 2026
+
+### Width + header
+Site-wide `page-shell` matches Lindy’s column: `min(1184px, 100% - 48px)`. Header, conversation card, toolkit, use cases, and Lindy inner pages share it, so left text inset equals the right tile’s outer inset. Toolkit/use-case tiles are ~49% of that column (~584px on desktop).
+
+### Use cases + photos
+A second sticky `01–05` block (`TerramoreUseCases`) covers e-commerce, fitness, home services, apparel, and professional firms. Toolkit tiles are product UI (logo grid, mix, funnel, meeting clip, files) like Lindy. Use-case tiles use real Unsplash photography in the same UI chrome — not the earlier AI product stills.
+
+### Toolkit sticky stage
+The right photo sits in a viewport-tall sticky slot (`sticky top-0` + `h-screen` + vertical center). 01–05 scroll on the left; the frame stays put and stacked images crossfade. Active step follows whichever item is nearest the vertical center of the viewport.
+
+### Headline
+Hero: **Unlock more from the business you already built.** Gold on the last line. Subcopy: Find what’s holding you back. Fix what’s broken. Build what moves you forward.
+
+### Logos
+Brand-colored Simple Icons on white tiles. Infinity path spans ~160vw so marks exit one side and re-enter on the other loop.
+
+### Channel conversations
+Each Slack-style channel is a named operator with a photo (Maya, Jordan, Priya, Luis) and a vertical-specific insight card: checkout funnel, paid mix/ROAS, speed-to-lead, creative CPA.
+
+### Toolkit
+Lindy-style `01–05` list (`TerramoreToolkit`) with a sticky photo/logo grid on the right that follows scroll: stack, channels, numbers, automations, playbooks.
+
+## Conversation, toolkit, use cases – September 10, 2026
+
+Removed the Möbius stroke. Logo tiles stay on the path but sit at ~8–20% opacity so the strip is hinted, not drawn.
+
+Team replies use formal cartoon portraits (same style as Adam). `@Terramore` uses Slack mention colors: `#1264a3` on `rgba(242,199,68,0.42)`. Copy is short, spoken, no em dashes. Unfurls are compact. Professional shows a 90-day Gantt.
+
+Toolkit subtitle and 01–05 copy simplified. Step 1 is a photo plus gold/blue/ink gradient with logo pills. Step 2 is a donut, not bars. Step 3 is a visit→ship leak path. Step 4 has no play button. Step 5 is a stacked Gantt.
+
+Use cases no longer reuse the sticky 01–05. Lindy-style: eyebrow, pills, one photo plus a short Slack quote.
+
+## Möbius path + capability unfurls – September 10, 2026
+
+The infinity stroke now sits on its own layer (no copy hole) at ~14% ink so the figure-8 crossing is visible behind the headline — it reads as one Möbius strip, not two circles. Logos still use the radial hole. A top fade keeps both out of the fixed site header so nav words stay clear.
+
+Channel replies dropped analytics. Each room is a capability unfurl: email tiles (Klaviyo-style), Google Drive assets, a Miami shoot brief, SMS flow, or a consult calendar.
+
+## Hero conversation team + briefs – September 10, 2026
+
+Terramore replies now match the client byline: **name, title, company**. First channel is Adam Moreno, Founder, Terramore. Other channels use Account Manager, Head of Sales, Lead Web Developer, Automation Expert, Growth Strategist. Added verticals from the existing set: professional, skincare, tech, creators, construction.
+
+Replaced funnel/mix/spark charts with a **finding brief**: one sentence, two numbers, optional Scale/Pause rows, one next step. Same nested card in the thread, readable without reading a chart.
+
+## Hero logo mask – September 10, 2026
+
+Möbius path stays. A radial CSS mask punches a soft hole around `[data-hero-copy]` (headline, subcopy, CTA). Logos fade out as they enter the type and fade back in on the other side. Copy stays `z-20` and fully opaque. Hole size is measured with ResizeObserver so it tracks layout.
+
+## Hero match to Lindy – September 10, 2026
+
+Sampled from lindy.ai: page cream `#fcf9f8`, ink `#0f1e2e`, gold gradient `#f7b844 → #c68809` (background-clip text), button blue `#2a66ff` / hover `#2252cc`. Hero type is 72px / 700 / 1.05 / -0.02em; subcopy 20px / 500 / 30px; CTA is a 40px pill, not a tall oval. More space under the header (`pt-[13rem]`) and before the conversation card (`mt-24`). Card is taller and airier so it reads like Lindy’s Slack mock.
+
+## Software tiles instead of people photos – September 10, 2026
+
+Stock photos of people did not fit a software / consultancy site. Toolkit and use-case panels now use CSS/SVG product art: line-icon tiles, connected dashboard cards, flowcharts, a laptop with a flow plus code pane, file tiles, calendars, and email sequences.
+
+- New `components/software-visuals.tsx` holds the shared illustrations. Brand wash is cream / pale blue / gold. No Unsplash people.
+- Toolkit 01 is a scattered icon pack plus integration logos. 02 is connected spend tiles. 03 is a browser flowchart with the ship leak. 04 is a laptop flowchart (missed call → text → board). 05 stays a Gantt.
+- Use-case left panels swap by pill: checkout path, booking calendar, SMS flow, Drive files, consult holds, refill emails.
+
+Cartoon team portraits in the Slack conversation stay. Those are generated illustrations, not stock photos.
+
+## Toolkit detail + Integrations page – September 10, 2026
+
+Toolkit tiles now show the work, not vague labels.
+
+- **01** Integration marks sit on a 6×6 grid with more top padding and gap. Light tilt only. No nudge, so none hide behind another. **See all integrations** stays a white pill.
+- **02** Apps sit in labeled groups on the left. The right story card stays half the tile. Ads uses CPC. Site is Shopify + Stripe catching the same order: cart and checkout in Shopify, $86 paid in Stripe. No visitor portrait. Email keeps the three-channel list. The week total stays one size.
+- **02** Starts on Ads when the tile comes into view, then walks Site, Email, Content. Content is automatic posting: one shoot posted to Instagram, YouTube, and TikTok, with logos and a Posted stamp on the stills. Less copy. Sticky visuals mount only while their step is active, so step 02 cannot keep looping in the background. Arriving always starts on Ads. Click a beat to hold it for four seconds, then the walk continues.
+- **03** Recording is the main stage. A slim live tracker under it keeps every fact as the visit fills in: page, scroll, products, cart, user, card, checkout, paid, order, email. It does not drop the first line when Jordan Lee and Checkout Ready land. The loop ends on the full list.
+- **04** Follow-up is one workflow, not a tree of equal cards. A Meta lead for Sam Reed ($2,400) arrives. Owner, sales, and VA light together. Then HubSpot, SMS, and Calendly move in parallel. The customer replies “2:15 works.” Sales sees it and the next action starts. The team row shows roles, not first names. The 5:4 frame is wider than it is tall, so the story uses full-width rows: headline, a horizontal lead bar, a 3-up team row, a 3-up moves row, then reply beside the next action. Headline is 18px. Next action stays inside the frame. No auto-scroll.
+- **05** Audience intelligence. One clock only: Maya and Eli walk Notice you → On the site → The city → Ready. Facts match the step they are on. The purchase card stays dim until Ready, then Reach / Leads / Deals / Buys light next to Meta, Google, HubSpot, and sales. No Ideal customer row, no Website / Engagement / Intent / Behavior chips. No AudienceLab name. No performance claims. Roadmap is now step 06.
+
+## Nav, Slack height, hero logos – September 11, 2026
+
+The homepage is the product. Top nav now matches that, not a SaaS menu.
+
+- Dropped Pricing, Security, and Enterprise from the bar. Those pages stay live so old links do not 404.
+- **Solutions**: the six jobs (checkout, room, phone, drop, consults, get them back), plus How we work and Partner.
+- **Integrations**: Ads, Store, Email and texts, Analytics. Groups on `/integrations` have matching ids.
+- **Resources**: About, Questions, Talk with us. Courses and workshops are off the bar. The home course block is gone. Header CTA is Let’s talk → `/partner`.
+- Slack card is taller (`min-h` 28rem / 36rem) so the thread has air.
+- Hero Möbius logos are stronger (about 0.38–0.72 opacity, whiter tiles).
+- About and Partner no longer draw a second dark nav. They sit under the shared header.
+
+Helpful pages from this home page: Home, Solutions, Integrations, How we work (`/#how-we-work`), Use cases (`/#use-cases`), About, Partner, Questions (`/#faq`). Legal stays in the footer.
+
+## Invite-only dashboard CTAs – September 11, 2026
+
+Consulting launch: talk first, pay when work starts, Terra IQ is invite-only.
+
+- Header **Log in** goes to `https://dashboard.terramore.io/sign-in` (not `/sign-up`). Label: Current clients.
+- Public CTAs stay **Let’s talk** → `/partner` or **Or pick a time** (Calendly). No Try for free.
+- Pricing is Talk / Start / Stay. Free course plan is gone.
+- FAQ and Resources say the dashboard is for invited clients only.
+
+## Slack card + faces – September 11, 2026
+
+The Slack mock is capped at 972px, halfway from the old 760px cap to the 1184px header, and centered so the left and right inset match. Each channel uses a different person and a different photo style, mix of real photos and cartoons. Prompts name the service (email marketing, ads, SMS, site, 90-day plan, refill, same-day booking, film, chase estimates). Every Terramore reply is a short yes in different words, then the artifact. Team faces are new formal cartoons with different people, not copies of Adam. If a client photo fails, initials show so the row is never blank. The artifact tile is capped at 32rem so it stops between the reply text and the member photos. The channel list is 200px wide so names like e-commerce stay on one line. Every channel has its own icon.
+- **06** Title is **You leave with a 90-day roadmap.** Rows are real work: WordPress → Shopify, past customer data, email/SMS for old leads, fix the path to buy, turn advertising back on, launch content. Bars overlap more and each row has its own color so the steps read as different work. Gantt bars animate in.
+
+## Step 03 first-time buyer email – September 11, 2026
+
+After the VLAIR visit pays, the tracker already had order confirmation. The Buy beat now keeps going: confirmation email, then a Mailchimp first-time buyer campaign, then an upsell for the Soft short they looked at ($68). Hovering Buy shows that end state. The list adds Campaign and Upsell so the interest on the home page is the reason for the offer.
+
+## Discoverability + Audience jobs – September 11, 2026
+
+Solutions / use cases now include two more jobs.
+
+- **Discoverability:** Show up where people look. Multiple stores (Shopify, Amazon, Etsy), Google Maps, the site’s own SEO, and aggregators like Yelp. Visual lights each listing live.
+- **Audience:** Talk to people who will buy. Reuses the Maya / Eli walk from toolkit step 05 so the job matches the work we already show: notice you, on the site, the city, ready.
+
+## BCG-style capability pages – September 11, 2026
+
+The earlier BCG pass was research only. Solutions was still the job pills. Capabilities now have their own pages.
+
+BCG lists 20 capabilities. We kept the ones a growth team can run and dropped the giant-firm set: Business Resilience, Social Impact, People Strategy, Purpose, Climate, Corporate Finance, International, Manufacturing, M&A, Organization Strategy, Risk and Compliance.
+
+**Hub:** `/solutions` is a capability grid, BCG-style. Title, deck, Learn more.
+
+**Pages:** `/solutions/[slug]` uses BCG section headers: services offered, How We Help, Our Client Work, related capabilities. Offerings have child pages at `/solutions/[slug]/[offering]`. Headers match BCG (Marketing and Sales, Customer Insights, Digital, Technology, and Data, and so on). Body copy is Terramore: short, 6th grade, no em dashes.
+
+**Ours on top of BCG:** Discoverability and Audience are first-class capabilities, not buried.
+
+**Nav:** Solutions dropdown lists All capabilities, then every capability, then Jobs we take (`/#use-cases`). Two columns. Mobile lists the same. Homepage use-case pills stay for the jobs.
+
+## Plain-language services – September 11, 2026
+
+The All capabilities hub is gone. `/solutions` redirects to Get more sales. The Solutions menu lists each service, then Jobs we take.
+
+Names are jobs a shop owner can say out loud: Get more sales, Save hours with AI, Know who buys, Make your tools talk, Charge the right price, Run a smoother week, Stop wasting money, Launch something new, Unstick the business, Get found, Reach the right people.
+
+Each page leads with the impact in one line, then What we do, What you get, What this looks like. No BCG section titles. No “capabilities” in the nav.
+
+## Solutions story pages (BCG format) – September 11, 2026
+
+Get more sales was reading like a hub: a card grid of every offering. `/solutions` still redirects there, but the page is now one Marketing and Sales story, not a directory.
+
+**Same chrome on every Solutions page (parent and offering):** eyebrow, H1, two story paragraphs, Let’s talk, then named service rows (title + deck, not cards), How We Help, Our Client Work, related rows, close CTA.
+
+**Copy split:** nav stays the job names (Get more sales). Page H1 and section titles use the BCG capability names (Marketing and Sales, Artificial Intelligence, and so on). Body is still Terramore: short, 6th grade, no em dashes. Client work is checkout, first-time buyer / Soft short, missed-call texts. Not fake enterprise cases.
+
+**Why:** BCG capability pages lead with a story and list services as named rows. We wanted that shape on every Solutions URL so Get more sales, Get found, and E-Commerce all feel like the same site.
+
+## BCG visual format on Solutions – September 11, 2026
+
+The last pass matched BCG section names but not the page. BCG capability pages (AI, Purpose, Customer Insights, Digital) use a large serif H1, a lead paragraph, a full-width rounded photo, a second paragraph, then service tiles with Learn more.
+
+**Layout:** Every capability and offering page now uses that chrome. Source Serif 4 on H1/H2. Cream page. White rounded tiles. How We Help and Client Work are tiles too. Related-capability links are gone so we can fill pages first.
+
+**Nav:** Job names (Get more sales, Save hours with AI) were too casual. The menu now uses business names a small owner already knows: Marketing and Sales, Artificial Intelligence, Customer Insights, Digital and Data, Pricing and Revenue, Operations, Cost Management, Innovation Strategy, Business Transformation, Discoverability, Audience.
+
+**Copy:** Terramore, written for an owner who thinks in revenue, channels, and cash. No cute slang. No em dashes. Client work is still checkout, first-time buyer follow-up, missed-call booking.
+
+**Hero images:** Still-life photographs per capability (no people, no logos), stored in `assets/capability-heroes/`. Offerings reuse the parent image.
+
+## Integrations as business solutions – September 11, 2026
+
+Integrations was one hub of logo pills. It now uses the same page chrome as Solutions.
+
+**Header names** (what an owner already says): Email Marketing, Communications, Advertising, Ecommerce, Payments, Analytics, Scheduling. `/integrations` redirects to Email Marketing.
+
+**Each category page:** serif H1, lead, photo, second paragraph, software tiles (logo + name + Learn more), How We Connect It, How It Becomes Revenue. Tool pages (Mailchimp, Shopify, Calendly) cover connect-to-what-you-have, introduce-if-missing, and how the path becomes an order or a booking.
+
+**Why:** The stack is not a logo wall. It is how ads, the store, email, chat, pay, and the calendar share one customer so a click can become cash. We stay in the tools they pay for. We add the smallest missing piece. We do not start over.
+
+## Homepage reviews, security, report, About – September 11, 2026
+
+Owners needed two doors on every path: a meeting, or an email we can write to.
+
+**Homepage order:** Hero (Let’s talk + Download a report + Or pick a time) → toolkit → Letters to Terramore review carousel (two-row marquee, Lindy shape) → CCPA / HIPAA security band → use cases → founder teaser → report band → FAQ → cream footer.
+
+**Report:** `/report` collects name, email, site, and consent. `/api/report` stores the lead on the existing email list when Supabase is configured. Capabilities are not wired. After submit they see `/report/example`, a Northline Atelier sample (Soft Knit Set $84, Merino Cardigan $72). Names and numbers are changed from a live client file. The original client name is not on the page.
+
+**About:** `/about` is now Adam Moreno, Kantar, Samba TV, solutions engineering, then Terramore. Initials, no Cloudinary photos.
+
+**Advertising:** Already lives at `/integrations/advertising` and Marketing and Sales / Digital Marketing. FAQ, Resources, footer, and About point there.
+
+**CTAs:** Header, Story pages, Lindy pages, FAQ, and footer all offer Let’s talk and Download a report.
+
+## Free Digital Footprint report as a section, not a header button – September 11, 2026
+
+The header and hero no longer lead with a Download a report button. People should read what is in the file first.
+
+**Hero:** Let’s talk, Or pick a time, then a text line: Or get a free Digital Footprint report on your business. That line jumps to `#report`.
+
+**`#report` section:** What is included (footprint, audience, wins, openings), how long (two to three business days), what they enter (name, email, site), and the form that sends the file to their inbox. `/report` reuses the same section.
+
+**Header:** Let’s talk only. Resources still lists the free report as a page to read, not a second top button.
+
+## Slack thread alignment + Nia photo – September 11, 2026
+
+The hero Slack card was vertically centering the thread in a 36rem pane, so `# e-commerce` sat far above Nia Brooks. The thread now starts at the top of the pane, like Slack. Nia’s avatar is a clearer local headshot (`/founder/nia-brooks-headshot.png`) instead of a distant Unsplash crop.
+
+## Homepage polish: steps, reviews, security, use cases – September 11, 2026
+
+**Steps:** Gap after “leave you the plan” is half of what it was. Headers stay on one line and name the value: work inside current tools, connect every channel to revenue, find the leak, follow up the same day, reach people ready to buy, leave with a 90-day plan.
+
+**Reviews:** One Lindy-style row. Photo, name, @handle, one-line quote, and a source mark (Google, Yelp, LinkedIn, G2).
+
+**Security:** Three tiles in Lindy’s words (Compliant / Private / In your control) plus “See how we protect your data.”
+
+**Use cases:** Names are outcomes now (recover checkout revenue, fill the appointment book, qualify inbound leads, launch a campaign, schedule more consults, drive repeat purchase). Visuals: the week book fills with names, a missed call becomes a qualifying site chat, a lookbook pans through a custom-home set with the client name removed, consults drop onto a partner calendar, refill emails float like the other job marks.
+
+## Solutions cards reveal like BCG – September 11, 2026
+
+BCG’s CMO Agenda / Digital Sales / E-Commerce cards keep the title on the photo, then spring a cream panel up to show the body. Solutions pages now do the same.
+
+**Behavior:** Hover or click. Not a link. No Learn more. The photo stays, the title stays, and the copy appears inside the card. Clicking another card closes the first.
+
+**Where:** Services, How we help, and Client work on every capability page, plus How we help on offering pages. Integration cards are unchanged so those still go to a tool page.
+
+## Homepage hero, report popup, campaign calendar – September 11, 2026
+
+**Logos:** The Möbius path is sized and centered on the headline, not on `160vw`. Each mark also gets `offset-path` from JS so a wide second monitor cannot send the path to a negative X. The track hugs the copy.
+
+**Hero:** The copy fills the first screen. Slack sits in full under it, so only the top two channels peek at the fold. Scroll reveals the rest of the tile, then the toolkit. “Or pick a time” is gone. The report is no longer a skip link from the hero. Founder block is off the home page.
+
+**Report:** The section is the file you get: four chapters (where you show up, who buys, what pays, where cash leaks) with a Northline sample line in each. The form opens in a popup after they choose “Send me the free report.”
+
+**Launch a campaign:** A content calendar. Apparel, fitness, clinic, and home posts light up with a live date. No lookbook photos.
+
+**Get found online:** Storefront marks are centered under a one-line story. Schedule more consults is removed. Integrations in the header stays open on click and closes on a second click or a click outside. Hover still opens and closes on leave. `/integrations` is a hub, and the footer Visit list all go to real pages.
+
+## Site clarity audit – September 11, 2026
+
+No code changed. Every public route was read as a first-time owner and graded 1 to 5 (plain words, purpose in five seconds, obvious next step). 41 sections, average 3.2, no 5s. The full table with next steps lives in the Cursor canvas `terramore-clarity-audit`.
+
+**Why the audit, not edits:** The user asked for a grade and a plan first. The weakest items are structural (nav taxonomy, the `/partner` form, legacy pages) and should be decided before copy edits.
+
+**Top findings:** the layout `<title>` still says “Free Courses & Consultations”; `/workshops`, `/courses/*`, and `/careers` contradict the site and sit in the sitemap at priority 0.9; the Solutions menu is twelve consulting nouns; `/partner` is an eight-step “Partner with Terramore.io” form with the old footer; `/pricing` and `/enterprise` are linked from nowhere; `/security`, `/pricing`, `/enterprise`, `/resources` have no footer; house words (leak, hold, the send, the list, Terra IQ) are never given a plain first use.
+
+
+## Clarity audit: all eight fixes and the rerun – September 11, 2026
+
+The eight "fix first" items from the audit are built. The same sweep (fetch every route from localhost:3000, strip to text, regrade with the same 1 to 5 rubric) was run again. 41 sections: average 3.2 → 4.5, seven 1s and 2s → zero, zero 5s → 22. The canvas `terramore-clarity-audit` now shows before and after per section.
+
+**1. Legacy pages and tab title.** `app/workshops`, `app/courses/*`, `app/careers`, `components/free-courses-popup.tsx`, `hooks/use-free-courses-popup.tsx`, and the `course-signup` / `free-courses-signup` API routes are deleted. `next.config.mjs` redirects `/workshops` → `/partner`, `/courses` and `/courses/*` → `/`, `/careers` → `/about` (permanent). Sitemap drops them and adds `/pricing` and `/enterprise`; the courses priority bump is gone. `app/layout.tsx` metadata is "Terramore | A growth team for owners" with a real description and keywords. Per-page `metadata` added on `/partner`, `/pricing`, `/security`, `/enterprise`, `/resources`, `/report`, `/report/example`, `/about`, `/solutions`. `llms.txt` rewritten to match the site. The legal pages still carry their own old inline nav with course links; the redirects catch those, but the pages themselves were out of scope.
+
+**2. /partner is "Talk with us".** New `components/talk-form.tsx`: three steps (what is stuck as a pick-one list of owner jobs, the business with site and optional type and revenue, name and email). Success state links to the Calendly page and the sample report. The page has a "What to expect" column (before, on, after the call), a direct calendar link, a pricing link, and `SiteFooter`. `app/api/partner-application/route.ts` now requires only `goal`, `name`, and `email`; the old fields are stored as "Not asked" / "Not shared" so the Supabase table shape did not change. Business name and site go into `message`. Duplicate email (409) is treated as sent, same as the report form.
+
+**3. Hero.** Subline replaced with the descriptor (growth team, inside your store, ads, email; find the step where you lose sales; for owners with a shop, a service, or a list). A caption sits above the Slack tile: "How the work happens. You ask in your channel. We ship it in your tools." The hero copy block lost 2rem of min-height so Slack still peeks 156px at the fold on a 900px viewport.
+
+**4. Solutions menu and hub.** `OWNER_JOBS` added to `lib/capabilities.ts` (six jobs, each pointing at the page that does it). `HeaderMenu` accepts `sections` with headings; Solutions shows "Pick the job" and "Every capability" side by side, with "See every job we take" and "All solutions" as strong links. Integrations menu ends with "All integrations"; Resources menu leads with Pricing and adds Start here. Mobile menu mirrors the grouping. `/solutions` is a real hub (jobs first, then all eleven capabilities) instead of a redirect.
+
+**5. Pricing linked, cost answered.** FAQ cost answer names the three tiers and links `/pricing`; the report answer links the sample; all seven answers rewritten. Footer Visit list: Solutions (hub), Integrations, Pricing, report, About, Security, Questions, Larger teams, Start here, Talk with us. `/pricing` copy says what happens at each tier and when you pay, with a report link for people not ready to call. No dollar figures, on purpose.
+
+**6. Four capability pages.** In `lib/capabilities.ts`: Digital, Technology, and Data opens with "Your ads, your store, your email, and your analytics should tell one story"; services are A 90-Day Plan, One View of Ads, Site, and Sales, Connect the Tools You Have, Score the Stack, Try New Tools Safely. Innovation Strategy and Delivery is now "Launch Something New" (Decide What to Launch, Ship It, Do It Again). Business Transformation is now "How We Work With You" (A Weekly Review, The First 90 Days, One Number We Are Moving). Artificial Intelligence opens with the 9 pm assistant and its services are An Assistant That Answers and Books, AI in the Daily Work, Rebuild the Path from Lead to Done, Rules for What It Can Say and See. Slugs unchanged so no URLs moved. Smaller renames: Marketing Function Excellence → A Cheaper Marketing Week, Supply Chain Management → Ship Dates You Can Hit, Schedule more consults → Fill the appointment book, Discoverability → Get Found, One clock → Four steps, no skipping.
+
+**7. Proof.** All 24 client-work cards open with the kind of business (shapewear brand, plumbing, clinic, fitness studio, home goods shop). Review cards render `role` instead of the @handle and roles are now specific with a city. No numbers were invented; the audit asked for one per card and that needs real figures from the user.
+
+**8. Jargon and About.** Plain first use everywhere the audit flagged: leak → the step where you lose sales, hold → a spot on the calendar, VA → your assistant, packet → the welcome files, pixel → tracking code, Business Manager → your ad account, the list → your email list, AOV → average order, SKU → next product, "Not Terra IQ" → "No login. No call." Security band uses the CCPA/HIPAA line. Use cases renamed (Answer every call and message, Reach people ready to buy). `StoryHero` has a `parent` prop; offering, capability, category, and tool pages show a "Part of …" link above the title. `/enterprise` lost its em dashes and is "Larger teams" in the footer. `/resources` is "Start here" with ten owner questions. `LindyPage` renders `SiteFooter`, so security, pricing, enterprise, and resources share the site footer. About leads with "Big brands pay a team to find out why people do not buy. Now you can have one," adds a "What that means for you" block, tells the resume once, and drops the stray Advertising line. Photo still needs a headshot.
+
+**Still open (needs the user):** headshot for About; real numbers for client cards and reviews; dollar ranges on Pricing; Customer Insights and Pricing and Revenue openers; a neutral Integrations hub image; optional trim of the six-step section.
+
+**Verification:** `tsc` clean outside pre-existing `components/ui` errors. Dev server restarted for the redirect change. All 22 public routes return 200 with the right `<title>`; legacy routes return 308. Talk form walked through all three steps in the browser (not submitted). Slack peek measured at 156px.
+
+## Hero logos back, shorter subline, dark recorder, report animation – September 11, 2026
+
+**Möbius logos.** They were rendering but invisible: the infinity path (about ±184px wide, ±84px tall) sat entirely inside the mask hole cut around the headline (±515 by ±208), so the mask hid every mark. The path now uses the whole track box (lobes reach `copyWidth + 2×reach` wide and `copyHeight + 150` tall) and the hole is a little smaller than the copy (0.42 × width, 0.46 × height), so about four fifths of each lobe is visible and marks fade only while passing behind the type. The mobile CSS caps on the track size were removed because they shifted the path off its box.
+
+**Hero copy.** Subline is one line: "A growth team for owners. We find where you lose sales and fix it." The Slack caption is gone and the copy block min-height is back to `100svh - 10.75rem`.
+
+**Blue background on the Vlair recorder.** `.software-visual-wash` was declared after `@tailwind utilities`, so its `background` shorthand beat the `bg-[#0a0a0a]` utility on the same element and painted the recorder blue (toolkit step 03 and the Recover checkout revenue use case). The wash rules now live in `@layer components`, and `Wash` skips the wash class whenever a `bg-` class is passed. The metrics HUD under the recording was never removed; it is visible again on black.
+
+**Sticky visual height.** The right-hand box was `h-[min(36rem, 100vh - 10rem)]`, 576px tall on a 900px screen, which left a large gap under the integration logos and stretched every step. It is `aspect-[5/4]` now (capped at `100vh - 10rem`), matching the mobile cards, and the logo grid uses `content-evenly` so rows spread to the button.
+
+**Report band.** The knit-set photo is replaced by `components/report-scan-visual.tsx`: five source chips (Site, Ads, Maps, Listings, Email) light up in turn while six findings appear one per second with a meter each: Discoverability (3 of 6 dots), Number of stores, Current highlights, Ad wins, Who buys, Where cash leaks. Values are Northline sample lines and say so. "What you get" copy stays under it.
+
+## Report popup with three questions, shared across the site – September 11, 2026
+
+**Why.** "Or get a free Digital Footprint report" sat too close to the "Let's talk" button and sent people to `/report`, a page that only restated the offer. The home page already had a nicer path: a popup with the form. Every report link now opens that same popup, and the popup warms the owner up before asking for an email.
+
+**One component.** `components/report-popup.tsx` exports `ReportPopup` (`open`, `onClose`) and `ReportPopupLink` (a text button that opens it). The modal is a white `rounded-[1.75rem]` card on an `ink/60` backdrop at `z-[100]`, rendered through a portal to `body` so it is never nested inside a `<p>` and sits above the `z-[80]` header. Backdrop click and Escape close it; body scroll is locked while open. Header: "Free Digital Footprint report" eyebrow and "Three quick questions, then we read your business and send the file in two to three business days."
+
+**Three softball questions, one at a time,** with a "1 of 3" counter and a progress bar. Each pick advances on its own after 750ms and shows one reassuring line:
+1. Do you have a website or online store today? Yes / Not yet. "Good. That tells us where to look first."
+2. Which is closest to your business? Online store / Local shop or service / Clinic or practice / Something else. "Got it. We read the footprint the way your customers find it."
+3. Are you running any ads or sending emails right now? Yes, both / One of them / Not yet. "Thanks. Now we know where the first fix likely is."
+Then "Last step. Where should the file go?" and the existing `ReportForm` (name, email, business name, website, consent). Success still goes to `/report/example?sent=1`.
+
+**Storing the answers.** `ReportForm` takes an optional `answers` object and posts it with the lead. `app/api/report/route.ts` folds it into a short string like `site=yes; type=local; marketing=one` (letters, digits, `_`, `=` only; capped at 100 chars) and writes it to `course_type`, a `VARCHAR(100)` column on `free_courses_signups` that report leads never used. No schema change, and a lead with no answers inserts exactly as before (`course_type: null`).
+
+**Where it is used.** `LindyPage` hero (security, pricing, enterprise, resources), `DualCtas` (about, story pages, FAQ, footer), `/partner` ("Not ready for a call?"), `/pricing` ("Not ready for a call?"), and `ReportBand` on the home page and `/report`, which lost its own inline modal and Escape handler in favor of the shared one. `ReportForm` gained a `plain` prop that drops its own card and header when it sits inside the popup. `/report` stays a page and stays in the menus.
+
+**Spacing.** Lindy hero: the report link moved from `mt-3` to `mt-6`. `DualCtas`: stacked gap `gap-3` to `gap-5` (row gap on desktop is `gap-4`). Partner "Not ready" line: `mt-4` to `mt-7`.
+
+**Verification.** `tsc` clean outside the pre-existing `components/ui` errors. Headless Chrome over CDP on `/pricing`, `/about`, `/partner`, and `/`: the link opens the popup, the three questions advance to the form with all five fields, Escape closes it and restores scroll, no console errors. The form was not submitted.
+
+## Go-live pass: Supabase check, report pipeline, Slack and email alerts, legal pages – September 11, 2026
+
+**What was asked.** Confirm both forms connect to Supabase, add an automatic Digital Footprint read that emails a PDF to the requester at low cost, make sure new bookings and new requests reach Adam, and list anything left before launch.
+
+**Supabase: what could and could not be verified.** There is no `.env`, `.env.local`, or `.env.production` in this checkout and the running dev server has no Supabase variables, so the live project could not be introspected from here. What was verified instead: both routes insert exactly the columns defined in `SUPABASE_SETUP.md` and `supabase-website-migration.sql` (`free_courses_signups`: `first_name`, `last_name`, `email`, `company`, `email_consent`, `signup_source`, `course_type`, `signup_date`, `status`; `partner_applications`: `location`, `business_type`, `revenue`, `team_size`, `goal`, `timeline`, `budget`, `name`, `email`, `phone`, `message`, `application_date`, `status`). Types and nullability match. One real risk found: the newer migration file creates the tables in a `website` schema while both routes used the default `public` schema. New `lib/supabase-server.ts` gives both routes one client and reads `SUPABASE_SCHEMA` (default `public`; set `website` if that migration was the one you ran, and expose `website` under Project Settings → API). `GET /api/report/generate` with header `x-report-secret` now probes both tables and every column the routes use and reports which keys are present, so the check can be run against production in one call once the env is set.
+
+**Report pipeline (`lib/report/*`, `app/api/report/route.ts`, `app/api/report/generate/route.ts`).** The Vlair report was produced in a different workspace; the transcripts here only reference the anonymised Northline sample, so the pipeline was designed fresh and kept cheap. On each report request the route saves the lead, returns 201, and then in `after()`: alerts Adam, confirms to the requester, and runs the pipeline. `footprint.ts` fetches the site HTML, robots.txt, and sitemap.xml with no paid API and records only observed facts: title, description, H1s, platform (Shopify, Woo, Wix, Squarespace, Webflow, WordPress), tracking pixels (Meta, GA, GTM, Google Ads, TikTok, Pinterest), email tools (Klaviyo, Mailchimp, HubSpot, Omnisend), social links, contact email and phone, cart or booking presence, visible prices. If `GOOGLE_PLACES_API_KEY` exists it adds one Places Text Search call (rating, review count, address, hours). Ad libraries are linked for a manual check, not scraped. `write.ts` sends those facts to the cheapest capable model for the key present (`OPENAI_API_KEY` → `gpt-4.1-mini`, `ANTHROPIC_API_KEY` → `claude-haiku-4-5`, override with `REPORT_MODEL`) with a system prompt that enforces the house voice (short sentences, no em dashes, never "tiles"), forbids invented facts, and requires "Not found" for anything not observed; a post-filter strips em dashes and the word "tiles" regardless. Output is the four chapters (Where you already show up; Who already looks, and who already buys; What already pays; Where cash is leaking) plus three 90-day moves. `pdf.ts` renders a Letter PDF with `pdf-lib` (new dependency, pure JS, no Chromium): ink cover, cream chapter pages with fact cards, closing page with the Calendly link and a plain-truth disclaimer. `pipeline.ts` emails the PDF to the requester with BCC to `adam.moreno@terramore.io`, stores the report text and status on the row, and posts a Slack line on sent, failed, or needs_keys. Estimated cost per report: about 4k input and 1.5k output tokens → roughly $0.004 on gpt-4.1-mini (about $0.01 on Haiku 4.5), plus about $0.03 if the Places call is on, plus email at Resend's free tier. Under five cents.
+
+**Row columns.** `supabase/migrations/20260911_report_pipeline.sql` adds `business_name`, `website`, `report_status`, `report_text`, `report_error`, `report_sent_at` to `free_courses_signups`. Run it in the SQL Editor. Until it runs the code falls back: it logs a warning, and writes `needs_keys` or `failed` into the legacy `status` column so the row still says something went wrong. It never writes `sent` into `status`.
+
+**Alerts and confirmations (`lib/notify.ts`).** Adam is told on Slack, not SMS. `notifyAdminOfLead` posts an Incoming Webhook message (`SLACK_WEBHOOK_URL`) with name, email, phone, business, site, the job or the three popup answers, the row id, and a link to the table in the Supabase dashboard; an email copy goes to `NOTIFY_EMAIL_TO` (default `adam.moreno@terramore.io`) when an email provider key exists. The requester gets `confirmLeadToUser`: an email ("We got it. The report lands in two to three business days." or "We got it. We read the site before we reply, usually within one business day.") and, only on the Talk form and only when they typed a phone, a short Twilio SMS. Email provider is whichever key exists: `RESEND_API_KEY`, `SENDGRID_API_KEY`, or `POSTMARK_SERVER_TOKEN`, sender `EMAIL_FROM`. Every channel is a logged no-op without its key and nothing here can fail a form submission; all of it runs in `after()`. `app/api/partner-application/route.ts` no longer throws a 500 when Supabase keys are missing; it logs the lead, sends the alerts, and returns 201 so a misconfigured deploy does not lose the request silently. The two `TODO` comments there are gone.
+
+**Calendly.** `components/calendly-widget.tsx` lost the 2024 US holiday list, the fake weekday picker, and the three-second "finding the right person" spinner. It is now a small card with Adam's photo and the Calendly embed, so days, hours, and notice come from the account and cannot contradict it. `components/roadmap-modal.tsx` still has `calendly.com/your-calendar`, but nothing imports it (only its hook file exists), so it was left alone. Settings that live in Calendly, not in code, for the `terramore/30min` event type:
+- Event type: one on one, duration 30 min, name "Talk with Terramore" or similar.
+- Availability: a schedule in `America/Los_Angeles`, Monday to Sunday 7:00 am to 8:00 pm (drop days you do not want).
+- Scheduling limits: minimum scheduling notice 2 hours; optional buffers and a daily cap.
+- Notifications and workflows: email confirmation to invitee on; a workflow "Send text to host when a new event is scheduled" to Adam's cell (Calendly Standard or higher; verify the number in Calendly); host email notifications go to the account email, so the account or a workflow email step must point at `adam.moreno@terramore.io`.
+- Invitee questions: keep name, email, and add "Website" so the site is known before the call.
+- Confirmation page: redirect to `https://terramore.io/report/example` or leave Calendly's default.
+
+**Legal pages.** `app/privacy`, `app/terms`, `app/disclosure`, `app/dmca` each carried a dark inline nav with a Courses menu linking to deleted `/courses/*` pages, a blue inline footer with "students" language, their own Schedule button and Calendly widget, and a 2025 LLC copyright. All four now render only their content and `SiteFooter`; the global `SiteHeader` comes from the root layout. Copyright lines read "Terramore.io, owned and operated by Adam Moreno, © 2026". Not changed: "Terramore.io, LLC" inside the policy prose and the "Last Updated February 4, 2025" dates, since those are legal statements to confirm, not layout. The pages are static again (no client hooks).
+
+**Go-live checklist.**
+1. Production env (Vercel → Settings → Environment Variables, Production scope): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_SCHEMA`, `SLACK_WEBHOOK_URL`, one of `RESEND_API_KEY` / `SENDGRID_API_KEY` / `POSTMARK_SERVER_TOKEN`, `EMAIL_FROM`, `NOTIFY_EMAIL_TO`, `OPENAI_API_KEY` or `ANTHROPIC_API_KEY`, `REPORT_GENERATE_SECRET`, optional `GOOGLE_PLACES_API_KEY`, `REPORT_MODEL`, `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER`. Names are in `.env.example`. No `vercel.json` exists; defaults are fine.
+2. Run `supabase/migrations/20260911_report_pipeline.sql`, then `curl -H "x-report-secret: …" https://terramore.io/api/report/generate` and confirm every probe is `ok: true` and `reportPipelineReady: true`.
+3. Submit one real report request with your own email and check: Slack line, confirmation email, PDF within about a minute, row updated to `report_status = sent`.
+4. Verify the sending domain at the email provider (SPF and DKIM) before the first send, or the PDF lands in spam.
+5. Cloudinary assets load: OG image and favicon both return 200 `image/png` (checked with curl today). `metadataBase` is `https://terramore.io`.
+6. `robots.ts` allows all, blocks `/api/`, points at the sitemap. `sitemap.ts` lists every public route including the legal pages and the generated solutions and integrations pages.
+7. Redirects in `next.config.mjs` cover `/courses`, `/courses/*`, `/workshops`, `/careers`.
+8. The live `terramore.io` still serves the old site (title "Consulting | Marketing | Free Courses"). Deploy this branch and purge any CDN cache.
+9. `pnpm build` passed today (105 static pages, 4 API routes). `ignoreBuildErrors` still hides pre-existing `components/ui/*` type errors.
+10. `components/roadmap-modal.tsx` is dead code with a placeholder Calendly URL; delete it when convenient.
+
+**Files.** New: `lib/supabase-server.ts`, `lib/notify.ts`, `lib/report/footprint.ts`, `lib/report/write.ts`, `lib/report/pdf.ts`, `lib/report/pipeline.ts`, `app/api/report/generate/route.ts`, `supabase/migrations/20260911_report_pipeline.sql`, `.env.example`. Changed: `app/api/report/route.ts`, `app/api/partner-application/route.ts`, `components/calendly-widget.tsx`, `app/privacy/page.tsx`, `app/terms/page.tsx`, `app/disclosure/page.tsx`, `app/dmca/page.tsx`, `package.json` (`pdf-lib`).

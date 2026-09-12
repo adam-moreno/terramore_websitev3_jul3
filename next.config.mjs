@@ -11,9 +11,10 @@ const nextConfig = {
   },
   async redirects() {
     return [
-      { source: '/courses/scaling', destination: '/courses/foundation', permanent: true },
-      { source: '/courses/offers', destination: '/courses/make-it-real', permanent: true },
-      { source: '/courses/leads', destination: '/courses/build-to-grow', permanent: true },
+      { source: '/courses', destination: '/', permanent: true },
+      { source: '/courses/:path*', destination: '/', permanent: true },
+      { source: '/workshops', destination: '/partner', permanent: true },
+      { source: '/careers', destination: '/about', permanent: true },
     ]
   },
 }

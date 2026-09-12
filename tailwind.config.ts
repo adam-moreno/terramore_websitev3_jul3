@@ -13,6 +13,16 @@ const config: Config = {
   theme: {
   	extend: {
   		colors: {
+  			cream: '#fcf9f8',
+  			ink: '#0f1e2e',
+  			brand: {
+  				DEFAULT: '#2a66ff',
+  				hover: '#2252cc',
+  			},
+  			gold: {
+  				from: '#f7b844',
+  				to: '#c68809',
+  			},
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {
