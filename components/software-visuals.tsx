@@ -7,17 +7,16 @@ import { INTEGRATION_LOGOS } from "@/lib/integrations"
 const TILE =
   "rounded-2xl bg-white shadow-[0_12px_28px_-18px_rgba(15,30,46,0.28)] ring-1 ring-black/[0.04]"
 
-const Wash = forwardRef<HTMLDivElement, { children: ReactNode; className?: string; frame?: string }>(
-  function Wash({ children, className = "", frame = "min-h-[26rem] md:min-h-0" }, ref) {
+const Wash = forwardRef<HTMLDivElement, { children: ReactNode; className?: string }>(
+  function Wash({ children, className = "" }, ref) {
     // A visual that brings its own background (the dark Vlair recorder) should not get the blue wash under it.
     const wash = /\bbg-/.test(className) ? "" : "software-visual-wash"
-    // From md up the wash fills a fixed-aspect frame. Below md it sits in flow. The default mobile frame
-    // grows from a minimum to fit its content; a visual whose content reflows while it rotates can pass a
-    // fixed mobile height (`frame`) so an inner flex-1 region absorbs the change and the frame never resizes.
+    // From md up the wash fills a fixed-aspect frame. Below md it sits in flow with a minimum height,
+    // so a phone-width visual grows to fit its content instead of overlapping or clipping it.
     return (
       <div
         ref={ref}
-        className={`${wash} relative ${frame} overflow-hidden md:absolute md:inset-0 ${className}`}
+        className={`${wash} relative min-h-[26rem] overflow-hidden md:absolute md:inset-0 md:min-h-0 ${className}`}
       >
         {children}
       </div>
@@ -277,7 +276,9 @@ function TrackHud({ rows, onDark = false }: { rows: TrackRow[]; onDark?: boolean
   const filled = TRACK_SLOTS.map((label) => ({
     label,
     value: values[label]?.replace("\n", ", "),
-  })).filter((row) => row.value)
+  }))
+    .filter((row) => row.value)
+    .slice(-4)
 
   return (
     <div className="flex items-start gap-2">
@@ -1048,15 +1049,11 @@ function ChannelDetail({ beat }: { beat: number }) {
   )
 }
 
-const CHANNEL_HOLD_MS = 7000
+const CHANNEL_HOLD_MS = 4000
 
 export function ChannelValueVisual() {
-  const rootRef = useRef<HTMLDivElement>(null)
-  const [visible, setVisible] = useState(false)
   const [held, setHeld] = useState<number | null>(null)
-  // Slower cadence (8s a state, double the old 4s) so a reader can follow, and paused until the
-  // section is on screen so it always begins on the first state, "Ads", when it is revealed.
-  const [autoIndex, setIndex] = useCycle(MONEY_BEATS.length, 8000, held !== null || !visible)
+  const [autoIndex, setIndex] = useCycle(MONEY_BEATS.length, 4000, held !== null)
   const holdTimer = useRef<number | null>(null)
   const active = held ?? autoIndex
   const beat = MONEY_BEATS[active]
@@ -1067,22 +1064,6 @@ export function ChannelValueVisual() {
       if (holdTimer.current !== null) window.clearTimeout(holdTimer.current)
     }
   }, [])
-
-  // Reset to "Ads" every time the visual enters the viewport, and only rotate while it is on screen.
-  useEffect(() => {
-    const node = rootRef.current
-    if (!node) return
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const showing = entries[0]?.isIntersecting ?? false
-        if (showing) setIndex(0)
-        setVisible(showing)
-      },
-      { threshold: 0.35 },
-    )
-    observer.observe(node)
-    return () => observer.disconnect()
-  }, [setIndex])
 
   const holdBeat = (index: number) => {
     setHeld(index)
@@ -1095,16 +1076,10 @@ export function ChannelValueVisual() {
   }
 
   return (
-    <Wash ref={rootRef} className="software-visual-wash-hot flex flex-col p-3">
-      {/* A guided caption leads the reader: a small uppercase label names the stage and its place in
-          the sequence, then the line explains what to watch. Reserve a constant height so a caption that
-          wraps to two lines on a narrow phone does not change the frame height as the beats rotate. */}
-      <div className="relative z-[4] flex min-h-[3.75rem] flex-col items-center justify-center gap-1 px-1 md:min-h-0">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-brand">
-          Step {active + 1} of {MONEY_BEATS.length} · {beat.source}
-        </p>
-        <p className="text-center text-[14px] font-semibold tracking-tight text-ink">{beat.line}</p>
-      </div>
+    <Wash className="software-visual-wash-hot flex flex-col p-3">
+      <p className="relative z-[4] px-1 text-center text-[14px] font-semibold tracking-tight text-ink">
+        {beat.line}
+      </p>
 
       {/* Phones: the apps for the active source sit in one row and the strip below is the switcher. */}
       <div className="mt-2 flex justify-center gap-1.5 md:hidden">
@@ -1154,25 +1129,7 @@ export function ChannelValueVisual() {
         </div>
 
         <div className="min-h-0 flex-1 md:absolute md:inset-y-0 md:right-0 md:w-[52%]">
-          {/* Phones: every source's detail is laid out in one grid cell, so the frame is as tall as the
-              tallest state and never resizes while the beats auto-rotate; only the active one is visible. */}
-          <div className="grid h-full md:hidden">
-            {MONEY_BEATS.map((item, index) => (
-              <div
-                key={item.id}
-                aria-hidden={index !== active}
-                className={`col-start-1 row-start-1 transition-opacity duration-300 ${
-                  index === active ? "opacity-100" : "pointer-events-none opacity-0"
-                }`}
-              >
-                <ChannelDetail beat={index} />
-              </div>
-            ))}
-          </div>
-          {/* Desktop is unchanged: one detail at a time so it keeps its per-switch entrance animation. */}
-          <div className="hidden h-full md:block">
-            <ChannelDetail beat={active} />
-          </div>
+          <ChannelDetail beat={active} />
         </div>
       </div>
 
@@ -1212,9 +1169,7 @@ export function LeakFlowVisual() {
   const view = hovered !== null ? settledVlair(hovered) : live
 
   return (
-    // Fixed mobile height: the tracked-metrics HUD grows as the recording plays, so the flex-1 screen
-    // area below absorbs that change and the frame stays a constant height while it rotates.
-    <Wash frame="h-[30rem] md:min-h-0 md:h-auto" className="flex flex-col bg-[#0a0a0a] p-0">
+    <Wash className="flex flex-col bg-[#0a0a0a] p-0">
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden text-white md:h-full">
         <div className="flex shrink-0 items-center gap-1.5 bg-[#141414] px-3 py-2">
           <span className="h-2 w-2 rounded-full bg-white/25" />
@@ -1324,7 +1279,7 @@ export function FollowUpFlowVisual() {
         }`}
       >
         <div className="min-w-0">
-          <p className="hidden text-[12px] font-semibold uppercase tracking-[0.12em] text-slate-400 lg:block">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400 lg:text-[12px]">
             New lead
           </p>
           <p className="truncate text-[18px] font-semibold tracking-tight text-ink lg:text-[22px]">
@@ -1340,7 +1295,7 @@ export function FollowUpFlowVisual() {
       </div>
 
       <div className={step >= 1 ? "software-node-in" : "opacity-25"}>
-        <p className="hidden text-[12px] font-semibold uppercase tracking-[0.12em] text-slate-400 lg:block">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400 lg:text-[12px]">
           Team knows now
         </p>
         <div className="grid grid-cols-3 gap-1.5 lg:mt-1.5 lg:gap-2">
@@ -1364,7 +1319,7 @@ export function FollowUpFlowVisual() {
       </div>
 
       <div className={step >= 2 ? "software-node-in" : "opacity-25"}>
-        <p className="hidden text-[12px] font-semibold uppercase tracking-[0.12em] text-slate-400 lg:block">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400 lg:text-[12px]">
           Business moves
         </p>
         <div className="grid grid-cols-3 gap-1.5 lg:mt-1.5 lg:gap-2">
@@ -1390,7 +1345,7 @@ export function FollowUpFlowVisual() {
 
       <div className="grid shrink-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-1.5 lg:gap-2">
         <div className={step >= 3 ? "software-flow-up" : "opacity-25"}>
-          <p className="hidden text-[12px] font-semibold uppercase tracking-[0.12em] text-slate-400 lg:block">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400 lg:text-[12px]">
             Customer responds
           </p>
           <div className={`${TILE} rounded-2xl rounded-bl-md px-3 py-1.5 lg:mt-1.5 lg:px-3.5 lg:py-2.5`}>
@@ -1419,7 +1374,7 @@ export function FollowUpFlowVisual() {
         </svg>
 
         <div className={`${TILE} px-3 py-1.5 lg:px-3.5 lg:py-2.5 ${step >= 4 ? "software-node-in" : "opacity-25"}`}>
-          <p className="hidden text-[12px] font-semibold uppercase tracking-[0.12em] text-slate-400 lg:block">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400 lg:text-[12px]">
             Next action
           </p>
           <p className="text-[13px] font-semibold leading-snug text-ink lg:mt-1 lg:text-[15px]">
@@ -1496,13 +1451,13 @@ const AUDIENCE_RESULTS = [
 
 export function AudienceIntelVisual() {
   const reduce = usePrefersReducedMotion()
-  const [walk] = useCycle(6, 3000, reduce)
+  const [walk] = useCycle(6, 1800, reduce)
   const col = reduce ? 3 : Math.min(walk, 3)
   const wrapping = !reduce && walk === 0
   const bought = reduce || walk >= 3
 
   return (
-    <Wash className="flex h-full flex-col justify-start gap-2.5 p-2.5 lg:gap-3 lg:p-4">
+    <Wash className="flex h-full flex-col justify-between gap-2 p-2.5 lg:gap-3 lg:p-4">
       <p className="sr-only">
         We watch Maya and Eli from the first ad or Instagram tap, through the site, to the city.
         When they are ready to buy, reach, leads, deals, and buys go up.
