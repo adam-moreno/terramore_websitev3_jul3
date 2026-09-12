@@ -1,47 +1,16 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import Link from "next/link"
 import { ReportPopup } from "@/components/report-popup"
 import { ReportScanVisual } from "@/components/report-scan-visual"
-
-const CHAPTERS = [
-  {
-    n: "01",
-    title: "Where you already show up",
-    body: "Your site, ads, Maps, email, and the listings people already use. We write what a stranger can see today.",
-    sample: "Northline: Shopify is live. Maps hours are a season behind.",
-  },
-  {
-    n: "02",
-    title: "Who already looks and buys",
-    body: "Who visits, who pays, and who paid still talks to. So ads and email go to the right people.",
-    sample: "Northline: women 32–46. Soft Knit Set. 61% leave at shipping.",
-  },
-  {
-    n: "03",
-    title: "What already pays",
-    body: "The path that already makes money. We keep it. We do not rip out what works.",
-    sample: "Northline: mobile checkout and the first-time buyer note.",
-  },
-  {
-    n: "04",
-    title: "Where cash is leaking",
-    body: "The broken step, and the first moves we would take in 90 days. In order.",
-    sample: "Northline: paid still talks to the city. No second email.",
-  },
-] as const
+import { CHAPTERS } from "@/lib/report/chapters"
 
 export function ReportBand() {
   const [open, setOpen] = useState(false)
+  // One shared index. The scan visual runs the rotation and drives this, so the
+  // finding on the left and the highlighted chapter on the right stay in sync.
   const [active, setActive] = useState(0)
-
-  useEffect(() => {
-    const id = window.setInterval(() => {
-      setActive((current) => (current + 1) % CHAPTERS.length)
-    }, 2800)
-    return () => window.clearInterval(id)
-  }, [])
 
   const chapter = CHAPTERS[active]
 
@@ -62,7 +31,7 @@ export function ReportBand() {
         <div className="card-radius mx-auto mt-12 grid max-w-[980px] overflow-hidden border border-black/[0.06] bg-white shadow-[0_20px_50px_-28px_rgba(15,23,42,0.22)] md:rounded-[1.75rem] lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
           <div className="card-pad relative flex min-h-[26rem] flex-col bg-ink text-cream md:p-7">
             <div className="min-h-0 flex-1">
-              <ReportScanVisual />
+              <ReportScanVisual active={active} setActive={setActive} />
             </div>
             <div className="mt-5 border-t border-white/10 pt-4">
               <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-cream/50">What you get</p>

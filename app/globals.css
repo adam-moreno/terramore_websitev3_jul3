@@ -615,19 +615,25 @@
   animation: software-track-row-in 0.45s ease-out both;
 }
 
-@keyframes report-meter-fill {
+@keyframes report-finding-in {
   from {
-    transform: scaleX(0);
+    opacity: 0;
+    transform: translateY(6px);
   }
   to {
-    transform: scaleX(1);
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-.report-meter-fill {
-  transform-origin: left center;
-  animation: report-meter-fill 0.7s ease-out both;
-  animation-delay: 0.2s;
+.report-finding-in {
+  animation: report-finding-in 0.45s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .report-finding-in {
+    animation: none;
+  }
 }
 
 .software-story-layer {

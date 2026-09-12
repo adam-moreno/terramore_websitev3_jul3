@@ -1,110 +1,105 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, type Dispatch, type SetStateAction } from "react"
+import Link from "next/link"
+import { CHAPTERS } from "@/lib/report/chapters"
 
-// What we read, in the order a stranger would find it.
-const SOURCES = ["Site", "Ads", "Maps", "Listings", "Email"] as const
+const ADVANCE_MS = 3800
 
-// What comes back, one line at a time. Sample values are Northline Atelier, the sample report.
-const FINDINGS = [
-  { label: "Discoverability", value: "Live in 3 of 6 places", meter: { kind: "dots", on: 3, of: 6 } },
-  { label: "Number of stores", value: "2 stores. Prices match in 1.", meter: { kind: "dots", on: 1, of: 2 } },
-  { label: "Current highlights", value: "Mobile checkout finishes. First-buy email lands.", meter: { kind: "bar", pct: 78 } },
-  { label: "Ad wins", value: "Meta return ads pay 3.1x", meter: { kind: "bar", pct: 62 } },
-  { label: "Who buys", value: "Women 32 to 46. Soft Knit Set.", meter: { kind: "bar", pct: 54 } },
-  { label: "Where cash leaks", value: "61% leave at shipping on mobile", meter: { kind: "bar", pct: 61, warn: true } },
-] as const
-
-const STEP_MS = 950
-const HOLD_STEPS = 4
-const TOTAL_STEPS = FINDINGS.length + HOLD_STEPS
-
-export function ReportScanVisual() {
-  const [step, setStep] = useState(0)
+// Copied from software-visuals so the scan can stop moving for anyone who asks
+// the system for reduced motion.
+function usePrefersReducedMotion() {
+  const [reduce, setReduce] = useState(false)
 
   useEffect(() => {
-    const id = window.setInterval(() => {
-      setStep((current) => (current + 1) % TOTAL_STEPS)
-    }, STEP_MS)
-    return () => window.clearInterval(id)
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)")
+    const sync = () => setReduce(media.matches)
+    sync()
+    media.addEventListener("change", sync)
+    return () => media.removeEventListener("change", sync)
   }, [])
 
-  const reading = step < FINDINGS.length
-  const shown = Math.min(step + 1, FINDINGS.length)
-  const sourceOn = reading ? step % SOURCES.length : -1
+  return reduce
+}
+
+export function ReportScanVisual({
+  active,
+  setActive,
+}: {
+  active: number
+  setActive: Dispatch<SetStateAction<number>>
+}) {
+  const reduce = usePrefersReducedMotion()
+  const [hovering, setHovering] = useState(false)
+  const [stopped, setStopped] = useState(false)
+  const paused = hovering || stopped
+
+  useEffect(() => {
+    if (reduce || paused) return
+    const id = window.setInterval(() => {
+      setActive((current) => (current + 1) % CHAPTERS.length)
+    }, ADVANCE_MS)
+    return () => window.clearInterval(id)
+  }, [reduce, paused, setActive])
+
+  const chapter = CHAPTERS[active]
+  const warn = chapter.tone === "warn"
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="flex items-center justify-between gap-3">
-        <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-cream/50">What we read</p>
-        <p className="flex items-center gap-1.5 text-[11px] text-cream/55">
-          <span className={`h-1.5 w-1.5 rounded-full ${reading ? "software-pulse-dot bg-gold" : "bg-[#3ddc97]"}`} />
-          {reading ? "Reading…" : "Written by a person"}
-        </p>
-      </div>
-      <div className="mt-2.5 flex flex-wrap gap-1.5">
-        {SOURCES.map((source, index) => (
-          <span
-            key={source}
-            className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors duration-300 ${
-              index === sourceOn
-                ? "bg-cream text-ink"
-                : reading && index < sourceOn
-                  ? "bg-cream/20 text-cream"
-                  : !reading
-                    ? "bg-cream/20 text-cream"
-                    : "bg-cream/[0.08] text-cream/50"
+    <div
+      className="flex h-full flex-col"
+      onMouseEnter={() => setHovering(true)}
+      onMouseLeave={() => setHovering(false)}
+      onFocus={() => setHovering(true)}
+      onBlur={() => setHovering(false)}
+    >
+      <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-cream/50">What we found</p>
+
+      <div className="mt-4 flex-1">
+        <div key={active} className={reduce ? "" : "report-finding-in"}>
+          <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-cream/45">{chapter.kicker}</p>
+          <p
+            className={`mt-2 text-[3rem] font-semibold leading-none tracking-tight ${
+              warn ? "text-[#ffb59e]" : "text-gold"
             }`}
           >
-            {source}
-          </span>
-        ))}
+            {chapter.stat}
+          </p>
+          <p className="mt-3 max-w-[22rem] text-[14px] leading-relaxed text-cream/75">{chapter.caption}</p>
+          <Link
+            href={`/report/example#chapter-${chapter.n}`}
+            className="mt-4 inline-flex items-center gap-1.5 text-[12px] font-medium text-cream/60 underline-offset-4 hover:text-cream hover:underline"
+          >
+            Chapter {chapter.n} · {chapter.title}
+            <span aria-hidden>→</span>
+          </Link>
+        </div>
       </div>
 
-      <div className="mt-4 flex-1 space-y-1.5">
-        {/* Every finding stays in the layout and fades in as it is read, so the frame reserves space for
-            the full list from the start and its height never changes while the reveal rotates. */}
-        {FINDINGS.map((item, index) => {
-          const meter = item.meter
-          const warn = "warn" in meter && meter.warn
-          const visible = index < shown
+      <div className="mt-4 flex items-center gap-2">
+        {CHAPTERS.map((item, index) => {
+          const on = index === active
           return (
-            <div
-              key={item.label}
-              aria-hidden={!visible}
-              className={`rounded-xl bg-white/[0.06] px-3 py-2 ring-1 ring-white/[0.06] transition-opacity duration-500 ${
-                visible ? "opacity-100" : "pointer-events-none opacity-0"
+            <button
+              key={item.n}
+              type="button"
+              aria-pressed={on}
+              aria-label={`Show finding ${index + 1} of ${CHAPTERS.length}`}
+              onClick={() => {
+                setActive(index)
+                setStopped(true)
+              }}
+              className={`h-1.5 rounded-full transition-all ${
+                on ? "w-6 bg-cream" : "w-1.5 bg-cream/30 hover:bg-cream/50"
               }`}
-            >
-              <div className="flex items-baseline justify-between gap-3">
-                <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-cream/50">{item.label}</p>
-                {meter.kind === "dots" ? (
-                  <span className="flex items-center gap-1">
-                    {Array.from({ length: meter.of }).map((_, index) => (
-                      <span
-                        key={index}
-                        className={`h-1.5 w-1.5 rounded-full ${index < meter.on ? "bg-gold" : "bg-white/15"}`}
-                      />
-                    ))}
-                  </span>
-                ) : (
-                  <span className="relative h-1.5 w-16 overflow-hidden rounded-full bg-white/15">
-                    <span
-                      className={`report-meter-fill absolute inset-y-0 left-0 rounded-full ${warn ? "bg-[#ff7a59]" : "bg-gold"}`}
-                      style={{ width: `${meter.pct}%` }}
-                    />
-                  </span>
-                )}
-              </div>
-              <p className={`mt-0.5 text-[13px] font-semibold leading-snug ${warn ? "text-[#ffb59e]" : "text-cream"}`}>
-                {item.value}
-              </p>
-            </div>
+            />
           )
         })}
       </div>
 
-      <p className="mt-4 text-[11px] text-cream/45">Sample lines from the Northline Atelier report. Yours reads your business.</p>
+      <p className="mt-3 text-[11px] text-cream/45">
+        Sample findings from the Northline Atelier report. Yours reads your business.
+      </p>
     </div>
   )
 }

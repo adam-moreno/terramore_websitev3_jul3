@@ -37,16 +37,21 @@ const OPENINGS = [
 ]
 
 function Slide({
+  id,
   kicker,
   title,
   children,
 }: {
+  id?: string
   kicker: string
   title: string
   children: ReactNode
 }) {
   return (
-    <article className="overflow-hidden rounded-[1.75rem] bg-white shadow-[0_8px_30px_rgba(15,30,46,0.06)]">
+    <article
+      id={id}
+      className="scroll-mt-24 overflow-hidden rounded-[1.75rem] bg-white shadow-[0_8px_30px_rgba(15,30,46,0.06)]"
+    >
       <div className="flex items-center gap-2 border-b border-black/[0.05] px-5 py-3">
         <span className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
         <span className="h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
@@ -113,7 +118,7 @@ export function ExampleReport({ sent }: { sent?: boolean }) {
       </section>
 
       <section className="page-shell mt-8 space-y-8">
-        <Slide kicker="01 · Digital footprint" title="Where they already show up.">
+        <Slide id="chapter-01" kicker="01 · Digital footprint" title="Where they already show up.">
           <div className="overflow-hidden rounded-[1.25rem]">
             <Image src={footprintDesk} alt="Desk with a store on the laptop and a product grid on the phone" className="aspect-[16/8] w-full object-cover" />
           </div>
@@ -128,7 +133,7 @@ export function ExampleReport({ sent }: { sent?: boolean }) {
           </div>
         </Slide>
 
-        <Slide kicker="02 · Current audience" title="Who already looks, and who already buys.">
+        <Slide id="chapter-02" kicker="02 · Current audience" title="Who already looks, and who already buys.">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {AUDIENCE.map((item) => (
               <div key={item.label} className="rounded-2xl border border-black/[0.05] px-5 py-4">
@@ -144,7 +149,7 @@ export function ExampleReport({ sent }: { sent?: boolean }) {
           </p>
         </Slide>
 
-        <Slide kicker="03 · Current wins" title="What is already working.">
+        <Slide id="chapter-03" kicker="03 · Current wins" title="What is already working.">
           <div className="grid gap-4 md:grid-cols-3">
             {WINS.map((item) => (
               <div key={item.title} className="rounded-2xl bg-cream px-5 py-5">
@@ -155,7 +160,7 @@ export function ExampleReport({ sent }: { sent?: boolean }) {
           </div>
         </Slide>
 
-        <Slide kicker="04 · Current openings" title="Where cash is still leaking.">
+        <Slide id="chapter-04" kicker="04 · Current openings" title="Where cash is still leaking.">
           <div className="grid gap-4 md:grid-cols-2">
             {OPENINGS.map((item) => (
               <div key={item.title} className="rounded-2xl border border-black/[0.05] px-5 py-5">
