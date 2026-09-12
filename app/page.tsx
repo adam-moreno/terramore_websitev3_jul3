@@ -9,7 +9,7 @@ import { ReviewCarousel } from "@/components/review-carousel"
 import { SecurityBand } from "@/components/security-band"
 import { SiteFooter } from "@/components/site-footer"
 import { HeroAnalytics } from "@/components/hero-analytics"
-import { HeroLogoMarquee } from "@/components/hero-logo-marquee"
+import { HeroIntegrationGrid } from "@/components/hero-integration-grid"
 import { HeroLogoMobius } from "@/components/hero-logo-mobius"
 import { TerramoreToolkit } from "@/components/terramore-toolkit"
 import { TerramoreUseCases } from "@/components/terramore-use-cases"
@@ -50,7 +50,7 @@ export default function TerramoreHomepage() {
                 </Link>
               </div>
             </div>
-            <HeroLogoMarquee className="mt-10 md:hidden" />
+            <HeroIntegrationGrid className="mt-12 md:hidden" />
           </div>
         </div>
 

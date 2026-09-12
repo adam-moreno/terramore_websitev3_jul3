@@ -62,13 +62,19 @@ export function ReportScanVisual() {
       </div>
 
       <div className="mt-4 flex-1 space-y-1.5">
-        {FINDINGS.slice(0, shown).map((item) => {
+        {/* Every finding stays in the layout and fades in as it is read, so the frame reserves space for
+            the full list from the start and its height never changes while the reveal rotates. */}
+        {FINDINGS.map((item, index) => {
           const meter = item.meter
           const warn = "warn" in meter && meter.warn
+          const visible = index < shown
           return (
             <div
               key={item.label}
-              className="software-track-row-in rounded-xl bg-white/[0.06] px-3 py-2 ring-1 ring-white/[0.06]"
+              aria-hidden={!visible}
+              className={`rounded-xl bg-white/[0.06] px-3 py-2 ring-1 ring-white/[0.06] transition-opacity duration-500 ${
+                visible ? "opacity-100" : "pointer-events-none opacity-0"
+              }`}
             >
               <div className="flex items-baseline justify-between gap-3">
                 <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-cream/50">{item.label}</p>

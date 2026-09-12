@@ -7,16 +7,17 @@ import { INTEGRATION_LOGOS } from "@/lib/integrations"
 const TILE =
   "rounded-2xl bg-white shadow-[0_12px_28px_-18px_rgba(15,30,46,0.28)] ring-1 ring-black/[0.04]"
 
-const Wash = forwardRef<HTMLDivElement, { children: ReactNode; className?: string }>(
-  function Wash({ children, className = "" }, ref) {
+const Wash = forwardRef<HTMLDivElement, { children: ReactNode; className?: string; frame?: string }>(
+  function Wash({ children, className = "", frame = "min-h-[26rem] md:min-h-0" }, ref) {
     // A visual that brings its own background (the dark Vlair recorder) should not get the blue wash under it.
     const wash = /\bbg-/.test(className) ? "" : "software-visual-wash"
-    // From md up the wash fills a fixed-aspect frame. Below md it sits in flow with a minimum height,
-    // so a phone-width visual grows to fit its content instead of overlapping or clipping it.
+    // From md up the wash fills a fixed-aspect frame. Below md it sits in flow. The default mobile frame
+    // grows from a minimum to fit its content; a visual whose content reflows while it rotates can pass a
+    // fixed mobile height (`frame`) so an inner flex-1 region absorbs the change and the frame never resizes.
     return (
       <div
         ref={ref}
-        className={`${wash} relative min-h-[26rem] overflow-hidden md:absolute md:inset-0 md:min-h-0 ${className}`}
+        className={`${wash} relative ${frame} overflow-hidden md:absolute md:inset-0 ${className}`}
       >
         {children}
       </div>
@@ -1075,9 +1076,11 @@ export function ChannelValueVisual() {
 
   return (
     <Wash className="software-visual-wash-hot flex flex-col p-3">
-      <p className="relative z-[4] px-1 text-center text-[14px] font-semibold tracking-tight text-ink">
-        {beat.line}
-      </p>
+      {/* Reserve a constant height so a caption that wraps to two lines on a narrow phone does not
+          change the frame height as the beats rotate. From md up it sits on a single line as before. */}
+      <div className="relative z-[4] flex min-h-[2.75rem] items-center justify-center px-1 md:min-h-0">
+        <p className="text-center text-[14px] font-semibold tracking-tight text-ink">{beat.line}</p>
+      </div>
 
       {/* Phones: the apps for the active source sit in one row and the strip below is the switcher. */}
       <div className="mt-2 flex justify-center gap-1.5 md:hidden">
@@ -1127,7 +1130,25 @@ export function ChannelValueVisual() {
         </div>
 
         <div className="min-h-0 flex-1 md:absolute md:inset-y-0 md:right-0 md:w-[52%]">
-          <ChannelDetail beat={active} />
+          {/* Phones: every source's detail is laid out in one grid cell, so the frame is as tall as the
+              tallest state and never resizes while the beats auto-rotate; only the active one is visible. */}
+          <div className="grid h-full md:hidden">
+            {MONEY_BEATS.map((item, index) => (
+              <div
+                key={item.id}
+                aria-hidden={index !== active}
+                className={`col-start-1 row-start-1 transition-opacity duration-300 ${
+                  index === active ? "opacity-100" : "pointer-events-none opacity-0"
+                }`}
+              >
+                <ChannelDetail beat={index} />
+              </div>
+            ))}
+          </div>
+          {/* Desktop is unchanged: one detail at a time so it keeps its per-switch entrance animation. */}
+          <div className="hidden h-full md:block">
+            <ChannelDetail beat={active} />
+          </div>
         </div>
       </div>
 
@@ -1167,7 +1188,9 @@ export function LeakFlowVisual() {
   const view = hovered !== null ? settledVlair(hovered) : live
 
   return (
-    <Wash className="flex flex-col bg-[#0a0a0a] p-0">
+    // Fixed mobile height: the tracked-metrics HUD grows as the recording plays, so the flex-1 screen
+    // area below absorbs that change and the frame stays a constant height while it rotates.
+    <Wash frame="h-[30rem] md:min-h-0 md:h-auto" className="flex flex-col bg-[#0a0a0a] p-0">
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden text-white md:h-full">
         <div className="flex shrink-0 items-center gap-1.5 bg-[#141414] px-3 py-2">
           <span className="h-2 w-2 rounded-full bg-white/25" />
