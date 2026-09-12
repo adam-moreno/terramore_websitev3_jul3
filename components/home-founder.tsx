@@ -1,3 +1,4 @@
+import Image from "next/image"
 import Link from "next/link"
 import { DualCtas } from "@/components/dual-ctas"
 
@@ -5,9 +6,14 @@ export function HomeFounder() {
   return (
     <section id="about" className="section-y md:py-24">
       <div className="page-shell grid items-start gap-8 md:grid-cols-[auto_1fr] md:gap-16">
-        <div className="flex h-28 w-28 items-center justify-center rounded-[1.5rem] bg-ink text-[2rem] font-semibold tracking-tight text-cream">
-          AM
-        </div>
+        <Image
+          src="/founder/adam-moreno-headshot.png"
+          alt="Adam Moreno, founder of Terramore"
+          width={864}
+          height={1152}
+          sizes="(min-width: 768px) 192px, 144px"
+          className="h-44 w-36 rounded-[1.5rem] object-cover object-top shadow-[0_8px_30px_rgba(15,30,46,0.08)] md:h-56 md:w-48"
+        />
         <div className="max-w-2xl">
           <p className="text-[13px] font-medium uppercase tracking-[0.16em] text-ink/40">Founder</p>
           <h2 className="section-title mt-3 text-ink md:text-[2.75rem] md:font-semibold md:leading-normal md:tracking-[-0.03em]">
