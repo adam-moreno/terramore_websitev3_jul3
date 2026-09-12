@@ -3,9 +3,11 @@
  * it logs and returns a result, it never throws, and a missing key is a logged no-op.
  *
  * Channels
- * - Slack (to Adam):   SLACK_WEBHOOK_URL                      Incoming Webhook URL
+ * - Slack (to Adam):   posts as the "Hearth" Slack app, in one of two modes (bot preferred, webhook fallback)
+ *                      bot:     SLACK_BOT_TOKEN + SLACK_LEADS_CHANNEL   chat.postMessage, needs the chat:write scope
+ *                      webhook: SLACK_WEBHOOK_URL                       Incoming Webhook URL (the scope Hearth has today)
  * - Email:             RESEND_API_KEY | SENDGRID_API_KEY | POSTMARK_SERVER_TOKEN   first one found wins
- *                      EMAIL_FROM        e.g. "Terramore <reports@terramore.io>" (a verified domain at the provider)
+ *                      RESEND_FROM_EMAIL (the dashboard's name) then EMAIL_FROM   e.g. "Terramore <reports@terramore.io>"
  *                      NOTIFY_EMAIL_TO   admin copy, default adam.moreno@terramore.io
  * - SMS (to the user): TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM_NUMBER
  */
@@ -24,7 +26,8 @@ export type EmailInput = {
 export type SendResult = { ok: boolean; channel: string; skipped?: boolean; error?: string }
 
 export const ADMIN_EMAIL = process.env.NOTIFY_EMAIL_TO?.trim() || "adam.moreno@terramore.io"
-const FROM = process.env.EMAIL_FROM?.trim() || "Terramore <no-reply@terramore.io>"
+/** Same value the Terra IQ dashboard uses (RESEND_FROM_EMAIL) so one address is set once; EMAIL_FROM is the local name. */
+export const FROM = process.env.RESEND_FROM_EMAIL?.trim() || process.env.EMAIL_FROM?.trim() || "Terramore <no-reply@terramore.io>"
 const SITE = "https://terramore.io"
 
 function skip(channel: string, why: string): SendResult {
@@ -54,8 +57,23 @@ export function smsConfigured(): boolean {
   return Boolean(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_FROM_NUMBER)
 }
 
+export type SlackMode = "bot" | "webhook" | "none"
+
+/** Bot token wins when both the token and a channel are set; otherwise the webhook; otherwise nothing. */
+export function slackMode(): SlackMode {
+  if (process.env.SLACK_BOT_TOKEN && process.env.SLACK_LEADS_CHANNEL) return "bot"
+  if (process.env.SLACK_WEBHOOK_URL) return "webhook"
+  return "none"
+}
+
 export function slackConfigured(): boolean {
-  return Boolean(process.env.SLACK_WEBHOOK_URL)
+  return slackMode() !== "none"
+}
+
+export function emailFromConfigured(): "RESEND_FROM_EMAIL" | "EMAIL_FROM" | null {
+  if (process.env.RESEND_FROM_EMAIL?.trim()) return "RESEND_FROM_EMAIL"
+  if (process.env.EMAIL_FROM?.trim()) return "EMAIL_FROM"
+  return null
 }
 
 /* ------------------------------------------------------------------ email */
@@ -179,18 +197,41 @@ export async function sendSms(to: string | null | undefined, body: string): Prom
 /* ------------------------------------------------------------------ slack */
 
 export async function postSlack(text: string, blocks?: unknown[]): Promise<SendResult> {
-  const url = process.env.SLACK_WEBHOOK_URL
-  if (!url) return skip("slack", "SLACK_WEBHOOK_URL missing")
+  const mode = slackMode()
+  if (mode === "none") {
+    const partial = process.env.SLACK_BOT_TOKEN ? "SLACK_BOT_TOKEN set but SLACK_LEADS_CHANNEL missing; " : ""
+    return skip("slack", `${partial}SLACK_BOT_TOKEN + SLACK_LEADS_CHANNEL or SLACK_WEBHOOK_URL missing`)
+  }
+
   try {
-    const response = await fetch(url, {
+    if (mode === "bot") {
+      // chat.postMessage answers 200 even on failure; the truth is in the JSON `ok` / `error` fields.
+      const response = await fetch("https://slack.com/api/chat.postMessage", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${process.env.SLACK_BOT_TOKEN}`, "Content-Type": "application/json; charset=utf-8" },
+        body: JSON.stringify({
+          channel: process.env.SLACK_LEADS_CHANNEL,
+          text,
+          blocks,
+          unfurl_links: false,
+          unfurl_media: false,
+        }),
+      })
+      if (!response.ok) return fail("slack:bot", await readError(response))
+      const json = (await response.json().catch(() => ({}))) as { ok?: boolean; error?: string }
+      if (!json.ok) return fail("slack:bot", json.error || "unknown error")
+      return { ok: true, channel: "slack:bot" }
+    }
+
+    const response = await fetch(process.env.SLACK_WEBHOOK_URL as string, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(blocks ? { text, blocks } : { text }),
     })
-    if (!response.ok) return fail("slack", await readError(response))
-    return { ok: true, channel: "slack" }
+    if (!response.ok) return fail("slack:webhook", await readError(response))
+    return { ok: true, channel: "slack:webhook" }
   } catch (error) {
-    return fail("slack", error)
+    return fail(`slack:${mode}`, error)
   }
 }
 

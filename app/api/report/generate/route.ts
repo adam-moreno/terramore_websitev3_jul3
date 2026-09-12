@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getServerSupabase } from "@/lib/supabase-server"
-import { emailProvider, slackConfigured, smsConfigured } from "@/lib/notify"
+import { emailFromConfigured, emailProvider, postSlack, slackMode, smsConfigured } from "@/lib/notify"
 import { missingReportKeys, runReportPipeline } from "@/lib/report/pipeline"
 import { modelProvider } from "@/lib/report/write"
 
@@ -8,6 +8,7 @@ import { modelProvider } from "@/lib/report/write"
  * Operator endpoint, guarded by REPORT_GENERATE_SECRET (header x-report-secret).
  *
  * GET  → config check: which keys are present, whether both lead tables and their columns are reachable.
+ *        ?test=slack posts one short line to the leads channel so Slack can be verified without a form submit.
  * POST → re-run the report pipeline for one lead: { email, name?, businessName?, website? }.
  *        Missing fields are read from the free_courses_signups row.
  */
@@ -35,6 +36,13 @@ export async function GET(request: NextRequest) {
   const denied = authorized(request)
   if (denied) return denied
 
+  if (request.nextUrl.searchParams.get("test") === "slack") {
+    const mode = slackMode()
+    if (mode === "none") return NextResponse.json({ slack: mode, ok: false, error: "Slack is not configured" }, { status: 503 })
+    const result = await postSlack("Terramore site connected to Hearth. Lead alerts will land here.")
+    return NextResponse.json({ slack: mode, ...result }, { status: result.ok ? 200 : 502 })
+  }
+
   const [leads, reportColumns, talks] = await Promise.all([
     probe("free_courses_signups", LEAD_COLUMNS),
     probe("free_courses_signups", REPORT_COLUMNS),
@@ -54,10 +62,10 @@ export async function GET(request: NextRequest) {
     keys: {
       model: modelProvider(),
       email: emailProvider(),
-      slack: slackConfigured(),
+      emailFrom: emailFromConfigured(),
+      slack: slackMode(),
       sms: smsConfigured(),
       places: Boolean(process.env.GOOGLE_PLACES_API_KEY),
-      emailFrom: Boolean(process.env.EMAIL_FROM),
     },
     reportPipelineReady: missingReportKeys().length === 0,
     missing: missingReportKeys(),
