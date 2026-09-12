@@ -136,7 +136,7 @@ export function ReviewCarousel() {
   return (
     <section className="section-y overflow-hidden md:py-24">
       <div className="page-shell text-center">
-        <p className="text-[13px] font-medium uppercase tracking-[0.16em] text-ink/40">Letters to Terramore</p>
+        <p className="section-eyebrow">Letters to Terramore</p>
         <h2 className="section-title mt-3 text-ink md:text-[3rem] md:font-semibold md:leading-normal md:tracking-[-0.03em]">
           Owners on what changed.
         </h2>

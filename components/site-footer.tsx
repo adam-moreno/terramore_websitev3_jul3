@@ -40,7 +40,7 @@ export function SiteFooter() {
               We find the step where you lose sales, fix it, and leave you a 90-day plan. Talk first, or ask for a
               free Digital Footprint report.
             </p>
-            <DualCtas className="mt-6" />
+            <DualCtas variant="report" className="mt-6" />
           </div>
           <div className="grid gap-8 sm:grid-cols-2">
             <div>

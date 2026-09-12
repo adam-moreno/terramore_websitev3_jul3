@@ -1048,11 +1048,15 @@ function ChannelDetail({ beat }: { beat: number }) {
   )
 }
 
-const CHANNEL_HOLD_MS = 4000
+const CHANNEL_HOLD_MS = 7000
 
 export function ChannelValueVisual() {
+  const rootRef = useRef<HTMLDivElement>(null)
+  const [visible, setVisible] = useState(false)
   const [held, setHeld] = useState<number | null>(null)
-  const [autoIndex, setIndex] = useCycle(MONEY_BEATS.length, 4000, held !== null)
+  // Slower cadence (8s a state, double the old 4s) so a reader can follow, and paused until the
+  // section is on screen so it always begins on the first state, "Ads", when it is revealed.
+  const [autoIndex, setIndex] = useCycle(MONEY_BEATS.length, 8000, held !== null || !visible)
   const holdTimer = useRef<number | null>(null)
   const active = held ?? autoIndex
   const beat = MONEY_BEATS[active]
@@ -1063,6 +1067,22 @@ export function ChannelValueVisual() {
       if (holdTimer.current !== null) window.clearTimeout(holdTimer.current)
     }
   }, [])
+
+  // Reset to "Ads" every time the visual enters the viewport, and only rotate while it is on screen.
+  useEffect(() => {
+    const node = rootRef.current
+    if (!node) return
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const showing = entries[0]?.isIntersecting ?? false
+        if (showing) setIndex(0)
+        setVisible(showing)
+      },
+      { threshold: 0.35 },
+    )
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [setIndex])
 
   const holdBeat = (index: number) => {
     setHeld(index)
@@ -1075,10 +1095,14 @@ export function ChannelValueVisual() {
   }
 
   return (
-    <Wash className="software-visual-wash-hot flex flex-col p-3">
-      {/* Reserve a constant height so a caption that wraps to two lines on a narrow phone does not
-          change the frame height as the beats rotate. From md up it sits on a single line as before. */}
-      <div className="relative z-[4] flex min-h-[2.75rem] items-center justify-center px-1 md:min-h-0">
+    <Wash ref={rootRef} className="software-visual-wash-hot flex flex-col p-3">
+      {/* A guided caption leads the reader: a small uppercase label names the stage and its place in
+          the sequence, then the line explains what to watch. Reserve a constant height so a caption that
+          wraps to two lines on a narrow phone does not change the frame height as the beats rotate. */}
+      <div className="relative z-[4] flex min-h-[3.75rem] flex-col items-center justify-center gap-1 px-1 md:min-h-0">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-brand">
+          Step {active + 1} of {MONEY_BEATS.length} · {beat.source}
+        </p>
         <p className="text-center text-[14px] font-semibold tracking-tight text-ink">{beat.line}</p>
       </div>
 
@@ -1472,13 +1496,13 @@ const AUDIENCE_RESULTS = [
 
 export function AudienceIntelVisual() {
   const reduce = usePrefersReducedMotion()
-  const [walk] = useCycle(6, 1800, reduce)
+  const [walk] = useCycle(6, 3000, reduce)
   const col = reduce ? 3 : Math.min(walk, 3)
   const wrapping = !reduce && walk === 0
   const bought = reduce || walk >= 3
 
   return (
-    <Wash className="flex h-full flex-col justify-between gap-2 p-2.5 lg:gap-3 lg:p-4">
+    <Wash className="flex h-full flex-col justify-start gap-2.5 p-2.5 lg:gap-3 lg:p-4">
       <p className="sr-only">
         We watch Maya and Eli from the first ad or Instagram tap, through the site, to the city.
         When they are ready to buy, reach, leads, deals, and buys go up.

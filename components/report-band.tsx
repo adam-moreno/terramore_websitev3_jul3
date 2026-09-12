@@ -48,7 +48,7 @@ export function ReportBand() {
   return (
     <section id="report" className="section-y scroll-mt-28 md:py-24">
       <div className="page-shell">
-        <p className="text-center text-[13px] font-medium uppercase tracking-[0.16em] text-ink/40">
+        <p className="section-eyebrow text-center">
           Free Digital Footprint report
         </p>
         <h2 className="section-title mx-auto mt-3 max-w-[720px] text-center text-ink md:text-[3rem] md:font-semibold md:leading-normal md:tracking-[-0.03em]">

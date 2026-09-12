@@ -98,7 +98,7 @@ export function TerramoreUseCases({ showIntro = true }: { showIntro?: boolean })
       <div className="page-shell">
         {showIntro ? (
           <>
-        <p className="text-center text-[12px] font-medium uppercase tracking-[0.18em] text-ink/40">Use cases</p>
+        <p className="section-eyebrow text-center">Use cases</p>
         <h2 className="section-title mx-auto mt-3 max-w-[640px] text-center text-ink md:text-[2.5rem] md:leading-normal md:tracking-[-0.04em]">
           Pick a job. <span className="text-gold">We have done it before.</span>
         </h2>
@@ -142,12 +142,6 @@ export function TerramoreUseCases({ showIntro = true }: { showIntro?: boolean })
             <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">{job.label}</p>
             <h3 className="mt-2 text-[1.5rem] font-semibold leading-[1.15] tracking-tight text-ink md:text-[1.45rem] md:leading-normal">{job.headline}</h3>
             <p className="mt-2 text-[16px] leading-[1.5] text-ink/70 md:text-[15px] md:leading-relaxed">{job.copy}</p>
-            <div className="mt-6 rounded-2xl bg-[#f7f7f5] px-4 py-3">
-              <p className="text-[13px] text-slate-700">
-                <span className="slack-mention">@Terramore</span> {job.quote}
-              </p>
-              <p className="mt-2 text-[13px] text-slate-500">{job.reply}</p>
-            </div>
           </div>
         </div>
       </div>

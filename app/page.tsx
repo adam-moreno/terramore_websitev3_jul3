@@ -9,7 +9,7 @@ import { ReviewCarousel } from "@/components/review-carousel"
 import { SecurityBand } from "@/components/security-band"
 import { SiteFooter } from "@/components/site-footer"
 import { HeroAnalytics } from "@/components/hero-analytics"
-import { HeroIntegrationGrid } from "@/components/hero-integration-grid"
+import { HeroFloatingLogos } from "@/components/hero-floating-logos"
 import { HeroLogoMobius } from "@/components/hero-logo-mobius"
 import { TerramoreToolkit } from "@/components/terramore-toolkit"
 import { TerramoreUseCases } from "@/components/terramore-use-cases"
@@ -17,8 +17,8 @@ import { TerramoreUseCases } from "@/components/terramore-use-cases"
 export default function TerramoreHomepage() {
   return (
     <div className="min-h-screen bg-cream">
-      <div className="fixed bottom-4 right-4 z-50">
-        <BookingLink className="inline-flex h-9 items-center rounded-full bg-brand px-4 text-[14px] font-medium text-white shadow-lg transition-shadow hover:bg-brand-hover hover:shadow-xl">
+      <div className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-[70]">
+        <BookingLink className="inline-flex h-10 items-center rounded-full bg-brand px-4 text-[14px] font-medium text-white shadow-lg transition-shadow hover:bg-brand-hover hover:shadow-xl">
           <Calendar className="mr-2 h-4 w-4" />
           Schedule
         </BookingLink>
@@ -29,6 +29,9 @@ export default function TerramoreHomepage() {
         <div className="pointer-events-none absolute inset-x-0 top-0 z-0 hidden h-[100svh] overflow-hidden md:block">
           <HeroLogoMobius />
         </div>
+
+        {/* Phones: floating integration marks scattered around the hero edges, behind the copy. */}
+        <HeroFloatingLogos className="md:hidden" />
 
         <div className="-mt-28 flex min-h-[calc(100svh-14rem)] flex-col justify-center pt-28 md:min-h-[calc(100svh-10.75rem)]">
           <div className="page-shell relative z-20 text-center">
@@ -50,7 +53,6 @@ export default function TerramoreHomepage() {
                 </Link>
               </div>
             </div>
-            <HeroIntegrationGrid className="mt-12 md:hidden" />
           </div>
         </div>
 

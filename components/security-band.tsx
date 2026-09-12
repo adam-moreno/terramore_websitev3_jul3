@@ -1,5 +1,3 @@
-import Link from "next/link"
-
 const PROMISES = [
   {
     title: "Compliant.",
@@ -33,12 +31,6 @@ export function SecurityBand() {
             </div>
           ))}
         </div>
-        <Link
-          href="/security"
-          className="mt-8 inline-block text-[15px] font-medium text-brand hover:text-brand-hover"
-        >
-          See how we protect your data
-        </Link>
       </div>
     </section>
   )
