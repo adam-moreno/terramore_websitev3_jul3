@@ -648,7 +648,7 @@ export function HeroAnalytics() {
 
   return (
     <div className="relative w-full" data-hero-analytics>
-      <div className="overflow-hidden rounded-[28px] border border-black/[0.06] bg-white shadow-[0_30px_80px_-32px_rgba(15,23,42,0.22)]">
+      <div className="card-radius overflow-hidden border border-black/[0.06] bg-white shadow-[0_30px_80px_-32px_rgba(15,23,42,0.22)] md:rounded-[28px]">
         {/* minmax(0,1fr): without it the long pill row sets the column's minimum width and the card overflows on phones. */}
         <div className="grid min-h-[26rem] grid-cols-[minmax(0,1fr)] md:min-h-[36rem] md:grid-cols-[200px_minmax(0,1fr)]">
           <aside className="hidden border-r border-black/[0.06] bg-[#f7f4f2] p-3 md:flex md:flex-col">

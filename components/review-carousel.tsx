@@ -109,7 +109,7 @@ function SourceMark({ source }: { source: (typeof REVIEWS)[number]["source"] }) 
 
 function ReviewCard({ review }: { review: (typeof REVIEWS)[number] }) {
   return (
-    <article className="w-[22rem] shrink-0 rounded-2xl border border-black/[0.05] bg-white px-5 py-4 shadow-[0_10px_32px_-18px_rgba(15,30,46,0.28)]">
+    <article className="card-radius card-pad w-[22rem] shrink-0 border border-black/[0.05] bg-white shadow-[0_10px_32px_-18px_rgba(15,30,46,0.28)] md:rounded-2xl md:px-5 md:py-4">
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
           <img
@@ -124,7 +124,8 @@ function ReviewCard({ review }: { review: (typeof REVIEWS)[number] }) {
         </div>
         <SourceMark source={review.source} />
       </div>
-      <p className="mt-3 truncate text-[15px] leading-snug text-ink/85">{review.quote}</p>
+      {/* Phones show the whole quote; desktop keeps one line so the row stays even. */}
+      <p className="mt-3 text-[16px] leading-[1.5] text-ink/85 md:truncate md:text-[15px] md:leading-snug">{review.quote}</p>
     </article>
   )
 }
@@ -133,14 +134,14 @@ export function ReviewCarousel() {
   const track = [...REVIEWS, ...REVIEWS]
 
   return (
-    <section className="overflow-hidden py-20 md:py-24">
+    <section className="section-y overflow-hidden md:py-24">
       <div className="page-shell text-center">
         <p className="text-[13px] font-medium uppercase tracking-[0.16em] text-ink/40">Letters to Terramore</p>
-        <h2 className="mt-3 text-[2.15rem] font-semibold tracking-[-0.03em] text-ink md:text-[3rem]">
+        <h2 className="section-title mt-3 text-ink md:text-[3rem] md:font-semibold md:leading-normal md:tracking-[-0.03em]">
           Owners on what changed.
         </h2>
       </div>
-      <div className="mt-10 overflow-hidden">
+      <div className="mt-12 overflow-hidden md:mt-10">
         <div className="review-marquee flex w-max gap-4">
           {track.map((review, index) => (
             <ReviewCard key={`${review.name}-${index}`} review={review} />

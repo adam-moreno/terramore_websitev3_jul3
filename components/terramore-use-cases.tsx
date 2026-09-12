@@ -94,27 +94,27 @@ export function TerramoreUseCases({ showIntro = true }: { showIntro?: boolean })
   useScrollRow(pillRow, activeIndex)
 
   return (
-    <section id="use-cases" className="scroll-mt-28 bg-cream py-16 md:py-24">
+    <section id="use-cases" className="section-y scroll-mt-28 bg-cream md:py-24">
       <div className="page-shell">
         {showIntro ? (
           <>
         <p className="text-center text-[12px] font-medium uppercase tracking-[0.18em] text-ink/40">Use cases</p>
-        <h2 className="mx-auto mt-3 max-w-[640px] text-center text-[1.85rem] font-bold tracking-[-0.04em] text-ink md:text-[2.5rem]">
+        <h2 className="section-title mx-auto mt-3 max-w-[640px] text-center text-ink md:text-[2.5rem] md:leading-normal md:tracking-[-0.04em]">
           Pick a job. <span className="text-gold">We have done it before.</span>
         </h2>
-        <p className="mx-auto mt-4 max-w-md text-center text-[15px] leading-relaxed text-ink/70">
+        <p className="section-lede mx-auto mt-4 max-w-md text-center text-ink/70 md:text-[15px] md:leading-relaxed">
           These are the first things founders ask us to take.
         </p>
           </>
         ) : null}
 
-        {/* Phones: one row that scrolls sideways, bleeding to the screen edge with a fade so it reads as scrollable. Desktop: wrapped and centered. */}
-        <div className="relative -mx-5 mt-8 sm:-mx-6 md:mx-0">
+        {/* The job chips wrap into centered rows on every width, the way lindy.ai lays out its use-case chips on a phone. Nothing scrolls sideways. */}
+        <div className="mt-10 md:mt-8">
           <div
             ref={pillRow}
             role="tablist"
             aria-label="Jobs"
-            className="flex snap-x snap-mandatory gap-2 overflow-x-auto scroll-px-5 px-5 py-1 scrollbar-hide sm:scroll-px-6 sm:px-6 md:flex-wrap md:justify-center md:overflow-visible md:px-0 md:py-0"
+            className="flex flex-wrap justify-center gap-2"
           >
             {JOBS.map((item) => (
               <button
@@ -123,7 +123,7 @@ export function TerramoreUseCases({ showIntro = true }: { showIntro?: boolean })
                 role="tab"
                 aria-selected={item.id === active}
                 onClick={() => setActive(item.id)}
-                className={`shrink-0 snap-start whitespace-nowrap rounded-full px-4 py-2 text-[14px] font-medium ${
+                className={`whitespace-nowrap rounded-full px-4 py-2.5 text-[14px] font-medium md:py-2 ${
                   item.id === active ? "bg-brand text-white" : "bg-white text-ink shadow-sm hover:bg-white/80"
                 }`}
               >
@@ -131,15 +131,17 @@ export function TerramoreUseCases({ showIntro = true }: { showIntro?: boolean })
               </button>
             ))}
           </div>
-          <div className="pointer-events-none absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-cream to-transparent md:hidden" />
         </div>
 
-        <div className="mx-auto mt-8 grid max-w-[920px] overflow-hidden rounded-[28px] border border-black/[0.06] bg-white shadow-[0_20px_50px_-28px_rgba(15,23,42,0.22)] md:mt-10 md:grid-cols-2">
-          <div className="relative min-h-[240px] bg-[#eef3fb] md:min-h-[360px]">{job.visual}</div>
-          <div className="flex flex-col justify-center p-6 md:p-8">
+        {/* Phones: the visual sits inset inside the card with its own radius, text below with 20px padding. From md up the two-column card is unchanged. */}
+        <div className="card-radius mx-auto mt-10 grid max-w-[920px] overflow-hidden border border-black/[0.06] bg-white shadow-[0_20px_50px_-28px_rgba(15,23,42,0.22)] md:mt-10 md:grid-cols-2 md:rounded-[28px]">
+          <div className="p-2 md:p-0">
+            <div className="relative min-h-[240px] overflow-hidden rounded-[16px] bg-[#eef3fb] md:min-h-[360px] md:rounded-none">{job.visual}</div>
+          </div>
+          <div className="card-pad flex flex-col justify-center md:p-8">
             <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">{job.label}</p>
-            <h3 className="mt-2 text-[1.45rem] font-semibold tracking-tight text-ink">{job.headline}</h3>
-            <p className="mt-2 text-[15px] leading-relaxed text-ink/70">{job.copy}</p>
+            <h3 className="mt-2 text-[1.5rem] font-semibold leading-[1.15] tracking-tight text-ink md:text-[1.45rem] md:leading-normal">{job.headline}</h3>
+            <p className="mt-2 text-[16px] leading-[1.5] text-ink/70 md:text-[15px] md:leading-relaxed">{job.copy}</p>
             <div className="mt-6 rounded-2xl bg-[#f7f7f5] px-4 py-3">
               <p className="text-[13px] text-slate-700">
                 <span className="slack-mention">@Terramore</span> {job.quote}

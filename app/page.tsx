@@ -32,7 +32,7 @@ export default function TerramoreHomepage() {
         </Button>
       </div>
 
-      <section className="relative isolate overflow-hidden bg-cream pt-28 pb-16 md:pt-32 md:pb-24">
+      <section className="section-y relative isolate overflow-hidden bg-cream pt-28 md:pt-32 md:pb-24">
         {/* The orbit only runs from md up. On phones it floated over the headline, so the marks move to a slim row under the CTA. */}
         <div className="pointer-events-none absolute inset-x-0 top-0 z-0 hidden h-[100svh] overflow-hidden md:block">
           <HeroLogoMobius />
@@ -42,17 +42,17 @@ export default function TerramoreHomepage() {
           <div className="page-shell relative z-20 text-center">
             <div className="mx-auto inline-flex flex-col items-center" data-hero-copy>
               <h1 className="mx-auto text-[2.5rem] font-bold leading-[1.05] tracking-[-0.02em] text-ink sm:text-5xl md:text-[72px] md:leading-[75.6px]">
-                Unlock more from the
+                Unlock more from the{" "}
                 <br className="hidden md:block" />
                 <span className="text-gold">business you already built.</span>
               </h1>
-              <p className="mx-auto mt-8 max-w-[626px] text-[18px] font-medium leading-[1.5] text-ink md:text-[20px] md:leading-[30px]">
+              <p className="mx-auto mt-7 max-w-[626px] text-[18px] font-medium leading-[1.5] text-ink md:mt-8 md:text-[20px] md:leading-[30px]">
                 A growth team for owners. We find where you lose sales and fix it.
               </p>
               <div className="mt-8 flex flex-col items-center">
                 <Link
                   href="/partner"
-                  className="inline-flex h-10 items-center justify-center rounded-full bg-brand px-4 text-[16px] font-medium text-white hover:bg-brand-hover"
+                  className="inline-flex h-12 items-center justify-center rounded-full bg-brand px-6 text-[16px] font-medium text-white hover:bg-brand-hover md:h-10 md:px-4"
                 >
                   Let&apos;s talk
                 </Link>
