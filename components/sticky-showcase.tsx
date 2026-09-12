@@ -71,17 +71,20 @@ export function StickyShowcase({
                   ref={(node) => {
                     itemRefs.current[index] = node
                   }}
-                  className={`flex flex-col justify-center py-12 transition-opacity duration-300 lg:min-h-[70vh] lg:py-16 ${
-                    active === index ? "opacity-100" : "opacity-35"
+                  className={`flex flex-col justify-center py-10 transition-opacity duration-300 lg:min-h-[70vh] lg:py-16 ${
+                    active === index ? "opacity-100" : "lg:opacity-35"
                   }`}
                 >
                   <p className="text-[13px] font-medium text-gold-to">{String(index + 1).padStart(2, "0")}</p>
-                  <h3 className="mt-3 whitespace-nowrap text-[1.2rem] font-semibold tracking-tight text-ink sm:text-[1.35rem] md:text-[1.75rem]">
+                  <h3 className="mt-3 text-[1.2rem] font-semibold tracking-tight text-ink sm:text-[1.35rem] md:whitespace-nowrap md:text-[1.75rem]">
                     {item.title}
                   </h3>
                   <p className="mt-3 max-w-[26rem] text-[15px] leading-relaxed text-ink/70">{item.copy}</p>
+                  {/* Below lg the visuals stack in flow. Under md each visual sets its own height, so nothing inside can overlap or clip. */}
                   <div className="mt-6 max-w-md overflow-hidden rounded-[24px] border border-black/[0.06] bg-white lg:hidden">
-                    <div className="relative aspect-[5/4]">{active === index ? <Visual /> : null}</div>
+                    <div className="relative md:aspect-square">
+                      <Visual />
+                    </div>
                   </div>
                 </li>
               )

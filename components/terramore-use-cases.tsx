@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, type ReactNode } from "react"
+import { useRef, useState, type ReactNode } from "react"
+import { useScrollRow } from "@/hooks/use-scroll-row"
 import {
   AudienceIntelVisual,
   BookingTilesVisual,
@@ -88,6 +89,9 @@ export const JOBS: {
 export function TerramoreUseCases({ showIntro = true }: { showIntro?: boolean }) {
   const [active, setActive] = useState(JOBS[0].id)
   const job = JOBS.find((item) => item.id === active) ?? JOBS[0]
+  const activeIndex = JOBS.findIndex((item) => item.id === job.id)
+  const pillRow = useRef<HTMLDivElement>(null)
+  useScrollRow(pillRow, activeIndex)
 
   return (
     <section id="use-cases" className="scroll-mt-28 bg-cream py-16 md:py-24">
@@ -104,22 +108,33 @@ export function TerramoreUseCases({ showIntro = true }: { showIntro?: boolean })
           </>
         ) : null}
 
-        <div className="mt-8 flex flex-wrap justify-center gap-2">
-          {JOBS.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => setActive(item.id)}
-              className={`rounded-full px-4 py-2 text-[14px] font-medium ${
-                item.id === active ? "bg-brand text-white" : "bg-white text-ink shadow-sm hover:bg-white/80"
-              }`}
-            >
-              {item.label}
-            </button>
-          ))}
+        {/* Phones: one row that scrolls sideways, bleeding to the screen edge with a fade so it reads as scrollable. Desktop: wrapped and centered. */}
+        <div className="relative -mx-5 mt-8 sm:-mx-6 md:mx-0">
+          <div
+            ref={pillRow}
+            role="tablist"
+            aria-label="Jobs"
+            className="flex snap-x snap-mandatory gap-2 overflow-x-auto scroll-px-5 px-5 py-1 scrollbar-hide sm:scroll-px-6 sm:px-6 md:flex-wrap md:justify-center md:overflow-visible md:px-0 md:py-0"
+          >
+            {JOBS.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                role="tab"
+                aria-selected={item.id === active}
+                onClick={() => setActive(item.id)}
+                className={`shrink-0 snap-start whitespace-nowrap rounded-full px-4 py-2 text-[14px] font-medium ${
+                  item.id === active ? "bg-brand text-white" : "bg-white text-ink shadow-sm hover:bg-white/80"
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-cream to-transparent md:hidden" />
         </div>
 
-        <div className="mx-auto mt-10 grid max-w-[920px] overflow-hidden rounded-[28px] border border-black/[0.06] bg-white shadow-[0_20px_50px_-28px_rgba(15,23,42,0.22)] md:grid-cols-2">
+        <div className="mx-auto mt-8 grid max-w-[920px] overflow-hidden rounded-[28px] border border-black/[0.06] bg-white shadow-[0_20px_50px_-28px_rgba(15,23,42,0.22)] md:mt-10 md:grid-cols-2">
           <div className="relative min-h-[240px] bg-[#eef3fb] md:min-h-[360px]">{job.visual}</div>
           <div className="flex flex-col justify-center p-6 md:p-8">
             <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">{job.label}</p>

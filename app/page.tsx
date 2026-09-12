@@ -10,6 +10,7 @@ import { ReviewCarousel } from "@/components/review-carousel"
 import { SecurityBand } from "@/components/security-band"
 import { SiteFooter } from "@/components/site-footer"
 import { HeroAnalytics } from "@/components/hero-analytics"
+import { HeroLogoMarquee } from "@/components/hero-logo-marquee"
 import { HeroLogoMobius } from "@/components/hero-logo-mobius"
 import { TerramoreToolkit } from "@/components/terramore-toolkit"
 import { TerramoreUseCases } from "@/components/terramore-use-cases"
@@ -32,16 +33,17 @@ export default function TerramoreHomepage() {
       </div>
 
       <section className="relative isolate overflow-hidden bg-cream pt-28 pb-16 md:pt-32 md:pb-24">
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[100svh] overflow-hidden">
+        {/* The orbit only runs from md up. On phones it floated over the headline, so the marks move to a slim row under the CTA. */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-0 hidden h-[100svh] overflow-hidden md:block">
           <HeroLogoMobius />
         </div>
 
-        <div className="-mt-28 flex min-h-[calc(100svh-10.75rem)] flex-col justify-center pt-28">
+        <div className="-mt-28 flex min-h-[calc(100svh-14rem)] flex-col justify-center pt-28 md:min-h-[calc(100svh-10.75rem)]">
           <div className="page-shell relative z-20 text-center">
             <div className="mx-auto inline-flex flex-col items-center" data-hero-copy>
               <h1 className="mx-auto text-[2.5rem] font-bold leading-[1.05] tracking-[-0.02em] text-ink sm:text-5xl md:text-[72px] md:leading-[75.6px]">
                 Unlock more from the
-                <br />
+                <br className="hidden md:block" />
                 <span className="text-gold">business you already built.</span>
               </h1>
               <p className="mx-auto mt-8 max-w-[626px] text-[18px] font-medium leading-[1.5] text-ink md:text-[20px] md:leading-[30px]">
@@ -56,6 +58,7 @@ export default function TerramoreHomepage() {
                 </Link>
               </div>
             </div>
+            <HeroLogoMarquee className="mt-10 md:hidden" />
           </div>
         </div>
 

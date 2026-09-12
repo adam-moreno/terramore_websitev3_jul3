@@ -11,8 +11,13 @@ const Wash = forwardRef<HTMLDivElement, { children: ReactNode; className?: strin
   function Wash({ children, className = "" }, ref) {
     // A visual that brings its own background (the dark Vlair recorder) should not get the blue wash under it.
     const wash = /\bbg-/.test(className) ? "" : "software-visual-wash"
+    // From md up the wash fills a fixed-aspect frame. Below md it sits in flow with a minimum height,
+    // so a phone-width visual grows to fit its content instead of overlapping or clipping it.
     return (
-      <div ref={ref} className={`${wash} absolute inset-0 overflow-hidden ${className}`}>
+      <div
+        ref={ref}
+        className={`${wash} relative min-h-[26rem] overflow-hidden md:absolute md:inset-0 md:min-h-0 ${className}`}
+      >
         {children}
       </div>
     )
@@ -43,13 +48,24 @@ function LineIcon({
   )
 }
 
-function BrandLogo({ slug, name, size = 28 }: { slug: string; name: string; size?: number }) {
+function BrandLogo({
+  slug,
+  name,
+  size = 28,
+  className,
+}: {
+  slug: string
+  name: string
+  size?: number
+  className?: string
+}) {
+  // When a className is given it owns the size, so the logo can change size across breakpoints.
   return (
     <img
       src={`https://cdn.simpleicons.org/${slug}`}
       alt={name}
-      className="object-contain"
-      style={{ width: size, height: size }}
+      className={`object-contain ${className ?? ""}`}
+      style={className ? undefined : { width: size, height: size }}
     />
   )
 }
@@ -71,10 +87,9 @@ function useCycle(length: number, ms: number, paused: boolean) {
 const TILE_TILTS = [-1.8, 2.2, -1.2, 1.6, -2.4, 1.1] as const
 
 function scatterLogo(index: number) {
-  const size = 40
   const tilt = `${TILE_TILTS[index % TILE_TILTS.length]}deg`
   const delay = `${(index % 8) * 0.28}s`
-  return { size, tilt, delay }
+  return { tilt, delay }
 }
 
 export function IntegrationTilesVisual({
@@ -85,8 +100,8 @@ export function IntegrationTilesVisual({
   return (
     <Wash>
       <div
-        className={`absolute inset-x-3 top-6 grid grid-cols-6 content-evenly items-center justify-items-center gap-x-3 gap-y-3 ${
-          showLink ? "bottom-[3.15rem]" : "bottom-2"
+        className={`grid grid-cols-6 content-evenly items-center justify-items-center gap-x-1.5 gap-y-2 px-3 pt-6 md:absolute md:inset-x-3 md:top-6 md:gap-x-3 md:gap-y-3 md:p-0 ${
+          showLink ? "pb-[3.15rem] md:bottom-[3.15rem]" : "pb-2 md:bottom-2"
         }`}
       >
         {INTEGRATION_LOGOS.map((logo, index) => {
@@ -94,15 +109,13 @@ export function IntegrationTilesVisual({
           return (
             <div
               key={logo.slug}
-              className="software-icon-tile software-icon-tile-still flex items-center justify-center"
+              className="software-icon-tile software-icon-tile-still flex h-9 w-9 items-center justify-center md:h-10 md:w-10"
               style={{
-                width: spot.size,
-                height: spot.size,
                 transform: `rotate(${spot.tilt})`,
                 animationDelay: spot.delay,
               }}
             >
-              <BrandLogo slug={logo.slug} name={logo.name} size={Math.round(spot.size * 0.44)} />
+              <BrandLogo slug={logo.slug} name={logo.name} className="h-4 w-4 md:h-[18px] md:w-[18px]" />
             </div>
           )
         })}
@@ -979,7 +992,7 @@ function ChannelDetail({ beat }: { beat: number }) {
   return (
     <div className={`${TILE} software-story-pop flex h-full flex-col overflow-hidden p-2.5`}>
       <p className="text-[12px] font-semibold text-brand">Automatic posting</p>
-      <div className="mt-2 grid min-h-0 flex-1 grid-cols-3 gap-1.5">
+      <div className="mt-2 grid min-h-[9rem] flex-1 grid-cols-3 gap-1.5 md:min-h-0">
         {[
           {
             src: "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&w=280&q=80",
@@ -1016,7 +1029,7 @@ function ChannelDetail({ beat }: { beat: number }) {
               <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/95">
                 <BrandLogo slug={post.slug} name={post.name} size={11} />
               </span>
-              <p className="truncate text-[9px] font-semibold text-white">{post.name}</p>
+              <p className="hidden truncate text-[9px] font-semibold text-white md:block">{post.name}</p>
             </div>
             <span
               className="software-posted-stamp absolute right-1.5 top-1.5 rounded-full bg-[#14804a] px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-wide text-white"
@@ -1066,8 +1079,21 @@ export function ChannelValueVisual() {
         {beat.line}
       </p>
 
-      <div className="relative mt-2 min-h-0 flex-1">
-        <div className="absolute inset-y-0 left-0 flex w-[46%] flex-col justify-between gap-1.5 pr-2">
+      {/* Phones: the apps for the active source sit in one row and the strip below is the switcher. */}
+      <div className="mt-2 flex justify-center gap-1.5 md:hidden">
+        {beat.apps.map((app, appIndex) => (
+          <div
+            key={app.slug}
+            className="software-icon-tile flex h-9 w-9 items-center justify-center"
+            style={{ animationDelay: `${appIndex * 0.2}s` }}
+          >
+            <BrandLogo slug={app.slug} name={app.name} size={16} />
+          </div>
+        ))}
+      </div>
+
+      <div className="relative mt-2 flex min-h-0 flex-1 flex-col md:block">
+        <div className="hidden md:absolute md:inset-y-0 md:left-0 md:flex md:w-[46%] md:flex-col md:justify-between md:gap-1.5 md:pr-2">
           {MONEY_BEATS.map((item, index) => (
             <button
               key={item.id}
@@ -1100,13 +1126,13 @@ export function ChannelValueVisual() {
           ))}
         </div>
 
-        <div className="absolute inset-y-0 right-0 w-[52%]">
+        <div className="min-h-0 flex-1 md:absolute md:inset-y-0 md:right-0 md:w-[52%]">
           <ChannelDetail beat={active} />
         </div>
       </div>
 
-      <div className={`${TILE} mt-2 flex items-center justify-between gap-3 px-3 py-2`}>
-        <div className="flex min-w-0 flex-1 gap-1">
+      <div className={`${TILE} mt-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 px-3 py-2 md:flex-nowrap`}>
+        <div className="flex w-full min-w-0 gap-1 md:w-auto md:flex-1">
           {MONEY_BEATS.map((item, index) => (
             <button
               key={item.id}
@@ -1124,7 +1150,7 @@ export function ChannelValueVisual() {
             </button>
           ))}
         </div>
-        <div className="w-[4.75rem] shrink-0 text-right">
+        <div className="flex w-full items-baseline justify-between border-t border-black/[0.05] pt-1.5 md:block md:w-[4.75rem] md:shrink-0 md:border-0 md:pt-0 md:text-right">
           <p className="text-[10px] font-medium text-slate-400">This week</p>
           <p className="text-[13px] font-semibold tabular-nums text-[#14804a]">
             ${running.toLocaleString()}
@@ -1142,14 +1168,14 @@ export function LeakFlowVisual() {
 
   return (
     <Wash className="flex flex-col bg-[#0a0a0a] p-0">
-      <div className="flex h-full min-h-0 flex-col overflow-hidden text-white">
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden text-white md:h-full">
         <div className="flex shrink-0 items-center gap-1.5 bg-[#141414] px-3 py-2">
           <span className="h-2 w-2 rounded-full bg-white/25" />
           <span className="h-2 w-2 rounded-full bg-white/25" />
           <span className="h-2 w-2 rounded-full bg-white/25" />
           <span className="ml-1.5 truncate text-[11px] tracking-wide text-white/45">{view.url}</span>
         </div>
-        <div className="grid shrink-0 grid-cols-5 gap-1 bg-[#141414] px-2 pb-2">
+        <div className="grid shrink-0 grid-cols-5 gap-0.5 bg-[#141414] px-2 pb-2 md:gap-1">
           {SITE_BEATS.map((item, index) => (
             <button
               key={item.id}
@@ -1158,16 +1184,20 @@ export function LeakFlowVisual() {
               onMouseLeave={() => setHovered(null)}
               onFocus={() => setHovered(index)}
               onBlur={() => setHovered(null)}
-              className={`rounded-lg px-1 py-1.5 text-center transition ${
+              className={`rounded-lg px-0.5 py-1.5 text-center transition md:px-1 ${
                 index === view.beat ? "bg-white text-ink" : "bg-white/10 text-white/50"
               }`}
             >
-              <p className="text-[10px] font-semibold">{item.label}</p>
+              <p className="text-[9px] font-semibold md:text-[10px]">{item.label}</p>
             </button>
           ))}
         </div>
-        <div className="relative min-h-0 flex-1">
-          <VlairRecordScreen view={view} />
+        {/* The recorded screen needs a real height on phones, where the frame is no longer a fixed aspect. */}
+        <div className="relative min-h-[15rem] flex-1 overflow-hidden md:min-h-0">
+          {/* Absolute wrapper gives the recorded pages a definite height to size against on every breakpoint. */}
+          <div className="absolute inset-0">
+            <VlairRecordScreen view={view} />
+          </div>
           <RecordCursor x={view.cursor.x} y={view.cursor.y} clicking={view.clicking} snap={view.snap} />
         </div>
         <div className="shrink-0 border-t border-white/10 bg-[#141414] px-3 py-2">
@@ -1227,7 +1257,7 @@ export function FollowUpFlowVisual() {
   const step = reduce ? 4 : scene
 
   return (
-    <Wash className="flex h-full flex-col justify-between p-2 lg:p-4">
+    <Wash className="flex h-full flex-col justify-between p-3 lg:p-4">
       <p className="sr-only">
         A new lead from Sam Reed for $2,400 reaches the owner, sales, and the VA. A deal is created, a
         follow-up is sent, and a hold is booked. Sam replies that 2:15 works. Sales sees it and the next
@@ -1886,12 +1916,17 @@ export function RefillSequenceVisual() {
   return (
     <Wash className="flex h-full flex-col justify-center p-4">
       <p className="mb-3 text-[11px] font-medium uppercase tracking-wide text-slate-400">Email sequence</p>
-      <div className="flex w-full items-stretch gap-2">
+      {/* Phones: the three notes stack as rows. From md up they sit side by side with arrows. */}
+      <div className="flex w-full flex-col items-stretch gap-2 md:flex-row">
         {REFILL_NOTES.map((note, index) => (
           <div key={note.title} className="flex flex-1 items-center">
-            <div className={`${TILE} w-full px-3 py-4 text-center ${index < step ? "software-node-in" : "opacity-25"}`}>
+            <div
+              className={`${TILE} flex w-full items-center gap-3 px-3 py-3 text-left md:block md:py-4 md:text-center ${
+                index < step ? "software-node-in" : "opacity-25"
+              }`}
+            >
               <div
-                className="software-icon-tile mx-auto mb-3 flex h-10 w-10 items-center justify-center"
+                className="software-icon-tile flex h-10 w-10 shrink-0 items-center justify-center md:mx-auto md:mb-3"
                 style={{ animationDelay: `${index * 0.22}s` }}
               >
                 <LineIcon size={18}>
@@ -1899,11 +1934,18 @@ export function RefillSequenceVisual() {
                   <path d="m3 7 9 6 9-6" />
                 </LineIcon>
               </div>
-              <p className="text-[13px] font-semibold text-ink">{note.title}</p>
-              <p className="text-[11px] text-slate-400">{note.day}</p>
-              <p className="mt-1 line-clamp-2 text-[10px] leading-snug text-slate-500">{note.subject}</p>
+              <div className="min-w-0">
+                <p className="text-[13px] font-semibold text-ink">
+                  {note.title}
+                  <span className="font-normal text-slate-400 md:hidden"> · {note.day}</span>
+                </p>
+                <p className="hidden text-[11px] text-slate-400 md:block">{note.day}</p>
+                <p className="mt-0.5 line-clamp-2 text-[11px] leading-snug text-slate-500 md:mt-1 md:text-[10px]">
+                  {note.subject}
+                </p>
+              </div>
             </div>
-            {index < REFILL_NOTES.length - 1 && <span className="px-1 text-slate-300">→</span>}
+            {index < REFILL_NOTES.length - 1 && <span className="hidden px-1 text-slate-300 md:inline">→</span>}
           </div>
         ))}
       </div>
@@ -1937,7 +1979,7 @@ export function DiscoverabilityVisual() {
         </p>
         <p className="mt-0.5 text-[14px] font-semibold text-ink">More than one door is open.</p>
       </div>
-      <div className="mt-2 grid grid-cols-2 gap-1.5">
+      <div className="mt-2 grid grid-cols-1 gap-1.5 min-[360px]:grid-cols-2">
         {FIND_PLACES.map((place, index) => {
           const on = index < shown
           return (
