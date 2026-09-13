@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { after } from "next/server"
 import { bookingApi, manageUrl, type BookingRecord } from "@/lib/booking-api"
 import { confirmBookingToUser, notifyAdminOfBooking } from "@/lib/notify"
+import { enrollLead } from "@/lib/nurture/enroll"
 
 export const dynamic = "force-dynamic"
 
@@ -61,8 +62,17 @@ export async function POST(request: NextRequest) {
   }
 
   // Messages go out after the response so the visitor sees the confirmation right away.
+  // Nurture enroll is future-only: existing bookings are never backfilled.
   after(async () => {
     await Promise.all([notifyAdminOfBooking(notice), confirmBookingToUser(notice)])
+    await enrollLead({
+      email,
+      name,
+      source: "book",
+      businessName: lead.business,
+      website: lead.website,
+      job: lead.note,
+    })
   })
 
   return NextResponse.json({

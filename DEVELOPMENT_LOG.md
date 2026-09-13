@@ -935,3 +935,20 @@ Recovered the preserved `tm-main-wt lib/notify.ts` stash (WIP from an interrupte
 **Stash handling.** `tm-main-wt lib/notify.ts` already matches committed `main` (`U0BMKSTCBFD` @mention on `notifyAdminOfLead` / `notifyAdminOfBooking`). Left both that stash and `book-flow whitespace` untouched.
 
 **Build.** `pnpm build` passed.
+
+## Lead nurture sequence (Talk / report / book) – September 13, 2026
+
+**Goal.** Enroll every *future* Talk form, Digital Footprint report, and `/book` signup into a 3-email follow-up after their immediate confirmation. Do not backfill historical leads or special-case the existing test booking.
+
+**Timing (from `enrolled_at`).** Day 1 → step 1; day 3 → step 2 (requires step 1 sent); day 5 → step 3 (requires step 2 sent). Unsubscribed rows are skipped. Cron: `vercel.json` path `/api/cron/nurture`, schedule `0 16 * * *` (16:00 UTC ≈ 9am PT).
+
+**Subjects.**
+1. What to expect from Terramore
+2. Where AI fits in the tools you already pay for
+3. Which job is loudest right now?
+
+**SQL (you must run in Supabase).** `supabase/migrations/20260913_lead_nurture.sql` creates `website.lead_nurture` (email unique, source talk|report|book, personalisation columns, step*_sent_at, unsubscribed_at). Idempotent. Grants `service_role`. App uses `SUPABASE_SERVICE_ROLE_KEY` + `SUPABASE_SCHEMA=website`.
+
+**Env.** Set `CRON_SECRET` on Vercel (production). Auth: `Authorization: Bearer ${CRON_SECRET}` (Vercel Cron sends this when the env var is set) or `?secret=`. If unset, the route returns 503. Unsubscribe HMAC uses `NURTURE_SECRET` → `BOOKING_API_SECRET` → `CRON_SECRET`.
+
+**Code.** `lib/nurture/` (types, map-links, templates via `email-template.ts`, enroll upsert no-op if already enrolled, process). Hooks in `after()` after confirmation: `partner-application` (talk), `report`, `booking`. `app/api/cron/nurture`, `app/api/nurture/unsubscribe`. No historical enroll.

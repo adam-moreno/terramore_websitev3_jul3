@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server"
 import { after } from "next/server"
 import { getServerSupabase, isMissingColumnError, supabaseTableUrl } from "@/lib/supabase-server"
 import { confirmLeadToUser, notifyAdminOfLead } from "@/lib/notify"
+import { enrollLead } from "@/lib/nurture/enroll"
+import { businessTypeFromReportAnswers } from "@/lib/nurture/map-links"
 import { runReportPipeline } from "@/lib/report/pipeline"
 
 // The pipeline fetches the site, calls a model, renders a PDF, and sends an email.
@@ -95,6 +97,14 @@ export async function POST(request: NextRequest) {
         tableUrl: supabaseTableUrl("free_courses_signups"),
       }
       await Promise.all([notifyAdminOfLead(lead), confirmLeadToUser(lead)])
+      await enrollLead({
+        email,
+        name,
+        source: "report",
+        businessType: businessTypeFromReportAnswers(answerSummary),
+        businessName: businessName || null,
+        website: website || null,
+      })
       await runReportPipeline({ name, email, businessName, website: website || null, answers: answerSummary || null })
     })
 

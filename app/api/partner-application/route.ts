@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { after } from 'next/server'
 import { getServerSupabase, supabaseTableUrl } from '@/lib/supabase-server'
 import { confirmLeadToUser, notifyAdminOfLead } from '@/lib/notify'
+import { enrollLead } from '@/lib/nurture/enroll'
 
 export async function POST(request: NextRequest) {
   try {
@@ -68,6 +69,15 @@ export async function POST(request: NextRequest) {
       console.warn('Talk request (no Supabase):', { name: cleanName, email: cleanEmail, goal, businessName, website })
       after(async () => {
         await Promise.all([notifyAdminOfLead(lead), confirmLeadToUser(lead)])
+        await enrollLead({
+          email: cleanEmail,
+          name: cleanName,
+          source: 'talk',
+          businessType: businessType && businessType !== 'Not shared' ? String(businessType) : null,
+          job: String(goal),
+          businessName,
+          website,
+        })
       })
       return NextResponse.json({ success: true, message: 'Request received' }, { status: 201 })
     }
@@ -126,6 +136,15 @@ export async function POST(request: NextRequest) {
     // Runs after the response; failures are logged and never reach the form.
     after(async () => {
       await Promise.all([notifyAdminOfLead(lead), confirmLeadToUser(lead)])
+      await enrollLead({
+        email: cleanEmail,
+        name: cleanName,
+        source: 'talk',
+        businessType: businessType && businessType !== 'Not shared' ? String(businessType) : null,
+        job: String(goal),
+        businessName,
+        website,
+      })
     })
 
     return NextResponse.json(
