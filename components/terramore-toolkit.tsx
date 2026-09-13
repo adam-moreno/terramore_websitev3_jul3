@@ -12,17 +12,17 @@ import {
 
 const ITEMS = [
   {
-    title: "Work inside your current tools",
+    title: "Work inside your tools",
     copy: "Google, Meta, Shopify, HubSpot, Mailchimp. We join the accounts you already pay for. You do not start over.",
     visual: IntegrationTilesVisual,
   },
   {
-    title: "Connect every channel to revenue",
+    title: "Connect channels to revenue",
     copy: "Paid ads bring people in. The site turns clicks into orders. Email and texts bring old leads back. Each one adds revenue you can see, in one place.",
     visual: ChannelValueVisual,
   },
   {
-    title: "Find where you lose the sale, then fix it",
+    title: "Fix the broken step",
     copy: "We watch visitors, clicks, carts they leave, and buys they finish. You see the broken step before we charge you to fix it.",
     visual: LeakFlowVisual,
   },
@@ -32,12 +32,12 @@ const ITEMS = [
     visual: FollowUpFlowVisual,
   },
   {
-    title: "Reach the people ready to buy",
+    title: "Reach buyers ready now",
     copy: "We watch who notices you, who comes to the site, and who is ready. Then we reach those people so more of them purchase.",
     visual: AudienceIntelVisual,
   },
   {
-    title: "Leave with a 90-day plan",
+    title: "Leave a 90-day plan",
     copy: "At day 90 you have a written plan with owners and dates: what we fixed, what we turned on, and what comes next. It stays with your team whether we stay or not.",
     visual: RoadmapVisual,
   },

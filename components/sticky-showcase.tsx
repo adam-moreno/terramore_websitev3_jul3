@@ -77,7 +77,7 @@ export function StickyShowcase({
                   }`}
                 >
                   <p className="text-[13px] font-medium text-gold-to">{String(index + 1).padStart(2, "0")}</p>
-                  <h3 className="mt-3 text-[1.5rem] font-semibold leading-[1.15] tracking-tight text-ink md:whitespace-nowrap md:text-[1.75rem] md:leading-normal">
+                  <h3 className="mt-3 whitespace-nowrap text-[1.5rem] font-semibold leading-[1.15] tracking-tight text-ink md:text-[1.75rem] md:leading-normal">
                     {item.title}
                   </h3>
                   <p className="mt-3 max-w-[26rem] text-[16px] leading-[1.5] text-ink/70 md:text-[15px] md:leading-relaxed">{item.copy}</p>

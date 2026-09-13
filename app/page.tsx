@@ -3,6 +3,7 @@
 import { Calendar } from "lucide-react"
 import { BookingLink } from "@/components/booking-popup"
 import Link from "next/link"
+import { useEffect, useState } from "react"
 import { HomeFaq } from "@/components/home-faq"
 import { ReportBand } from "@/components/report-band"
 import { ReviewCarousel } from "@/components/review-carousel"
@@ -14,15 +15,47 @@ import { HeroLogoMobius } from "@/components/hero-logo-mobius"
 import { TerramoreToolkit } from "@/components/terramore-toolkit"
 import { TerramoreUseCases } from "@/components/terramore-use-cases"
 
+function ScheduleFab() {
+  const [pastHero, setPastHero] = useState(false)
+
+  useEffect(() => {
+    const sync = () => {
+      const mobile = window.matchMedia("(max-width: 767px)").matches
+      if (!mobile) {
+        setPastHero(true)
+        return
+      }
+      setPastHero(window.scrollY > window.innerHeight * 0.7)
+    }
+    sync()
+    window.addEventListener("scroll", sync, { passive: true })
+    window.addEventListener("resize", sync)
+    return () => {
+      window.removeEventListener("scroll", sync)
+      window.removeEventListener("resize", sync)
+    }
+  }, [])
+
+  return (
+    <div
+      className={`fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-[70] transition duration-300 ease-out ${
+        pastHero
+          ? "translate-y-0 opacity-100"
+          : "pointer-events-none translate-y-3 opacity-0 md:pointer-events-auto md:translate-y-0 md:opacity-100"
+      }`}
+    >
+      <BookingLink className="inline-flex h-11 items-center rounded-2xl bg-brand px-4 text-[14px] font-medium text-white shadow-lg transition-shadow hover:bg-brand-hover hover:shadow-xl">
+        <Calendar className="mr-2 h-4 w-4" />
+        Schedule
+      </BookingLink>
+    </div>
+  )
+}
+
 export default function TerramoreHomepage() {
   return (
     <div className="min-h-screen bg-cream">
-      <div className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-[70]">
-        <BookingLink className="inline-flex h-11 items-center rounded-2xl bg-brand px-4 text-[14px] font-medium text-white shadow-lg transition-shadow hover:bg-brand-hover hover:shadow-xl">
-          <Calendar className="mr-2 h-4 w-4" />
-          Schedule
-        </BookingLink>
-      </div>
+      <ScheduleFab />
 
       <section className="section-y relative isolate overflow-hidden bg-cream pt-28 md:pt-32 md:pb-24">
         {/* The orbit only runs from md up. On phones it floated over the headline, so the marks move to a slim row under the CTA. */}
@@ -42,7 +75,7 @@ export default function TerramoreHomepage() {
                 <span className="text-gold">business you already built.</span>
               </h1>
               <p className="mx-auto mt-7 max-w-[626px] text-[18px] font-medium leading-[1.5] text-ink md:mt-8 md:text-[20px] md:leading-[30px]">
-                A growth team for owners. We find where you lose sales and fix it.
+                We put AI into the tools that already win for you, then add proven marketing and sales plays so more revenue shows up.
               </p>
               <div className="mt-8 flex flex-col items-center">
                 <Link
@@ -51,6 +84,9 @@ export default function TerramoreHomepage() {
                 >
                   Let&apos;s talk
                 </Link>
+                <p className="mt-3 text-[13px] font-medium text-ink/45">
+                  Free Digital Footprint report · No credit card
+                </p>
               </div>
             </div>
           </div>

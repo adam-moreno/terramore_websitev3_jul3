@@ -48,8 +48,8 @@ const MARKS = MARK_SPOTS.map((spot, index) => {
     top: spot.top,
     left: spot.left,
     size: spot.size,
-    delay: `${(index % 8) * 0.3}s`,
-    dur: `${6 + (index % 5) * 0.4}s`,
+    delay: `${(index % 9) * 0.55}s`,
+    dur: `${9 + (index % 6) * 1.1}s`,
   }
 })
 

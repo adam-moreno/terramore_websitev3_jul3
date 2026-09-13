@@ -917,3 +917,21 @@ Five surgical, mobile-focused UI changes on the live homepage. No business facts
 ## Slack @mention on admin alerts
 
 Recovered the preserved `tm-main-wt lib/notify.ts` stash (WIP from an interrupted task that was never committed/pushed). Its diff matched the intended spec exactly, so it was applied (not re-implemented) and the stash dropped after a clean apply. The change adds `const SLACK_MENTION = (process.env.SLACK_MENTION_USER_ID?.trim() || "U0BMKSTCBFD")` and, in the two admin functions only (`notifyAdminOfLead`, `notifyAdminOfBooking`), prepends `<@${SLACK_MENTION}> ` to the fallback `text` and unshifts a leading `section` mrkdwn block with the mention (guarded to skip when the constant is empty). Lead-facing/user confirmation messages were untouched. This makes admin Slack alerts push to Adam's phone in mentions-only channels. `pnpm build` passed. The unrelated `book-flow whitespace app/page.tsx` stash was left untouched.
+
+## Homepage polish: Slack reveal, float, report carousel – September 12, 2026
+
+**Goal.** Ship a Lindy-clean Slack conversation reveal, smoother floating logos, mobile Schedule scroll-reveal, hero/toolkit copy polish, content-calendar counter fix, and a manual report-chapter carousel. Work stayed on `main`.
+
+**1. Slack conversation (`components/hero-analytics.tsx`).** Replaced the team-only typing interval with a per-channel sequence: message 1 appears fully first (already sent), then every later message gets typing → text → attachment. Fixed card height (`h-[22rem]` mobile / `h-[36rem]` desktop) with `overflow-hidden` so attachments never grow the card. Removed the mobile channel pill strip; channel header is `# label` + caret dropdown (mobile) with swipe left/right on the conversation area. Role line hidden on mobile. Reduced motion jumps to the finished conversation. Timing: ~1s first hold, ~0.8s typing, ~1s message, ~0.8s asset, soft loop.
+
+**2. Floating logos.** `hero-float` keyframes now travel ~12–18px on X/Y with slight rotate; longer organic durations/delays in `hero-floating-logos.tsx`. Opacity 0.28 and reduced-motion static behavior kept.
+
+**3. Schedule FAB.** Mobile-only: hidden until scroll past ~70vh; desktop always visible. Safe-area inset preserved.
+
+**4–6. Copy / toolkit / calendar.** Hero subhead and helper line under Let's talk. Toolkit step titles shortened to one line with `whitespace-nowrap`. DropFilesVisual badge is `{n} post` / `{n} posts`, vertically centered.
+
+**7. Report carousel.** `ReportScanVisual` is a horizontal snap carousel of the four CHAPTER cards (kicker prominent, stat secondary). No auto-advance. Desktop keeps a static "Inside the report" list without sync. Mobile relies on the carousel alone.
+
+**Stash handling.** `tm-main-wt lib/notify.ts` already matches committed `main` (`U0BMKSTCBFD` @mention on `notifyAdminOfLead` / `notifyAdminOfBooking`). Left both that stash and `book-flow whitespace` untouched.
+
+**Build.** `pnpm build` passed.

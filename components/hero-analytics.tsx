@@ -4,6 +4,7 @@ import {
   Briefcase,
   Calendar,
   Check,
+  ChevronDown,
   Clapperboard,
   Cpu,
   Dumbbell,
@@ -21,8 +22,7 @@ import {
   Users,
   type LucideIcon,
 } from "lucide-react"
-import { useEffect, useRef, useState, type ReactNode } from "react"
-import { useScrollRow } from "@/hooks/use-scroll-row"
+import { useEffect, useRef, useState, type ReactNode, type TouchEvent } from "react"
 
 function usePrefersReducedMotion() {
   const [reduce, setReduce] = useState(false)
@@ -459,6 +459,13 @@ const EMAIL_TONES: Record<string, string> = {
   violet: "bg-violet-50",
 }
 
+const HOLD_FIRST_MS = 1000
+const TYPING_MS = 800
+const MESSAGE_MS = 1000
+const ASSET_MS = 800
+const HOLD_END_MS = 2200
+const SWIPE_THRESHOLD = 48
+
 function FileIcon({ kind }: { kind: DriveFile["kind"] }) {
   if (kind === "folder") return <Folder className="h-3 w-3 text-amber-500" />
   if (kind === "video") return <Film className="h-3 w-3 text-slate-500" />
@@ -636,8 +643,7 @@ function TypingDots() {
   )
 }
 
-// phase drives the reveal for a team reply: 0 shows the typing dots, 1 shows the typed message,
-// 2 adds the attachment. Client messages are always passed phase 2 so they read as already sent.
+/** phase: 0 = typing only, 1 = text (no attachment yet), 2 = text + attachment */
 function SlackMessage({ message, phase }: { message: Message; phase: number }) {
   const showText = phase >= 1
   const showAttachment = phase >= 2
@@ -659,7 +665,7 @@ function SlackMessage({ message, phase }: { message: Message; phase: number }) {
           ) : null}{" "}
           <span className="font-normal text-slate-400">{message.time}</span>
         </p>
-        <p className="text-[11px] text-slate-400">{message.from.role}</p>
+        <p className="hidden text-[11px] text-slate-400 md:block">{message.from.role}</p>
         {showText ? (
           <p className="mt-1 text-[14px] leading-relaxed text-slate-700">{message.text}</p>
         ) : (
@@ -675,31 +681,129 @@ function SlackMessage({ message, phase }: { message: Message; phase: number }) {
   )
 }
 
+type RevealCursor = {
+  /** Index of the message currently being revealed (or last complete). */
+  index: number
+  /** 0 typing, 1 text, 2 full (text + attachment). Message 0 starts at 2. */
+  phase: number
+}
+
+function finalReveal(messages: Message[]): RevealCursor {
+  return { index: Math.max(messages.length - 1, 0), phase: 2 }
+}
+
+function messagePhase(cursor: RevealCursor, messageIndex: number): number | null {
+  if (messageIndex < cursor.index) return 2
+  if (messageIndex > cursor.index) return null
+  return cursor.phase
+}
+
 export function HeroAnalytics() {
   const [active, setActive] = useState(CHANNELS[0].id)
   const channel = CHANNELS.find((item) => item.id === active) ?? CHANNELS[0]
   const activeIndex = CHANNELS.findIndex((item) => item.id === channel.id)
   const extraMembers = Math.max(channel.members - 4, 0)
-  const pillRow = useRef<HTMLDivElement>(null)
-  useScrollRow(pillRow, activeIndex)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+  const touchStartX = useRef<number | null>(null)
 
-  // Loop a typing-then-message reveal for the Terramore team reply. It resets whenever the channel
-  // changes. With reduced motion we skip straight to the finished message and attachment.
   const reduce = usePrefersReducedMotion()
-  const [tick, setTick] = useState(0)
+  const [cursor, setCursor] = useState<RevealCursor>(() =>
+    reduce ? finalReveal(channel.messages) : { index: 0, phase: 2 }
+  )
+
   useEffect(() => {
-    setTick(0)
-    if (reduce) return
-    const id = window.setInterval(() => setTick((current) => (current + 1) % 6), 850)
-    return () => window.clearInterval(id)
+    setMenuOpen(false)
+    if (reduce) {
+      setCursor(finalReveal(channel.messages))
+      return
+    }
+
+    let cancelled = false
+    let timer: number | undefined
+    const messages = channel.messages
+
+    const wait = (ms: number) =>
+      new Promise<void>((resolve) => {
+        timer = window.setTimeout(resolve, ms)
+      })
+
+    const play = async () => {
+      while (!cancelled) {
+        setCursor({ index: 0, phase: 2 })
+        await wait(HOLD_FIRST_MS)
+        if (cancelled) return
+
+        for (let i = 1; i < messages.length; i++) {
+          setCursor({ index: i, phase: 0 })
+          await wait(TYPING_MS)
+          if (cancelled) return
+
+          setCursor({ index: i, phase: 1 })
+          await wait(MESSAGE_MS)
+          if (cancelled) return
+
+          if (messages[i].attachment) {
+            setCursor({ index: i, phase: 2 })
+            await wait(ASSET_MS)
+            if (cancelled) return
+          } else {
+            setCursor({ index: i, phase: 2 })
+          }
+        }
+
+        await wait(HOLD_END_MS)
+        if (cancelled) return
+      }
+    }
+
+    void play()
+    return () => {
+      cancelled = true
+      if (timer !== undefined) window.clearTimeout(timer)
+    }
   }, [active, reduce])
-  const reveal = reduce ? 2 : tick === 0 ? 0 : tick === 1 ? 1 : 2
+
+  useEffect(() => {
+    if (!menuOpen) return
+    const onPointer = (event: MouseEvent) => {
+      if (!menuRef.current?.contains(event.target as Node)) setMenuOpen(false)
+    }
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMenuOpen(false)
+    }
+    document.addEventListener("mousedown", onPointer)
+    document.addEventListener("keydown", onKey)
+    return () => {
+      document.removeEventListener("mousedown", onPointer)
+      document.removeEventListener("keydown", onKey)
+    }
+  }, [menuOpen])
+
+  const goChannel = (delta: number) => {
+    const next = (activeIndex + delta + CHANNELS.length) % CHANNELS.length
+    setActive(CHANNELS[next].id)
+  }
+
+  const onTouchStart = (event: TouchEvent) => {
+    touchStartX.current = event.changedTouches[0]?.clientX ?? null
+  }
+
+  const onTouchEnd = (event: TouchEvent) => {
+    const start = touchStartX.current
+    touchStartX.current = null
+    if (start === null) return
+    const end = event.changedTouches[0]?.clientX
+    if (end === undefined) return
+    const delta = end - start
+    if (Math.abs(delta) < SWIPE_THRESHOLD) return
+    goChannel(delta < 0 ? 1 : -1)
+  }
 
   return (
     <div className="relative w-full" data-hero-analytics>
       <div className="card-radius overflow-hidden border border-black/[0.06] bg-white shadow-[0_30px_80px_-32px_rgba(15,23,42,0.22)] md:rounded-[28px]">
-        {/* minmax(0,1fr): without it the long pill row sets the column's minimum width and the card overflows on phones. */}
-        <div className="grid min-h-[26rem] grid-cols-[minmax(0,1fr)] md:min-h-[36rem] md:grid-cols-[200px_minmax(0,1fr)]">
+        <div className="grid h-[22rem] grid-cols-[minmax(0,1fr)] md:h-[36rem] md:grid-cols-[200px_minmax(0,1fr)]">
           <aside className="hidden border-r border-black/[0.06] bg-[#f7f4f2] p-3 md:flex md:flex-col">
             <p className="px-2 pb-3 text-[13px] font-semibold text-slate-800">Terramore</p>
             <p className="px-2 pb-2 text-[11px] font-medium uppercase tracking-wide text-slate-400">Channels</p>
@@ -724,66 +828,87 @@ export function HeroAnalytics() {
             </div>
           </aside>
 
-          <div className="flex min-h-[26rem] min-w-0 flex-col bg-white md:min-h-[36rem]">
-            <div className="flex items-center justify-between gap-3 border-b border-black/[0.06] px-4 py-2.5">
-              <div className="flex min-w-0 items-center gap-2 text-[13px] font-semibold text-slate-800">
-                <channel.icon className="h-3.5 w-3.5 shrink-0 text-slate-500" />
-                <span className="text-slate-400">#</span>
-                <span className="truncate">{channel.label}</span>
-                <span className="shrink-0 font-normal text-slate-400">· {channel.members} members</span>
-              </div>
-              <div className="flex shrink-0 -space-x-1.5">
-                {CHANNELS.slice(0, 4).map((item) => (
-                  <SlackFace
-                    key={item.id}
-                    src={item.client.photo}
-                    name={item.client.name}
-                    className="h-6 w-6 rounded-full border-2 border-white object-cover"
+          <div className="flex h-full min-w-0 flex-col bg-white">
+            <div className="flex shrink-0 items-center justify-between gap-3 border-b border-black/[0.06] px-4 py-2.5">
+              <div className="relative min-w-0" ref={menuRef}>
+                <button
+                  type="button"
+                  aria-expanded={menuOpen}
+                  aria-haspopup="listbox"
+                  onClick={() => setMenuOpen((open) => !open)}
+                  className="inline-flex max-w-full items-center gap-1.5 rounded-lg py-0.5 text-left text-[13px] font-semibold text-slate-800 hover:bg-slate-50 md:hover:bg-transparent"
+                >
+                  <channel.icon className="h-3.5 w-3.5 shrink-0 text-slate-500" />
+                  <span className="text-slate-400">#</span>
+                  <span className="truncate">{channel.label}</span>
+                  <ChevronDown
+                    className={`h-3.5 w-3.5 shrink-0 text-slate-400 transition md:hidden ${menuOpen ? "rotate-180" : ""}`}
                   />
-                ))}
-                <span className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-white bg-slate-100 text-[9px] font-semibold text-slate-500">
-                  +{extraMembers}
-                </span>
+                  <span className="hidden shrink-0 font-normal text-slate-400 md:inline">· {channel.members} members</span>
+                </button>
+                {menuOpen ? (
+                  <div
+                    role="listbox"
+                    aria-label="Channels"
+                    className="absolute left-0 top-full z-20 mt-1 max-h-64 w-56 overflow-y-auto rounded-xl border border-black/[0.08] bg-white py-1 shadow-[0_16px_40px_-20px_rgba(15,23,42,0.35)] md:hidden"
+                  >
+                    {CHANNELS.map((item) => {
+                      const Icon = item.icon
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          role="option"
+                          aria-selected={item.id === active}
+                          onClick={() => {
+                            setActive(item.id)
+                            setMenuOpen(false)
+                          }}
+                          className={`flex w-full items-center gap-2 px-3 py-2 text-left text-[13px] ${
+                            item.id === active ? "bg-slate-50 font-semibold text-slate-900" : "text-slate-600"
+                          }`}
+                        >
+                          <Icon className="h-3.5 w-3.5 shrink-0" />
+                          <span className="text-slate-400">#</span>
+                          <span>{item.label}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                ) : null}
+              </div>
+              <div className="flex shrink-0 items-center gap-2">
+                <span className="text-[11px] font-normal text-slate-400 md:hidden">{channel.members}</span>
+                <div className="flex -space-x-1.5">
+                  {CHANNELS.slice(0, 4).map((item) => (
+                    <SlackFace
+                      key={item.id}
+                      src={item.client.photo}
+                      name={item.client.name}
+                      className="h-6 w-6 rounded-full border-2 border-white object-cover"
+                    />
+                  ))}
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-white bg-slate-100 text-[9px] font-semibold text-slate-500">
+                    +{extraMembers}
+                  </span>
+                </div>
               </div>
             </div>
 
-            <div className="relative border-b border-black/[0.04] md:hidden">
-              <div
-                ref={pillRow}
-                className="flex snap-x snap-mandatory gap-2 overflow-x-auto scroll-px-4 px-4 py-2 scrollbar-hide"
-                role="tablist"
-                aria-label="Channels"
-              >
-                {CHANNELS.map((item) => {
-                  const Icon = item.icon
+            <div
+              className="min-h-0 flex-1 overflow-hidden px-4 py-4 md:px-6 md:py-5"
+              onTouchStart={onTouchStart}
+              onTouchEnd={onTouchEnd}
+            >
+              <div className="flex flex-col gap-5">
+                {channel.messages.map((message, index) => {
+                  const phase = messagePhase(cursor, index)
+                  if (phase === null) return null
                   return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      role="tab"
-                      aria-selected={item.id === active}
-                      onClick={() => setActive(item.id)}
-                      className={`inline-flex shrink-0 snap-start items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-[12px] ${
-                        item.id === active ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600 active:bg-slate-200"
-                      }`}
-                    >
-                      <Icon className="h-3 w-3 shrink-0" />
-                      #{item.label}
-                    </button>
+                    <SlackMessage key={`${channel.id}-${index}`} message={message} phase={phase} />
                   )
                 })}
               </div>
-              <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-white to-transparent" />
-            </div>
-
-            <div className="flex flex-1 flex-col justify-start gap-5 px-4 py-4 md:gap-5 md:px-6 md:py-5">
-              {channel.messages.map((message, index) => (
-                <SlackMessage
-                  key={`${channel.id}-${index}`}
-                  message={message}
-                  phase={message.from.team ? reveal : 2}
-                />
-              ))}
             </div>
           </div>
         </div>

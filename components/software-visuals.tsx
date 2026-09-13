@@ -1826,8 +1826,11 @@ export function DropFilesVisual() {
           <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">Content calendar</p>
           <p className="mt-0.5 text-[14px] font-semibold text-ink">Posts go live on a date. Same files everywhere.</p>
         </div>
-        <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-brand shadow-sm">
-          {Math.min(step, CALENDAR_POSTS.length)} this week
+        <span className="inline-flex items-center justify-center rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-brand shadow-sm">
+          {(() => {
+            const n = Math.min(step, CALENDAR_POSTS.length)
+            return `${n} ${n === 1 ? "post" : "posts"}`
+          })()}
         </span>
       </div>
       <div className="mt-3 space-y-1.5">

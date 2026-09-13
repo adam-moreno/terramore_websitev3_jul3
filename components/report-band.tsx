@@ -8,18 +8,11 @@ import { CHAPTERS } from "@/lib/report/chapters"
 
 export function ReportBand() {
   const [open, setOpen] = useState(false)
-  // One shared index. The scan visual runs the rotation and drives this, so the
-  // finding on the left and the highlighted chapter on the right stay in sync.
-  const [active, setActive] = useState(0)
-
-  const chapter = CHAPTERS[active]
 
   return (
     <section id="report" className="section-y scroll-mt-28 md:py-24">
       <div className="page-shell">
-        <p className="section-eyebrow text-center">
-          Free Digital Footprint report
-        </p>
+        <p className="section-eyebrow text-center">Free Digital Footprint report</p>
         <h2 className="section-title mx-auto mt-3 max-w-[720px] text-center text-ink md:text-[3rem] md:font-semibold md:leading-normal md:tracking-[-0.03em]">
           See the business the way a new customer already can.
         </h2>
@@ -28,10 +21,10 @@ export function ReportBand() {
           where you are losing sales, and what we would fix first. It lands in your inbox in two to three business days.
         </p>
 
-        <div className="card-radius mx-auto mt-12 grid max-w-[980px] overflow-hidden border border-black/[0.06] bg-white shadow-[0_20px_50px_-28px_rgba(15,23,42,0.22)] md:rounded-[1.75rem] lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
+        <div className="card-radius mx-auto mt-12 grid max-w-[980px] overflow-hidden border border-black/[0.06] bg-white shadow-[0_20px_50px_-28px_rgba(15,23,42,0.22)] md:rounded-[1.75rem] lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
           <div className="card-pad relative flex min-h-[26rem] flex-col bg-ink text-cream md:p-7">
             <div className="min-h-0 flex-1">
-              <ReportScanVisual active={active} setActive={setActive} />
+              <ReportScanVisual />
             </div>
             <div className="mt-5 border-t border-white/10 pt-4">
               <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-cream/50">What you get</p>
@@ -42,37 +35,23 @@ export function ReportBand() {
             </div>
           </div>
 
-          <div className="card-pad flex flex-col md:p-8">
+          <div className="card-pad hidden flex-col md:p-8 lg:flex">
             <p className="text-[12px] font-medium uppercase tracking-[0.14em] text-ink/40">Inside the report</p>
             <div className="mt-4 space-y-2">
-              {CHAPTERS.map((item, index) => {
-                const on = index === active
-                return (
-                  <button
-                    key={item.n}
-                    type="button"
-                    onClick={() => setActive(index)}
-                    className={`w-full rounded-2xl px-4 py-3 text-left transition ${
-                      on ? "bg-[#eef3fb] ring-1 ring-brand/15" : "hover:bg-cream"
-                    }`}
-                  >
-                    <div className="flex items-baseline gap-3">
-                      <span className={`text-[12px] font-semibold ${on ? "text-brand" : "text-ink/35"}`}>{item.n}</span>
-                      <span className="text-[15px] font-semibold text-ink">{item.title}</span>
-                    </div>
-                    {on ? (
-                      <>
-                        <p className="mt-1.5 pl-8 text-[13px] leading-relaxed text-ink/70">{item.body}</p>
-                        <p className="mt-1 pl-8 text-[12px] text-slate-500">{item.sample}</p>
-                      </>
-                    ) : null}
-                  </button>
-                )
-              })}
+              {CHAPTERS.map((item) => (
+                <div key={item.n} className="rounded-2xl px-4 py-3">
+                  <div className="flex items-baseline gap-3">
+                    <span className="text-[12px] font-semibold text-ink/35">{item.n}</span>
+                    <span className="text-[15px] font-semibold text-ink">{item.title}</span>
+                  </div>
+                  <p className="mt-1.5 pl-8 text-[13px] leading-relaxed text-ink/70">{item.body}</p>
+                  <p className="mt-1 pl-8 text-[12px] text-slate-500">{item.sample}</p>
+                </div>
+              ))}
             </div>
             <p className="mt-5 text-[13px] leading-relaxed text-slate-500">
-              {chapter.n} is open. The grey lines are from a real report for a small apparel brand, with the name changed to
-              Northline Atelier. Yours names your site and your first fix.
+              The grey lines are from a sample report for a small apparel brand, with the name changed to Northline
+              Atelier. Yours names your site and your first fix.
             </p>
           </div>
         </div>

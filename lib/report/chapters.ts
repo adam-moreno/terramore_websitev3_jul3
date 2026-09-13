@@ -1,10 +1,9 @@
-// One source of truth for the four report chapters. Both the homepage report band
-// (the right-column list) and the scan visual (one finding at a time) read from
-// this so the highlighted chapter and the shown finding stay in sync.
+// One source of truth for the four report chapters. The homepage report band carousel
+// and the desktop "Inside the report" list both read from this array.
 //
 // Every stat below is a reused sample value from the Northline Atelier sample
 // report. Nothing here is a real client number, and the captions say so in plain
-// English. The `tone` drives the stat color: gold by default, warn for the leak.
+// English. The `tone` drives the supporting stat color: gold by default, warn for the leak.
 
 export type ChapterTone = "gold" | "warn"
 
