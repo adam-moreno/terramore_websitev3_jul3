@@ -758,6 +758,30 @@
   font-weight: 700;
 }
 
+/* Slack "someone is typing" dots that bounce before the message appears. */
+@keyframes slack-typing {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.35;
+  }
+  30% {
+    transform: translateY(-3px);
+    opacity: 1;
+  }
+}
+
+.slack-typing-dot {
+  animation: slack-typing 1.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slack-typing-dot {
+    animation: none;
+  }
+}
+
 nav.bg-slate-900.text-white {
   display: none;
 }

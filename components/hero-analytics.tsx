@@ -21,8 +21,22 @@ import {
   Users,
   type LucideIcon,
 } from "lucide-react"
-import { useRef, useState, type ReactNode } from "react"
+import { useEffect, useRef, useState, type ReactNode } from "react"
 import { useScrollRow } from "@/hooks/use-scroll-row"
+
+function usePrefersReducedMotion() {
+  const [reduce, setReduce] = useState(false)
+
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)")
+    const sync = () => setReduce(media.matches)
+    sync()
+    media.addEventListener("change", sync)
+    return () => media.removeEventListener("change", sync)
+  }, [])
+
+  return reduce
+}
 
 type Person = { name: string; role: string; photo: string; team?: boolean }
 type DriveFile = { name: string; kind: "folder" | "video" | "doc" }
@@ -608,7 +622,26 @@ function AttachmentCard({ attachment }: { attachment: Attachment }) {
   )
 }
 
-function SlackMessage({ message }: { message: Message }) {
+function TypingDots() {
+  return (
+    <span
+      className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1.5"
+      role="status"
+      aria-label="typing"
+    >
+      <span className="slack-typing-dot h-1.5 w-1.5 rounded-full bg-slate-400" />
+      <span className="slack-typing-dot h-1.5 w-1.5 rounded-full bg-slate-400" style={{ animationDelay: "0.18s" }} />
+      <span className="slack-typing-dot h-1.5 w-1.5 rounded-full bg-slate-400" style={{ animationDelay: "0.36s" }} />
+    </span>
+  )
+}
+
+// phase drives the reveal for a team reply: 0 shows the typing dots, 1 shows the typed message,
+// 2 adds the attachment. Client messages are always passed phase 2 so they read as already sent.
+function SlackMessage({ message, phase }: { message: Message; phase: number }) {
+  const showText = phase >= 1
+  const showAttachment = phase >= 2
+
   return (
     <div className="flex gap-3">
       <SlackFace
@@ -627,8 +660,12 @@ function SlackMessage({ message }: { message: Message }) {
           <span className="font-normal text-slate-400">{message.time}</span>
         </p>
         <p className="text-[11px] text-slate-400">{message.from.role}</p>
-        <p className="mt-1 text-[14px] leading-relaxed text-slate-700">{message.text}</p>
-        {message.attachment ? (
+        {showText ? (
+          <p className="mt-1 text-[14px] leading-relaxed text-slate-700">{message.text}</p>
+        ) : (
+          <TypingDots />
+        )}
+        {message.attachment && showAttachment ? (
           <div className="max-w-[32rem]">
             <AttachmentCard attachment={message.attachment} />
           </div>
@@ -645,6 +682,18 @@ export function HeroAnalytics() {
   const extraMembers = Math.max(channel.members - 4, 0)
   const pillRow = useRef<HTMLDivElement>(null)
   useScrollRow(pillRow, activeIndex)
+
+  // Loop a typing-then-message reveal for the Terramore team reply. It resets whenever the channel
+  // changes. With reduced motion we skip straight to the finished message and attachment.
+  const reduce = usePrefersReducedMotion()
+  const [tick, setTick] = useState(0)
+  useEffect(() => {
+    setTick(0)
+    if (reduce) return
+    const id = window.setInterval(() => setTick((current) => (current + 1) % 6), 850)
+    return () => window.clearInterval(id)
+  }, [active, reduce])
+  const reveal = reduce ? 2 : tick === 0 ? 0 : tick === 1 ? 1 : 2
 
   return (
     <div className="relative w-full" data-hero-analytics>
@@ -729,7 +778,11 @@ export function HeroAnalytics() {
 
             <div className="flex flex-1 flex-col justify-start gap-5 px-4 py-4 md:gap-5 md:px-6 md:py-5">
               {channel.messages.map((message, index) => (
-                <SlackMessage key={`${channel.id}-${index}`} message={message} />
+                <SlackMessage
+                  key={`${channel.id}-${index}`}
+                  message={message}
+                  phase={message.from.team ? reveal : 2}
+                />
               ))}
             </div>
           </div>

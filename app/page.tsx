@@ -18,7 +18,7 @@ export default function TerramoreHomepage() {
   return (
     <div className="min-h-screen bg-cream">
       <div className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-[70]">
-        <BookingLink className="inline-flex h-10 items-center rounded-full bg-brand px-4 text-[14px] font-medium text-white shadow-lg transition-shadow hover:bg-brand-hover hover:shadow-xl">
+        <BookingLink className="inline-flex h-11 items-center rounded-2xl bg-brand px-4 text-[14px] font-medium text-white shadow-lg transition-shadow hover:bg-brand-hover hover:shadow-xl">
           <Calendar className="mr-2 h-4 w-4" />
           Schedule
         </BookingLink>

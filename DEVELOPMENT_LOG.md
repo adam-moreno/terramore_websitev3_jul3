@@ -890,3 +890,26 @@ Eight concrete mobile-focused fixes to the home page (`app/page.tsx` and its com
 **Copy rules.** No em dashes, the word "tiles" is not used, and no business facts or numbers were invented; wording and voice match the existing text versions.
 
 **Files.** New: `lib/email-template.ts`. Changed: `lib/notify.ts`. `pnpm build` passed.
+
+## Sept 12, 2026 - Mobile hero and showcase polish (5 changes)
+
+Five surgical, mobile-focused UI changes on the live homepage. No business facts or numbers were invented, no em dashes, and the word "tiles" is not used in any user-facing copy.
+
+### 1. More floating hero logos
+`components/hero-floating-logos.tsx`. The mobile-only faint brand marks behind the hero went from 8 to 21. Positions are now a hand-placed set of spots in the left and right side rails plus the top and bottom bands, deliberately avoiding the centered text column so the headline, subhead, and CTA stay fully readable. Logo sources are pulled from `INTEGRATION_LOGOS` (`lib/integrations.ts`), sizes vary between 30 and 42px, opacity stays at 0.28, and the gentle `hero-float` animation and reduced-motion opt-out are unchanged. The desktop Mobius orbit was not touched.
+
+### 2. Floating "Schedule" button as a rounded rectangle
+`app/page.tsx`. The fixed bottom-right booking button changed from `rounded-full` to `rounded-2xl` (and `h-10` to `h-11`) so it reads as a clean rounded rectangle with the calendar icon and the "Schedule" label, instead of a pill/circle on mobile. Fixed position, safe-area inset, shadow, and brand color are unchanged, so desktop is unaffected.
+
+### 3. Tighter spacing before "See all integrations"
+`components/software-visuals.tsx`, `IntegrationTilesVisual`. On phones the logo grid used `content-evenly` inside a tall min-height frame with the button absolutely pinned to the bottom, leaving dead space. The grid and button are now wrapped in a phone-only centered flex column (`absolute inset-0 flex flex-col justify-center gap-3`) so the button hugs the last row of logos. From `md` up the grid and button revert to their original absolute positions, so desktop is unchanged.
+
+### 4. Step 2 channel visual: constant height + active highlight
+`components/software-visuals.tsx`, `ChannelValueVisual` (the rotating Ads/Site/Email/Content visual). The detail card previously grew and shrank with each channel, making the card jump. It now holds a fixed `h-[17rem]` on phones (sized to the tallest channel state) with `md:h-auto` so desktop keeps its fixed aspect frame; the wrapping flex column dropped `flex-1` so the total height stays constant across the full rotation. For readability, the active channel now has an obvious brand badge above the app row on phones, and the bottom switcher's active item gets a brand ring and brand-colored label. Brand blue and gold accents were reused.
+
+### 5. Slack card: typing indicator before the message
+`components/hero-analytics.tsx` (the Slack showcase, `HeroAnalytics`). The member avatar, name, and role stay visible; a looping reveal now plays for the Terramore team reply: three animated typing dots appear first, then the typed message text, then the existing attachment/preview. The reveal resets when the channel changes and respects reduced motion (jumps straight to the finished message and attachment). New `slack-typing` keyframes were added to `app/globals.css` with a reduced-motion opt-out. The existing attachments and client messages were preserved.
+
+**Branch note.** `main` was checked out in a leftover worktree at `/private/tmp/tm-main-wt` that also held an unrelated uncommitted `lib/notify.ts` edit. That edit was preserved in a named stash, the worktree was removed, and `main` was checked out in the primary repo before this work.
+
+**Build.** `pnpm build` passed.

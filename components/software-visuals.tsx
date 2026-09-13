@@ -99,36 +99,40 @@ export function IntegrationTilesVisual({
 }) {
   return (
     <Wash>
-      <div
-        className={`grid grid-cols-6 content-evenly items-center justify-items-center gap-x-1.5 gap-y-2 px-3 pt-6 md:absolute md:inset-x-3 md:top-6 md:gap-x-3 md:gap-y-3 md:p-0 ${
-          showLink ? "pb-[3.15rem] md:bottom-[3.15rem]" : "pb-2 md:bottom-2"
-        }`}
-      >
-        {INTEGRATION_LOGOS.map((logo, index) => {
-          const spot = scatterLogo(index)
-          return (
-            <div
-              key={logo.slug}
-              className="software-icon-tile software-icon-tile-still flex h-9 w-9 items-center justify-center md:h-10 md:w-10"
-              style={{
-                transform: `rotate(${spot.tilt})`,
-                animationDelay: spot.delay,
-              }}
-            >
-              <BrandLogo slug={logo.slug} name={logo.name} className="h-4 w-4 md:h-[18px] md:w-[18px]" />
-            </div>
-          )
-        })}
-      </div>
-
-      {showLink ? (
-        <Link
-          href="/integrations"
-          className="absolute bottom-3 left-1/2 z-[3] -translate-x-1/2 rounded-full bg-white px-4 py-2 text-[13px] font-semibold text-brand shadow-[0_10px_22px_-14px_rgba(15,30,46,0.45)] ring-1 ring-brand/20 transition hover:bg-brand hover:text-white hover:ring-brand"
+      {/* Phones: center the logo field and the button together as one group so the button hugs the last
+          row of logos. From md up the grid and the button return to their fixed absolute positions. */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-1 md:static md:block md:gap-0 md:px-0">
+        <div
+          className={`grid grid-cols-6 content-center items-center justify-items-center gap-x-1.5 gap-y-2 px-3 md:absolute md:inset-x-3 md:top-6 md:gap-x-3 md:gap-y-3 md:p-0 ${
+            showLink ? "md:bottom-[3.15rem]" : "md:bottom-2"
+          }`}
         >
-          See all integrations
-        </Link>
-      ) : null}
+          {INTEGRATION_LOGOS.map((logo, index) => {
+            const spot = scatterLogo(index)
+            return (
+              <div
+                key={logo.slug}
+                className="software-icon-tile software-icon-tile-still flex h-9 w-9 items-center justify-center md:h-10 md:w-10"
+                style={{
+                  transform: `rotate(${spot.tilt})`,
+                  animationDelay: spot.delay,
+                }}
+              >
+                <BrandLogo slug={logo.slug} name={logo.name} className="h-4 w-4 md:h-[18px] md:w-[18px]" />
+              </div>
+            )
+          })}
+        </div>
+
+        {showLink ? (
+          <Link
+            href="/integrations"
+            className="z-[3] rounded-full bg-white px-4 py-2 text-[13px] font-semibold text-brand shadow-[0_10px_22px_-14px_rgba(15,30,46,0.45)] ring-1 ring-brand/20 transition hover:bg-brand hover:text-white hover:ring-brand md:absolute md:bottom-3 md:left-1/2 md:-translate-x-1/2"
+          >
+            See all integrations
+          </Link>
+        ) : null}
+      </div>
     </Wash>
   )
 }
@@ -1081,20 +1085,28 @@ export function ChannelValueVisual() {
         {beat.line}
       </p>
 
-      {/* Phones: the apps for the active source sit in one row and the strip below is the switcher. */}
-      <div className="mt-2 flex justify-center gap-1.5 md:hidden">
-        {beat.apps.map((app, appIndex) => (
-          <div
-            key={app.slug}
-            className="software-icon-tile flex h-9 w-9 items-center justify-center"
-            style={{ animationDelay: `${appIndex * 0.2}s` }}
-          >
-            <BrandLogo slug={app.slug} name={app.name} size={16} />
-          </div>
-        ))}
+      {/* Phones: a clear badge names the active source, then its apps sit in one row. The strip below
+          is the switcher, so a first-time viewer can follow which channel is live as it rotates. */}
+      <div className="mt-2 flex flex-col items-center gap-1 md:hidden">
+        <span className="rounded-full bg-brand/10 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-brand ring-1 ring-brand/20">
+          {beat.source}
+        </span>
+        <div className="flex justify-center gap-1.5">
+          {beat.apps.map((app, appIndex) => (
+            <div
+              key={app.slug}
+              className="software-icon-tile flex h-9 w-9 items-center justify-center"
+              style={{ animationDelay: `${appIndex * 0.2}s` }}
+            >
+              <BrandLogo slug={app.slug} name={app.name} size={16} />
+            </div>
+          ))}
+        </div>
       </div>
 
-      <div className="relative mt-2 flex min-h-0 flex-1 flex-col md:block">
+      {/* The detail card holds a fixed height on phones (sized to the tallest channel) so the whole
+          visual never grows or shrinks as the active channel rotates. */}
+      <div className="relative mt-2 flex min-h-0 flex-col md:block">
         <div className="hidden md:absolute md:inset-y-0 md:left-0 md:flex md:w-[46%] md:flex-col md:justify-between md:gap-1.5 md:pr-2">
           {MONEY_BEATS.map((item, index) => (
             <button
@@ -1128,7 +1140,7 @@ export function ChannelValueVisual() {
           ))}
         </div>
 
-        <div className="min-h-0 flex-1 md:absolute md:inset-y-0 md:right-0 md:w-[52%]">
+        <div className="h-[17rem] min-h-0 md:absolute md:inset-y-0 md:right-0 md:h-auto md:w-[52%]">
           <ChannelDetail beat={active} />
         </div>
       </div>
@@ -1142,10 +1154,16 @@ export function ChannelValueVisual() {
               onClick={() => holdBeat(index)}
               aria-pressed={index === active}
               className={`min-w-0 flex-1 rounded-xl px-1.5 py-1 text-left transition ${
-                index === active ? "bg-[#eef3fb]" : "opacity-50"
+                index === active ? "bg-[#eef3fb] ring-2 ring-inset ring-brand/40" : "opacity-50"
               }`}
             >
-              <p className="truncate text-[10px] font-medium text-slate-400">{item.source}</p>
+              <p
+                className={`truncate text-[10px] font-medium ${
+                  index === active ? "text-brand" : "text-slate-400"
+                }`}
+              >
+                {item.source}
+              </p>
               <p className="text-[12px] font-semibold tabular-nums text-ink">
                 ${item.add.toLocaleString()}
               </p>
