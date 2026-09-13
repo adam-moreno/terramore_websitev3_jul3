@@ -35,6 +35,8 @@ export const ADMIN_EMAIL = process.env.NOTIFY_EMAIL_TO?.trim() || "adam.moreno@t
 export const FROM = process.env.RESEND_FROM_EMAIL?.trim() || process.env.EMAIL_FROM?.trim() || "Terramore <no-reply@terramore.io>"
 /** Replies to a no-reply sender land with Adam. */
 export const REPLY_TO = process.env.EMAIL_REPLY_TO?.trim() || "adam.moreno@terramore.io"
+/** Slack member ID to @-mention on admin alerts so they push to Adam's phone even in mentions-only channels. Env can override; "" disables. */
+const SLACK_MENTION = (process.env.SLACK_MENTION_USER_ID?.trim() || "U0BMKSTCBFD")
 const SITE = "https://terramore.io"
 const BOOK_URL = `${SITE}/book`
 
@@ -310,8 +312,15 @@ export async function notifyAdminOfLead(lead: Lead): Promise<SendResult[]> {
     ].join(""),
   })
 
+  // @-mention Adam so the alert pushes to his phone even in a mentions-only channel.
+  let slackText = `${title}: ${lead.name} <${lead.email}>`
+  if (SLACK_MENTION) {
+    slackText = `<@${SLACK_MENTION}> ${slackText}`
+    blocks.unshift({ type: "section", text: { type: "mrkdwn", text: `<@${SLACK_MENTION}>` } })
+  }
+
   const results = await Promise.all([
-    postSlack(`${title}: ${lead.name} <${lead.email}>`, blocks),
+    postSlack(slackText, blocks),
     sendEmail({
       to: ADMIN_EMAIL,
       subject: `${title}: ${lead.name}`,
@@ -428,7 +437,13 @@ export async function notifyAdminOfBooking(b: BookingNotice): Promise<SendResult
     { type: "section", text: { type: "mrkdwn", text: lines.map((line) => `• ${line}`).join("\n") } },
     { type: "context", elements: [{ type: "mrkdwn", text: "Booked on terramore.io. The event is on the Outlook calendar and in Terra IQ under Leads." }] },
   ]
-  return postSlack(`${title}: ${b.name}${b.business ? ` (${b.business})` : ""}, ${when(b.startIso, PT)}`, blocks)
+  // @-mention Adam so the alert pushes to his phone even in a mentions-only channel.
+  let slackText = `${title}: ${b.name}${b.business ? ` (${b.business})` : ""}, ${when(b.startIso, PT)}`
+  if (SLACK_MENTION) {
+    slackText = `<@${SLACK_MENTION}> ${slackText}`
+    blocks.unshift({ type: "section", text: { type: "mrkdwn", text: `<@${SLACK_MENTION}>` } })
+  }
+  return postSlack(slackText, blocks)
 }
 
 /** Confirmation to the lead: time in their zone, the join link, the manage link. SMS only with a phone. Never throws. */

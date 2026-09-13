@@ -913,3 +913,7 @@ Five surgical, mobile-focused UI changes on the live homepage. No business facts
 **Branch note.** `main` was checked out in a leftover worktree at `/private/tmp/tm-main-wt` that also held an unrelated uncommitted `lib/notify.ts` edit. That edit was preserved in a named stash, the worktree was removed, and `main` was checked out in the primary repo before this work.
 
 **Build.** `pnpm build` passed.
+
+## Slack @mention on admin alerts
+
+Recovered the preserved `tm-main-wt lib/notify.ts` stash (WIP from an interrupted task that was never committed/pushed). Its diff matched the intended spec exactly, so it was applied (not re-implemented) and the stash dropped after a clean apply. The change adds `const SLACK_MENTION = (process.env.SLACK_MENTION_USER_ID?.trim() || "U0BMKSTCBFD")` and, in the two admin functions only (`notifyAdminOfLead`, `notifyAdminOfBooking`), prepends `<@${SLACK_MENTION}> ` to the fallback `text` and unshifts a leading `section` mrkdwn block with the mention (guarded to skip when the constant is empty). Lead-facing/user confirmation messages were untouched. This makes admin Slack alerts push to Adam's phone in mentions-only channels. `pnpm build` passed. The unrelated `book-flow whitespace app/page.tsx` stash was left untouched.
