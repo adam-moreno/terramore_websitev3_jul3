@@ -1,5 +1,10 @@
 # Development Log - Terramore Website
 
+## 2026-09-14 — Share card margin + title case
+
+- Browser title / OG / Twitter: "Terramore | A Growth Team for Owners".
+- Share card: bottom subheader one size larger; top and bottom margins matched. Asset: `/share/terramore-share-v2-og.png`.
+
 ## 2026-09-14 — Share card layout tighten
 
 - Larger top-left logo (~3×), larger TERRAMORE.IO, centered headline, discovery line larger and pinned to the bottom. Asset: `/share/terramore-share-v2-og.png`.

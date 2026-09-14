@@ -1,6 +1,6 @@
 const LLMS_TXT = `# Terramore
 
-> A growth team for owners. Terramore is a founder-led growth consultancy that works inside the store, ads, and email a business already pays for, finds where it loses sales, and fixes that step.
+> A Growth Team for Owners. Terramore is a founder-led growth consultancy that works inside the store, ads, and email a business already pays for, finds where it loses sales, and fixes that step.
 
 Terramore serves owners with a shop, a service, or a customer list. Work starts with a free call. A free Digital Footprint report is the backup if they are not ready to talk. The client dashboard (Terra IQ) is invite only for current clients. The client owns the data and assets. Monthly work is optional.
 

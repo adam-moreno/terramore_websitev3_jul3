@@ -9,7 +9,7 @@ const googleSiteVerification =
 
 export const metadata: Metadata = {
   ...(googleSiteVerification ? { verification: { google: googleSiteVerification } } : {}),
-  title: 'Terramore | A growth team for owners',
+  title: 'Terramore | A Growth Team for Owners',
   description: 'Terramore works inside your store, ads, and email to find where you lose sales and fix it. For owners with a shop, a service, or a list. Talk first, or ask for a free Digital Footprint report.',
   keywords: 'growth team, small business marketing, ecommerce, email marketing, advertising, digital footprint report',
   authors: [{ name: 'Adam Moreno' }],
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     apple: 'https://res.cloudinary.com/dzzzkruux/image/upload/v1768374905/Screenshot_2026-01-13_at_11.10.56_PM_eqtvoj.png',
   },
   openGraph: {
-    title: 'Terramore | A growth team for owners',
+    title: 'Terramore | A Growth Team for Owners',
     description: 'Terramore works inside your store, ads, and email to find where you lose sales and fix it. For owners with a shop, a service, or a list. Talk first, or ask for a free Digital Footprint report.',
     url: 'https://terramore.io',
     siteName: 'Terramore.io',
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Terramore | A growth team for owners',
+    title: 'Terramore | A Growth Team for Owners',
     description: 'Terramore works inside your store, ads, and email to find where you lose sales and fix it. For owners with a shop, a service, or a list. Talk first, or ask for a free Digital Footprint report.',
     images: ['/share/terramore-share-v2-og.png'],
   },
