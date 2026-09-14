@@ -1,5 +1,9 @@
 # Development Log - Terramore Website
 
+## 2026-09-14 — Mobile hero first-viewport rhythm
+
+- Mobile hero: top-aligned `min-h-[calc(100svh-14rem)]` (not `justify-center`) so headline → subhead → Let's talk stay compact at the top and only the top of the Slack card peeks into the first viewport (~200px on a 390×844 phone). Desktop tall centered column unchanged.
+
 ## 2026-09-14 — Share card hierarchy
 
 - Darker/heavier TERRAMORE.IO; softer regular-weight discovery line so brand and headline lead. Asset: `/share/terramore-share-v2-og.png`.

@@ -58,7 +58,7 @@ export default function TerramoreHomepage() {
     <div className="min-h-screen bg-cream">
       <ScheduleFab />
 
-      <section className="section-y relative isolate overflow-hidden bg-cream pt-28 md:pt-32 md:pb-24">
+      <section className="relative isolate overflow-hidden bg-cream pt-24 pb-6 md:pt-32 md:pb-24">
         {/* The orbit only runs from md up. On phones it floated over the headline, so the marks move to a slim row under the CTA. */}
         <div className="pointer-events-none absolute inset-x-0 top-0 z-0 hidden h-[100svh] overflow-hidden md:block">
           <HeroLogoMobius />
@@ -67,25 +67,34 @@ export default function TerramoreHomepage() {
         {/* Phones: floating integration marks scattered around the hero edges, behind the copy. */}
         <HeroFloatingLogos className="md:hidden" />
 
-        <div className="-mt-28 flex min-h-[calc(100svh-14rem)] flex-col justify-center pt-28 md:min-h-[calc(100svh-10.75rem)]">
+        {/*
+          Mobile: top-aligned column sized so headline → subhead → CTA sit compactly,
+          with only the top of the Slack card peeking into the first viewport.
+          Do not justify-center on mobile (that stretches empty space and hides the peek).
+          Desktop: keep the tall centered column that was already reviewed.
+        */}
+        <div className="relative z-20 flex min-h-[calc(100svh-14rem)] flex-col justify-start pt-1 md:-mt-28 md:min-h-[calc(100svh-10.75rem)] md:justify-center md:pt-28">
           <div className="page-shell relative z-20 text-center">
-            <div className="mx-auto inline-flex flex-col items-center" data-hero-copy>
-              <h1 className="mx-auto text-[2.5rem] font-bold leading-[1.05] tracking-[-0.02em] text-ink sm:text-5xl md:text-[72px] md:leading-[75.6px]">
+            <div
+              className="mx-auto flex w-full max-w-[22.5rem] flex-col items-center sm:max-w-[28rem] md:max-w-none md:inline-flex"
+              data-hero-copy
+            >
+              <h1 className="mx-auto text-center text-[2.35rem] font-bold leading-[1.08] tracking-[-0.02em] text-ink sm:text-5xl md:text-[72px] md:leading-[75.6px]">
                 Unlock more from the{" "}
                 <br className="hidden md:block" />
                 <span className="text-gold">business you already built.</span>
               </h1>
-              <p className="mx-auto mt-7 max-w-[626px] text-[18px] font-medium leading-[1.5] text-ink md:mt-8 md:text-[20px] md:leading-[30px]">
+              <p className="mx-auto mt-4 max-w-[20.5rem] text-center text-[17px] font-medium leading-[1.45] text-ink sm:max-w-[26rem] md:mt-8 md:max-w-[626px] md:text-[20px] md:leading-[30px]">
                 We find where the business already wins, then add marketing and sales plays so more revenue shows up. AI goes into the tools you already pay for.
               </p>
-              <div className="mt-8 flex flex-col items-center">
+              <div className="mt-5 flex flex-col items-center md:mt-8">
                 <Link
                   href="/partner"
-                  className="inline-flex h-12 items-center justify-center rounded-full bg-brand px-6 text-[16px] font-medium text-white hover:bg-brand-hover md:h-10 md:px-4"
+                  className="inline-flex h-11 items-center justify-center rounded-full bg-brand px-6 text-[16px] font-medium text-white hover:bg-brand-hover md:h-10 md:px-4"
                 >
                   Let&apos;s talk
                 </Link>
-                <p className="mt-3 text-[13px] font-medium text-ink/45">
+                <p className="mt-2.5 text-center text-[13px] font-medium text-ink/45">
                   Free 30-minute call.{" "}
                   <ReportPopupLink
                     label="Or get a free Digital Footprint report"
@@ -97,7 +106,8 @@ export default function TerramoreHomepage() {
           </div>
         </div>
 
-        <div className="page-shell relative z-20">
+        {/* Mobile: tight gap so the Slack card connects to the CTA and peeks under the fold. */}
+        <div className="page-shell relative z-20 mt-5 md:mt-0">
           <div className="mx-auto w-full max-w-[972px]">
             <HeroAnalytics />
           </div>
