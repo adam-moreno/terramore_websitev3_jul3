@@ -45,7 +45,7 @@ function ScheduleFab() {
       }`}
     >
       <BookingLink className="inline-flex h-11 items-center rounded-2xl bg-brand px-4 text-[14px] font-medium text-white shadow-lg transition-shadow hover:bg-brand-hover hover:shadow-xl">
-        <Calendar className="mr-2 h-4 w-4" />
+        <Calendar className="mr-2 h-4 w-4" aria-hidden />
         Schedule
       </BookingLink>
     </div>

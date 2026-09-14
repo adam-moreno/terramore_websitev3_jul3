@@ -68,7 +68,7 @@ const REVIEWS = [
 function SourceMark({ source }: { source: (typeof REVIEWS)[number]["source"] }) {
   if (source === "google") {
     return (
-      <svg viewBox="0 0 24 24" className="h-4 w-4" aria-label="Google">
+      <svg viewBox="0 0 24 24" className="h-4 w-4" role="img" aria-label="Google">
         <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.4h6.5c-.3 1.5-1.1 2.7-2.4 3.6v3h3.9c2.3-2.1 3.5-5.2 3.5-8.7z" />
         <path fill="#34A853" d="M12 24c3.2 0 5.9-1.1 7.9-2.9l-3.9-3c-1.1.7-2.4 1.2-4 1.2-3.1 0-5.7-2.1-6.6-4.9H1.4v3.1C3.4 21.3 7.4 24 12 24z" />
         <path fill="#FBBC05" d="M5.4 14.4c-.2-.7-.4-1.5-.4-2.4s.1-1.7.4-2.4V6.5H1.4C.5 8.3 0 10.1 0 12s.5 3.7 1.4 5.5l4-3.1z" />
@@ -79,7 +79,7 @@ function SourceMark({ source }: { source: (typeof REVIEWS)[number]["source"] }) 
 
   if (source === "yelp") {
     return (
-      <svg viewBox="0 0 24 24" className="h-4 w-4" aria-label="Yelp">
+      <svg viewBox="0 0 24 24" className="h-4 w-4" role="img" aria-label="Yelp">
         <path
           fill="#FF1A1A"
           d="M12.1 2.1c.6-.2 1.2.2 1.3.8l1.2 6.4c.1.6-.3 1.2-.9 1.3l-2.1.3c-.6.1-1.1-.4-1.1-1L9.3 3.4c0-.7.5-1.2 1.2-1.3h1.6zm7.6 5.2c.6.3.8 1 .5 1.6l-3.2 5.7c-.3.5-1 .7-1.6.4l-1.8-1c-.5-.3-.7-1-.4-1.6l3.2-5.6c.3-.6 1.1-.8 1.7-.5l1.6 1zm-13.4.3 1.6-1c.6-.3 1.4 0 1.6.6l2.4 6c.2.6 0 1.3-.6 1.5l-1.9.7c-.6.2-1.3 0-1.5-.6L5.6 8.7c-.3-.6 0-1.3.7-1.6zm1.2 11.1c-.3-.6 0-1.3.6-1.5l6.2-2.2c.6-.2 1.2.1 1.4.7l.7 2c.2.6-.1 1.3-.7 1.5l-6.5 2.3c-.6.2-1.3-.1-1.5-.7l-.2-2.1z"
@@ -90,7 +90,7 @@ function SourceMark({ source }: { source: (typeof REVIEWS)[number]["source"] }) 
 
   if (source === "g2") {
     return (
-      <svg viewBox="0 0 24 24" className="h-4 w-4" aria-label="G2">
+      <svg viewBox="0 0 24 24" className="h-4 w-4" role="img" aria-label="G2">
         <circle cx="12" cy="12" r="11" fill="#FF492C" />
         <path fill="#fff" d="M8.2 8.1h5.1c2.4 0 3.9 1.5 3.9 3.6 0 1.6-.9 2.8-2.3 3.3l2.5 3.4h-2.6l-2.2-3.1H10v3.1H8.2V8.1zm5 5.2c1.2 0 2-.7 2-1.7s-.8-1.6-2-1.6H10v3.3h3.2z" />
       </svg>
@@ -98,7 +98,7 @@ function SourceMark({ source }: { source: (typeof REVIEWS)[number]["source"] }) 
   }
 
   return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4" aria-label="LinkedIn">
+    <svg viewBox="0 0 24 24" className="h-4 w-4" role="img" aria-label="LinkedIn">
       <path
         fill="#0A66C2"
         d="M20.5 2h-17A1.5 1.5 0 002 3.5v17A1.5 1.5 0 003.5 22h17a1.5 1.5 0 001.5-1.5v-17A1.5 1.5 0 0020.5 2zM8 19H5v-9h3zM6.5 8.3A1.8 1.8 0 116.5 4.7a1.8 1.8 0 010 3.6zM19 19h-3v-4.8c0-1.4-.5-2.1-1.5-2.1-1.1 0-1.6.8-1.6 2.1V19h-3v-9h3v1.2c.5-.8 1.5-1.5 2.8-1.5 2.1 0 3.3 1.3 3.3 4.1z"
@@ -130,8 +130,6 @@ function ReviewCard({ review }: { review: (typeof REVIEWS)[number] }) {
 }
 
 export function ReviewCarousel() {
-  const track = [...REVIEWS, ...REVIEWS]
-
   return (
     <section className="overflow-hidden py-20 md:py-24">
       <div className="page-shell text-center">
@@ -142,8 +140,14 @@ export function ReviewCarousel() {
       </div>
       <div className="mt-10 overflow-hidden">
         <div className="review-marquee flex w-max gap-4">
-          {track.map((review, index) => (
-            <ReviewCard key={`${review.name}-${index}`} review={review} />
+          {REVIEWS.map((review) => (
+            <ReviewCard key={review.name} review={review} />
+          ))}
+          {/* Duplicate set is visual-only for the infinite marquee loop. */}
+          {REVIEWS.map((review) => (
+            <div key={`dup-${review.name}`} aria-hidden>
+              <ReviewCard review={review} />
+            </div>
           ))}
         </div>
       </div>

@@ -350,6 +350,14 @@
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .hero-mobius-logo {
+    animation: none;
+    opacity: 0.45;
+    filter: none;
+  }
+}
+
 /* In the components layer so a bg-* utility on the same element (the dark Vlair recorder) can override it */
 @layer components {
   .software-visual-wash {
