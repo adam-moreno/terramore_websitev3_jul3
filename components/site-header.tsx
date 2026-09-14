@@ -1,29 +1,67 @@
 "use client"
 
-import { ChevronDown, Menu, X } from "lucide-react"
+import {
+  BarChart3,
+  Briefcase,
+  ChevronDown,
+  CreditCard,
+  LayoutGrid,
+  Mail,
+  MapPin,
+  Megaphone,
+  Menu,
+  ShoppingBag,
+  Sparkles,
+  Users,
+  X,
+  type LucideIcon,
+} from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useId, useRef, useState } from "react"
 import { Logo } from "@/components/logo"
 import { DASHBOARD_LOGIN_URL } from "@/lib/dashboard"
 import { CAPABILITIES, OWNER_JOBS, capabilityPath } from "@/lib/capabilities"
 import { INTEGRATION_CATEGORIES, integrationPath } from "@/lib/integrations"
 
-type MenuItem = { href: string; label: string; strong?: boolean }
+type MenuItem = { href: string; label: string; strong?: boolean; icon?: LucideIcon }
 type MenuSection = { heading: string; items: MenuItem[] }
+
+const JOB_ICONS: LucideIcon[] = [ShoppingBag, Briefcase, Mail, MapPin, Users, CreditCard]
+const CAPABILITY_ICONS: LucideIcon[] = [
+  Megaphone,
+  Sparkles,
+  Users,
+  BarChart3,
+  CreditCard,
+  Briefcase,
+  LayoutGrid,
+  Sparkles,
+  Briefcase,
+  MapPin,
+  Users,
+]
 
 const solutionsSections: MenuSection[] = [
   {
     heading: "Pick the job",
     items: [
-      ...OWNER_JOBS.map((job) => ({ href: job.href, label: job.label })),
-      { href: "/#use-cases", label: "See every job we take", strong: true },
+      ...OWNER_JOBS.map((job, index) => ({
+        href: job.href,
+        label: job.label,
+        icon: JOB_ICONS[index % JOB_ICONS.length],
+      })),
+      { href: "/solutions", label: "All solutions", strong: true },
     ],
   },
   {
     heading: "Every capability",
     items: [
-      ...CAPABILITIES.map((item) => ({ href: capabilityPath(item.slug), label: item.navTitle })),
+      ...CAPABILITIES.map((item, index) => ({
+        href: capabilityPath(item.slug),
+        label: item.navTitle,
+        icon: CAPABILITY_ICONS[index % CAPABILITY_ICONS.length],
+      })),
       { href: "/solutions", label: "All solutions", strong: true },
     ],
   },
@@ -125,6 +163,83 @@ function HeaderMenu({
   )
 }
 
+function MobileAccordion({
+  label,
+  children,
+  defaultOpen = false,
+}: {
+  label: string
+  children: React.ReactNode
+  defaultOpen?: boolean
+}) {
+  const [open, setOpen] = useState(defaultOpen)
+  const panelId = useId()
+
+  return (
+    <div className="border-b border-black/[0.04] last:border-b-0">
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-controls={panelId}
+        onClick={() => setOpen((value) => !value)}
+        className="flex w-full items-center justify-between py-4 text-left text-[17px] font-medium text-ink"
+      >
+        {label}
+        <ChevronDown
+          className={`h-4 w-4 shrink-0 text-slate-500 transition duration-200 ${open ? "rotate-180" : ""}`}
+          aria-hidden
+        />
+      </button>
+      {open ? (
+        <div id={panelId} className="pb-4 pt-1">
+          {children}
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
+function MobileItemRow({ item, onPick }: { item: MenuItem; onPick: () => void }) {
+  const Icon = item.icon
+  return (
+    <Link
+      href={item.href}
+      onClick={onPick}
+      className={`flex items-center gap-3 py-2.5 text-[15px] ${
+        item.strong ? "font-semibold text-brand" : "font-medium text-ink"
+      }`}
+    >
+      {Icon ? (
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-black/[0.08] bg-white text-slate-500">
+          <Icon className="h-4 w-4" strokeWidth={1.75} aria-hidden />
+        </span>
+      ) : null}
+      <span>{item.label}</span>
+    </Link>
+  )
+}
+
+function MobileSection({
+  heading,
+  items,
+  onPick,
+}: {
+  heading: string
+  items: MenuItem[]
+  onPick: () => void
+}) {
+  return (
+    <div className="mb-4 last:mb-0">
+      <p className="pb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">{heading}</p>
+      <div className="flex flex-col">
+        {items.map((item) => (
+          <MobileItemRow key={`${item.href}-${item.label}`} item={item} onPick={onPick} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export function SiteHeader() {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
@@ -133,84 +248,139 @@ export function SiteHeader() {
     setOpen(false)
   }, [pathname])
 
+  useEffect(() => {
+    if (!open) return
+    const previous = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    return () => {
+      document.body.style.overflow = previous
+    }
+  }, [open])
+
+  const close = () => setOpen(false)
+
   return (
     <header className="pointer-events-none fixed top-4 left-0 right-0 z-[80]">
-      <div className="page-shell">
-      <div className="pointer-events-auto flex w-full items-center justify-between overflow-visible rounded-xl border border-black/[0.06] bg-white/90 px-4 py-2 shadow-[0_8px_30px_rgba(0,0,0,0.06)] backdrop-blur-md">
-        <Logo size="md" animate={false} on="light" />
-
-        <nav className="hidden items-center gap-6 text-[13px] font-medium text-slate-600 lg:flex">
-          <HeaderMenu label="Solutions" sections={solutionsSections} columns={2} />
-          <HeaderMenu label="Integrations" items={integrationLinks} columns={2} />
-          <HeaderMenu label="Resources" items={resourceLinks} />
-        </nav>
-
-        <div className="hidden items-center gap-2 lg:flex">
-          <a
-            href={DASHBOARD_LOGIN_URL}
-            title="Current clients. Invite only."
-            className="flex flex-col items-end px-3 py-1 text-[13px] font-medium text-slate-600 hover:text-slate-900"
-          >
-            <span>Log in</span>
-            <span className="text-[10px] font-normal text-slate-400">Current clients</span>
-          </a>
-          <Link
-            href="/partner"
-            className="rounded-full bg-brand px-4 py-2 text-[13px] font-medium text-white hover:bg-brand-hover"
-          >
-            Let&apos;s talk
-          </Link>
-        </div>
-
+      {open ? (
         <button
           type="button"
-          className="rounded-full p-2 text-slate-700 lg:hidden"
-          onClick={() => setOpen((value) => !value)}
-          aria-label="Menu"
-        >
-          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
-      </div>
+          aria-label="Close menu"
+          className="pointer-events-auto fixed inset-0 z-[75] bg-ink/25 lg:hidden"
+          onClick={close}
+        />
+      ) : null}
 
-      {open && (
-        <div className="pointer-events-auto mt-2 w-full rounded-xl border border-black/[0.06] bg-white p-4 shadow-lg lg:hidden">
-          <div className="flex flex-col gap-3 text-[15px] text-slate-700">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">Pick the job</p>
-            {OWNER_JOBS.map((job) => (
-              <Link key={job.label} href={job.href}>
-                {job.label}
-              </Link>
-            ))}
-            <Link href="/solutions" className="font-semibold text-brand">
-              All solutions
-            </Link>
-            <p className="pt-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">Integrations</p>
-            {INTEGRATION_CATEGORIES.map((item) => (
-              <Link key={item.slug} href={integrationPath(item.slug)}>
-                {item.navTitle}
-              </Link>
-            ))}
-            <p className="pt-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">More</p>
-            <Link href="/#how-we-work">How we work</Link>
-            <Link href="/pricing">Pricing</Link>
-            <Link href="/report">Free Digital Footprint report</Link>
-            <Link href="/about">About</Link>
-            <Link href="/security">Security</Link>
-            <Link href="/#faq">Questions</Link>
-            <Link href="/resources">Start here</Link>
-            <a href={DASHBOARD_LOGIN_URL} title="Current clients. Invite only.">
+      <div className="page-shell relative z-[80]">
+        <div className="pointer-events-auto flex w-full items-center gap-2 overflow-visible rounded-xl border border-black/[0.06] bg-white/95 px-3 py-2 shadow-[0_8px_30px_rgba(0,0,0,0.06)] backdrop-blur-md sm:px-4">
+          <Logo
+            size="md"
+            animate={false}
+            on="light"
+            className="min-w-0 shrink"
+            wordmarkClassName="!h-7 w-auto lg:!h-8"
+          />
+
+          {/* Mobile: Log in + Let's talk sit in the bar like Lindy (closed and open). */}
+          <div className="ml-auto flex items-center gap-1.5 lg:hidden">
+            <a
+              href={DASHBOARD_LOGIN_URL}
+              title="Current clients. Invite only."
+              className="shrink-0 px-1.5 py-1 text-[12px] font-medium text-ink"
+            >
               Log in
             </a>
-            <p className="text-[12px] text-slate-400">Current clients. Invite only.</p>
             <Link
               href="/partner"
-              className="rounded-full bg-brand px-4 py-2.5 text-center font-medium text-white"
+              className="shrink-0 rounded-lg bg-brand px-2.5 py-1.5 text-[12px] font-medium text-white hover:bg-brand-hover"
+            >
+              Let&apos;s talk
+            </Link>
+            <button
+              type="button"
+              className="rounded-lg p-1.5 text-ink"
+              onClick={() => setOpen((value) => !value)}
+              aria-label={open ? "Close menu" : "Open menu"}
+              aria-expanded={open}
+            >
+              {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+          </div>
+
+          <nav className="ml-auto hidden items-center gap-6 text-[13px] font-medium text-slate-600 lg:flex">
+            <HeaderMenu label="Solutions" sections={solutionsSections} columns={2} />
+            <HeaderMenu label="Integrations" items={integrationLinks} columns={2} />
+            <HeaderMenu label="Resources" items={resourceLinks} />
+          </nav>
+
+          <div className="hidden items-center gap-2 lg:flex">
+            <a
+              href={DASHBOARD_LOGIN_URL}
+              title="Current clients. Invite only."
+              className="flex flex-col items-end px-3 py-1 text-[13px] font-medium text-slate-600 hover:text-slate-900"
+            >
+              <span>Log in</span>
+              <span className="text-[10px] font-normal text-slate-400">Current clients</span>
+            </a>
+            <Link
+              href="/partner"
+              className="rounded-full bg-brand px-4 py-2 text-[13px] font-medium text-white hover:bg-brand-hover"
             >
               Let&apos;s talk
             </Link>
           </div>
         </div>
-      )}
+
+        {open ? (
+          <div className="pointer-events-auto mt-2 max-h-[min(70vh,32rem)] w-full overflow-y-auto rounded-2xl border border-black/[0.06] bg-white px-4 shadow-[0_20px_50px_-24px_rgba(15,23,42,0.35)] lg:hidden">
+            <MobileAccordion label="Solutions">
+              {solutionsSections.map((section) => (
+                <MobileSection
+                  key={section.heading}
+                  heading={section.heading}
+                  items={section.items}
+                  onPick={close}
+                />
+              ))}
+            </MobileAccordion>
+
+            <Link
+              href="/integrations"
+              onClick={close}
+              className="block border-b border-black/[0.04] py-4 text-[17px] font-medium text-ink"
+            >
+              Integrations
+            </Link>
+            <Link
+              href="/pricing"
+              onClick={close}
+              className="block border-b border-black/[0.04] py-4 text-[17px] font-medium text-ink"
+            >
+              Pricing
+            </Link>
+            <Link
+              href="/security"
+              onClick={close}
+              className="block border-b border-black/[0.04] py-4 text-[17px] font-medium text-ink"
+            >
+              Security
+            </Link>
+            <Link
+              href="/enterprise"
+              onClick={close}
+              className="block border-b border-black/[0.04] py-4 text-[17px] font-medium text-ink"
+            >
+              Larger teams
+            </Link>
+
+            <MobileAccordion label="Resources">
+              <div className="flex flex-col">
+                {resourceLinks.map((item) => (
+                  <MobileItemRow key={`${item.href}-${item.label}`} item={item} onPick={close} />
+                ))}
+              </div>
+            </MobileAccordion>
+          </div>
+        ) : null}
       </div>
     </header>
   )

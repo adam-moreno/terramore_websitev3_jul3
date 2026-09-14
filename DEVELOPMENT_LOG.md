@@ -1,5 +1,9 @@
 # Development Log - Terramore Website
 
+## 2026-09-14 — Mobile header Lindy pattern
+
+- Mobile bar now includes Log in + Let's talk beside a shrunken wordmark (mark size unchanged). Open menu uses accordion Solutions/Resources with chevrons, dimmed backdrop, and icon rows under Solutions. Desktop nav unchanged.
+
 ## 2026-09-14 — Mobile hero match Lindy air
 
 - Header→headline gap raised to ~74px (`pt-36` mobile; was ~10px with `pt-20`).
