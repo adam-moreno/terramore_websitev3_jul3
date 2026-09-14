@@ -86,7 +86,7 @@ export default function TerramoreHomepage() {
                 <span className="text-gold">business you already built.</span>
               </h1>
               <p className="mx-auto mt-5 max-w-[20.5rem] text-center text-[16px] font-medium leading-[1.4] text-ink sm:max-w-[26rem] md:mt-8 md:max-w-[626px] md:text-[20px] md:leading-[30px]">
-                We find where the business already wins, then add marketing and sales so more revenue shows up.
+                We find where the business already wins, then add marketing and sales to get more customers and grow your revenue.
               </p>
               <div className="mt-6 flex flex-col items-center md:mt-8">
                 <Link
@@ -95,13 +95,12 @@ export default function TerramoreHomepage() {
                 >
                   Let&apos;s talk
                 </Link>
-                <p className="mt-2.5 text-center text-[13px] font-medium text-ink/45">
-                  Free 30-minute call.{" "}
-                  <ReportPopupLink
-                    label="Or get a free Digital Footprint report"
-                    className="underline-offset-4 hover:text-ink hover:underline"
-                  />
-                </p>
+                <div className="mt-2.5 flex flex-col items-center gap-1 text-center text-[13px] font-medium text-ink/45">
+                  <p>Free 30-minute call.</p>
+                  <ReportPopupLink className="text-[13px] font-medium text-ink/45 underline-offset-4 hover:text-ink">
+                    Or tap for a free Digital Footprint report
+                  </ReportPopupLink>
+                </div>
                 <div className="mt-2.5">
                   <G2Rating rating="4.5" />
                 </div>

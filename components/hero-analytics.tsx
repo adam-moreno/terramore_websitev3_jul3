@@ -5,6 +5,8 @@ import {
   Calendar,
   Check,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   Clapperboard,
   Cpu,
   Dumbbell,
@@ -22,7 +24,7 @@ import {
   Users,
   type LucideIcon,
 } from "lucide-react"
-import { useEffect, useRef, useState, type ReactNode, type TouchEvent } from "react"
+import { useEffect, useRef, useState, type ReactNode } from "react"
 
 function usePrefersReducedMotion() {
   const [reduce, setReduce] = useState(false)
@@ -705,7 +707,9 @@ export function HeroAnalytics() {
   const extraMembers = Math.max(channel.members - 4, 0)
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
-  const touchStartX = useRef<number | null>(null)
+  const paneRef = useRef<HTMLDivElement>(null)
+  const touchStart = useRef<{ x: number; y: number } | null>(null)
+  const touchAxis = useRef<"h" | "v" | null>(null)
 
   const reduce = usePrefersReducedMotion()
   const [cursor, setCursor] = useState<RevealCursor>(() =>
@@ -785,20 +789,57 @@ export function HeroAnalytics() {
     setActive(CHANNELS[next].id)
   }
 
-  const onTouchStart = (event: TouchEvent) => {
-    touchStartX.current = event.changedTouches[0]?.clientX ?? null
-  }
+  // Lock page scroll while a horizontal channel swipe is in progress.
+  useEffect(() => {
+    const el = paneRef.current
+    if (!el) return
 
-  const onTouchEnd = (event: TouchEvent) => {
-    const start = touchStartX.current
-    touchStartX.current = null
-    if (start === null) return
-    const end = event.changedTouches[0]?.clientX
-    if (end === undefined) return
-    const delta = end - start
-    if (Math.abs(delta) < SWIPE_THRESHOLD) return
-    goChannel(delta < 0 ? 1 : -1)
-  }
+    const onStart = (event: globalThis.TouchEvent) => {
+      const touch = event.changedTouches[0]
+      if (!touch) return
+      touchStart.current = { x: touch.clientX, y: touch.clientY }
+      touchAxis.current = null
+    }
+
+    const onMove = (event: globalThis.TouchEvent) => {
+      const start = touchStart.current
+      const touch = event.touches[0]
+      if (!start || !touch) return
+      const dx = touch.clientX - start.x
+      const dy = touch.clientY - start.y
+      if (!touchAxis.current) {
+        if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return
+        touchAxis.current = Math.abs(dx) > Math.abs(dy) ? "h" : "v"
+      }
+      if (touchAxis.current === "h") {
+        event.preventDefault()
+      }
+    }
+
+    const onEnd = (event: globalThis.TouchEvent) => {
+      const start = touchStart.current
+      const touch = event.changedTouches[0]
+      const axis = touchAxis.current
+      touchStart.current = null
+      touchAxis.current = null
+      if (!start || !touch || axis !== "h") return
+      const dx = touch.clientX - start.x
+      if (Math.abs(dx) < SWIPE_THRESHOLD) return
+      const next = (activeIndex + (dx < 0 ? 1 : -1) + CHANNELS.length) % CHANNELS.length
+      setActive(CHANNELS[next].id)
+    }
+
+    el.addEventListener("touchstart", onStart, { passive: true })
+    el.addEventListener("touchmove", onMove, { passive: false })
+    el.addEventListener("touchend", onEnd, { passive: true })
+    el.addEventListener("touchcancel", onEnd, { passive: true })
+    return () => {
+      el.removeEventListener("touchstart", onStart)
+      el.removeEventListener("touchmove", onMove)
+      el.removeEventListener("touchend", onEnd)
+      el.removeEventListener("touchcancel", onEnd)
+    }
+  }, [activeIndex])
 
   return (
     <div className="relative w-full" data-hero-analytics>
@@ -895,20 +936,58 @@ export function HeroAnalytics() {
               </div>
             </div>
 
-            <div
-              className="min-h-0 flex-1 overflow-hidden px-4 py-4 md:px-6 md:py-5"
-              onTouchStart={onTouchStart}
-              onTouchEnd={onTouchEnd}
-            >
-              <div className="flex flex-col gap-5">
-                {channel.messages.map((message, index) => {
-                  const phase = messagePhase(cursor, index)
-                  if (phase === null) return null
-                  return (
-                    <SlackMessage key={`${channel.id}-${index}`} message={message} phase={phase} />
-                  )
-                })}
+            <div className="relative min-h-0 flex-1">
+              <div
+                ref={paneRef}
+                className="h-full overflow-hidden px-4 py-4 md:px-6 md:py-5"
+              >
+                <div className="flex flex-col gap-5">
+                  {channel.messages.map((message, index) => {
+                    const phase = messagePhase(cursor, index)
+                    if (phase === null) return null
+                    return (
+                      <SlackMessage key={`${channel.id}-${index}`} message={message} phase={phase} />
+                    )
+                  })}
+                </div>
               </div>
+
+              {/* Mobile: quiet horizontal-carousel cues without cluttering the Slack look. */}
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center md:hidden">
+                <button
+                  type="button"
+                  aria-label="Previous channel"
+                  onClick={() => goChannel(-1)}
+                  className="pointer-events-auto ml-1 rounded-full bg-white/80 p-1 text-slate-400 shadow-sm ring-1 ring-black/[0.04] backdrop-blur-sm"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+              </div>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center md:hidden">
+                <button
+                  type="button"
+                  aria-label="Next channel"
+                  onClick={() => goChannel(1)}
+                  className="pointer-events-auto mr-1 rounded-full bg-white/80 p-1 text-slate-400 shadow-sm ring-1 ring-black/[0.04] backdrop-blur-sm"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+
+            <div className="flex shrink-0 items-center justify-center gap-1.5 border-t border-black/[0.04] py-2.5 md:hidden">
+              {CHANNELS.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  aria-label={`Show #${item.label}`}
+                  aria-current={item.id === active ? "true" : undefined}
+                  onClick={() => setActive(item.id)}
+                  className={`h-1.5 rounded-full transition-all ${
+                    item.id === active ? "w-4 bg-brand" : "w-1.5 bg-slate-300"
+                  }`}
+                />
+              ))}
             </div>
           </div>
         </div>

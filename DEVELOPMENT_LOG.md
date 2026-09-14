@@ -1,5 +1,16 @@
 # Development Log - Terramore Website
 
+## 2026-09-14 — Hero CTA clarity + Slack swipe + share card rename
+
+- Hero subhead: "…to get more customers and grow your revenue."
+- Under Let's talk: two plain lines — "Free 30-minute call." and "Or tap for a free Digital Footprint report" (opens report popup). Gold underline on "free" is share-card only, not on-site.
+- Slack channel carousel (mobile): axis-aware touch lock so horizontal swipes don't fight page scroll; quiet chevrons + dots as carousel cues.
+- OG share card copy: "Digital Footprint Report"; gold underline under "free" in the support line. Asset: `/share/terramore-share-v2-og.png`.
+
+## 2026-09-14 — Hero subhead reword
+
+- Hero support line now: "We find where the business already wins, then add marketing and sales to grow your revenue." (dropped "shows up" / "reaches you").
+
 ## 2026-09-14 — Mobile menu Terramore copy + Log in
 
 - Restored Terramore mobile labels: Solutions / Integrations / More (not Lindy flat Pricing/Security/Enterprise rows). All chevron rows accordion with icon subitems. Log in moved out of the header bar to the top of the open menu in brand blue.

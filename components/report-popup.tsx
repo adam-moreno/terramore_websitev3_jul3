@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, type ReactNode } from "react"
 import { createPortal } from "react-dom"
 import { ReportForm, type ReportAnswers } from "@/components/report-form"
 
@@ -159,9 +159,11 @@ export function ReportPopup({ open, onClose }: { open: boolean; onClose: () => v
 
 export function ReportPopupLink({
   label = "Or get a free Digital Footprint report",
+  children,
   className = "text-[14px] font-medium text-ink/50 underline-offset-4 hover:text-ink hover:underline",
 }: {
   label?: string
+  children?: ReactNode
   className?: string
 }) {
   const [open, setOpen] = useState(false)
@@ -169,7 +171,7 @@ export function ReportPopupLink({
   return (
     <>
       <button type="button" onClick={() => setOpen(true)} className={className}>
-        {label}
+        {children ?? label}
       </button>
       <ReportPopup open={open} onClose={() => setOpen(false)} />
     </>
