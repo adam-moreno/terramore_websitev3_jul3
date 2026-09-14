@@ -1,5 +1,16 @@
 # Development Log - Terramore Website
 
+## 2026-09-14 — Mobile hero match Lindy air
+
+- Header→headline gap raised to ~74px (`pt-36` mobile; was ~10px with `pt-20`).
+- Restored top-aligned `min-h-[calc(100svh-18rem)]` so Slack only peeks (~112px), with `mt-8` before the card. Internal stack stays grouped (`mt-5` / `mt-6`). Desktop unchanged.
+
+## 2026-09-14 — Mobile hero Lindy-tight spacing
+
+- Removed mobile `min-h-[calc(100svh-14rem)]` (root cause of empty cream between CTA and Slack). Content-led height; desktop `md:min-h` + center unchanged.
+- Tighter mobile stack: `pt-20`, subhead `mt-3`, CTA `mt-4`, trust `mt-2` / `mt-2.5`, Slack `mt-4`.
+- Subhead shortened to three-line length; gold accent on "more"; G2 4.5 row under the free-call line (`components/g2-rating.tsx`). Confirm rating is real before treating as final.
+
 ## 2026-09-14 — Mobile hero first-viewport rhythm
 
 - Mobile hero: top-aligned `min-h-[calc(100svh-14rem)]` (not `justify-center`) so headline → subhead → Let's talk stay compact at the top and only the top of the Slack card peeks into the first viewport (~200px on a 390×844 phone). Desktop tall centered column unchanged.

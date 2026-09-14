@@ -10,6 +10,7 @@ import { ReportBand } from "@/components/report-band"
 import { ReviewCarousel } from "@/components/review-carousel"
 import { SecurityBand } from "@/components/security-band"
 import { SiteFooter } from "@/components/site-footer"
+import { G2Rating } from "@/components/g2-rating"
 import { HeroAnalytics } from "@/components/hero-analytics"
 import { HeroFloatingLogos } from "@/components/hero-floating-logos"
 import { HeroLogoMobius } from "@/components/hero-logo-mobius"
@@ -58,7 +59,7 @@ export default function TerramoreHomepage() {
     <div className="min-h-screen bg-cream">
       <ScheduleFab />
 
-      <section className="relative isolate overflow-hidden bg-cream pt-24 pb-6 md:pt-32 md:pb-24">
+      <section className="relative isolate overflow-hidden bg-cream pt-36 pb-5 md:pt-32 md:pb-24">
         {/* The orbit only runs from md up. On phones it floated over the headline, so the marks move to a slim row under the CTA. */}
         <div className="pointer-events-none absolute inset-x-0 top-0 z-0 hidden h-[100svh] overflow-hidden md:block">
           <HeroLogoMobius />
@@ -68,26 +69,26 @@ export default function TerramoreHomepage() {
         <HeroFloatingLogos className="md:hidden" />
 
         {/*
-          Mobile: top-aligned column sized so headline → subhead → CTA sit compactly,
-          with only the top of the Slack card peeking into the first viewport.
-          Do not justify-center on mobile (that stretches empty space and hides the peek).
-          Desktop: keep the tall centered column that was already reviewed.
+          Mobile (Lindy rhythm): generous header→headline air (pt-36), tight message stack,
+          then a top-aligned min-height so Slack only peeks (~7rem) into the first viewport.
+          Do not justify-center on mobile. Desktop tall centered column unchanged.
         */}
-        <div className="relative z-20 flex min-h-[calc(100svh-14rem)] flex-col justify-start pt-1 md:-mt-28 md:min-h-[calc(100svh-10.75rem)] md:justify-center md:pt-28">
+        <div className="relative z-20 flex min-h-[calc(100svh-18rem)] flex-col justify-start md:-mt-28 md:min-h-[calc(100svh-10.75rem)] md:justify-center md:pt-28">
           <div className="page-shell relative z-20 text-center">
             <div
               className="mx-auto flex w-full max-w-[22.5rem] flex-col items-center sm:max-w-[28rem] md:max-w-none md:inline-flex"
               data-hero-copy
             >
               <h1 className="mx-auto text-center text-[2.35rem] font-bold leading-[1.08] tracking-[-0.02em] text-ink sm:text-5xl md:text-[72px] md:leading-[75.6px]">
-                Unlock more from the{" "}
+                Unlock{" "}
+                <span className="text-gold tracking-[-0.01em]">more</span> from the{" "}
                 <br className="hidden md:block" />
                 <span className="text-gold">business you already built.</span>
               </h1>
-              <p className="mx-auto mt-4 max-w-[20.5rem] text-center text-[17px] font-medium leading-[1.45] text-ink sm:max-w-[26rem] md:mt-8 md:max-w-[626px] md:text-[20px] md:leading-[30px]">
-                We find where the business already wins, then add marketing and sales plays so more revenue shows up. AI goes into the tools you already pay for.
+              <p className="mx-auto mt-5 max-w-[20.5rem] text-center text-[16px] font-medium leading-[1.4] text-ink sm:max-w-[26rem] md:mt-8 md:max-w-[626px] md:text-[20px] md:leading-[30px]">
+                We find where the business already wins, then add marketing and sales so more revenue shows up.
               </p>
-              <div className="mt-5 flex flex-col items-center md:mt-8">
+              <div className="mt-6 flex flex-col items-center md:mt-8">
                 <Link
                   href="/partner"
                   className="inline-flex h-11 items-center justify-center rounded-full bg-brand px-6 text-[16px] font-medium text-white hover:bg-brand-hover md:h-10 md:px-4"
@@ -101,13 +102,16 @@ export default function TerramoreHomepage() {
                     className="underline-offset-4 hover:text-ink hover:underline"
                   />
                 </p>
+                <div className="mt-2.5">
+                  <G2Rating rating="4.5" />
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Mobile: tight gap so the Slack card connects to the CTA and peeks under the fold. */}
-        <div className="page-shell relative z-20 mt-5 md:mt-0">
+        {/* Mobile: Lindy-like air before the Slack peek; desktop gap unchanged. */}
+        <div className="page-shell relative z-20 mt-8 md:mt-0">
           <div className="mx-auto w-full max-w-[972px]">
             <HeroAnalytics />
           </div>
