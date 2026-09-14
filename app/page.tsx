@@ -3,6 +3,7 @@
 import { Calendar } from "lucide-react"
 import { BookingLink } from "@/components/booking-popup"
 import Link from "next/link"
+import { League_Spartan } from "next/font/google"
 import { ReportPopupLink } from "@/components/report-popup"
 import { useEffect, useState } from "react"
 import { HomeFaq } from "@/components/home-faq"
@@ -16,6 +17,13 @@ import { HeroFloatingLogos } from "@/components/hero-floating-logos"
 import { HeroLogoMobius } from "@/components/hero-logo-mobius"
 import { TerramoreToolkit } from "@/components/terramore-toolkit"
 import { TerramoreUseCases } from "@/components/terramore-use-cases"
+
+/* Terramore.io header wordmark typeface. */
+const brandMore = League_Spartan({
+  subsets: ["latin"],
+  weight: ["700"],
+  display: "swap",
+})
 
 function ScheduleFab() {
   const [pastHero, setPastHero] = useState(false)
@@ -81,9 +89,13 @@ export default function TerramoreHomepage() {
             >
               <h1 className="mx-auto text-center text-[2.35rem] font-bold leading-[1.08] tracking-[-0.02em] text-ink sm:text-5xl md:text-[72px] md:leading-[75.6px]">
                 Unlock{" "}
-                <span className="text-gold tracking-[-0.01em]">more</span> from the{" "}
-                <br className="hidden md:block" />
-                <span className="text-gold">business you already built.</span>
+                <span className={`${brandMore.className} text-[1.28em] font-bold leading-none tracking-[-0.08em] text-ink`}>
+                  more
+                </span>
+                <br />
+                from the <span className="text-gold">business</span>
+                <br />
+                <span className="text-gold">you already built.</span>
               </h1>
               <p className="mx-auto mt-5 max-w-[20.5rem] text-center text-[16px] font-medium leading-[1.4] text-ink sm:max-w-[26rem] md:mt-8 md:max-w-[626px] md:text-[20px] md:leading-[30px]">
                 We find where the business already wins, then add marketing and sales to get more customers and grow your revenue.

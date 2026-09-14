@@ -1,5 +1,11 @@
 # Development Log - Terramore Website
 
+## 2026-09-14 — Hero "more" uses wordmark font, not gold
+
+- Removed gold gradient on "more" in "Unlock more". Word stays ink (`text-ink`) and uses League Spartan 700 (Terramore.io header wordmark). "business you already built." stays gold.
+- Tightened "more" tracking and bumped its size slightly above the surrounding headline.
+- Headline breaks onto three lines: "Unlock more" / "from the business" / "you already built."
+
 ## 2026-09-14 — Report CTA tap vs click
 
 - Hero report link: mobile "Or tap for a free Digital Footprint report"; desktop "Or click here for a Digital Footprint report".
