@@ -1,5 +1,11 @@
 # Development Log - Terramore Website
 
+## 2026-09-14 — OG share card marker scribble under "free"
+
+- Replaced the straight gold underline under "free" on the landscape OG card with a layered hand-drawn / marker scribble (Pillow stroke polygons).
+- Color: brighter Terramore gold `#C4943A` (SCRIBBLE_GOLD) so it pops in thumbnails vs muted headline bronze `#A27B3D`. Site hero CTA copy unchanged — no scribble on-site.
+- Regenerated `public/share/terramore-share-v2-og.png` from `tmp-og/compose_share_card_v2.py`.
+
 ## 2026-09-14 — Hero CTA clarity + Slack swipe + share card rename
 
 - Hero subhead: "…to get more customers and grow your revenue."
