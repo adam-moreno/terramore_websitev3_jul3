@@ -1,5 +1,9 @@
 # Development Log - Terramore Website
 
+## 2026-09-14 — Mobile menu Terramore copy + Log in
+
+- Restored Terramore mobile labels: Solutions / Integrations / More (not Lindy flat Pricing/Security/Enterprise rows). All chevron rows accordion with icon subitems. Log in moved out of the header bar to the top of the open menu in brand blue.
+
 ## 2026-09-14 — Mobile header Lindy pattern
 
 - Mobile bar now includes Log in + Let's talk beside a shrunken wordmark (mark size unchanged). Open menu uses accordion Solutions/Resources with chevrons, dimmed backdrop, and icon rows under Solutions. Desktop nav unchanged.

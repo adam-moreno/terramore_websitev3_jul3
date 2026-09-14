@@ -3,16 +3,22 @@
 import {
   BarChart3,
   Briefcase,
+  Calendar,
   ChevronDown,
+  CircleHelp,
   CreditCard,
+  FileText,
   LayoutGrid,
+  Lock,
   Mail,
   MapPin,
   Megaphone,
   Menu,
+  MessageSquare,
   ShoppingBag,
   Sparkles,
   Users,
+  Wrench,
   X,
   type LucideIcon,
 } from "lucide-react"
@@ -42,6 +48,16 @@ const CAPABILITY_ICONS: LucideIcon[] = [
   Users,
 ]
 
+const INTEGRATION_ICONS: Record<string, LucideIcon> = {
+  "email-marketing": Mail,
+  "calls-texts-and-chat": MessageSquare,
+  advertising: Megaphone,
+  ecommerce: ShoppingBag,
+  payments: CreditCard,
+  analytics: BarChart3,
+  scheduling: Calendar,
+}
+
 const solutionsSections: MenuSection[] = [
   {
     heading: "Pick the job",
@@ -51,7 +67,7 @@ const solutionsSections: MenuSection[] = [
         label: job.label,
         icon: JOB_ICONS[index % JOB_ICONS.length],
       })),
-      { href: "/solutions", label: "All solutions", strong: true },
+      { href: "/#use-cases", label: "See every job we take", strong: true },
     ],
   },
   {
@@ -71,18 +87,30 @@ const integrationLinks: MenuItem[] = [
   ...INTEGRATION_CATEGORIES.map((item) => ({
     href: integrationPath(item.slug),
     label: item.navTitle,
+    icon: INTEGRATION_ICONS[item.slug] ?? LayoutGrid,
   })),
   { href: "/integrations", label: "All integrations", strong: true },
 ]
 
 const resourceLinks: MenuItem[] = [
-  { href: "/pricing", label: "Pricing" },
-  { href: "/report", label: "Free Digital Footprint report" },
-  { href: "/about", label: "About" },
-  { href: "/security", label: "Security" },
-  { href: "/#faq", label: "Questions" },
-  { href: "/resources", label: "Start here" },
-  { href: "/partner", label: "Talk with us" },
+  { href: "/pricing", label: "Pricing", icon: CreditCard },
+  { href: "/report", label: "Free Digital Footprint report", icon: FileText },
+  { href: "/about", label: "About", icon: Users },
+  { href: "/security", label: "Security", icon: Lock },
+  { href: "/#faq", label: "Questions", icon: CircleHelp },
+  { href: "/resources", label: "Start here", icon: Sparkles },
+  { href: "/partner", label: "Talk with us", icon: MessageSquare },
+]
+
+/** Mobile "More" list: original Terramore labels, with icons for accordion rows. */
+const moreLinks: MenuItem[] = [
+  { href: "/#how-we-work", label: "How we work", icon: Wrench },
+  { href: "/pricing", label: "Pricing", icon: CreditCard },
+  { href: "/report", label: "Free Digital Footprint report", icon: FileText },
+  { href: "/about", label: "About", icon: Users },
+  { href: "/security", label: "Security", icon: Lock },
+  { href: "/#faq", label: "Questions", icon: CircleHelp },
+  { href: "/resources", label: "Start here", icon: Sparkles },
 ]
 
 function MenuLink({ item, onPick }: { item: MenuItem; onPick: () => void }) {
@@ -280,15 +308,7 @@ export function SiteHeader() {
             wordmarkClassName="!h-7 w-auto lg:!h-8"
           />
 
-          {/* Mobile: Log in + Let's talk sit in the bar like Lindy (closed and open). */}
           <div className="ml-auto flex items-center gap-1.5 lg:hidden">
-            <a
-              href={DASHBOARD_LOGIN_URL}
-              title="Current clients. Invite only."
-              className="shrink-0 px-1.5 py-1 text-[12px] font-medium text-ink"
-            >
-              Log in
-            </a>
             <Link
               href="/partner"
               className="shrink-0 rounded-lg bg-brand px-2.5 py-1.5 text-[12px] font-medium text-white hover:bg-brand-hover"
@@ -332,6 +352,16 @@ export function SiteHeader() {
 
         {open ? (
           <div className="pointer-events-auto mt-2 max-h-[min(70vh,32rem)] w-full overflow-y-auto rounded-2xl border border-black/[0.06] bg-white px-4 shadow-[0_20px_50px_-24px_rgba(15,23,42,0.35)] lg:hidden">
+            <a
+              href={DASHBOARD_LOGIN_URL}
+              title="Current clients. Invite only."
+              onClick={close}
+              className="block border-b border-black/[0.04] py-4 text-[17px] font-semibold text-brand"
+            >
+              Log in
+              <span className="mt-0.5 block text-[12px] font-medium text-brand/60">Current clients. Invite only.</span>
+            </a>
+
             <MobileAccordion label="Solutions">
               {solutionsSections.map((section) => (
                 <MobileSection
@@ -343,38 +373,17 @@ export function SiteHeader() {
               ))}
             </MobileAccordion>
 
-            <Link
-              href="/integrations"
-              onClick={close}
-              className="block border-b border-black/[0.04] py-4 text-[17px] font-medium text-ink"
-            >
-              Integrations
-            </Link>
-            <Link
-              href="/pricing"
-              onClick={close}
-              className="block border-b border-black/[0.04] py-4 text-[17px] font-medium text-ink"
-            >
-              Pricing
-            </Link>
-            <Link
-              href="/security"
-              onClick={close}
-              className="block border-b border-black/[0.04] py-4 text-[17px] font-medium text-ink"
-            >
-              Security
-            </Link>
-            <Link
-              href="/enterprise"
-              onClick={close}
-              className="block border-b border-black/[0.04] py-4 text-[17px] font-medium text-ink"
-            >
-              Larger teams
-            </Link>
-
-            <MobileAccordion label="Resources">
+            <MobileAccordion label="Integrations">
               <div className="flex flex-col">
-                {resourceLinks.map((item) => (
+                {integrationLinks.map((item) => (
+                  <MobileItemRow key={`${item.href}-${item.label}`} item={item} onPick={close} />
+                ))}
+              </div>
+            </MobileAccordion>
+
+            <MobileAccordion label="More">
+              <div className="flex flex-col">
+                {moreLinks.map((item) => (
                   <MobileItemRow key={`${item.href}-${item.label}`} item={item} onPick={close} />
                 ))}
               </div>
