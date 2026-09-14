@@ -24,7 +24,7 @@ import {
   Users,
   type LucideIcon,
 } from "lucide-react"
-import { useEffect, useRef, useState, type ReactNode } from "react"
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react"
 
 function usePrefersReducedMotion() {
   const [reduce, setReduce] = useState(false)
@@ -708,8 +708,38 @@ export function HeroAnalytics() {
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   const paneRef = useRef<HTMLDivElement>(null)
+  const probeRef = useRef<HTMLDivElement>(null)
+  /** Mobile only: fixed pane height = tallest fully-revealed channel (no clip, no grow-on-switch). */
+  const [messagePaneH, setMessagePaneH] = useState<number | null>(null)
   const touchStart = useRef<{ x: number; y: number } | null>(null)
   const touchAxis = useRef<"h" | "v" | null>(null)
+
+  useLayoutEffect(() => {
+    const probe = probeRef.current
+    if (!probe) return
+
+    const measure = () => {
+      const mobile = window.matchMedia("(max-width: 767px)").matches
+      if (!mobile) {
+        setMessagePaneH(null)
+        return
+      }
+      let max = 0
+      probe.querySelectorAll<HTMLElement>("[data-channel-probe]").forEach((node) => {
+        max = Math.max(max, node.offsetHeight)
+      })
+      if (max > 0) setMessagePaneH(max)
+    }
+
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(probe)
+    window.addEventListener("resize", measure)
+    return () => {
+      ro.disconnect()
+      window.removeEventListener("resize", measure)
+    }
+  }, [])
 
   const reduce = usePrefersReducedMotion()
   const [cursor, setCursor] = useState<RevealCursor>(() =>
@@ -785,7 +815,8 @@ export function HeroAnalytics() {
   }, [menuOpen])
 
   const goChannel = (delta: number) => {
-    const next = (activeIndex + delta + CHANNELS.length) % CHANNELS.length
+    const next = activeIndex + delta
+    if (next < 0 || next >= CHANNELS.length) return
     setActive(CHANNELS[next].id)
   }
 
@@ -825,7 +856,8 @@ export function HeroAnalytics() {
       if (!start || !touch || axis !== "h") return
       const dx = touch.clientX - start.x
       if (Math.abs(dx) < SWIPE_THRESHOLD) return
-      const next = (activeIndex + (dx < 0 ? 1 : -1) + CHANNELS.length) % CHANNELS.length
+      const next = activeIndex + (dx < 0 ? 1 : -1)
+      if (next < 0 || next >= CHANNELS.length) return
       setActive(CHANNELS[next].id)
     }
 
@@ -841,10 +873,14 @@ export function HeroAnalytics() {
     }
   }, [activeIndex])
 
+  const showPrev = activeIndex > 0
+  const showNext = activeIndex < CHANNELS.length - 1
+
   return (
     <div className="relative w-full" data-hero-analytics>
       <div className="card-radius overflow-hidden border border-black/[0.06] bg-white shadow-[0_30px_80px_-32px_rgba(15,23,42,0.22)] md:rounded-[28px]">
-        <div className="grid h-[22rem] grid-cols-[minmax(0,1fr)] md:h-[36rem] md:grid-cols-[200px_minmax(0,1fr)]">
+        {/* Mobile height follows the tallest conversation (measured once); desktop stays a fixed frame. */}
+        <div className="grid grid-cols-[minmax(0,1fr)] md:h-[36rem] md:grid-cols-[200px_minmax(0,1fr)]">
           <aside className="hidden border-r border-black/[0.06] bg-[#f7f4f2] p-3 md:flex md:flex-col">
             <p className="px-2 pb-3 text-[13px] font-semibold text-slate-800">Terramore</p>
             <p className="px-2 pb-2 text-[11px] font-medium uppercase tracking-wide text-slate-400">Channels</p>
@@ -936,7 +972,33 @@ export function HeroAnalytics() {
               </div>
             </div>
 
-            <div className="relative min-h-0 flex-1">
+            <div
+              className="relative min-h-[14rem] flex-1 md:min-h-0"
+              style={messagePaneH != null ? { height: messagePaneH, flex: "none" } : undefined}
+            >
+              {/* Offscreen probes: same width as the pane so mobile height = longest full conversation. */}
+              <div
+                ref={probeRef}
+                aria-hidden
+                className="pointer-events-none invisible absolute left-0 top-0 -z-10 w-full md:hidden"
+              >
+                {CHANNELS.map((item) => (
+                  <div
+                    key={item.id}
+                    data-channel-probe
+                    className="flex flex-col gap-5 px-4 py-4"
+                  >
+                    {item.messages.map((message, index) => (
+                      <SlackMessage
+                        key={`${item.id}-probe-${index}`}
+                        message={message}
+                        phase={2}
+                      />
+                    ))}
+                  </div>
+                ))}
+              </div>
+
               <div
                 ref={paneRef}
                 className="h-full overflow-hidden px-4 py-4 md:px-6 md:py-5"
@@ -952,30 +1014,35 @@ export function HeroAnalytics() {
                 </div>
               </div>
 
-              {/* Mobile: quiet horizontal-carousel cues without cluttering the Slack look. */}
-              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center md:hidden">
-                <button
-                  type="button"
-                  aria-label="Previous channel"
-                  onClick={() => goChannel(-1)}
-                  className="pointer-events-auto ml-1 rounded-full bg-white/80 p-1 text-slate-400 shadow-sm ring-1 ring-black/[0.04] backdrop-blur-sm"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </button>
-              </div>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center md:hidden">
-                <button
-                  type="button"
-                  aria-label="Next channel"
-                  onClick={() => goChannel(1)}
-                  className="pointer-events-auto mr-1 rounded-full bg-white/80 p-1 text-slate-400 shadow-sm ring-1 ring-black/[0.04] backdrop-blur-sm"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </button>
-              </div>
+              {/* Mobile: quiet horizontal-carousel cues; hide at ends so first has no left, last has no right. */}
+              {showPrev ? (
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center md:hidden">
+                  <button
+                    type="button"
+                    aria-label="Previous channel"
+                    onClick={() => goChannel(-1)}
+                    className="pointer-events-auto ml-1 rounded-full bg-white/80 p-1 text-slate-400 shadow-sm ring-1 ring-black/[0.04] backdrop-blur-sm"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </button>
+                </div>
+              ) : null}
+              {showNext ? (
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center md:hidden">
+                  <button
+                    type="button"
+                    aria-label="Next channel"
+                    onClick={() => goChannel(1)}
+                    className="pointer-events-auto mr-1 rounded-full bg-white/80 p-1 text-slate-400 shadow-sm ring-1 ring-black/[0.04] backdrop-blur-sm"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                </div>
+              ) : null}
             </div>
 
-            <div className="flex shrink-0 items-center justify-center gap-1.5 border-t border-black/[0.04] py-2.5 md:hidden">
+            {/* Always the last chrome row on mobile — outside the measured message pane so it cannot be clipped. */}
+            <div className="relative z-10 flex shrink-0 items-center justify-center gap-1.5 border-t border-black/[0.04] bg-white py-2.5 md:hidden">
               {CHANNELS.map((item) => (
                 <button
                   key={item.id}

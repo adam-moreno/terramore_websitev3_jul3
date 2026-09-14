@@ -67,7 +67,7 @@ export default function TerramoreHomepage() {
     <div className="min-h-screen bg-cream">
       <ScheduleFab />
 
-      <section className="relative isolate overflow-hidden bg-cream pt-36 pb-5 md:pt-32 md:pb-24">
+      <section className="relative isolate overflow-hidden bg-cream pt-36 pb-0 md:pt-32 md:pb-0">
         {/* The orbit only runs from md up. On phones it floated over the headline, so the marks move to a slim row under the CTA. */}
         <div className="pointer-events-none absolute inset-x-0 top-0 z-0 hidden h-[100svh] overflow-hidden md:block">
           <HeroLogoMobius />
@@ -121,14 +121,25 @@ export default function TerramoreHomepage() {
             </div>
           </div>
         </div>
+      </section>
 
-        {/* Mobile: Lindy-like air before the Slack peek; desktop gap unchanged. */}
-        <div className="page-shell relative z-20 mt-8 md:mt-0">
+      {/*
+        Slack straddles the hero → toolkit seam: top half cream (hero), bottom half cream
+        (same as "Why Terramore…"), with a soft mid/bottom gradient so scrolling onward feels continuous.
+      */}
+      <div className="relative">
+        <div aria-hidden className="pointer-events-none absolute inset-0">
+          <div className="h-1/2 bg-cream" />
+          <div className="h-1/2 bg-cream" />
+          <div className="absolute inset-x-0 top-[42%] h-[28%] bg-gradient-to-b from-cream via-white/55 to-cream" />
+          <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-b from-transparent to-cream" />
+        </div>
+        <div className="page-shell relative z-20 mt-8 pb-10 md:mt-0 md:pb-24">
           <div className="mx-auto w-full max-w-[972px]">
             <HeroAnalytics />
           </div>
         </div>
-      </section>
+      </div>
 
       <TerramoreToolkit />
       <ReviewCarousel />

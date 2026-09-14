@@ -1,5 +1,11 @@
 # Development Log - Terramore Website
 
+## 2026-09-14 — Slack tile full height + hero/toolkit bridge
+
+- Mobile Slack message pane height is measured once from the tallest fully-revealed channel (fixed; does not grow when switching). Fixes cutoff under attachments like `hero-cut-03.mp4`.
+- Slack sits in a bridge between hero and "Why Terramore feels like a real growth team": top half cream (hero), bottom half cream (toolkit), with a soft mid/bottom gradient so scrolling into the next section feels continuous.
+- Carousel dots stay as the bottom chrome row (outside the measured pane). First channel has no left arrow; last has no right arrow; swipe no longer wraps.
+
 ## 2026-09-14 — Hero "more" uses wordmark font, not gold
 
 - Removed gold gradient on "more" in "Unlock more". Word stays ink (`text-ink`) and uses League Spartan 700 (Terramore.io header wordmark). "business you already built." stays gold.
