@@ -26,7 +26,7 @@ export default function ResourcesPage() {
           />
           <LindyCard
             title="What does it cost?"
-            body="The call is free. A deposit starts the 90-day plan. A monthly fee keeps us in your tools. You never pay to find out what is broken."
+            body="The call is free. Scope and payment are set after we agree on the work. Monthly is optional. You own the data and assets."
             href="/pricing"
           />
           <LindyCard

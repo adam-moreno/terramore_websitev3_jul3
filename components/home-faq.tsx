@@ -6,7 +6,7 @@ import { DASHBOARD_LOGIN_URL } from "@/lib/dashboard"
 const FAQS = [
   {
     q: "How do we start?",
-    a: "Two ways. Book a free 30-minute call and tell us where the business is stuck. Or ask for the free Digital Footprint report: leave a name, an email, and your site, and we send a written read of your business in two to three business days.",
+    a: "Start with a free 30-minute call and tell us where the business is stuck. If you are not ready for a call, ask for the free Digital Footprint report: leave a name, an email, and your site, and we send a written read in two to three business days.",
   },
   {
     q: "What is the Digital Footprint report?",
@@ -30,7 +30,7 @@ const FAQS = [
   },
   {
     q: "What does the work cost?",
-    a: "The first call is free. If we go ahead, a deposit starts the first 90 days and covers finding the broken step, fixing it, and writing the plan. After that, a monthly fee keeps us working in your tools. Both numbers depend on how many channels we run, and we quote them on the call. You never pay to find out what is broken.",
+    a: "The first call is free. After we agree on scope, a deposit starts the work. Jobs are priced by the job, and the number can change if the scope changes. The first stretch can be 90 days, or we keep going. Monthly is optional. Financing is available. You own the data and the assets. You never pay to find out what is broken.",
   },
 ]
 

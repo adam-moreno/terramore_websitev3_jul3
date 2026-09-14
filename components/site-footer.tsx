@@ -37,10 +37,10 @@ export function SiteFooter() {
           <div className="max-w-sm">
             <Logo size="md" animate={false} on="light" />
             <p className="mt-4 text-[15px] leading-relaxed text-slate-600">
-              We find the step where you lose sales, fix it, and leave you a 90-day plan. Talk first, or ask for a
+              We find the step where you lose sales and fix it. Talk first. If you are not ready for a call, ask for a
               free Digital Footprint report.
             </p>
-            <DualCtas variant="report" className="mt-6" />
+            <DualCtas className="mt-6" />
           </div>
           <div className="grid gap-8 sm:grid-cols-2">
             <div>

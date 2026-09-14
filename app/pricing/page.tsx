@@ -6,7 +6,7 @@ import { ReportPopupLink } from "@/components/report-popup"
 export const metadata: Metadata = {
   title: "Pricing | Terramore",
   description:
-    "The first call is free. A deposit starts the 90-day plan. A monthly fee keeps the team in your tools. No fee until you see what is broken.",
+    "The first call is free. Scope and payment are set after we agree on the work. Jobs are priced by the job. Monthly is optional. You own the data and assets.",
 }
 
 const plans = [
@@ -26,12 +26,12 @@ const plans = [
   {
     name: "Start",
     price: "Deposit",
-    note: "The first 90 days",
+    note: "After we agree on scope",
     points: [
-      "We show you the step where you lose sales before we charge to fix it",
-      "The first fix is scoped with a date",
-      "You get a 90-day plan with owners and dates",
-      "Invoiced after we agree on the scope",
+      "Not every job is the same, so the price is not the same",
+      "The deposit is invoiced after we agree on the work",
+      "The first stretch can be 90 days, or we keep going",
+      "Financing is available",
     ],
     href: "/partner",
     cta: "Start with a call",
@@ -40,11 +40,11 @@ const plans = [
   {
     name: "Stay",
     price: "Monthly",
-    note: "After the first 90 days",
+    note: "Optional. Not required.",
     points: [
-      "We keep working inside your ads, site, and email",
-      "You get an invite to the client dashboard",
-      "Same people, not a new tool",
+      "Monthly is an option if you want us to stay in the tools",
+      "You own the data, ads, lists, and assets",
+      "We can stay as long as the work is useful",
     ],
     href: "/partner",
     cta: "Ask about monthly",
@@ -57,7 +57,7 @@ export default function PricingPage() {
     <LindyPage
       title="Talk first."
       accent="Pay when we start."
-      subtitle="The call is free. The deposit and the monthly fee depend on how many channels we run, and we quote both on the call. You never pay to find out what is broken."
+      subtitle="The call is free. Scope and payment are set after that call. Jobs are priced by the work, not a menu. You never pay to find out what is broken."
       ctaHref="/partner"
       ctaLabel="Book the free call"
     >

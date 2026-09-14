@@ -16,11 +16,11 @@ const FOR_OWNERS = [
   },
   {
     title: "You see the problem before you pay to fix it",
-    body: "The first call is free. The free report shows the step where you lose sales. The deposit comes after you agree with what we found.",
+    body: "The first call is free. The deposit comes after we agree on scope. The price follows the job, not a menu.",
   },
   {
-    title: "You keep the plan",
-    body: "At day 90 you have a written plan with owners and dates. Your team can run Monday from it whether we stay or not.",
+    title: "You keep the work",
+    body: "You own the data and the assets. Work can be 90 days or continue. Monthly is optional. Specialists join when the scope needs them.",
   },
 ]
 
@@ -91,6 +91,9 @@ export default function AboutPage() {
             <p>
               He also builds sites, apps, and the systems behind them. That mix is why Terramore can read your numbers
               and fix the page in the same week.
+            </p>
+            <p>
+              Adam leads every engagement. Specialists in ads, email, and build join when the job needs them.
             </p>
           </div>
         </div>

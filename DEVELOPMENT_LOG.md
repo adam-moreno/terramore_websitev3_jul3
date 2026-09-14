@@ -1,5 +1,13 @@
 # Development Log - Terramore Website
 
+## 2026-09-13 — Phase C owner answers applied
+
+- Proof stays mechanism-only. No client revenue claims.
+- Pricing / FAQ / About: deposit after scope, jobs priced by the job, 90 days or continue, monthly optional, financing available, client owns data and assets.
+- Homepage Talk-first. Report is the backup. Hero leads with growth, then AI.
+- Fake named reviews removed. Section is now industry jobs we know, not testimonials.
+- Toolkit channel dollars labeled Example. VLAIR kept (real brand). About: founder-led, specialists join by scope.
+
 ## 2026-09-13 — Share card v2
 
 - Site Open Graph / Twitter preview now uses the Version 2 1080×1350 Terramore share card at `/share/terramore-share-v2.png` instead of the Cloudinary homepage screenshot.

@@ -1170,8 +1170,8 @@ export function ChannelValueVisual() {
             </button>
           ))}
         </div>
-        <div className="flex w-full items-baseline justify-between border-t border-black/[0.05] pt-1.5 md:block md:w-[4.75rem] md:shrink-0 md:border-0 md:pt-0 md:text-right">
-          <p className="text-[10px] font-medium text-slate-400">This week</p>
+        <div className="flex w-full items-baseline justify-between border-t border-black/[0.05] pt-1.5 md:block md:w-[5.5rem] md:shrink-0 md:border-0 md:pt-0 md:text-right">
+          <p className="text-[10px] font-medium text-slate-400">Example</p>
           <p className="text-[13px] font-semibold tabular-nums text-[#14804a]">
             ${running.toLocaleString()}
           </p>
@@ -1304,7 +1304,7 @@ export function FollowUpFlowVisual() {
             Sam Reed
           </p>
         </div>
-        <p className="shrink-0 text-[14px] font-semibold text-ink lg:text-[16px]">$2,400 · Meta form</p>
+        <p className="shrink-0 text-[14px] font-semibold text-ink lg:text-[16px]">Example · $2,400</p>
         <span className="inline-flex shrink-0 items-center gap-1.5 text-[12px] font-semibold text-brand lg:text-[13px]">
           <span className="software-pulse-dot h-1.5 w-1.5 rounded-full bg-brand" />
           Just now

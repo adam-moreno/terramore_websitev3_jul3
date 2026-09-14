@@ -1,11 +1,11 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Contact Terramore | Partner With Us | Get in Touch Today',
-  description: 'Reach out to Terramore. Partner with us or get in touch for marketing and consulting. Contact us today for a free consultation.',
+  title: 'Talk with Terramore | Free 30-minute call',
+  description: 'Tell us where the business is stuck. The call is free. Scope and payment come after we agree on the work.',
   openGraph: {
-    title: 'Contact Terramore | Partner With Us | Get in Touch Today',
-    description: 'Reach out to Terramore. Partner with us or get in touch for marketing and consulting. Contact us today for a free consultation.',
+    title: 'Talk with Terramore | Free 30-minute call',
+    description: 'Tell us where the business is stuck. The call is free. Scope and payment come after we agree on the work.',
     url: 'https://terramore.io/partner',
   },
 }

@@ -3,6 +3,7 @@
 import { Calendar } from "lucide-react"
 import { BookingLink } from "@/components/booking-popup"
 import Link from "next/link"
+import { ReportPopupLink } from "@/components/report-popup"
 import { useEffect, useState } from "react"
 import { HomeFaq } from "@/components/home-faq"
 import { ReportBand } from "@/components/report-band"
@@ -75,7 +76,7 @@ export default function TerramoreHomepage() {
                 <span className="text-gold">business you already built.</span>
               </h1>
               <p className="mx-auto mt-7 max-w-[626px] text-[18px] font-medium leading-[1.5] text-ink md:mt-8 md:text-[20px] md:leading-[30px]">
-                We put AI into the tools that already win for you, then add proven marketing and sales plays so more revenue shows up.
+                We find where the business already wins, then add marketing and sales plays so more revenue shows up. AI goes into the tools you already pay for.
               </p>
               <div className="mt-8 flex flex-col items-center">
                 <Link
@@ -85,7 +86,11 @@ export default function TerramoreHomepage() {
                   Let&apos;s talk
                 </Link>
                 <p className="mt-3 text-[13px] font-medium text-ink/45">
-                  Free Digital Footprint report · No credit card
+                  Free 30-minute call.{" "}
+                  <ReportPopupLink
+                    label="Or get a free Digital Footprint report"
+                    className="underline-offset-4 hover:text-ink hover:underline"
+                  />
                 </p>
               </div>
             </div>
