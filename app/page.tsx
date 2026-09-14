@@ -98,7 +98,8 @@ export default function TerramoreHomepage() {
                 <div className="mt-2.5 flex flex-col items-center gap-1 text-center text-[13px] font-medium text-ink/45">
                   <p>Free 30-minute call.</p>
                   <ReportPopupLink className="text-[13px] font-medium text-ink/45 underline-offset-4 hover:text-ink">
-                    Or tap for a free Digital Footprint report
+                    <span className="md:hidden">Or tap for a free Digital Footprint report</span>
+                    <span className="hidden md:inline">Or click here for a Digital Footprint report</span>
                   </ReportPopupLink>
                 </div>
                 <div className="mt-2.5">

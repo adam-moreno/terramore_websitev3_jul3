@@ -1,5 +1,9 @@
 # Development Log - Terramore Website
 
+## 2026-09-14 — Report CTA tap vs click
+
+- Hero report link: mobile "Or tap for a free Digital Footprint report"; desktop "Or click here for a Digital Footprint report".
+
 ## 2026-09-14 — OG share card marker scribble under "free"
 
 - Replaced the straight gold underline under "free" on the landscape OG card with a layered hand-drawn / marker scribble (Pillow stroke polygons).
