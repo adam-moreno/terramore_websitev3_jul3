@@ -1,5 +1,9 @@
 # Development Log - Terramore Website
 
+## 2026-09-14 — Share card hierarchy
+
+- Darker/heavier TERRAMORE.IO; softer regular-weight discovery line so brand and headline lead. Asset: `/share/terramore-share-v2-og.png`.
+
 ## 2026-09-14 — Share card margin + title case
 
 - Browser title / OG / Twitter: "Terramore | A Growth Team for Owners".
