@@ -1,5 +1,10 @@
 # Development Log - Terramore Website
 
+## 2026-09-13 — Share card v2
+
+- Site Open Graph / Twitter preview now uses the Version 2 1080×1350 Terramore share card at `/share/terramore-share-v2.png` instead of the Cloudinary homepage screenshot.
+- Reason: iMessage / SMS previews should show the approved brand card (logo, TERRAMORE.IO, headline, Business Discovery Report invite, VIEW YOUR BUSINESS REPORT).
+
 ## Project Initialization - [Current Date]
 
 ### Initial State Assessment
