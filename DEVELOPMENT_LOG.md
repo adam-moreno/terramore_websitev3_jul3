@@ -1,5 +1,9 @@
 # Development Log - Terramore Website
 
+## 2026-09-14 — Share card layout tighten
+
+- Larger top-left logo (~3×), larger TERRAMORE.IO, centered headline, discovery line larger and pinned to the bottom. Asset: `/share/terramore-share-v2-og.png`.
+
 ## 2026-09-14 — Share card type bump
 
 - Horizontal OG card: button removed; report line is the support copy. All type sizes increased ~two steps for text-thumbnail readability. Asset: `/share/terramore-share-v2-og.png`.
