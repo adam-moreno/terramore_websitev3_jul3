@@ -35,9 +35,9 @@ export const metadata: Metadata = {
     type: 'website',
     images: [
       {
-        url: '/share/terramore-share-v2.png',
-        width: 1080,
-        height: 1350,
+        url: '/share/terramore-share-v2-og.png',
+        width: 1200,
+        height: 630,
         alt: 'Terramore | Unlock more from the business you already built',
       },
     ],
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Terramore | A growth team for owners',
     description: 'Terramore works inside your store, ads, and email to find where you lose sales and fix it. For owners with a shop, a service, or a list. Talk first, or ask for a free Digital Footprint report.',
-    images: ['/share/terramore-share-v2.png'],
+    images: ['/share/terramore-share-v2-og.png'],
   },
   robots: {
     index: true,

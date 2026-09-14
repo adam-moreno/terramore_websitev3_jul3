@@ -1,5 +1,9 @@
 # Development Log - Terramore Website
 
+## 2026-09-14 — Horizontal share card
+
+- Open Graph / text preview now uses a 1200×630 landscape Version 2 card at `/share/terramore-share-v2-og.png` so iMessage and social previews stay horizontal.
+
 ## 2026-09-13 — Phase C owner answers applied
 
 - Proof stays mechanism-only. No client revenue claims.
