@@ -1,6 +1,7 @@
 "use client"
 
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 import { browserTimeZone, formatLongDay, formatTime, formatWhen, groupSlotsByDay, tzLabel } from "@/lib/booking-format"
 import { buildIcs } from "@/lib/ics"
 
@@ -16,9 +17,9 @@ export type BookingResult = {
 
 const DAYS_AHEAD = 14
 
-/** Book mode: 3 qualifier steps → day → time → contact. Pick mode (reschedule): day → time only. */
-const BOOK_STEPS = ["Owner", "Business", "Stage", "Pick a day", "Pick a time", "Your details"]
-const PICK_STEPS = ["Pick a day", "Pick a time"]
+/** Book mode: 3 qualifier steps → schedule (day+time) → contact. Pick mode (reschedule): schedule only. */
+const BOOK_STEPS = ["Owner", "Business", "Stage", "Schedule", "Your details"]
+const PICK_STEPS = ["Schedule"]
 const QUALIFIER_COUNT = 3
 
 const OWNER_OPTIONS = ["Yes", "No", "Exploring for one"]
@@ -36,18 +37,160 @@ const DIGITAL_STAGES = [
   "Just getting started",
   "I post a bit of content",
   "I've done ads",
-  "I have a monthly budget",
   "SEO / organic focus",
-  "Running a full stack",
+  "I have a monthly budget",
 ]
 
-const pill = "h-11 rounded-full border px-4 text-[14px] font-medium transition"
-const pillOff = "border-ink/10 bg-cream text-ink hover:border-brand/40 hover:bg-white"
-const pillOn = "border-brand bg-brand text-white"
+const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+
 const choiceOff = "border-ink/10 bg-white text-ink/80 hover:border-ink/30"
 const choiceOn = "border-brand bg-brand/[0.06] text-ink"
-const inputClass = "mt-1.5 h-11 w-full rounded-full border border-ink/10 bg-cream px-4 text-[15px] text-ink outline-none focus:border-brand"
+/** Amazon-style contact chrome: bold label → tight gap → rectangular input. Details step only. */
+const detailsLabel = "block text-[14px] font-bold text-ink"
+const detailsInput =
+  "mt-1 h-10 w-full rounded-md border border-ink/25 bg-white px-3 py-2.5 text-[15px] text-ink placeholder:text-ink/35 outline-none focus:border-brand"
 const stepPane = "mt-4 animate-fade-in"
+
+function pad2(n: number) {
+  return String(n).padStart(2, "0")
+}
+
+/** Local calendar YYYY-MM-DD — matches dayKey() for the browser zone. */
+function localDayKey(year: number, monthIndex: number, day: number) {
+  return `${year}-${pad2(monthIndex + 1)}-${pad2(day)}`
+}
+
+function parseDayKey(key: string) {
+  const [y, m, d] = key.split("-").map(Number)
+  return { year: y, monthIndex: m - 1, day: d }
+}
+
+function monthLabel(year: number, monthIndex: number) {
+  return new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" }).format(new Date(year, monthIndex, 1))
+}
+
+function shiftMonth(year: number, monthIndex: number, delta: number) {
+  const d = new Date(year, monthIndex + delta, 1)
+  return { year: d.getFullYear(), monthIndex: d.getMonth() }
+}
+
+function monthCells(year: number, monthIndex: number) {
+  const firstDow = new Date(year, monthIndex, 1).getDay()
+  const daysInMonth = new Date(year, monthIndex + 1, 0).getDate()
+  const cells: ({ key: string; day: number } | null)[] = []
+  for (let i = 0; i < firstDow; i++) cells.push(null)
+  for (let day = 1; day <= daysInMonth; day++) {
+    cells.push({ key: localDayKey(year, monthIndex, day), day })
+  }
+  while (cells.length % 7 !== 0) cells.push(null)
+  return cells
+}
+
+/** Calendly-style month grid. Only days with API slots are selectable. */
+function MonthDayPicker({
+  availableKeys,
+  selectedKey,
+  onSelect,
+}: {
+  availableKeys: Set<string>
+  selectedKey: string | null
+  onSelect: (key: string) => void
+}) {
+  const bounds = useMemo(() => {
+    const keys = Array.from(availableKeys).sort()
+    if (keys.length === 0) return null
+    const first = parseDayKey(keys[0])
+    const last = parseDayKey(keys[keys.length - 1])
+    return {
+      min: { year: first.year, monthIndex: first.monthIndex },
+      max: { year: last.year, monthIndex: last.monthIndex },
+      start: { year: first.year, monthIndex: first.monthIndex },
+    }
+  }, [availableKeys])
+
+  const [view, setView] = useState(() => bounds?.start || { year: new Date().getFullYear(), monthIndex: new Date().getMonth() })
+
+  useEffect(() => {
+    if (!bounds) return
+    setView((current) => {
+      const beforeMin =
+        current.year < bounds.min.year || (current.year === bounds.min.year && current.monthIndex < bounds.min.monthIndex)
+      const afterMax =
+        current.year > bounds.max.year || (current.year === bounds.max.year && current.monthIndex > bounds.max.monthIndex)
+      return beforeMin || afterMax ? bounds.start : current
+    })
+  }, [bounds])
+
+  if (!bounds) return null
+
+  const canPrev =
+    view.year > bounds.min.year || (view.year === bounds.min.year && view.monthIndex > bounds.min.monthIndex)
+  const canNext =
+    view.year < bounds.max.year || (view.year === bounds.max.year && view.monthIndex < bounds.max.monthIndex)
+  const cells = monthCells(view.year, view.monthIndex)
+  const todayKey = (() => {
+    const n = new Date()
+    return localDayKey(n.getFullYear(), n.getMonth(), n.getDate())
+  })()
+
+  return (
+    <div className="mx-auto w-full max-w-[20rem] @[24rem]:mx-0">
+      <div className="flex items-center justify-between gap-2">
+        <button
+          type="button"
+          aria-label="Previous month"
+          disabled={!canPrev}
+          onClick={() => setView((v) => shiftMonth(v.year, v.monthIndex, -1))}
+          className="inline-flex h-9 w-9 items-center justify-center rounded-full text-ink/70 transition hover:bg-cream hover:text-ink disabled:pointer-events-none disabled:opacity-30"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </button>
+        <p className="text-[15px] font-semibold tracking-tight text-ink">{monthLabel(view.year, view.monthIndex)}</p>
+        <button
+          type="button"
+          aria-label="Next month"
+          disabled={!canNext}
+          onClick={() => setView((v) => shiftMonth(v.year, v.monthIndex, 1))}
+          className="inline-flex h-9 w-9 items-center justify-center rounded-full text-ink/70 transition hover:bg-cream hover:text-ink disabled:pointer-events-none disabled:opacity-30"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </button>
+      </div>
+      <div className="mt-3 grid grid-cols-7 gap-y-1 text-center">
+        {WEEKDAYS.map((d) => (
+          <span key={d} className="pb-1 text-[11px] font-medium uppercase tracking-wide text-slate-400">
+            {d}
+          </span>
+        ))}
+        {cells.map((cell, index) => {
+          if (!cell) return <span key={`e-${index}`} className="h-9 sm:h-10" />
+          const open = availableKeys.has(cell.key)
+          const selected = selectedKey === cell.key
+          const isToday = cell.key === todayKey
+          return (
+            <button
+              key={cell.key}
+              type="button"
+              disabled={!open}
+              onClick={() => onSelect(cell.key)}
+              aria-label={cell.key}
+              aria-pressed={selected}
+              className={`mx-auto flex h-9 w-9 items-center justify-center rounded-full text-[13px] font-medium transition sm:h-10 sm:w-10 sm:text-[14px] ${
+                selected
+                  ? "bg-brand text-white"
+                  : open
+                    ? `text-ink hover:bg-brand/10 ${isToday ? "ring-1 ring-ink/20" : ""}`
+                    : "cursor-default text-ink/25"
+              }`}
+            >
+              {cell.day}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
 
 /** Shown whenever Terra IQ is not reachable or not configured. Never a blank state. No email shortcut. */
 export function BookingFallback({ reason, onRetry }: { reason?: string; onRetry?: () => void }) {
@@ -78,8 +221,8 @@ function loadErrorMessage(status: number, error?: string): string {
 }
 
 /**
- * Qualify → day → time → details → confirm. Used by the popup, the /book page, and (in "pick" mode) the
- * reschedule screen, where the caller takes the chosen slot instead of the details form.
+ * Qualify → schedule (day + time) → details → confirm. Used by the popup, the /book page, and (in "pick"
+ * mode) the reschedule screen, where the caller takes the chosen slot instead of the details form.
  */
 export function BookingFlow({
   mode = "book",
@@ -93,9 +236,8 @@ export function BookingFlow({
 }) {
   const isPick = mode === "pick"
   const steps = isPick ? PICK_STEPS : BOOK_STEPS
-  const dayStep = isPick ? 0 : QUALIFIER_COUNT
-  const timeStep = dayStep + 1
-  const detailsStep = dayStep + 2
+  const scheduleStep = isPick ? 0 : QUALIFIER_COUNT
+  const detailsStep = scheduleStep + 1
 
   const [tz, setTz] = useState("UTC")
   const [slots, setSlots] = useState<string[] | null>(null)
@@ -113,6 +255,7 @@ export function BookingFlow({
   const [phone, setPhone] = useState("")
   const [business, setBusiness] = useState("")
   const [website, setWebsite] = useState("")
+  const [socials, setSocials] = useState("")
   const [error, setError] = useState("")
   const [busy, setBusy] = useState(false)
   const [done, setDone] = useState<BookingResult | null>(null)
@@ -148,11 +291,9 @@ export function BookingFlow({
   }, [load])
 
   const days = useMemo(() => (slots ? groupSlotsByDay(slots, tz) : []), [slots, tz])
+  const availableKeys = useMemo(() => new Set(days.map((d) => d.key)), [days])
   const day = days.find((d) => d.key === dayKey) || null
   const zone = tzLabel(tz, slot || undefined)
-
-  /** Map UI step → calendar/contact phase. Book mode offsets by qualifier count. */
-  const calStep = isPick ? step : step - QUALIFIER_COUNT
 
   const answerAndAdvance = (nextStep: number, apply: () => void) => {
     if (advancing) return
@@ -165,11 +306,11 @@ export function BookingFlow({
     }, 180)
   }
 
+  /** Stay on the schedule step; times appear beside the calendar. */
   const chooseDay = (key: string) => {
     setDayKey(key)
     setSlot(null)
     setError("")
-    setStep(timeStep)
   }
 
   const chooseSlot = async (iso: string) => {
@@ -182,7 +323,7 @@ export function BookingFlow({
       if (problem) {
         setError(problem)
         await load()
-        setStep(timeStep)
+        setStep(scheduleStep)
       }
       return
     }
@@ -193,7 +334,7 @@ export function BookingFlow({
     event.preventDefault()
     setError("")
     if (!slot) {
-      setStep(timeStep)
+      setStep(scheduleStep)
       return
     }
     if (!name.trim() || !email.trim()) {
@@ -201,7 +342,10 @@ export function BookingFlow({
       return
     }
     setBusy(true)
-    const note = [`Owner: ${isOwner}`, `Type: ${businessType}`, `Stage: ${digitalStage}`].join("\n")
+    // API has no socials field — fold into note like report form packs extras.
+    const noteLines = [`Owner: ${isOwner}`, `Type: ${businessType}`, `Stage: ${digitalStage}`]
+    if (socials.trim()) noteLines.push(`Socials: ${socials.trim()}`)
+    const note = noteLines.join("\n")
     try {
       const response = await fetch("/api/booking", {
         method: "POST",
@@ -221,7 +365,7 @@ export function BookingFlow({
       if (response.status === 409) {
         setError("That time was just taken. Pick another.")
         await load()
-        setStep(timeStep)
+        setStep(scheduleStep)
         return
       }
       if (!response.ok || !data.startIso || !data.manageUrl) {
@@ -341,17 +485,46 @@ export function BookingFlow({
         </div>
       ) : null}
 
-      {calStep === 0 && days.length > 0 ? (
-        <div key="day" className={stepPane}>
-          <p className="text-[1.2rem] font-semibold tracking-tight text-ink">Pick a day</p>
-          <p className="mt-1 text-[14px] text-slate-500">30 minutes. Times shown in {zone}.</p>
-          <div className={`mt-4 grid gap-2 ${compact ? "grid-cols-2" : "grid-cols-2 sm:grid-cols-3"}`}>
-            {days.map((d) => (
-              <button key={d.key} type="button" onClick={() => chooseDay(d.key)} className={`${pill} ${d.key === dayKey ? pillOn : pillOff}`}>
-                {d.label}
-              </button>
-            ))}
+      {step === scheduleStep && days.length > 0 ? (
+        <div key="schedule" className={stepPane}>
+          <p className="text-[1.2rem] font-semibold tracking-tight text-ink">{dayKey ? "Pick a time" : "Pick a day"}</p>
+          <p className="mt-1 text-[14px] text-slate-500">
+            {day ? `${formatLongDay(day.slots[0], tz)}. Shown in ${zone}.` : `30 minutes. Times shown in ${zone}.`}
+          </p>
+          {/* Side-by-side when Schedule pane ≥24rem (container), not viewport md */}
+          <div className="@container mt-4">
+            <div className="flex flex-col gap-5 @[24rem]:flex-row @[24rem]:items-start @[24rem]:gap-5">
+              <div className="min-w-0 @[24rem]:w-[20rem] @[24rem]:shrink-0">
+                <MonthDayPicker availableKeys={availableKeys} selectedKey={dayKey} onSelect={chooseDay} />
+              </div>
+              <div className="flex w-full min-w-0 flex-col @[24rem]:flex-1">
+                {day ? (
+                  <div className="flex max-h-[min(40vh,18rem)] flex-col gap-2 overflow-y-auto overscroll-contain pr-1 @[24rem]:max-h-[19rem]">
+                    {day.slots.map((iso) => (
+                      <button
+                        key={iso}
+                        type="button"
+                        disabled={busy}
+                        onClick={() => void chooseSlot(iso)}
+                        className={`h-11 w-full shrink-0 rounded-lg border text-[14px] font-medium transition disabled:opacity-60 ${
+                          iso === slot
+                            ? "border-brand bg-brand text-white"
+                            : "border-ink/15 bg-white text-ink hover:border-brand/50 hover:bg-cream"
+                        }`}
+                      >
+                        {formatTime(iso, tz)}
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="rounded-xl border border-dashed border-ink/15 bg-cream/60 px-3 py-10 text-center text-[13px] text-slate-500 @[24rem]:min-h-[12rem] @[24rem]:py-14">
+                    Select a day
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
+          {error ? <p className="mt-3 text-[14px] text-red-600">{error}</p> : null}
           {!isPick ? (
             <button type="button" onClick={() => setStep(2)} className="mt-4 text-[14px] font-medium text-slate-500 hover:text-ink">
               Back
@@ -360,69 +533,96 @@ export function BookingFlow({
         </div>
       ) : null}
 
-      {calStep === 1 && day ? (
-        <div key="time" className={stepPane}>
-          <p className="text-[1.2rem] font-semibold tracking-tight text-ink">{formatLongDay(day.slots[0], tz)}</p>
-          <p className="mt-1 text-[14px] text-slate-500">Pick a time. Shown in {zone}.</p>
-          <div className={`mt-4 grid max-h-[40vh] gap-2 overflow-y-auto pr-1 ${compact ? "grid-cols-2" : "grid-cols-3 sm:grid-cols-4"}`}>
-            {day.slots.map((iso) => (
-              <button
-                key={iso}
-                type="button"
-                disabled={busy}
-                onClick={() => void chooseSlot(iso)}
-                className={`${pill} ${iso === slot ? pillOn : pillOff} disabled:opacity-60`}
-              >
-                {formatTime(iso, tz)}
-              </button>
-            ))}
-          </div>
-          {error ? <p className="mt-3 text-[14px] text-red-600">{error}</p> : null}
-          <button type="button" onClick={() => setStep(dayStep)} className="mt-4 text-[14px] font-medium text-slate-500 hover:text-ink">
-            Back to days
-          </button>
-        </div>
-      ) : null}
-
       {!isPick && step === detailsStep && slot ? (
         <form key="details" onSubmit={submit} className={stepPane}>
-          <p className="text-[1.2rem] font-semibold tracking-tight text-ink">Your details</p>
+          <p className="text-[1.35rem] font-bold tracking-tight text-ink">Your details</p>
           <p className="mt-1 text-[14px] text-slate-500">{formatWhen(slot, tz)}. The invite goes to this email.</p>
-          <label className="mt-4 block">
-            <span className="text-[13px] font-medium text-ink">Name</span>
-            <input required value={name} onChange={(e) => setName(e.target.value)} className={inputClass} autoComplete="name" />
-          </label>
-          <label className="mt-3 block">
-            <span className="text-[13px] font-medium text-ink">Email</span>
-            <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} autoComplete="email" />
-          </label>
-          <label className="mt-3 block">
-            <span className="text-[13px] font-medium text-ink">Phone (optional, for a text reminder)</span>
-            <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className={inputClass} autoComplete="tel" />
-          </label>
-          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+
+          <div className="mt-5 flex flex-col gap-4">
             <label className="block">
-              <span className="text-[13px] font-medium text-ink">Business name</span>
-              <input value={business} onChange={(e) => setBusiness(e.target.value)} className={inputClass} autoComplete="organization" />
+              <span className={detailsLabel}>Full name</span>
+              <input
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="First and last name"
+                className={detailsInput}
+                autoComplete="name"
+              />
             </label>
             <label className="block">
-              <span className="text-[13px] font-medium text-ink">Website</span>
-              <input value={website} onChange={(e) => setWebsite(e.target.value)} placeholder="https://" className={inputClass} autoComplete="url" />
+              <span className={detailsLabel}>Email</span>
+              <input
+                required
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@company.com"
+                className={detailsInput}
+                autoComplete="email"
+              />
+            </label>
+            <label className="block">
+              <span className={detailsLabel}>Phone</span>
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="Optional"
+                className={detailsInput}
+                autoComplete="tel"
+              />
+              <span className="mt-1 block text-[12px] text-slate-500">Optional. We may text a reminder.</span>
+            </label>
+            <label className="block">
+              <span className={detailsLabel}>Business name</span>
+              <input
+                value={business}
+                onChange={(e) => setBusiness(e.target.value)}
+                placeholder="Your company"
+                className={detailsInput}
+                autoComplete="organization"
+              />
+            </label>
+            <label className="block">
+              <span className={detailsLabel}>Website</span>
+              <input
+                value={website}
+                onChange={(e) => setWebsite(e.target.value)}
+                placeholder="https://"
+                className={detailsInput}
+                autoComplete="url"
+              />
+            </label>
+            <label className="block">
+              <span className={detailsLabel}>
+                Social usernames <span className="font-normal text-ink/40">(optional)</span>
+              </span>
+              <input
+                value={socials}
+                onChange={(e) => setSocials(e.target.value)}
+                placeholder="Instagram / LinkedIn / TikTok handles"
+                className={detailsInput}
+              />
             </label>
           </div>
+
           {error ? <p className="mt-4 text-[14px] text-red-600">{error}</p> : null}
-          <div className="mt-6 flex items-center justify-between gap-3">
-            <button type="button" onClick={() => setStep(timeStep)} className="text-[14px] font-medium text-slate-500 hover:text-ink">
-              Back
-            </button>
-            <button
-              type="submit"
-              disabled={busy}
-              className="inline-flex h-11 items-center rounded-full bg-brand px-5 text-[15px] font-medium text-white hover:bg-brand-hover disabled:opacity-60"
-            >
-              {busy ? "Booking…" : "Confirm the call"}
-            </button>
-          </div>
+
+          <button
+            type="submit"
+            disabled={busy}
+            className="mt-6 inline-flex h-11 w-full items-center justify-center rounded-full bg-brand px-6 text-[15px] font-medium text-white hover:bg-brand-hover disabled:opacity-60"
+          >
+            {busy ? "Booking…" : "Confirm the call"}
+          </button>
+          <button
+            type="button"
+            onClick={() => setStep(scheduleStep)}
+            className="mt-3 text-[14px] font-medium text-slate-500 hover:text-ink"
+          >
+            Back
+          </button>
         </form>
       ) : null}
     </div>

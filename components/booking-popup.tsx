@@ -32,7 +32,7 @@ export function BookingPopup({ open, onClose }: { open: boolean; onClose: () => 
       className="fixed inset-0 z-[100] flex items-end justify-center bg-ink/60 p-4 sm:items-center"
     >
       <button type="button" aria-label="Close" className="absolute inset-0 cursor-default" onClick={onClose} />
-      <div className="relative z-10 max-h-[calc(100vh-2rem)] w-full max-w-lg overflow-y-auto rounded-[1.75rem] bg-white shadow-[0_24px_60px_-20px_rgba(15,30,46,0.45)]">
+      <div className="relative z-10 max-h-[calc(100vh-2rem)] w-full max-w-2xl overflow-y-auto rounded-[1.75rem] bg-white shadow-[0_24px_60px_-20px_rgba(15,30,46,0.45)]">
         <div className="flex items-start justify-between gap-3 px-7 pt-7 md:px-9 md:pt-9">
           <div>
             <p className="text-[12px] font-medium uppercase tracking-[0.16em] text-ink/40">Book a call</p>

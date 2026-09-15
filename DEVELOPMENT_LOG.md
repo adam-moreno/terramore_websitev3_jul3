@@ -1,5 +1,28 @@
 # Development Log - Terramore Website
 
+## 2026-09-14 — Booking: Amazon-style contact details step
+
+- Restyled **Your details** only (after Schedule) to match Amazon shipping-address density: bold labels tight above white rectangular inputs (`rounded-md`, thin `border-ink/25`), single-column stack, subtle grey helper under Phone, full-width brand pill CTA.
+- Field order: Full name, Email, Phone (optional), Business name, Website, Social usernames (optional, new). Progress chrome unchanged.
+- Booking API still has no `socials` field — when filled, append `Socials: …` to existing `note` (Owner / Type / Stage). No API route change.
+
+## 2026-09-14 — Booking: Schedule side-by-side via container query
+
+- **Why times felt “always underneath”:** Schedule used viewport `md:flex-row` (768px). That can miss the intended Calendly layout when the window is mid-width, and the calendar stayed `mx-auto` (centered) while stacked. Popup was only `max-w-xl`, so even when row layout applied it didn’t read as calendar-left + times-right.
+- **Fix:** Schedule row uses `@container` + `@[24rem]:flex-row` (content width, not viewport). Always two columns once the pane is ≥24rem: calendar fixed ~20rem left, times/`Select a day` flex on the right. Mobile/narrow pane still stacks. Popup widened `max-w-xl` → `max-w-2xl`.
+
+## 2026-09-14 — Booking: day + time on one schedule step
+
+- Merged former separate “Pick a day” / “Pick a time” steps into one **Schedule** step (book: Owner → Business → Stage → Schedule → Your details; reschedule/`pick`: Schedule only). Progress bar counts the merged step once.
+- After selecting a day, calendar stays visible; available times list on the right (wide pane) or below (narrow). Empty right panel shows “Select a day” until a day is chosen. Headline switches Pick a day → Pick a time. Clicking a time still advances to details (book) or calls `onPick` (reschedule). Same availability API/slots — no backend changes. Popup shell nudged toward `max-w-2xl` for calendar | times.
+
+## 2026-09-14 — Booking: month calendar + digital stage options
+
+- **Digital journey options:** Dropped “Running a full stack.” Order is now Just getting started → I post a bit of content → I've done ads → SEO / organic focus → I have a monthly budget (last).
+- **Day picker:** Replaced chip/bubble day buttons with a Calendly-style month grid (`MonthDayPicker` in `booking-flow.tsx`): month nav, weekday headers, selectable only when `/api/booking/availability` returned slots for that day; past/empty days muted. Still uses the same slot grouping (`groupSlotsByDay`) and create path — no new calendar backend.
+- **Time picker:** Vertical list of available times for the selected day (same API slots), then contact details unchanged.
+- **Overlap / create:** Unchanged — availability from Terra IQ via `GET /api/booking/availability`; book via `POST /api/booking` (409 → pick another time).
+
 ## 2026-09-14 — Booking: fix warm-up + one-question steps
 
 - **Why “warming up”:** Local `/api/booking/availability` returned `503 not_configured` because `BOOKING_API_SECRET` was unset (no `.env.local`). After qualifiers, `BookingFlow` showed `BookingFallback`. Not a calendar-UI bug — missing env. Added gitignored `.env.local` from `~/.terramore/booking-api-secret`. Clearer copy when not configured vs true upstream outage.
