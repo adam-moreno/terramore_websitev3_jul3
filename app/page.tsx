@@ -101,7 +101,7 @@ export default function TerramoreHomepage() {
               <p className="mx-auto mt-5 max-w-none text-center text-[16px] font-medium leading-[1.4] text-ink sm:max-w-[26rem] md:mt-8 md:max-w-[626px] md:text-[20px] md:leading-[30px]">
                 We find where the business wins today,
                 <br />
-                then automate proven marketing and sales strategies
+                then automate marketing and sales to get
                 <br />
                 <span className={`${brandMore.className} text-[1.22em] font-bold leading-none tracking-[-0.08em] text-ink`}>
                   more

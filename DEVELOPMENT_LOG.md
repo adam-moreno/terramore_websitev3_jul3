@@ -1,5 +1,17 @@
 # Development Log - Terramore Website
 
+## 2026-09-15 — Homepage hero subhead (copy refresh)
+
+Updated line 2 of the hero subhead: “then automate proven marketing and sales strategies” → “then automate marketing and sales to get”. Kept 3 forced `<br />` lines, League Spartan `brandMore` on both “more”s at `1.22em`, and existing subhead sizing.
+
+### Final copy
+1. We find where the business wins today,
+2. then automate marketing and sales to get
+3. more customers & more revenue.
+
+### Files
+- `app/page.tsx`
+
 ## 2026-09-15 — Launch readiness Phase 1–3 (shipped to prod)
 
 Paid-acquisition readiness for `/report` → form → delivery → SMS. **Pushed to `origin/main` for Vercel production.**
