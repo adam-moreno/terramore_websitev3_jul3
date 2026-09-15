@@ -98,7 +98,18 @@ export default function TerramoreHomepage() {
                 <span className="text-gold">you already built.</span>
               </h1>
               <p className="mx-auto mt-5 max-w-[20.5rem] text-center text-[16px] font-medium leading-[1.4] text-ink sm:max-w-[26rem] md:mt-8 md:max-w-[626px] md:text-[20px] md:leading-[30px]">
-                We find where the business already wins, then add marketing and sales to get more customers and grow your revenue.
+                We find where the business already wins,
+                <br />
+                then automate proven marketing and sales strategies to get
+                <br />
+                <span className={`${brandMore.className} text-[1.15em] font-bold leading-none tracking-[-0.08em] text-ink`}>
+                  more
+                </span>{" "}
+                customers &{" "}
+                <span className={`${brandMore.className} text-[1.15em] font-bold leading-none tracking-[-0.08em] text-ink`}>
+                  more
+                </span>{" "}
+                revenue.
               </p>
               <div className="mt-6 flex flex-col items-center md:mt-8">
                 <BookingLink
