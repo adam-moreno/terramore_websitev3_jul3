@@ -167,7 +167,7 @@ function chapter(ctx: Ctx, kicker: string, title: string, items: Array<{ label: 
 function moves(ctx: Ctx, report: ReportContent) {
   if (!report.moves.length) return
   const items = report.moves.map((move) => ({ label: move.window, value: move.title, note: move.body }))
-  chapter(ctx, "05 · Next 90 days", "Three moves, in order.", items, "Talk with us and we map the work in a meeting. terramore.io/partner")
+  chapter(ctx, "05 · Next 90 days", "Three moves, in order.", items, "Talk with us and we map the work in a meeting. terramore.io/book")
 }
 
 export async function renderReportPdf(report: ReportContent): Promise<Buffer> {

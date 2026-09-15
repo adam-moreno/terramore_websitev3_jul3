@@ -5,7 +5,6 @@ import type { LeadNurtureRow, NurtureEmail, NurtureStep } from "./types"
 
 const SITE = "https://www.terramore.io"
 const BOOK_URL = `${SITE}/book`
-const TALK_URL = `${SITE}/partner`
 
 function firstName(name: string | null | undefined): string {
   const part = (name || "").trim().split(/\s+/)[0]
@@ -121,10 +120,9 @@ function buildStep1(row: LeadNurtureRow): NurtureEmail {
     "",
     personal,
     "",
-    "In the next few notes I will share how we put AI into that path, and where it usually helps first. No hard sell. If a call would help sooner, pick a time or send a note.",
+    "In the next few notes I will share how we put AI into that path, and where it usually helps first. No hard sell. If a call would help sooner, pick a time.",
     "",
     `Book a time: ${BOOK_URL}`,
-    `Or tell us the job: ${TALK_URL}`,
     "",
     "Adam Moreno",
     "Terramore",
@@ -143,11 +141,9 @@ function buildStep1(row: LeadNurtureRow): NurtureEmail {
       ),
       emailP(personal),
       emailP(
-        "In the next few notes I will share how we put AI into that path, and where it usually helps first. No hard sell. If a call would help sooner, pick a time or send a note.",
+        "In the next few notes I will share how we put AI into that path, and where it usually helps first. No hard sell. If a call would help sooner, pick a time.",
       ),
       emailButton("Book a time", BOOK_URL),
-      emailP("Or tell us the job:"),
-      emailButton("Talk with us", TALK_URL),
       emailSignoff("Adam Moreno", "Terramore"),
       unsub.html,
     ].join(""),
@@ -214,7 +210,6 @@ function buildStep3(row: LeadNurtureRow): NurtureEmail {
     ...linkLines,
     "",
     `If a short call would help, book here: ${BOOK_URL}`,
-    `Or tell us the job in a note: ${TALK_URL}`,
     "",
     "Adam Moreno",
     "Terramore",
@@ -230,9 +225,8 @@ function buildStep3(row: LeadNurtureRow): NurtureEmail {
       ),
       emailP("Here are three pages that match what you shared. Skim the one that feels closest."),
       ...links.map((link) => emailButton(link.label, link.href)),
-      emailP("If a short call would help, or you want to spell out the job in a note:"),
+      emailP("If a short call would help:"),
       emailButton("Book a time", BOOK_URL),
-      emailButton("Talk with us", TALK_URL),
       emailSignoff("Adam Moreno", "Terramore"),
       unsub.html,
     ].join(""),

@@ -13,7 +13,6 @@ export default function EnterprisePage() {
       title="A growth team that can"
       accent="sit next to yours."
       subtitle="For brands that already have a marketing team and need more hands who know ads, operations, and automation. You get named people, not a rotating vendor."
-      ctaHref="/partner"
       ctaLabel="Let's talk"
     >
       <section className="pb-20">

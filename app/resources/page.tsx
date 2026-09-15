@@ -14,7 +14,6 @@ export default function ResourcesPage() {
       title="Start here."
       accent="Every page, in order."
       subtitle="The questions owners ask first, and the page that answers each one."
-      ctaHref="/partner"
       ctaLabel="Let's talk"
     >
       <section className="pb-20">
@@ -67,7 +66,7 @@ export default function ResourcesPage() {
           <LindyCard
             title="Ready to talk?"
             body="Tell us where the business is stuck. We map the work and tell you if we are the right team."
-            href="/partner"
+            href="/book"
           />
         </div>
         <p className="page-shell mt-10 text-center text-[15px] text-ink/70">

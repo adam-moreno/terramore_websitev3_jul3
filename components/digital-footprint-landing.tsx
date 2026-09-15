@@ -3,6 +3,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { useEffect, useState } from "react"
+import { BookingLink } from "@/components/booking-popup"
 import { ReportPopup } from "@/components/report-popup"
 import { CHAPTERS } from "@/lib/report/chapters"
 
@@ -260,17 +261,15 @@ export function DigitalFootprintLanding() {
           <p className="mt-4 text-[13px] font-medium text-cream/50">
             Requested by thousands of business owners
           </p>
-          <Link
-            href="/book"
+          <BookingLink
+            label="Or talk through a report with us"
             onClick={() => {
               if (typeof window === "undefined") return
               const gtag = (window as Window & { gtag?: (...args: unknown[]) => void }).gtag
-              if (typeof gtag === "function") gtag("event", "schedule", { cta_id: "report_closing_book" })
+              if (typeof gtag === "function") gtag("event", "select_content", { content_type: "cta", cta_id: "report_closing_talk" })
             }}
             className="mt-6 text-[14px] font-medium text-cream/55 underline-offset-4 hover:text-cream hover:underline"
-          >
-            Or talk through a report with us
-          </Link>
+          />
         </div>
       </section>
 

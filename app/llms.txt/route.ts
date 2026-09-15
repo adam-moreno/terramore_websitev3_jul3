@@ -7,7 +7,6 @@ Terramore serves owners with a shop, a service, or a customer list. Work starts 
 ## Main
 
 - [Home](https://terramore.io): What Terramore does, how the work happens, use cases, and the free report
-- [Talk with us](https://terramore.io/partner): Tell us where the business is stuck and we reply within one business day
 - [Book a call](https://terramore.io/book): Pick a time for the free 30-minute call, shown in your time zone
 - [Pricing](https://terramore.io/pricing): Talk is free, Start is a deposit after scope, Stay is optional monthly
 - [Free Digital Footprint report](https://terramore.io/report): What is in the report, how long it takes, and how we send it

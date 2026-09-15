@@ -1,5 +1,27 @@
 # Development Log - Terramore Website
 
+## 2026-09-14 — Booking: fix warm-up + one-question steps
+
+- **Why “warming up”:** Local `/api/booking/availability` returned `503 not_configured` because `BOOKING_API_SECRET` was unset (no `.env.local`). After qualifiers, `BookingFlow` showed `BookingFallback`. Not a calendar-UI bug — missing env. Added gitignored `.env.local` from `~/.terramore/booking-api-secret`. Clearer copy when not configured vs true upstream outage.
+- **Qualifiers (one per step, same tile, progress, click → advance):** (1) Are you a business owner? Yes / No / Exploring for one. (2) What kind of business? (existing types). (3) Digital journey stage (Just getting started → Running a full stack). Then day → time → details. Note on POST: Owner / Type / Stage.
+
+## 2026-09-14 — Booking flow: qualify → calendar → contact
+
+- Restructured `BookingFlow` to **qualifiers (≥3) → pick day → pick time → contact details → submit**. Qualifier answers (business type, what’s stuck, revenue band) ship as `note` on `POST /api/booking`. Reschedule (`mode="pick"`) still skips qualifiers.
+- Removed **Email Adam** from `BookingFallback` (retry instead) and the mailto nudge on `/book`. Popup header softened from “Talk with Adam” to “Book a call”.
+- Confirmation email unchanged: `confirmBookingToUser` via `after()` in `app/api/booking/route.ts` (plus admin Slack + nurture enroll). All schedule CTAs still use `BookingLink`/`BookingPopup` or `/book` → same `BookingFlow`.
+
+## 2026-09-14 — Let's talk opens booking popup; remove /partner
+
+- **Let's talk** (header, slim report chrome, home hero, DualCtas, Lindy pages) and talk-through CTAs (report landing close, thank-you shell) open `BookingPopup` / `BookingLink` in place — same calendar funnel as `/book` (day → time → details).
+- Removed `/partner` page and `talk-form.tsx`. Permanent redirect `/partner` → `/book` (also retargeted `/workshops`). Nav/footer "Talk with us", sitemap, llms.txt, notify/nurture emails, and PDF next-steps copy point at `/book`. Booking fallback emails Adam when the calendar is down.
+
+## 2026-09-14 — Talk-through CTAs match Let's talk (/partner)
+
+- **"Let's talk"** sitewide is the `/partner` Talk form (header, hero, DualCtas, Lindy pages). Report-funnel slim `SiteChrome` had incorrectly pointed Let's talk at `/book`; fixed to `/partner`.
+- **"Talk through a report with us" / "Talk through my report"** were booking shortcuts to `/book`. Aligned to the same `/partner` funnel: closing CTA on `digital-footprint-landing`, thank-you CTA on `example-report-shell`, and report confirm email button/text in `lib/notify.ts`.
+- GA4: closing/sent CTAs now fire `select_content` with `report_closing_talk` / `report_sent_talk` (no longer `schedule` / `*_book`). Dedicated "Book a call" / "Pick a time" surfaces still use `/book`.
+
 ## 2026-09-14 — Report funnel: drop grey-lines copy + footer
 
 - Removed the “Grey lines are examples…” lede from `digital-footprint-landing` What’s inside, and the matching note under chapter samples on homepage `report-band`. Sample lines themselves stay.
@@ -23,9 +45,9 @@ Approved decisions and shipping notes:
 2. **Timing (2A):** Near-instant / automated delivery copy everywhere — “usually within a few minutes.” Removed leftover “2–3 business days” and “written by a person” from homepage report band, FAQ, and related surfaces. Confirm email already matched.
 3. **Proof (3B):** Softened social proof to “thousands of business owners” (no fabricated 5,000+).
 4. **Phone (4B):** Optional on report form.
-5. **Nav (5B):** `/report` and `/report/*` use slim `SiteChrome` header (logo + Log in + Let’s talk) with no `pt-24` double padding; landing/example use light `pt-6`/`pt-10`.
-6. **Form:** Qualifiers first in popup; website required; socials + phone optional; GA4 `form_start` / `generate_lead`; CTA events on primary/closing/book; UTM/gclid captured from URL + `sessionStorage`, packed into `course_type` (100-char) with short keys prioritizing click IDs; full attribution still in Slack notify details.
-7. **Thank-you (`?sent=1`):** “Your report is on the way” + secondary **Talk through my report** → `/book`. Success URL picks sample from qualifier (`service`/`local`/`professional` → service sample).
+5. **Nav (5B):** `/report` and `/report/*` use slim `SiteChrome` header (logo + Log in + Let’s talk → `/partner`) with no `pt-24` double padding; landing/example use light `pt-6`/`pt-10`.
+6. **Form:** Qualifiers first in popup; website required; socials + phone optional; GA4 `form_start` / `generate_lead`; CTA events on primary/closing/talk; UTM/gclid captured from URL + `sessionStorage`, packed into `course_type` (100-char) with short keys prioritizing click IDs; full attribution still in Slack notify details.
+7. **Thank-you (`?sent=1`):** “Your report is on the way” + secondary **Talk through my report** → `/partner` (same funnel as Let’s talk). Success URL picks sample from qualifier (`service`/`local`/`professional` → service sample).
 
 No Google Ads AW- conversion ID or Meta/TikTok pixels added (GA4 `G-BQN6VCY579` only). Scratch `tmp-og/` remains untracked.
 

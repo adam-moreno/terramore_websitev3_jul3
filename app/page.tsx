@@ -2,7 +2,6 @@
 
 import { Calendar } from "lucide-react"
 import { BookingLink } from "@/components/booking-popup"
-import Link from "next/link"
 import { League_Spartan } from "next/font/google"
 import { ReportPopupLink } from "@/components/report-popup"
 import { useEffect, useState } from "react"
@@ -101,12 +100,10 @@ export default function TerramoreHomepage() {
                 We find where the business already wins, then add marketing and sales to get more customers and grow your revenue.
               </p>
               <div className="mt-6 flex flex-col items-center md:mt-8">
-                <Link
-                  href="/partner"
+                <BookingLink
+                  label="Let's talk"
                   className="inline-flex h-11 items-center justify-center rounded-full bg-brand px-6 text-[16px] font-medium text-white hover:bg-brand-hover md:h-10 md:px-4"
-                >
-                  Let&apos;s talk
-                </Link>
+                />
                 <div className="mt-2.5 flex flex-col items-center gap-1 text-center text-[13px] font-medium text-ink/45">
                   <p>Free 30-minute call.</p>
                   <ReportPopupLink className="text-[13px] font-medium text-ink/45 underline-offset-4 hover:text-ink">

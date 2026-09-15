@@ -13,7 +13,8 @@ const nextConfig = {
     return [
       { source: '/courses', destination: '/', permanent: true },
       { source: '/courses/:path*', destination: '/', permanent: true },
-      { source: '/workshops', destination: '/partner', permanent: true },
+      { source: '/workshops', destination: '/book', permanent: true },
+      { source: '/partner', destination: '/book', permanent: true },
       { source: '/careers', destination: '/about', permanent: true },
     ]
   },

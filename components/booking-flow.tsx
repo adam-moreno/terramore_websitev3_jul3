@@ -1,6 +1,5 @@
 "use client"
 
-import Link from "next/link"
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react"
 import { browserTimeZone, formatLongDay, formatTime, formatWhen, groupSlotsByDay, tzLabel } from "@/lib/booking-format"
 import { buildIcs } from "@/lib/ics"
@@ -16,33 +15,70 @@ export type BookingResult = {
 }
 
 const DAYS_AHEAD = 14
-const STEPS = ["Pick a day", "Pick a time", "Your details"]
+
+/** Book mode: 3 qualifier steps → day → time → contact. Pick mode (reschedule): day → time only. */
+const BOOK_STEPS = ["Owner", "Business", "Stage", "Pick a day", "Pick a time", "Your details"]
+const PICK_STEPS = ["Pick a day", "Pick a time"]
+const QUALIFIER_COUNT = 3
+
+const OWNER_OPTIONS = ["Yes", "No", "Exploring for one"]
+
+const BUSINESS_TYPES = [
+  "Online store",
+  "Local shop",
+  "Service business",
+  "Clinic or practice",
+  "Creator or brand",
+  "Other",
+]
+
+const DIGITAL_STAGES = [
+  "Just getting started",
+  "I post a bit of content",
+  "I've done ads",
+  "I have a monthly budget",
+  "SEO / organic focus",
+  "Running a full stack",
+]
 
 const pill = "h-11 rounded-full border px-4 text-[14px] font-medium transition"
 const pillOff = "border-ink/10 bg-cream text-ink hover:border-brand/40 hover:bg-white"
 const pillOn = "border-brand bg-brand text-white"
+const choiceOff = "border-ink/10 bg-white text-ink/80 hover:border-ink/30"
+const choiceOn = "border-brand bg-brand/[0.06] text-ink"
 const inputClass = "mt-1.5 h-11 w-full rounded-full border border-ink/10 bg-cream px-4 text-[15px] text-ink outline-none focus:border-brand"
+const stepPane = "mt-4 animate-fade-in"
 
-/** Shown whenever Terra IQ is not reachable or not configured. Never a blank state. */
-export function BookingFallback({ reason }: { reason?: string }) {
+/** Shown whenever Terra IQ is not reachable or not configured. Never a blank state. No email shortcut. */
+export function BookingFallback({ reason, onRetry }: { reason?: string; onRetry?: () => void }) {
   return (
     <div className="rounded-2xl border border-ink/10 bg-cream px-5 py-5">
       <p className="text-[15px] font-semibold text-ink">{reason || "Booking is warming up."}</p>
       <p className="mt-1 text-[14px] text-slate-600">
-        Send us a note instead and we reply within one business day.
+        Try again in a moment. The calendar usually comes back quickly.
       </p>
-      <Link
-        href="/partner"
-        className="mt-4 inline-flex h-11 items-center rounded-full bg-brand px-5 text-[15px] font-medium text-white hover:bg-brand-hover"
-      >
-        Send a note
-      </Link>
+      {onRetry ? (
+        <button
+          type="button"
+          onClick={onRetry}
+          className="mt-4 inline-flex h-11 items-center rounded-full bg-brand px-5 text-[15px] font-medium text-white hover:bg-brand-hover"
+        >
+          Try again
+        </button>
+      ) : null}
     </div>
   )
 }
 
+function loadErrorMessage(status: number, error?: string): string {
+  if (error === "not_configured" || status === 503) {
+    return "Calendar isn’t connected in this environment yet."
+  }
+  return "Booking is warming up."
+}
+
 /**
- * Day, time, details, confirm. Used by the popup, the /book page, and (in "pick" mode) the
+ * Qualify → day → time → details → confirm. Used by the popup, the /book page, and (in "pick" mode) the
  * reschedule screen, where the caller takes the chosen slot instead of the details form.
  */
 export function BookingFlow({
@@ -55,12 +91,22 @@ export function BookingFlow({
   onPick?: (startIso: string) => Promise<string | null>
   compact?: boolean
 }) {
+  const isPick = mode === "pick"
+  const steps = isPick ? PICK_STEPS : BOOK_STEPS
+  const dayStep = isPick ? 0 : QUALIFIER_COUNT
+  const timeStep = dayStep + 1
+  const detailsStep = dayStep + 2
+
   const [tz, setTz] = useState("UTC")
   const [slots, setSlots] = useState<string[] | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [step, setStep] = useState(0)
   const [dayKey, setDayKey] = useState<string | null>(null)
   const [slot, setSlot] = useState<string | null>(null)
+
+  const [isOwner, setIsOwner] = useState("")
+  const [businessType, setBusinessType] = useState("")
+  const [digitalStage, setDigitalStage] = useState("")
 
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
@@ -70,6 +116,7 @@ export function BookingFlow({
   const [error, setError] = useState("")
   const [busy, setBusy] = useState(false)
   const [done, setDone] = useState<BookingResult | null>(null)
+  const [advancing, setAdvancing] = useState(false)
 
   useEffect(() => {
     setTz(browserTimeZone())
@@ -85,8 +132,11 @@ export function BookingFlow({
         `/api/booking/availability?from=${encodeURIComponent(from.toISOString())}&to=${encodeURIComponent(to.toISOString())}&tz=${encodeURIComponent(browserTimeZone())}`,
         { cache: "no-store" }
       )
-      if (!response.ok) throw new Error(String(response.status))
-      const data = (await response.json()) as { slots?: string[] }
+      const data = (await response.json().catch(() => ({}))) as { slots?: string[]; error?: string }
+      if (!response.ok) {
+        setLoadError(loadErrorMessage(response.status, data.error))
+        return
+      }
       setSlots(Array.isArray(data.slots) ? data.slots : [])
     } catch {
       setLoadError("Booking is warming up.")
@@ -101,35 +151,49 @@ export function BookingFlow({
   const day = days.find((d) => d.key === dayKey) || null
   const zone = tzLabel(tz, slot || undefined)
 
+  /** Map UI step → calendar/contact phase. Book mode offsets by qualifier count. */
+  const calStep = isPick ? step : step - QUALIFIER_COUNT
+
+  const answerAndAdvance = (nextStep: number, apply: () => void) => {
+    if (advancing) return
+    setError("")
+    apply()
+    setAdvancing(true)
+    window.setTimeout(() => {
+      setStep(nextStep)
+      setAdvancing(false)
+    }, 180)
+  }
+
   const chooseDay = (key: string) => {
     setDayKey(key)
     setSlot(null)
     setError("")
-    setStep(1)
+    setStep(timeStep)
   }
 
   const chooseSlot = async (iso: string) => {
     setSlot(iso)
     setError("")
-    if (mode === "pick" && onPick) {
+    if (isPick && onPick) {
       setBusy(true)
       const problem = await onPick(iso)
       setBusy(false)
       if (problem) {
         setError(problem)
         await load()
-        setStep(1)
+        setStep(timeStep)
       }
       return
     }
-    setStep(2)
+    setStep(detailsStep)
   }
 
   const submit = async (event: FormEvent) => {
     event.preventDefault()
     setError("")
     if (!slot) {
-      setStep(1)
+      setStep(timeStep)
       return
     }
     if (!name.trim() || !email.trim()) {
@@ -137,6 +201,7 @@ export function BookingFlow({
       return
     }
     setBusy(true)
+    const note = [`Owner: ${isOwner}`, `Type: ${businessType}`, `Stage: ${digitalStage}`].join("\n")
     try {
       const response = await fetch("/api/booking", {
         method: "POST",
@@ -147,6 +212,7 @@ export function BookingFlow({
           phone: phone.trim() || null,
           business: business.trim() || null,
           website: website.trim() || null,
+          note,
           startIso: slot,
           tz,
         }),
@@ -155,11 +221,11 @@ export function BookingFlow({
       if (response.status === 409) {
         setError("That time was just taken. Pick another.")
         await load()
-        setStep(1)
+        setStep(timeStep)
         return
       }
       if (!response.ok || !data.startIso || !data.manageUrl) {
-        setLoadError("Booking is warming up.")
+        setLoadError(loadErrorMessage(response.status, data.error))
         return
       }
       setDone(data as BookingResult)
@@ -170,39 +236,115 @@ export function BookingFlow({
     }
   }
 
-  if (loadError) return <BookingFallback reason={loadError} />
-
   if (done) return <BookingSuccess booking={done} tz={tz} name={name} />
 
-  if (slots === null) {
+  // After qualifiers (or immediately in pick mode), calendar must be ready.
+  const needsCalendar = isPick || step >= QUALIFIER_COUNT
+  if (needsCalendar && loadError) {
+    return <BookingFallback reason={loadError} onRetry={() => void load()} />
+  }
+  if (needsCalendar && slots === null) {
     return (
       <div className="py-6">
         <p className="text-[14px] text-slate-500">Checking the calendar…</p>
       </div>
     )
   }
-
-  if (days.length === 0) {
-    return <BookingFallback reason="No open times in the next two weeks." />
+  if (needsCalendar && days.length === 0) {
+    return <BookingFallback reason="No open times in the next two weeks." onRetry={() => void load()} />
   }
+
+  const choiceGrid = compact ? "grid-cols-1" : "sm:grid-cols-2"
 
   return (
     <div>
       <div className="flex items-center gap-3">
         <span className="text-[12px] font-semibold text-brand">
-          {Math.min(step, STEPS.length - 1) + 1} of {mode === "pick" ? 2 : STEPS.length}
+          {Math.min(step, steps.length - 1) + 1} of {steps.length}
         </span>
         <div className="flex flex-1 gap-1.5">
-          {(mode === "pick" ? STEPS.slice(0, 2) : STEPS).map((label, index) => (
+          {steps.map((label, index) => (
             <span key={label} className={`h-1 flex-1 rounded-full ${index <= step ? "bg-brand" : "bg-ink/10"}`} />
           ))}
         </div>
       </div>
 
-      {step === 0 ? (
-        <div className="mt-4">
-          <p className="text-[1.2rem] font-semibold tracking-tight text-ink">{STEPS[0]}</p>
-          <p className="mt-1 text-[14px] text-slate-500">30 minutes with Adam. Times shown in {zone}.</p>
+      {!isPick && step === 0 ? (
+        <div key="q-owner" className={stepPane}>
+          <p className="text-[1.2rem] font-semibold tracking-tight text-ink">Are you a business owner?</p>
+          <p className="mt-1 text-[14px] text-slate-500">So we know who we are talking with.</p>
+          <div className={`mt-4 grid gap-2 ${choiceGrid}`}>
+            {OWNER_OPTIONS.map((item) => (
+              <button
+                key={item}
+                type="button"
+                disabled={advancing}
+                onClick={() => answerAndAdvance(1, () => setIsOwner(item))}
+                className={`rounded-2xl border px-4 py-3 text-left text-[14px] font-medium transition ${
+                  isOwner === item ? choiceOn : choiceOff
+                } disabled:opacity-60`}
+              >
+                {item}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {!isPick && step === 1 ? (
+        <div key="q-type" className={stepPane}>
+          <p className="text-[1.2rem] font-semibold tracking-tight text-ink">What kind of business?</p>
+          <p className="mt-1 text-[14px] text-slate-500">Pick the closest fit.</p>
+          <div className={`mt-4 grid gap-2 ${choiceGrid}`}>
+            {BUSINESS_TYPES.map((item) => (
+              <button
+                key={item}
+                type="button"
+                disabled={advancing}
+                onClick={() => answerAndAdvance(2, () => setBusinessType(item))}
+                className={`rounded-2xl border px-4 py-3 text-left text-[14px] font-medium transition ${
+                  businessType === item ? choiceOn : choiceOff
+                } disabled:opacity-60`}
+              >
+                {item}
+              </button>
+            ))}
+          </div>
+          <button type="button" onClick={() => setStep(0)} className="mt-4 text-[14px] font-medium text-slate-500 hover:text-ink">
+            Back
+          </button>
+        </div>
+      ) : null}
+
+      {!isPick && step === 2 ? (
+        <div key="q-stage" className={stepPane}>
+          <p className="text-[1.2rem] font-semibold tracking-tight text-ink">What stage are you on in your digital journey?</p>
+          <p className="mt-1 text-[14px] text-slate-500">Where things stand today.</p>
+          <div className={`mt-4 grid gap-2 ${choiceGrid}`}>
+            {DIGITAL_STAGES.map((item) => (
+              <button
+                key={item}
+                type="button"
+                disabled={advancing}
+                onClick={() => answerAndAdvance(3, () => setDigitalStage(item))}
+                className={`rounded-2xl border px-4 py-3 text-left text-[14px] font-medium transition ${
+                  digitalStage === item ? choiceOn : choiceOff
+                } disabled:opacity-60`}
+              >
+                {item}
+              </button>
+            ))}
+          </div>
+          <button type="button" onClick={() => setStep(1)} className="mt-4 text-[14px] font-medium text-slate-500 hover:text-ink">
+            Back
+          </button>
+        </div>
+      ) : null}
+
+      {calStep === 0 && days.length > 0 ? (
+        <div key="day" className={stepPane}>
+          <p className="text-[1.2rem] font-semibold tracking-tight text-ink">Pick a day</p>
+          <p className="mt-1 text-[14px] text-slate-500">30 minutes. Times shown in {zone}.</p>
           <div className={`mt-4 grid gap-2 ${compact ? "grid-cols-2" : "grid-cols-2 sm:grid-cols-3"}`}>
             {days.map((d) => (
               <button key={d.key} type="button" onClick={() => chooseDay(d.key)} className={`${pill} ${d.key === dayKey ? pillOn : pillOff}`}>
@@ -210,11 +352,16 @@ export function BookingFlow({
               </button>
             ))}
           </div>
+          {!isPick ? (
+            <button type="button" onClick={() => setStep(2)} className="mt-4 text-[14px] font-medium text-slate-500 hover:text-ink">
+              Back
+            </button>
+          ) : null}
         </div>
       ) : null}
 
-      {step === 1 && day ? (
-        <div className="mt-4">
+      {calStep === 1 && day ? (
+        <div key="time" className={stepPane}>
           <p className="text-[1.2rem] font-semibold tracking-tight text-ink">{formatLongDay(day.slots[0], tz)}</p>
           <p className="mt-1 text-[14px] text-slate-500">Pick a time. Shown in {zone}.</p>
           <div className={`mt-4 grid max-h-[40vh] gap-2 overflow-y-auto pr-1 ${compact ? "grid-cols-2" : "grid-cols-3 sm:grid-cols-4"}`}>
@@ -231,15 +378,15 @@ export function BookingFlow({
             ))}
           </div>
           {error ? <p className="mt-3 text-[14px] text-red-600">{error}</p> : null}
-          <button type="button" onClick={() => setStep(0)} className="mt-4 text-[14px] font-medium text-slate-500 hover:text-ink">
+          <button type="button" onClick={() => setStep(dayStep)} className="mt-4 text-[14px] font-medium text-slate-500 hover:text-ink">
             Back to days
           </button>
         </div>
       ) : null}
 
-      {step === 2 && slot ? (
-        <form onSubmit={submit} className="mt-4">
-          <p className="text-[1.2rem] font-semibold tracking-tight text-ink">{STEPS[2]}</p>
+      {!isPick && step === detailsStep && slot ? (
+        <form key="details" onSubmit={submit} className={stepPane}>
+          <p className="text-[1.2rem] font-semibold tracking-tight text-ink">Your details</p>
           <p className="mt-1 text-[14px] text-slate-500">{formatWhen(slot, tz)}. The invite goes to this email.</p>
           <label className="mt-4 block">
             <span className="text-[13px] font-medium text-ink">Name</span>
@@ -255,7 +402,7 @@ export function BookingFlow({
           </label>
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             <label className="block">
-              <span className="text-[13px] font-medium text-ink">Business</span>
+              <span className="text-[13px] font-medium text-ink">Business name</span>
               <input value={business} onChange={(e) => setBusiness(e.target.value)} className={inputClass} autoComplete="organization" />
             </label>
             <label className="block">
@@ -265,7 +412,7 @@ export function BookingFlow({
           </div>
           {error ? <p className="mt-4 text-[14px] text-red-600">{error}</p> : null}
           <div className="mt-6 flex items-center justify-between gap-3">
-            <button type="button" onClick={() => setStep(1)} className="text-[14px] font-medium text-slate-500 hover:text-ink">
+            <button type="button" onClick={() => setStep(timeStep)} className="text-[14px] font-medium text-slate-500 hover:text-ink">
               Back
             </button>
             <button

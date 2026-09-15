@@ -25,6 +25,7 @@ import {
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useEffect, useId, useRef, useState } from "react"
+import { BookingLink } from "@/components/booking-popup"
 import { Logo } from "@/components/logo"
 import { DASHBOARD_LOGIN_URL } from "@/lib/dashboard"
 import { CAPABILITIES, OWNER_JOBS, capabilityPath } from "@/lib/capabilities"
@@ -99,7 +100,7 @@ const resourceLinks: MenuItem[] = [
   { href: "/security", label: "Security", icon: Lock },
   { href: "/#faq", label: "Questions", icon: CircleHelp },
   { href: "/resources", label: "Start here", icon: Sparkles },
-  { href: "/partner", label: "Talk with us", icon: MessageSquare },
+  { href: "/book", label: "Talk with us", icon: MessageSquare },
 ]
 
 /** Mobile "More" list: original Terramore labels, with icons for accordion rows. */
@@ -309,12 +310,10 @@ export function SiteHeader() {
           />
 
           <div className="ml-auto flex items-center gap-1.5 lg:hidden">
-            <Link
-              href="/partner"
+            <BookingLink
+              label="Let's talk"
               className="shrink-0 rounded-lg bg-brand px-2.5 py-1.5 text-[12px] font-medium text-white hover:bg-brand-hover"
-            >
-              Let&apos;s talk
-            </Link>
+            />
             <button
               type="button"
               className="rounded-lg p-1.5 text-ink"
@@ -341,12 +340,10 @@ export function SiteHeader() {
               <span>Log in</span>
               <span className="text-[10px] font-normal text-slate-400">Current clients</span>
             </a>
-            <Link
-              href="/partner"
+            <BookingLink
+              label="Let's talk"
               className="rounded-full bg-brand px-4 py-2 text-[13px] font-medium text-white hover:bg-brand-hover"
-            >
-              Let&apos;s talk
-            </Link>
+            />
           </div>
         </div>
 
@@ -410,12 +407,10 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
               <a href={DASHBOARD_LOGIN_URL} className="text-[13px] font-medium text-ink/55 hover:text-ink">
                 Log in
               </a>
-              <Link
-                href="/book"
+              <BookingLink
+                label="Let's talk"
                 className="inline-flex h-9 items-center justify-center rounded-full bg-brand px-4 text-[14px] font-medium text-white hover:bg-brand-hover"
-              >
-                Let&apos;s talk
-              </Link>
+              />
             </div>
           </div>
         </header>

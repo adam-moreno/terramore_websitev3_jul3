@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { BookingLink } from "@/components/booking-popup"
 import { ReportPopupLink } from "@/components/report-popup"
 import { SiteFooter } from "@/components/site-footer"
 
@@ -7,7 +8,6 @@ interface LindyPageProps {
   accent?: string
   subtitle: string
   children: React.ReactNode
-  ctaHref?: string
   ctaLabel?: string
 }
 
@@ -16,7 +16,6 @@ export function LindyPage({
   accent,
   subtitle,
   children,
-  ctaHref = "/partner",
   ctaLabel = "Let's talk",
 }: LindyPageProps) {
   return (
@@ -31,12 +30,10 @@ export function LindyPage({
           <p className="mx-auto mt-5 max-w-xl text-base font-medium leading-relaxed text-ink/80 sm:text-lg">
             {subtitle}
           </p>
-          <Link
-            href={ctaHref}
+          <BookingLink
+            label={ctaLabel}
             className="mt-8 inline-flex h-10 items-center rounded-full bg-brand px-4 text-[16px] font-medium text-white hover:bg-brand-hover"
-          >
-            {ctaLabel}
-          </Link>
+          />
           <div className="mt-6">
             <ReportPopupLink />
           </div>

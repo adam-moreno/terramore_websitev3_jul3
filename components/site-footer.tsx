@@ -17,7 +17,7 @@ const PRIMARY = [
   { href: "/#faq", label: "Questions" },
   { href: "/enterprise", label: "Larger teams" },
   { href: "/resources", label: "Start here" },
-  { href: "/partner", label: "Talk with us" },
+  { href: "/book", label: "Talk with us" },
 ]
 
 const LEGAL = [

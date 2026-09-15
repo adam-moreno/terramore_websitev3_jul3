@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import Link from "next/link"
+import { BookingLink } from "@/components/booking-popup"
 import { LindyPage } from "@/components/lindy-page"
 import { ReportPopupLink } from "@/components/report-popup"
 
@@ -19,7 +19,6 @@ const plans = [
       "We tell you what we would look at first",
       "You find out if we are the right team",
     ],
-    href: "/partner",
     cta: "Book the call",
     featured: false,
   },
@@ -33,7 +32,6 @@ const plans = [
       "The first stretch can be 90 days, or we keep going",
       "Financing is available",
     ],
-    href: "/partner",
     cta: "Start with a call",
     featured: true,
   },
@@ -46,7 +44,6 @@ const plans = [
       "You own the data, ads, lists, and assets",
       "We can stay as long as the work is useful",
     ],
-    href: "/partner",
     cta: "Ask about monthly",
     featured: false,
   },
@@ -58,7 +55,6 @@ export default function PricingPage() {
       title="Talk first."
       accent="Pay when we start."
       subtitle="The call is free. Scope and payment are set after that call. Jobs are priced by the work, not a menu. You never pay to find out what is broken."
-      ctaHref="/partner"
       ctaLabel="Book the free call"
     >
       <section className="pb-20">
@@ -78,16 +74,14 @@ export default function PricingPage() {
                   <li key={point}>{point}</li>
                 ))}
               </ul>
-              <Link
-                href={plan.href}
+              <BookingLink
+                label={plan.cta}
                 className={`mt-6 rounded-full px-4 py-2.5 text-center text-sm font-semibold ${
                   plan.featured
                     ? "bg-blue-600 text-white hover:bg-blue-700"
                     : "bg-slate-100 text-slate-800 hover:bg-slate-200"
                 }`}
-              >
-                {plan.cta}
-              </Link>
+              />
             </div>
           ))}
         </div>

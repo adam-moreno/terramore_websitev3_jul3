@@ -1,5 +1,4 @@
 import type { Metadata } from "next"
-import Link from "next/link"
 import { BookingFlow } from "@/components/booking-flow"
 import { SiteFooter } from "@/components/site-footer"
 
@@ -17,23 +16,16 @@ export default function BookPage() {
           <div>
             <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-brand">Book a call</p>
             <h1 className="mt-3 text-[2.2rem] font-bold leading-[1.08] tracking-[-0.02em] text-ink md:text-[3rem]">
-              Thirty minutes with Adam.
+              Let&apos;s talk about the business.
             </h1>
             <p className="mt-4 text-[17px] leading-relaxed text-slate-600">
-              Free. We look at where the business loses sales and say what we would fix first. Bring the site, the ads, or the list, whichever one is bothering you.
+              Free 30 minutes. We look at where the business loses sales and say what we would fix first. A few questions up front so the call is useful.
             </p>
             <ul className="mt-6 space-y-2 text-[15px] text-slate-600">
+              <li>Qualify in about a minute, then pick a time.</li>
               <li>Google Meet link in the invite.</li>
-              <li>Times shown in your time zone.</li>
-              <li>Move or cancel from the confirmation email.</li>
+              <li>Times shown in your time zone. Move or cancel from the confirmation email.</li>
             </ul>
-            <p className="mt-6 text-[14px] text-slate-500">
-              Rather write first?{" "}
-              <Link href="/partner" className="font-medium text-brand hover:text-brand-hover">
-                Send a note
-              </Link>
-              .
-            </p>
           </div>
           <div className="rounded-[1.75rem] bg-white p-7 shadow-[0_8px_30px_rgba(15,30,46,0.04)] md:p-9">
             <BookingFlow />

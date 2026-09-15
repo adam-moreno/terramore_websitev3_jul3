@@ -1,7 +1,7 @@
 "use client"
 
-import Link from "next/link"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { BookingLink } from "@/components/booking-popup"
 import { ExampleReport } from "@/components/example-report"
 import { ExampleReportService } from "@/components/example-report-service"
 
@@ -46,13 +46,11 @@ export function ExampleReportShell({
               We&apos;re preparing it now. It usually lands in your inbox within a few minutes. This sample shows the
               shape while you wait.
             </p>
-            <Link
-              href="/book"
-              onClick={() => track("schedule", { cta_id: "report_sent_book" })}
+            <BookingLink
+              label="Talk through my report"
+              onClick={() => track("select_content", { content_type: "cta", cta_id: "report_sent_talk" })}
               className="mt-4 inline-flex h-10 items-center justify-center rounded-full bg-brand px-5 text-[14px] font-medium text-white hover:bg-brand-hover"
-            >
-              Talk through my report
-            </Link>
+            />
           </div>
         ) : null}
 
