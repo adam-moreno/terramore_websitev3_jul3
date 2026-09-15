@@ -77,12 +77,11 @@ export default function TerramoreHomepage() {
 
         {/*
           Mobile (Lindy rhythm): generous header→headline air (pt-36), tight message stack,
-          then a top-aligned min-height that shortens the cream column (100svh-14rem) so
-          Slack peeks into the first viewport — middle step between 10rem (too low) and
-          18rem (original higher). Do not justify-center on mobile.
-          Desktop tall centered column unchanged.
+          then a top-aligned min-height that shortens the cream column (100svh-15rem) so
+          Slack peeks into the first viewport — one step above 14rem, still below 18rem.
+          Do not justify-center on mobile. Desktop tall centered column unchanged.
         */}
-        <div className="relative z-20 flex min-h-[calc(100svh-14rem)] flex-col justify-start md:-mt-28 md:min-h-[calc(100svh-10.75rem)] md:justify-center md:pt-28">
+        <div className="relative z-20 flex min-h-[calc(100svh-15rem)] flex-col justify-start md:-mt-28 md:min-h-[calc(100svh-10.75rem)] md:justify-center md:pt-28">
           <div className="page-shell relative z-20 text-center">
             <div
               className="mx-auto flex w-full max-w-none flex-col items-center sm:max-w-[28rem] md:max-w-none md:inline-flex"
@@ -138,15 +137,19 @@ export default function TerramoreHomepage() {
         Slack straddles the hero → toolkit seam: top half cream (hero), bottom half cream
         (same as "Why Terramore…"), with a soft mid/bottom gradient so scrolling onward feels continuous.
       */}
-      <div className="relative">
+      {/*
+        Slack straddles the hero → toolkit seam. Mobile uses equal px-6 insets (not page-shell
+        width-calc) so L/R cream stays balanced; desktop keeps the 972px centered column.
+      */}
+      <div className="relative overflow-x-clip">
         <div aria-hidden className="pointer-events-none absolute inset-0">
           <div className="h-1/2 bg-cream" />
           <div className="h-1/2 bg-cream" />
           <div className="absolute inset-x-0 top-[42%] h-[28%] bg-gradient-to-b from-cream via-white/55 to-cream" />
           <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-b from-transparent to-cream" />
         </div>
-        <div className="page-shell relative z-20 mt-8 pb-10 md:mt-0 md:pb-24">
-          <div className="mx-auto w-full max-w-[972px]">
+        <div className="relative z-20 mx-auto mt-6 w-full max-w-[972px] px-6 pb-10 md:mt-0 md:w-[min(972px,calc(100%-3rem))] md:px-0 md:pb-24">
+          <div className="mx-auto w-full min-w-0 max-w-full">
             <HeroAnalytics />
           </div>
         </div>

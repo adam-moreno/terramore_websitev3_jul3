@@ -1,5 +1,22 @@
 # Development Log - Terramore Website
 
+## 2026-09-15 — Homepage mobile Slack: equal side cream + smidge higher
+
+Equalize mobile Slack L/R breathing room and raise the peek one more step.
+
+- Hero column mobile min-height: `100svh-14rem` → `100svh-15rem` (desktop `md:` unchanged).
+- Slack wrapper mobile margin: `mt-8` → `mt-6` (`md:mt-0` unchanged).
+- Slack mobile inset: leave `page-shell` width-calc; use equal `px-6` + `max-w-[972px] mx-auto` with `overflow-x-clip` / `min-w-0 max-w-full` so the card cannot read flush on one side.
+- Pull lower-right floating hero marks inward so they stop kissing the Slack right edge.
+
+### Exact class changes
+- `app/page.tsx`: `min-h-[calc(100svh-14rem)]` → `min-h-[calc(100svh-15rem)]`; Slack wrap `page-shell … mt-8` → `mx-auto mt-6 w-full max-w-[972px] px-6 … md:w-[min(972px,calc(100%-3rem))] md:px-0`; parent `relative` → `relative overflow-x-clip`; inner `max-w-[972px]` → `min-w-0 max-w-full`.
+- `components/hero-analytics.tsx`: root `relative w-full` → `relative mx-auto w-full min-w-0 max-w-full`; card `card-radius overflow-hidden …` → `card-radius max-w-full overflow-hidden …`.
+- `components/hero-floating-logos.tsx`: right-rail / bottom-band `left` % nudged inward (e.g. `92%`→`89%`, `91%`→`86%`/`87%`, bottom `74%`→`70%`).
+
+### Files
+- `app/page.tsx`, `components/hero-analytics.tsx`, `components/hero-floating-logos.tsx`
+
 ## 2026-09-15 — Homepage mobile Slack seating (fold peek)
 
 Doubled the prior upward move and shortened the hero column so Slack peeks on mobile arrival.

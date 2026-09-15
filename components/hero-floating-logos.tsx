@@ -21,14 +21,14 @@ const MARK_SPOTS = [
   { top: "60%", left: "4%", size: 42 },
   { top: "73%", left: "9%", size: 34 },
   { top: "86%", left: "5%", size: 36 },
-  // Right side rail
-  { top: "7%", left: "90%", size: 36 },
-  { top: "19%", left: "85%", size: 42 },
-  { top: "32%", left: "92%", size: 32 },
-  { top: "45%", left: "86%", size: 38 },
-  { top: "58%", left: "91%", size: 34 },
-  { top: "71%", left: "85%", size: 40 },
-  { top: "84%", left: "91%", size: 34 },
+  // Right side rail — keep lower marks inward so they don't kiss the Slack card's right cream
+  { top: "7%", left: "88%", size: 36 },
+  { top: "19%", left: "84%", size: 42 },
+  { top: "32%", left: "89%", size: 32 },
+  { top: "45%", left: "84%", size: 38 },
+  { top: "58%", left: "87%", size: 34 },
+  { top: "71%", left: "83%", size: 40 },
+  { top: "84%", left: "86%", size: 34 },
   // Top band (center is empty above the headline)
   { top: "4%", left: "28%", size: 32 },
   { top: "3%", left: "52%", size: 38 },
@@ -36,8 +36,8 @@ const MARK_SPOTS = [
   // Bottom band (center is empty below the CTA, above the analytics card)
   { top: "90%", left: "24%", size: 34 },
   { top: "93%", left: "40%", size: 30 },
-  { top: "91%", left: "58%", size: 36 },
-  { top: "89%", left: "74%", size: 32 },
+  { top: "91%", left: "56%", size: 36 },
+  { top: "89%", left: "70%", size: 32 },
 ] as const
 
 const MARKS = MARK_SPOTS.map((spot, index) => {

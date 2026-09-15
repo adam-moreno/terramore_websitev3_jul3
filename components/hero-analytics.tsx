@@ -877,8 +877,8 @@ export function HeroAnalytics() {
   const showNext = activeIndex < CHANNELS.length - 1
 
   return (
-    <div className="relative w-full" data-hero-analytics>
-      <div className="card-radius overflow-hidden border border-black/[0.06] bg-white shadow-[0_30px_80px_-32px_rgba(15,23,42,0.22)] md:rounded-[28px]">
+    <div className="relative mx-auto w-full min-w-0 max-w-full" data-hero-analytics>
+      <div className="card-radius max-w-full overflow-hidden border border-black/[0.06] bg-white shadow-[0_30px_80px_-32px_rgba(15,23,42,0.22)] md:rounded-[28px]">
         {/* Mobile height follows the tallest conversation (measured once); desktop stays a fixed frame. */}
         <div className="grid grid-cols-[minmax(0,1fr)] md:h-[36rem] md:grid-cols-[200px_minmax(0,1fr)]">
           <aside className="hidden border-r border-black/[0.06] bg-[#f7f4f2] p-3 md:flex md:flex-col">
