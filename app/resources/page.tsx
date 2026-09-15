@@ -36,12 +36,12 @@ export default function ResourcesPage() {
           />
           <LindyCard
             title="What is the free report?"
-            body="We read your site, ads, Maps, and listings and write what is working, what is leaking, and what we would fix first. It lands in your inbox."
+            body="We read your site, ads, Maps, and listings and write what is working, what is leaking, and what we would fix first. In your inbox in minutes."
             href="/report"
           />
           <LindyCard
             title="What does a report look like?"
-            body="A full sample for a small apparel brand, with names and numbers changed."
+            body="Sample reports for ecommerce and a service business. Illustrative demos — not live client files."
             href="/report/example"
           />
           <LindyCard

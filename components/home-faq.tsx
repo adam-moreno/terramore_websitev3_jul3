@@ -6,11 +6,11 @@ import { DASHBOARD_LOGIN_URL } from "@/lib/dashboard"
 const FAQS = [
   {
     q: "How do we start?",
-    a: "Start with a free 30-minute call and tell us where the business is stuck. If you are not ready for a call, ask for the free Digital Footprint report: leave a name, an email, and your site, and we send a written read in two to three business days.",
+    a: "Start with a free 30-minute call and tell us where the business is stuck. If you are not ready for a call, ask for the free Digital Footprint report: leave a name, an email, and your site. In your inbox in minutes.",
   },
   {
     q: "What is the Digital Footprint report?",
-    a: "A short file about your business, written by a person. Where you already show up online, who already looks and buys, what is already working, and where you are losing sales. It takes two to three business days and there is a full sample on this site.",
+    a: "A short written file about your business. Where you already show up online, who already looks and buys, what is already working, and where you are losing sales. In your inbox in minutes, and there are full samples on this site.",
   },
   {
     q: "Do you run advertising?",

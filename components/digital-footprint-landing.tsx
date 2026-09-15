@@ -9,7 +9,7 @@ import { CHAPTERS } from "@/lib/report/chapters"
 const PDF_PAGES = [
   { src: "/report/pdf-cover.png", alt: "Sample report page: Where you show up" },
   { src: "/report/pdf-discover.png", alt: "Sample report page: Where you're winning" },
-  { src: "/report/pdf-leak.png", alt: "Sample report page: Where you can improve" },
+  { src: "/report/pdf-leak.png", alt: "Sample report page: Quick Revenue Opportunities" },
 ] as const
 
 const ROTATE_MS = 4000
@@ -18,25 +18,31 @@ const STEPS = [
   {
     n: "01",
     title: "Answer a few questions",
-    body: "Three short questions, then your name and email. About a minute.",
+    body: "Two short questions about your business, then your details. About a minute.",
     time: "~60 sec",
   },
   {
     n: "02",
     title: "We read what’s public",
     body: "Your website, socials, ads, and reviews — the same places customers already look.",
-    time: "Our work",
+    time: "Automated read",
   },
   {
     n: "03",
     title: "Report in your inbox",
-    body: "A written PDF: what’s working, where you can improve, and what to do next.",
-    time: "< 5 min",
+    body: "A written PDF: what’s working, quick revenue opportunities, and what to do next.",
+    time: "A few minutes",
   },
 ] as const
 
 function exampleLine(sample: string) {
   return sample.replace(/^Northline:\s*/i, "Example: ")
+}
+
+function trackCta() {
+  if (typeof window === "undefined") return
+  const gtag = (window as Window & { gtag?: (...args: unknown[]) => void }).gtag
+  if (typeof gtag === "function") gtag("event", "cta_click", { cta_id: "report_primary" })
 }
 
 function PdfStack() {
@@ -52,7 +58,7 @@ function PdfStack() {
   const order = [0, 1, 2].map((i) => (active + i) % PDF_PAGES.length)
 
   return (
-    <div className="relative mx-auto h-[22rem] w-full max-w-[20rem] sm:h-[26rem] sm:max-w-[22rem] md:h-[32rem] md:max-w-[26rem]">
+    <div className="relative mx-auto h-[20rem] w-full max-w-[18rem] sm:h-[24rem] sm:max-w-[22rem] md:h-[30rem] md:max-w-[26rem]">
       {order.map((pageIndex, depth) => {
         const page = PDF_PAGES[pageIndex]
         const isFront = depth === 2
@@ -105,66 +111,62 @@ function PdfStack() {
 export function DigitalFootprintLanding() {
   const [open, setOpen] = useState(false)
 
+  const openForm = () => {
+    trackCta()
+    setOpen(true)
+  }
+
   return (
     <>
-      {/* Hero — tighter under header */}
-      <section className="relative isolate overflow-hidden bg-cream pt-20 pb-16 md:pt-24 md:pb-24">
+      <section className="relative isolate overflow-hidden bg-cream pt-6 pb-14 md:pt-10 md:pb-20">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(42,102,255,0.08),_transparent_55%),radial-gradient(ellipse_at_bottom_right,_rgba(198,136,9,0.07),_transparent_50%)]"
         />
         <div className="page-shell relative z-10">
-          <div className="grid items-center gap-14 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-16">
+          <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-14">
             <div className="text-center lg:text-left">
               <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-brand">
                 Free Digital Footprint report
               </p>
-              <h1 className="mt-3 text-[2.35rem] font-bold leading-[1.08] tracking-[-0.02em] text-ink sm:text-5xl md:mt-4 md:text-[3.25rem] md:leading-[1.05]">
-                See your business the way a{" "}
-                <span className="text-gold">first-time customer</span> already does.
+              <h1 className="mt-3 text-[2.2rem] font-bold leading-[1.08] tracking-[-0.02em] text-ink sm:text-5xl md:text-[3.1rem] md:leading-[1.05]">
+                See what a potential customer sees{" "}
+                <span className="text-gold">before they call you.</span>
               </h1>
-              <p className="mx-auto mt-5 max-w-[22rem] text-[16px] font-medium leading-[1.4] text-ink/75 sm:max-w-md lg:mx-0 md:text-[18px]">
-                A free written report on your website, socials, ads, and reviews —
-                so you know what’s working and what to fix first.
+              <p className="mx-auto mt-4 max-w-[24rem] text-[16px] font-medium leading-[1.4] text-ink/75 sm:max-w-lg lg:mx-0 md:text-[18px]">
+                We review your website, Google presence, socials, reviews, and ads — then show what’s working, what’s
+                hurting you, and what we’d fix first.
               </p>
 
-              <div className="mt-8 flex flex-col items-center gap-3 lg:items-start">
+              <div className="mt-7 flex flex-col items-center gap-2.5 lg:items-start">
                 <button
                   type="button"
-                  onClick={() => setOpen(true)}
+                  onClick={openForm}
                   className="inline-flex h-12 items-center justify-center rounded-full bg-brand px-7 text-[16px] font-medium text-white hover:bg-brand-hover"
                 >
-                  Get your report
+                  Get my free Digital Footprint report
                 </button>
-                <p className="max-w-sm text-[13px] font-medium text-ink/50 lg:max-w-none">
-                  About a minute to request. In your inbox in under 5 minutes.
+                <p className="text-[13px] font-medium text-ink/45">Free · No login · No call required</p>
+                <p className="max-w-sm text-[13px] font-medium text-ink/55 lg:max-w-none">
+                  About a minute to request. In your inbox in minutes.
                 </p>
-                <p className="text-[13px] font-semibold text-ink/70">
-                  Requested by over 5,000 business owners
+                <p className="text-[13px] font-semibold text-ink/65">
+                  Requested by thousands of business owners
                 </p>
-              </div>
-
-              <div className="mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[13px] font-medium text-ink/45 lg:justify-start">
-                <span>Free</span>
-                <span className="text-ink/20">·</span>
-                <span>No login</span>
-                <span className="text-ink/20">·</span>
-                <span>No call required</span>
               </div>
             </div>
 
-            <div className="pb-6 md:pb-2">
+            <div className="pb-4 md:pb-0">
               <PdfStack />
-              <p className="mt-8 text-center text-[12px] text-ink/40 lg:text-left">
-                Sample pages. Numbers for illustration.
+              <p className="mt-7 text-center text-[12px] text-ink/40 lg:text-left">
+                Sample pages. Numbers for illustration — not a live client file.
               </p>
-              {/* Quiet half-step: stack already proves shape; no dedicated section */}
               <p className="mt-2 text-center text-[12px] lg:text-left">
                 <Link
                   href="/report/example"
                   className="font-medium text-ink/45 underline-offset-4 hover:text-ink hover:underline"
                 >
-                  View a full sample report
+                  View sample reports
                 </Link>
               </p>
             </div>
@@ -172,7 +174,6 @@ export function DigitalFootprintLanding() {
         </div>
       </section>
 
-      {/* How it works */}
       <section className="section-y border-t border-black/[0.04] bg-white md:py-24">
         <div className="page-shell">
           <div className="mx-auto max-w-[560px] text-center">
@@ -199,17 +200,28 @@ export function DigitalFootprintLanding() {
         </div>
       </section>
 
-      {/* What’s inside */}
+      <section className="border-t border-black/[0.04] bg-white py-12 md:py-16">
+        <div className="page-shell flex flex-col items-center text-center">
+          <button
+            type="button"
+            onClick={openForm}
+            className="inline-flex h-12 items-center justify-center rounded-full bg-brand px-7 text-[16px] font-medium text-white hover:bg-brand-hover"
+          >
+            Get my free Digital Footprint report
+          </button>
+          <p className="mt-3 text-[13px] font-medium text-ink/55">
+            In your inbox in minutes.
+          </p>
+        </div>
+      </section>
+
       <section className="section-y bg-cream md:py-24">
         <div className="page-shell">
           <div className="mx-auto max-w-[560px] text-center">
             <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-brand">What’s inside</p>
             <h2 className="section-title mt-3 text-ink md:text-[2.5rem] md:leading-normal md:tracking-[-0.04em]">
-              Four chapters about your business.
+              What’s working. What’s costing you. What we’d fix first.
             </h2>
-            <p className="section-lede mx-auto mt-4 max-w-md text-ink/70">
-              Grey lines are examples. Yours names your site and your first fix.
-            </p>
           </div>
           <div className="mx-auto mt-12 grid max-w-[920px] gap-4 md:mt-14 md:grid-cols-2">
             {CHAPTERS.map((item) => (
@@ -229,31 +241,35 @@ export function DigitalFootprintLanding() {
         </div>
       </section>
 
-      {/* Closing CTA */}
       <section className="section-y bg-ink text-cream md:py-24">
         <div className="page-shell flex flex-col items-center text-center">
           <h2 className="max-w-2xl text-[2rem] font-semibold tracking-tight md:text-[2.75rem] md:leading-tight">
-            Get your report.
+            Get my free Digital Footprint report
           </h2>
           <p className="mt-4 max-w-lg text-[15px] leading-relaxed text-cream/70">
-            About a minute to request. Written PDF on your website, socials, ads, and reviews —
-            in your inbox in under 5 minutes.
+            You don’t need to hire Terramore to get the report. If you want help implementing what we find, we’ll walk
+            through the priorities with you.
           </p>
           <button
             type="button"
-            onClick={() => setOpen(true)}
+            onClick={openForm}
             className="mt-8 inline-flex h-12 items-center justify-center rounded-full bg-brand px-7 text-[16px] font-medium text-white hover:bg-brand-hover"
           >
-            Get your report
+            Get my free Digital Footprint report
           </button>
           <p className="mt-4 text-[13px] font-medium text-cream/50">
-            Requested by over 5,000 business owners
+            Requested by thousands of business owners
           </p>
           <Link
-            href="/partner"
+            href="/book"
+            onClick={() => {
+              if (typeof window === "undefined") return
+              const gtag = (window as Window & { gtag?: (...args: unknown[]) => void }).gtag
+              if (typeof gtag === "function") gtag("event", "schedule", { cta_id: "report_closing_book" })
+            }}
             className="mt-6 text-[14px] font-medium text-cream/55 underline-offset-4 hover:text-cream hover:underline"
           >
-            Or book a free 30-minute call
+            Or talk through a report with us
           </Link>
         </div>
       </section>

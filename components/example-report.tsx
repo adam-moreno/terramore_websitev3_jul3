@@ -67,24 +67,23 @@ function Slide({
   )
 }
 
-export function ExampleReport({ sent }: { sent?: boolean }) {
+export function ExampleReport({ hideDisclosure = false }: { hideDisclosure?: boolean }) {
   return (
-    <div className="bg-cream pb-24">
-      <section className="page-shell pt-6 md:pt-10">
-        {sent ? (
-          <p className="mb-6 rounded-2xl bg-white px-5 py-4 text-[15px] text-ink/75 shadow-[0_8px_30px_rgba(15,30,46,0.04)]">
-            We have your email. This is the sample so you know the shape. Your report goes to the inbox you gave us.
-          </p>
-        ) : (
+    <div>
+      <section className="page-shell">
+        {hideDisclosure ? null : (
           <p className="mb-6 text-[14px] text-ink/50">
-            Sample only. Names, product, and numbers are changed from a live client file.
+            Illustrative sample for a small apparel brand. Names, product, and numbers are changed. Not a live client
+            file shown as-is.
           </p>
         )}
 
         <div className="overflow-hidden rounded-[1.75rem] bg-ink text-cream shadow-[0_8px_30px_rgba(15,30,46,0.12)]">
           <div className="grid items-stretch md:grid-cols-[1.1fr_0.9fr]">
             <div className="p-8 md:p-12">
-              <p className="text-[12px] font-medium uppercase tracking-[0.16em] text-cream/45">Sample report</p>
+              <p className="text-[12px] font-medium uppercase tracking-[0.16em] text-cream/45">
+                Sample report · ecommerce
+              </p>
               <h1 className="mt-3 text-[2.4rem] font-semibold leading-[1.05] tracking-[-0.03em] md:text-[3.25rem]">
                 Northline Atelier
               </h1>
@@ -160,7 +159,7 @@ export function ExampleReport({ sent }: { sent?: boolean }) {
           </div>
         </Slide>
 
-        <Slide id="chapter-04" kicker="04 · Current openings" title="Where cash is still leaking.">
+        <Slide id="chapter-04" kicker="04 · Current openings" title="Quick Revenue Opportunities">
           <div className="grid gap-4 md:grid-cols-2">
             {OPENINGS.map((item) => (
               <div key={item.title} className="rounded-2xl border border-black/[0.05] px-5 py-5">
@@ -203,13 +202,13 @@ export function ExampleReport({ sent }: { sent?: boolean }) {
         <div className="max-w-2xl border-t border-black/[0.06] pt-10">
           <h2 className="text-[2rem] font-semibold tracking-[-0.02em] text-ink">Want this for your shop?</h2>
           <p className="mt-3 text-[1.05rem] leading-relaxed text-ink/70">
-            Give us the site and an email. We send the report. Or talk and we map the work in a meeting.
+            Give us the site and an email. In your inbox in minutes. Or talk and we map the work in a meeting.
           </p>
           <DualCtas className="mt-7" />
           <p className="mt-5 text-[14px] text-slate-500">
             Want yours?{" "}
-            <Link href="/#report" className="font-medium text-brand hover:text-brand-hover">
-              See what is in the free report
+            <Link href="/report" className="font-medium text-brand hover:text-brand-hover">
+              Request the free report
             </Link>
             .
           </p>

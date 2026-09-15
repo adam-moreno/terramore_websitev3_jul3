@@ -398,6 +398,31 @@ export function SiteHeader() {
 export function SiteChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const isHome = pathname === "/"
+  const isReportFunnel = pathname === "/report" || pathname?.startsWith("/report/")
+
+  if (isReportFunnel) {
+    return (
+      <>
+        <header className="sticky top-0 z-[80] border-b border-black/[0.06] bg-cream/95 backdrop-blur-md">
+          <div className="page-shell flex h-14 items-center justify-between md:h-16">
+            <Logo size="sm" animate={false} on="light" />
+            <div className="flex items-center gap-3">
+              <a href={DASHBOARD_LOGIN_URL} className="text-[13px] font-medium text-ink/55 hover:text-ink">
+                Log in
+              </a>
+              <Link
+                href="/book"
+                className="inline-flex h-9 items-center justify-center rounded-full bg-brand px-4 text-[14px] font-medium text-white hover:bg-brand-hover"
+              >
+                Let&apos;s talk
+              </Link>
+            </div>
+          </div>
+        </header>
+        <div>{children}</div>
+      </>
+    )
+  }
 
   return (
     <>

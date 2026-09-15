@@ -51,10 +51,10 @@ export const CHAPTERS: readonly Chapter[] = [
   },
   {
     n: "04",
-    title: "Where cash is leaking",
+    title: "Quick Revenue Opportunities",
     body: "The broken step, and the first moves we would take in 90 days. In order.",
     sample: "Northline: paid still talks to the city. No second email.",
-    kicker: "Where cash leaks",
+    kicker: "Quick revenue",
     stat: "61%",
     caption: "61% of Northline Atelier shoppers leave at shipping on their phones.",
     tone: "warn",

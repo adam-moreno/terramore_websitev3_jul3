@@ -17,8 +17,8 @@ export function ReportBand() {
           See the business the way a new customer already can.
         </h2>
         <p className="section-lede mx-auto mt-4 max-w-[560px] text-center text-ink/70 md:mt-5 md:text-[1.05rem] md:leading-relaxed">
-          We read what a stranger can already see: your site, ads, Maps, and listings. A person writes what is working,
-          where you are losing sales, and what we would fix first. It lands in your inbox in two to three business days.
+          We read what a stranger can already see: your site, ads, Maps, and listings. You get a written report of what
+          is working, where you are losing sales, and what we would fix first. In your inbox in minutes.
         </p>
 
         <div className="card-radius mx-auto mt-12 grid max-w-[980px] overflow-hidden border border-black/[0.06] bg-white shadow-[0_20px_50px_-28px_rgba(15,23,42,0.22)] md:rounded-[1.75rem] lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
@@ -30,7 +30,7 @@ export function ReportBand() {
               <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-cream/50">What you get</p>
               <p className="mt-1.5 text-[1.35rem] font-semibold tracking-tight">A file about your business.</p>
               <p className="mt-1.5 max-w-sm text-[14px] leading-relaxed text-cream/75">
-                No login. No call. A written read of what is already public, by a person.
+                No login. No call. A written read of what is already public.
               </p>
             </div>
           </div>
@@ -49,10 +49,6 @@ export function ReportBand() {
                 </div>
               ))}
             </div>
-            <p className="mt-5 text-[13px] leading-relaxed text-slate-500">
-              The grey lines are from a sample report for a small apparel brand, with the name changed to Northline
-              Atelier. Yours names your site and your first fix.
-            </p>
           </div>
         </div>
 
@@ -65,7 +61,7 @@ export function ReportBand() {
             Send me the free report
           </button>
           <Link href="/report/example" className="text-[15px] font-medium text-ink/55 underline-offset-4 hover:text-ink hover:underline">
-            See the Northline sample
+            See sample reports
           </Link>
         </div>
       </div>

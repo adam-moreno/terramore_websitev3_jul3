@@ -68,9 +68,10 @@ export function pickNurtureLinks(job?: string | null, businessType?: string | nu
   const j = norm(job)
   const t = norm(businessType)
 
-  const isOnline = /online\s*store|e-?comm/.test(t) || t === "online_store"
-  const isClinic = /clinic|practice/.test(t) || t === "clinic"
-  const isService = /service\s*business|local\s*shop|^local$/.test(t) || t === "local"
+  const isOnline = /online\s*store|e-?comm/.test(t) || t === "online_store" || t === "ecommerce"
+  const isClinic = /clinic|practice|professional/.test(t) || t === "clinic" || t === "professional"
+  const isService =
+    /service\s*business|local\s*shop|^local$|^service$/.test(t) || t === "local" || t === "service"
   const isCreator = /creator|brand/.test(t)
 
   if (/cart|checkout|do not finish|don'?t finish/.test(j)) {
@@ -163,9 +164,10 @@ export function businessTypeFromReportAnswers(answers: string | null | undefined
   const match = answers.match(/(?:^|;\s*)type=([a-z0-9_]+)/i)
   if (!match) return null
   const value = match[1].toLowerCase()
-  if (value === "online_store") return "Online store"
-  if (value === "local") return "Local shop"
-  if (value === "clinic") return "Clinic or practice"
+  if (value === "online_store" || value === "ecommerce") return "Ecommerce"
+  if (value === "service") return "Service business"
+  if (value === "professional" || value === "clinic") return "Professional services"
+  if (value === "local") return "Local business"
   if (value === "other") return "Other"
   return value
 }

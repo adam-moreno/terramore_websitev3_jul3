@@ -6,34 +6,30 @@ import { ReportForm, type ReportAnswers } from "@/components/report-form"
 
 const QUESTIONS = [
   {
-    key: "site",
-    prompt: "Do you have a website or online store today?",
-    options: [
-      { value: "yes", label: "Yes" },
-      { value: "not_yet", label: "Not yet" },
-    ],
-    reassure: "Good. That tells us where to look first.",
-  },
-  {
     key: "type",
     prompt: "Which is closest to your business?",
     options: [
-      { value: "online_store", label: "Online store" },
-      { value: "local", label: "Local shop or service" },
-      { value: "clinic", label: "Clinic or practice" },
-      { value: "other", label: "Something else" },
+      { value: "service", label: "Service business" },
+      { value: "ecommerce", label: "Ecommerce" },
+      { value: "professional", label: "Professional services" },
+      { value: "local", label: "Local business" },
+      { value: "other", label: "Other" },
     ],
     reassure: "Got it. We read the footprint the way your customers find it.",
   },
   {
-    key: "marketing",
-    prompt: "Are you running any ads or sending emails right now?",
+    key: "challenge",
+    prompt: "What is the biggest growth challenge right now?",
     options: [
-      { value: "both", label: "Yes, both" },
-      { value: "one", label: "One of them" },
-      { value: "not_yet", label: "Not yet" },
+      { value: "leads", label: "Getting more leads" },
+      { value: "converting", label: "Converting more leads" },
+      { value: "follow_up", label: "Following up with leads" },
+      { value: "visibility", label: "Marketing / visibility" },
+      { value: "sales", label: "Sales process" },
+      { value: "ops", label: "Operations / automation" },
+      { value: "unsure", label: "Not sure" },
     ],
-    reassure: "Thanks. Now we know where the first fix likely is.",
+    reassure: "Thanks. That tells us what to look for first.",
   },
 ] as const
 
@@ -82,7 +78,6 @@ export function ReportPopup({ open, onClose }: { open: boolean; onClose: () => v
     setPicked(value)
   }
 
-  // Portal to body so the modal is never nested inside a <p> or a parent stacking context.
   return createPortal(
     <div
       role="dialog"
@@ -91,12 +86,12 @@ export function ReportPopup({ open, onClose }: { open: boolean; onClose: () => v
       className="fixed inset-0 z-[100] flex items-end justify-center bg-ink/60 p-4 sm:items-center"
     >
       <button type="button" aria-label="Close" className="absolute inset-0 cursor-default" onClick={onClose} />
-      <div className="relative z-10 w-full max-w-md overflow-hidden rounded-[1.75rem] bg-white shadow-[0_24px_60px_-20px_rgba(15,30,46,0.45)]">
+      <div className="relative z-10 max-h-[90vh] w-full max-w-md overflow-y-auto rounded-[1.75rem] bg-white shadow-[0_24px_60px_-20px_rgba(15,30,46,0.45)]">
         <div className="flex items-start justify-between gap-3 px-7 pt-7 md:px-9 md:pt-9">
           <div>
             <p className="text-[12px] font-medium uppercase tracking-[0.16em] text-ink/40">Free Digital Footprint report</p>
             <p className="mt-2 text-[15px] leading-relaxed text-ink/75">
-              Three quick questions, then we read your business and send the file in two to three business days.
+              Two quick questions, then your details. In your inbox in minutes.
             </p>
           </div>
           <button type="button" onClick={onClose} className="shrink-0 text-[13px] font-medium text-slate-400 hover:text-ink">
@@ -129,7 +124,7 @@ export function ReportPopup({ open, onClose }: { open: boolean; onClose: () => v
                     type="button"
                     onClick={() => choose(question.key, option.value)}
                     disabled={picked !== null}
-                    className={`h-12 rounded-full border px-5 text-left text-[15px] font-medium transition ${
+                    className={`min-h-12 rounded-full border px-5 py-3 text-left text-[15px] font-medium transition ${
                       on
                         ? "border-brand bg-brand text-white"
                         : "border-ink/10 bg-cream text-ink hover:border-brand/40 hover:bg-white disabled:opacity-50"
@@ -147,7 +142,7 @@ export function ReportPopup({ open, onClose }: { open: boolean; onClose: () => v
         ) : (
           <div className="px-7 pb-7 pt-6 md:px-9 md:pb-9">
             <p className="text-[12px] font-semibold text-brand">Last step</p>
-            <p className="mt-2 text-[1.2rem] font-semibold tracking-tight text-ink">Where should the file go?</p>
+            <p className="mt-2 text-[1.2rem] font-semibold tracking-tight text-ink">Where should the report go?</p>
             <ReportForm plain className="mt-4" answers={answers} />
           </div>
         )}

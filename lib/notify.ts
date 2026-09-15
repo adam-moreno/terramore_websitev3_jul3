@@ -341,8 +341,9 @@ export async function confirmLeadToUser(lead: Lead): Promise<SendResult[]> {
     ? [
         `Hi ${first},`,
         "",
-        "We got it. The report lands in two to three business days.",
-        `Until then, the sample shows the shape: ${SITE}/report/example`,
+        "We got it. Your Digital Footprint report usually lands in your inbox within a few minutes.",
+        `While you wait, a sample shows the shape: ${SITE}/report/example`,
+        `When you have it, you can talk through priorities here: ${BOOK_URL}`,
         "",
         "Adam Moreno",
         "Terramore",
@@ -358,18 +359,20 @@ export async function confirmLeadToUser(lead: Lead): Promise<SendResult[]> {
       ]
 
   const sms = isReport
-    ? `Terramore: we got it, ${first}. The report lands in two to three business days.`
+    ? `Terramore: we got it, ${first}. Your report usually lands within a few minutes.`
     : `Terramore: we got it, ${first}. We read the site before we reply, usually within one business day.`
 
   const html = isReport
     ? emailShell({
         heading: "Your Digital Footprint report is on the way",
-        previewText: "The report lands in two to three business days.",
+        previewText: "Usually in your inbox within a few minutes.",
         bodyHtml: [
           emailP(`Hi ${first},`),
-          emailP("We got it. The report lands in two to three business days."),
-          emailP("Until then, the sample shows the shape:"),
+          emailP("We got it. Your Digital Footprint report usually lands in your inbox within a few minutes."),
+          emailP("While you wait, a sample shows the shape:"),
           emailButton("See a sample report", `${SITE}/report/example`),
+          emailP("When you have it, you can talk through what we would prioritize:"),
+          emailButton("Talk through my report", BOOK_URL),
           emailSignoff("Adam Moreno", "Terramore"),
         ].join(""),
       })

@@ -1,8 +1,37 @@
 # Development Log - Terramore Website
 
+## 2026-09-14 — Report funnel: drop grey-lines copy + footer
+
+- Removed the “Grey lines are examples…” lede from `digital-footprint-landing` What’s inside, and the matching note under chapter samples on homepage `report-band`. Sample lines themselves stay.
+- Dropped `SiteFooter` from `/report` and `/report/example` so the funnel matches slim `SiteChrome` (nav only). Other pages still render footer themselves.
+
+## 2026-09-14 — Timing copy + sample title fix
+
+- Landing/funnel CTA microcopy now uses **In your inbox in minutes** (hero, mid CTA, form, popup, report band, FAQ, resources, report meta). Left confirm email/`lib/notify.ts` and the `?sent=1` banner slightly more complete.
+- Fixed visible sample title: regenerated `public/report/pdf-leak.png` so the stack no longer shows **Where you can improve**; sample slides + marketing chapter 04 now say **Quick Revenue Opportunities**. Real generated PDF chapters in `lib/report/write.ts` unchanged.
+
+## 2026-09-14 — Digital Footprint landing: chapter title + mid CTA
+
+- Renamed marketing PDF stack title **Where you can improve** → **Quick Revenue Opportunities** (alt on leak sample page); how-it-works inbox step prose updated to match. Sibling stack titles unchanged. Did not change `lib/report/chapters.ts` or real PDF chapter names.
+- Added a centered mid-page CTA band (same primary button + ReportPopup) between How it works / “Report in your inbox” and What’s inside; support line reuses existing timing copy (“Usually in your inbox within a few minutes”).
+
+## 2026-09-14 — Paid-acquisition report funnel (complete)
+
+Approved decisions and shipping notes:
+
+1. **Samples (1B):** Keep Northline ecommerce + add Ridgeview Home Services fictional service sample. `/report/example` tabs: Ecommerce | Service business. Both labeled as illustrative / not a live client file.
+2. **Timing (2A):** Near-instant / automated delivery copy everywhere — “usually within a few minutes.” Removed leftover “2–3 business days” and “written by a person” from homepage report band, FAQ, and related surfaces. Confirm email already matched.
+3. **Proof (3B):** Softened social proof to “thousands of business owners” (no fabricated 5,000+).
+4. **Phone (4B):** Optional on report form.
+5. **Nav (5B):** `/report` and `/report/*` use slim `SiteChrome` header (logo + Log in + Let’s talk) with no `pt-24` double padding; landing/example use light `pt-6`/`pt-10`.
+6. **Form:** Qualifiers first in popup; website required; socials + phone optional; GA4 `form_start` / `generate_lead`; CTA events on primary/closing/book; UTM/gclid captured from URL + `sessionStorage`, packed into `course_type` (100-char) with short keys prioritizing click IDs; full attribution still in Slack notify details.
+7. **Thank-you (`?sent=1`):** “Your report is on the way” + secondary **Talk through my report** → `/book`. Success URL picks sample from qualifier (`service`/`local`/`professional` → service sample).
+
+No Google Ads AW- conversion ID or Meta/TikTok pixels added (GA4 `G-BQN6VCY579` only). Scratch `tmp-og/` remains untracked.
+
 ## 2026-09-14 — Digital Footprint landing page
 
-- Rebuilt `/report` as a dedicated landing: hero with layered rotating PDF mockups (`public/report/pdf-*.png`), CTA **Get your report**, request ~1 min / inbox **under 5 minutes**, website/socials/ads/reviews scope, “Requested by over 5,000 business owners,” how-it-works, four chapters with “Example:” lines (no Northline on this page). PDF page titles: Where you show up / Where you're winning / Where you can improve. Sample is a quiet link under the stack (no dedicated half-step section). Soft social-proof claim until verified.
+- Rebuilt `/report` as a dedicated landing: hero with layered rotating PDF mockups (`public/report/pdf-*.png`), CTA **Get your report**, request ~1 min / inbox **under 5 minutes**, website/socials/ads/reviews scope, “Requested by over 5,000 business owners,” how-it-works, four chapters with “Example:” lines (no Northline on this page). PDF page titles: Where you show up / Where you're winning / Quick Revenue Opportunities. Sample is a quiet link under the stack (no dedicated half-step section). Soft social-proof claim until verified.
 
 ## 2026-09-14 — Slack tile full height + hero/toolkit bridge
 

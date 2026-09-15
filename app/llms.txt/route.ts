@@ -11,7 +11,7 @@ Terramore serves owners with a shop, a service, or a customer list. Work starts 
 - [Book a call](https://terramore.io/book): Pick a time for the free 30-minute call, shown in your time zone
 - [Pricing](https://terramore.io/pricing): Talk is free, Start is a deposit after scope, Stay is optional monthly
 - [Free Digital Footprint report](https://terramore.io/report): What is in the report, how long it takes, and how we send it
-- [Sample report](https://terramore.io/report/example): Northline Atelier sample report
+- [Sample report](https://terramore.io/report/example): Ecommerce and service-business sample reports (illustrative demos)
 - [About](https://terramore.io/about): Adam Moreno and why the work looks like a growth team
 - [Security](https://terramore.io/security): CCPA and HIPAA handling of client data
 - [Start here](https://terramore.io/resources): Every page in the order owners ask about them
