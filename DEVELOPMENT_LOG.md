@@ -1,5 +1,15 @@
 # Development Log - Terramore Website
 
+## 2026-09-15 — Homepage mobile Slack spacing (middle ground)
+
+Nudged Slack tile up from the more-air layout without returning to the original peek.
+
+- Slack wrapper mobile margin: `mt-16` → `mt-12` (`md:mt-0` unchanged). Between original `mt-8` and prior `mt-16`.
+- Hero column min-height left at `100svh-10rem` (was `18rem` originally); margin-only tweak preferred for subtlety.
+
+### Files
+- `app/page.tsx`
+
 ## 2026-09-15 — Homepage hero subhead (copy refresh)
 
 Updated line 2 of the hero subhead: “then automate proven marketing and sales strategies” → “then automate marketing and sales to get”. Kept 3 forced `<br />` lines, League Spartan `brandMore` on both “more”s at `1.22em`, and existing subhead sizing.

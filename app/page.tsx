@@ -144,7 +144,7 @@ export default function TerramoreHomepage() {
           <div className="absolute inset-x-0 top-[42%] h-[28%] bg-gradient-to-b from-cream via-white/55 to-cream" />
           <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-b from-transparent to-cream" />
         </div>
-        <div className="page-shell relative z-20 mt-16 pb-10 md:mt-0 md:pb-24">
+        <div className="page-shell relative z-20 mt-12 pb-10 md:mt-0 md:pb-24">
           <div className="mx-auto w-full max-w-[972px]">
             <HeroAnalytics />
           </div>
