@@ -1,5 +1,9 @@
 # Development Log - Terramore Website
 
+## 2026-09-14 — Digital Footprint landing page
+
+- Rebuilt `/report` as a dedicated landing: hero with layered rotating PDF mockups (`public/report/pdf-*.png`), CTA **Get your report**, request ~1 min / inbox **under 5 minutes**, website/socials/ads/reviews scope, “Requested by over 5,000 business owners,” how-it-works, four chapters with “Example:” lines (no Northline on this page). PDF page titles: Where you show up / Where you're winning / Where you can improve. Sample is a quiet link under the stack (no dedicated half-step section). Soft social-proof claim until verified.
+
 ## 2026-09-14 — Slack tile full height + hero/toolkit bridge
 
 - Mobile Slack message pane height is measured once from the tallest fully-revealed channel (fixed; does not grow when switching). Fixes cutoff under attachments like `hero-cut-03.mp4`.
