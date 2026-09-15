@@ -1,5 +1,122 @@
 # Development Log - Terramore Website
 
+## 2026-09-14 — Sendblue wired (SMS + closing helpers)
+
+### Enable
+Set all three in `.env.local` / Vercel (never commit values):
+- `SENDBLUE_API_KEY` → `sb-api-key-id`
+- `SENDBLUE_API_SECRET` → `sb-api-secret-key`
+- `SENDBLUE_FROM_NUMBER` → E.164 line from the Sendblue dashboard (`GET /api/lines`)
+
+When those three are present, `sendSms` in `lib/notify.ts` uses Sendblue. Otherwise it falls back to Twilio (`TWILIO_ACCOUNT_SID` + `TWILIO_AUTH_TOKEN` + `TWILIO_FROM_NUMBER`). Prod with only Twilio keeps working. Missing both → logged skip; booking/forms never fail on SMS.
+
+### Free vs paid
+- **Free shared-line:** ~10 verified contacts; inbound-first — `ensureContact` adds the number, then the lead must text your Sendblue number once before outbound delivers. Creating the contact alone is not enough on free.
+- **Dedicated / paid:** removes that allowlist; outbound to any number (subject to normal carrier rules).
+
+### What we wired for closing
+| Feature | Status |
+|--------|--------|
+| Booking / lead confirm SMS via `sendSms` | **Live** → Sendblue when configured |
+| Typing indicator before outbound SMS | **Live** (fail soft; often no-ops on first message / SMS) |
+| `ensureContact` on successful booking with phone | **Live** (fail soft; grows free allowlist) |
+| Optional `mediaUrl` on `sendSms` / `sendblueSendMessage` | **API ready** — pass only real CDN URLs; we do not invent Loom/report thumbs in SMS today |
+| `markRead`, `sendReaction` | **Helpers exported** — use when inbound webhooks exist |
+| `sendCarousel`, `evaluateService` | **Helpers exported** — carousel needs V2 line + 2–20 HTTPS images; RCS is automatic fallback on Android when available |
+| FaceTime / line provisioning / TOTP | **Not wrapped** — use Sendblue docs when needed |
+
+Code: `lib/sendblue.ts`, `lib/notify.ts` (`smsProvider`, `sendSms` options), `.env.example`.
+
+### Quick test
+```bash
+# Direct send (replace env + phone)
+curl -X POST 'https://api.sendblue.com/api/send-message' \
+  -H "sb-api-key-id: $SENDBLUE_API_KEY" \
+  -H "sb-api-secret-key: $SENDBLUE_API_SECRET" \
+  -H 'Content-Type: application/json' \
+  -d "{\"number\":\"+1XXXXXXXXXX\",\"from_number\":\"$SENDBLUE_FROM_NUMBER\",\"content\":\"Terramore Sendblue test\"}"
+
+# Or book on /book with a phone — watch server logs for [sendblue] / [notify] sms:sendblue
+```
+
+## 2026-09-14 — Sendblue Free API setup guide (docs research only)
+
+Superseded by **Sendblue wired** above. Original research notes retained for free-plan inbound-first context.
+
+Researched official Sendblue API v2 docs for Free/sandbox testing.
+## 2026-09-14 — Booking pre-call reminder sequence (24h → 2m)
+
+### How scheduling works
+- Same path as the ~5 min prep email: `sendEmail({ scheduledAt })` in `lib/notify.ts`.
+  - **Resend:** `scheduled_at` (ISO)
+  - **SendGrid:** `send_at` (unix)
+  - **Postmark:** no schedule → sends immediately + warns (not suitable for far-future reminders)
+- **Not** the nurture cron (`/api/cron/nurture` is day 1/3/5 only).
+- Scheduled at booking time inside `after()` on `POST /api/booking`, after confirm + prep.
+
+### Cadence (offsets before `startIso`)
+Only schedule if `start − offset > now + 2 minutes`. Example: call in ~3 hours → skip 24h and 10h; send 2h, 30m, 2m.
+
+| When | Channel | Subject direction | Focus |
+|------|---------|-------------------|--------|
+| Immediate | Email (+ SMS if phone) | Booked: your call with Adam… | Confirm time, Meet, manage, teaser that prep note is next |
+| ~5 min | Email (scheduled) | Before your call: what to expect | Full what-to-expect / join / light prep; soft DFR CTA if no prior report |
+| 24h before | Email (scheduled) | Tomorrow: your Terramore call | Shorter prep + agenda; one question; soft DFR; manage; optional Loom thumb→URL |
+| 10h before | Email (scheduled) | Today: your call with Adam | One concrete prep item (site + goal); quiet space; Meet; soft DFR ok |
+| 2h before | Email (scheduled) | In 2 hours — join details | Join prominent; phone / “we’ll text”; short cover; manage still available |
+| 30m before | Email (scheduled) | Starting in 30 minutes | Join first; calendar check; ~5 lines; **no** DFR / cancel button |
+| 2m before | Email (scheduled) | Starting now | Ultra-short Join now + phone fallback; **no** manage / DFR |
+
+### Loom / video
+- No playable video embed.
+- Optional on **24h only:** if `BOOKING_PREP_LOOM_URL` is set → link (button, or thumbnail if `BOOKING_PREP_LOOM_THUMB_URL` is set). If unset → skip entirely (no fake Loom).
+
+### Also
+- Softened nurture “Book a time” CTAs when `source === "book"` (looking-forward copy instead of re-book).
+- Code: `lib/booking-reminders.ts`; wired from `app/api/booking/route.ts`.
+
+### Gaps
+- Provider max schedule window (Resend often ~30d; SendGrid `send_at` often ~72h) can reject far-future reminders — logged, not retried via cron.
+- Cancel/reschedule does **not** cancel already-scheduled provider emails (same gap as prep).
+- Postmark cannot schedule — would fire all reminders immediately if used as provider.
+
+## 2026-09-14 — Booking submit feel + prep email + calendar links
+
+### Booking slowness (cause + fix)
+- **Cause:** `POST /api/booking` must `await` Terra IQ (`/api/public/booking`, up to 20s) to create the Outlook event + Meet link before it can return success. Confirm email / Slack / nurture were already in `after()` and did **not** block the response.
+- **Fix (local):** Clearer pending UI — disabled fieldset, `Booking…` + status line (“Holding your time…”), `aria-busy`. No change to Terra IQ path; success still requires upstream create. Emails stay after response; prep email uses provider schedule (not a sleep in `after()`).
+
+### Immediate confirm email
+- `confirmBookingToUser` now sets expectation: another short note in a few minutes with what to expect / join / light prep.
+
+### +5 min “what to expect” email
+- New `sendBookingPrepEmail` in `lib/notify.ts`, scheduled via `sendEmail({ scheduledAt })` (~5 min).
+  - Resend: `scheduled_at`; SendGrid: `send_at`; Postmark: no schedule → sends immediately + warns.
+- Content: what the call is, how to join, light prep; soft Digital Footprint CTA when no prior report.
+- Nurture cron is day 1/3/5 only — not used for 5-minute timing.
+
+### Digital Footprint tracking
+- `lib/leads/has-digital-footprint.ts` looks up `free_courses_signups` by email (`signup_source === digital_footprint_report` or `report_status`/`report_sent_at`).
+- Phone is not a reliable DFR key (stored inside `company` on report form). Website match not required for this branch.
+- If Supabase missing / lookup fails → treat as unknown → soft “If you haven’t yet…” CTA.
+
+### Add to calendar (iOS / Android)
+- Was: single `.ics` Blob download only.
+- Now: **Google Calendar** template link + **Download .ics** on booking success and manage success.
+- Expected: iOS Safari → `.ics` opens Apple Calendar; Google link opens Google Calendar app/web. Android Chrome → Google link is best; `.ics` also works via download/intent. No `webcal:` (that is for subscriptions, not one-off events).
+
+### Pre-meeting info (recommendations only — form not expanded)
+Worth knowing before the call beyond current Owner / Type / Stage + contact: (1) primary growth goal next 90 days, (2) monthly marketing/ops budget band, (3) team size / who runs day-to-day, (4) biggest leak they already feel (calls, carts, follow-up, discovery).
+
+## 2026-09-14 — Booking success: drop Move or cancel
+
+- Removed the **Move or cancel** link next to **Add to calendar** on `BookingSuccess` in `components/booking-flow.tsx`. Manage/reschedule via confirmation email and `/book/manage` unchanged.
+
+## 2026-09-14 — Booking: last time slot tap + phone required
+
+- **Last slot hard to tap:** Times list used `overflow-y-auto` with max-height but no bottom padding, so 7:30pm sat flush against the scroll/modal edge. Added `pb-6`/`pb-8`, `scroll-pb-8`, a short spacer after the last button, and slightly tighter max-heights (`min(36vh,16.5rem)` / `@[24rem]:17.5rem`) so the last hit target clears the edge on stacked mobile and desktop right column.
+- **Phone required:** Contact step marks Phone required; helper “We’ll text if you miss the call.” Submit validates with the same rules as `normalizePhone` (10-digit US, 11-digit leading 1, or `+` with ≥8 digits). Business name, website, socials stay optional.
+
 ## 2026-09-14 — Booking: Amazon-style contact details step
 
 - Restyled **Your details** only (after Schedule) to match Amazon shipping-address density: bold labels tight above white rectangular inputs (`rounded-md`, thin `border-ink/25`), single-column stack, subtle grey helper under Phone, full-width brand pill CTA.

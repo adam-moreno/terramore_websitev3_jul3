@@ -107,10 +107,28 @@ function unsubFooter(email: string): { html: string; text: string } {
   }
 }
 
+function bookCta(row: LeadNurtureRow): { text: string; buttonHtml: string } {
+  if (row.source === "book") {
+    return {
+      text: "Looking forward to our call. Reply to this note if anything on your side changes.",
+      buttonHtml: "",
+    }
+  }
+  return {
+    text: `Book a time: ${BOOK_URL}`,
+    buttonHtml: emailButton("Book a time", BOOK_URL),
+  }
+}
+
 function buildStep1(row: LeadNurtureRow): NurtureEmail {
   const first = firstName(row.name)
   const personal = personalParagraph(row)
+  const cta = bookCta(row)
   const subject = "What to expect from Terramore"
+  const close =
+    row.source === "book"
+      ? "In the next few notes I will share how we put AI into that path, and where it usually helps first. No hard sell."
+      : "In the next few notes I will share how we put AI into that path, and where it usually helps first. No hard sell. If a call would help sooner, pick a time."
   const paras = [
     `Hi ${first},`,
     "",
@@ -120,9 +138,9 @@ function buildStep1(row: LeadNurtureRow): NurtureEmail {
     "",
     personal,
     "",
-    "In the next few notes I will share how we put AI into that path, and where it usually helps first. No hard sell. If a call would help sooner, pick a time.",
+    close,
     "",
-    `Book a time: ${BOOK_URL}`,
+    cta.text,
     "",
     "Adam Moreno",
     "Terramore",
@@ -140,10 +158,8 @@ function buildStep1(row: LeadNurtureRow): NurtureEmail {
         "What we do for the business is simple to say and careful to run. We find the step where you lose a sale, a booking, or a reply. We fix that step. We leave a 90-day plan your team can keep running after we step back.",
       ),
       emailP(personal),
-      emailP(
-        "In the next few notes I will share how we put AI into that path, and where it usually helps first. No hard sell. If a call would help sooner, pick a time.",
-      ),
-      emailButton("Book a time", BOOK_URL),
+      emailP(close),
+      cta.buttonHtml || emailP(cta.text),
       emailSignoff("Adam Moreno", "Terramore"),
       unsub.html,
     ].join(""),
@@ -155,6 +171,10 @@ function buildStep2(row: LeadNurtureRow): NurtureEmail {
   const first = firstName(row.name)
   const landings = aiLandings(row)
   const subject = "Where AI fits in the tools you already pay for"
+  const walkLine =
+    row.source === "book"
+      ? "Looking forward to walking a workflow on our call."
+      : `Want to walk a specific workflow? ${BOOK_URL}`
   const paras = [
     `Hi ${first},`,
     "",
@@ -166,7 +186,7 @@ function buildStep2(row: LeadNurtureRow): NurtureEmail {
     "",
     "How to maintain it after it is live: one owner on your side, a short weekly review, and human approval on outbound messages and price changes. You can turn a path off. We design for that.",
     "",
-    `Want to walk a specific workflow? ${BOOK_URL}`,
+    walkLine,
     "",
     "Adam Moreno",
     "Terramore",
@@ -187,7 +207,7 @@ function buildStep2(row: LeadNurtureRow): NurtureEmail {
       emailP(
         "How to maintain it after it is live: one owner on your side, a short weekly review, and human approval on outbound messages and price changes. You can turn a path off. We design for that.",
       ),
-      emailButton("Book a time", BOOK_URL),
+      row.source === "book" ? emailP(walkLine) : emailButton("Book a time", BOOK_URL),
       emailSignoff("Adam Moreno", "Terramore"),
       unsub.html,
     ].join(""),
@@ -200,6 +220,10 @@ function buildStep3(row: LeadNurtureRow): NurtureEmail {
   const links = pickNurtureLinks(row.job, row.business_type)
   const subject = "Which job is loudest right now?"
   const linkLines = links.map((link) => `- ${link.label}: ${link.href}`)
+  const close =
+    row.source === "book"
+      ? "Looking forward to our call — reply if anything changes."
+      : `If a short call would help, book here: ${BOOK_URL}`
   const paras = [
     `Hi ${first},`,
     "",
@@ -209,7 +233,7 @@ function buildStep3(row: LeadNurtureRow): NurtureEmail {
     "",
     ...linkLines,
     "",
-    `If a short call would help, book here: ${BOOK_URL}`,
+    close,
     "",
     "Adam Moreno",
     "Terramore",
@@ -225,8 +249,9 @@ function buildStep3(row: LeadNurtureRow): NurtureEmail {
       ),
       emailP("Here are three pages that match what you shared. Skim the one that feels closest."),
       ...links.map((link) => emailButton(link.label, link.href)),
-      emailP("If a short call would help:"),
-      emailButton("Book a time", BOOK_URL),
+      row.source === "book"
+        ? emailP(close)
+        : `${emailP("If a short call would help:")}${emailButton("Book a time", BOOK_URL)}`,
       emailSignoff("Adam Moreno", "Terramore"),
       unsub.html,
     ].join(""),

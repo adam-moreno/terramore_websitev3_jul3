@@ -102,3 +102,17 @@ export function emailDetail(label: string, value: string): string {
 export function emailSignoff(name: string, org: string): string {
   return `<p style="margin:20px 0 0 0;font-size:15px;line-height:1.5;color:${INK};">${esc(name)}<br><span style="color:${MUTED};">${esc(org)}</span></p>`
 }
+
+/** Static image linking out (e.g. Loom thumbnail → watch URL). Not a playable embed. */
+export function emailLinkedImage(href: string, src: string, alt: string, width = 480): string {
+  return `
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 14px 0;">
+    <tr>
+      <td>
+        <a href="${esc(href)}" target="_blank" style="display:inline-block;text-decoration:none;">
+          <img src="${esc(src)}" alt="${esc(alt)}" width="${width}" style="display:block;width:100%;max-width:${width}px;height:auto;border:0;outline:none;border-radius:8px;">
+        </a>
+      </td>
+    </tr>
+  </table>`
+}

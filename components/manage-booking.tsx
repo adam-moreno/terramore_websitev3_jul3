@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
 import { BookingFallback, BookingFlow, downloadIcs } from "@/components/booking-flow"
 import { browserTimeZone, formatWhen } from "@/lib/booking-format"
+import { googleCalendarUrl } from "@/lib/ics"
 
 type Booking = {
   id: string
@@ -152,12 +153,29 @@ export function ManageBooking() {
       {state === "moved" ? <p className="mt-2 text-[14px] text-slate-600">An updated invite is on the way.</p> : null}
       {error ? <p className="mt-4 text-[14px] text-red-600">{error}</p> : null}
       <div className="mt-6 flex flex-wrap items-center gap-3">
+        <a
+          href={googleCalendarUrl({
+            uid: booking.id,
+            startIso: booking.startIso,
+            endIso: booking.endIso,
+            title: "Call with Adam Moreno, Terramore",
+            description: booking.meetUrl
+              ? `Join on Google Meet: ${booking.meetUrl}`
+              : "Join link is on the calendar invite from adam.moreno@terramore.io.",
+            url: booking.meetUrl,
+          })}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex h-11 items-center rounded-full bg-ink px-5 text-[15px] font-medium text-white hover:bg-ink/90"
+        >
+          Google Calendar
+        </a>
         <button
           type="button"
           onClick={() => downloadIcs(booking)}
-          className="inline-flex h-11 items-center rounded-full bg-ink px-5 text-[15px] font-medium text-white hover:bg-ink/90"
+          className="inline-flex h-11 items-center rounded-full border border-ink/15 px-5 text-[15px] font-medium text-ink hover:border-ink/40"
         >
-          Add to calendar
+          Download .ics
         </button>
         <button
           type="button"

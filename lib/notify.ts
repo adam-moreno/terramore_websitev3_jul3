@@ -10,10 +10,18 @@
  *                      RESEND_FROM_EMAIL (the dashboard's name) then EMAIL_FROM   e.g. "Terramore <reports@terramore.io>"
  *                      NOTIFY_EMAIL_TO   admin copy, default adam.moreno@terramore.io
  *                      EMAIL_REPLY_TO    reply-to on every outbound email, default adam.moreno@terramore.io
- * - SMS (to the user): TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM_NUMBER
+ * - SMS (to the user): Sendblue preferred when SENDBLUE_API_KEY + SENDBLUE_API_SECRET +
+ *                      SENDBLUE_FROM_NUMBER are set; else Twilio (TWILIO_ACCOUNT_SID,
+ *                      TWILIO_AUTH_TOKEN, TWILIO_FROM_NUMBER). Failures never throw.
  */
 
 import { emailShell, emailButton, emailP, emailDetail, emailSignoff } from "./email-template"
+import {
+  ensureContact,
+  sendTypingIndicator,
+  sendblueConfigured,
+  sendblueSendMessage,
+} from "./sendblue"
 
 export type Attachment = { filename: string; content: Buffer; contentType: string }
 
@@ -26,6 +34,11 @@ export type EmailInput = {
   /** Overrides EMAIL_REPLY_TO for one message. */
   replyTo?: string
   attachments?: Attachment[]
+  /**
+   * Schedule delivery (ISO 8601). Resend: `scheduled_at`. SendGrid: `send_at` unix.
+   * Postmark has no schedule here — sends immediately and logs a warning.
+   */
+  scheduledAt?: string
 }
 
 export type SendResult = { ok: boolean; channel: string; skipped?: boolean; error?: string }
@@ -63,8 +76,19 @@ export function emailProvider(): "resend" | "sendgrid" | "postmark" | null {
   return null
 }
 
-export function smsConfigured(): boolean {
+function twilioConfigured(): boolean {
   return Boolean(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_FROM_NUMBER)
+}
+
+/** Prefer Sendblue when fully configured; otherwise Twilio. */
+export function smsProvider(): "sendblue" | "twilio" | null {
+  if (sendblueConfigured()) return "sendblue"
+  if (twilioConfigured()) return "twilio"
+  return null
+}
+
+export function smsConfigured(): boolean {
+  return smsProvider() !== null
 }
 
 export type SlackMode = "bot" | "webhook" | "none"
@@ -96,6 +120,10 @@ export async function sendEmail(input: EmailInput): Promise<SendResult> {
 
   try {
     let response: Response
+    const scheduledAt = input.scheduledAt?.trim() || undefined
+    if (scheduledAt && provider === "postmark") {
+      console.warn(`[notify] email:postmark cannot schedule; sending immediately (wanted ${scheduledAt})`)
+    }
     if (provider === "resend") {
       response = await fetch("https://api.resend.com/emails", {
         method: "POST",
@@ -108,6 +136,7 @@ export async function sendEmail(input: EmailInput): Promise<SendResult> {
           subject: input.subject,
           text: input.text,
           html: input.html,
+          scheduled_at: scheduledAt,
           attachments: input.attachments?.map((a) => ({
             filename: a.filename,
             content: a.content.toString("base64"),
@@ -118,6 +147,7 @@ export async function sendEmail(input: EmailInput): Promise<SendResult> {
     } else if (provider === "sendgrid") {
       const fromMatch = FROM.match(/^(.*?)\s*<(.+)>$/)
       const from = fromMatch ? { name: fromMatch[1].trim(), email: fromMatch[2].trim() } : { email: FROM }
+      const sendAt = scheduledAt ? Math.floor(new Date(scheduledAt).getTime() / 1000) : undefined
       response = await fetch("https://api.sendgrid.com/v3/mail/send", {
         method: "POST",
         headers: { Authorization: `Bearer ${process.env.SENDGRID_API_KEY}`, "Content-Type": "application/json" },
@@ -130,6 +160,7 @@ export async function sendEmail(input: EmailInput): Promise<SendResult> {
             { type: "text/plain", value: input.text },
             ...(input.html ? [{ type: "text/html", value: input.html }] : []),
           ],
+          send_at: sendAt && Number.isFinite(sendAt) ? sendAt : undefined,
           attachments: input.attachments?.map((a) => ({
             filename: a.filename,
             content: a.content.toString("base64"),
@@ -184,10 +215,46 @@ export function normalizePhone(raw: string | null | undefined): string | null {
   return null
 }
 
-export async function sendSms(to: string | null | undefined, body: string): Promise<SendResult> {
+export type SendSmsOptions = {
+  /**
+   * Public CDN URL with a file extension (Sendblue media_url). Only pass a real asset —
+   * do not invent thumbnails. Ignored on Twilio path today.
+   */
+  mediaUrl?: string
+  /** Show iMessage typing briefly before send (Sendblue only). Default true; never blocks send. */
+  typing?: boolean
+}
+
+export async function sendSms(
+  to: string | null | undefined,
+  body: string,
+  opts: SendSmsOptions = {},
+): Promise<SendResult> {
   const phone = normalizePhone(to)
   if (!phone) return skip("sms", "no usable phone number")
-  if (!smsConfigured()) return skip("sms", "TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, or TWILIO_FROM_NUMBER missing")
+
+  const provider = smsProvider()
+  if (!provider) {
+    return skip(
+      "sms",
+      "SENDBLUE_API_KEY+SECRET+FROM_NUMBER or TWILIO_ACCOUNT_SID+AUTH_TOKEN+FROM_NUMBER missing",
+    )
+  }
+
+  if (provider === "sendblue") {
+    if (opts.typing !== false) {
+      // Best-effort … bubble. Often fails on first contact (no route yet); ignore.
+      await sendTypingIndicator(phone, { state: "start", maxDurationMs: 4000 }).catch(() => undefined)
+    }
+    const mediaUrl = opts.mediaUrl?.trim() || undefined
+    const result = await sendblueSendMessage({
+      to: phone,
+      content: body,
+      ...(mediaUrl ? { mediaUrl } : {}),
+    })
+    if (!result.ok) return fail("sms:sendblue", result.error || "send failed")
+    return { ok: true, channel: "sms:sendblue" }
+  }
 
   const sid = process.env.TWILIO_ACCOUNT_SID as string
   const token = process.env.TWILIO_AUTH_TOKEN as string
@@ -202,10 +269,10 @@ export async function sendSms(to: string | null | undefined, body: string): Prom
       },
       body: new URLSearchParams({ To: phone, From: from, Body: body }),
     })
-    if (!response.ok) return fail("sms", await readError(response))
-    return { ok: true, channel: "sms" }
+    if (!response.ok) return fail("sms:twilio", await readError(response))
+    return { ok: true, channel: "sms:twilio" }
   } catch (error) {
-    return fail("sms", error)
+    return fail("sms:twilio", error)
   }
 }
 
@@ -454,6 +521,8 @@ export async function confirmBookingToUser(b: BookingNotice): Promise<SendResult
   const first = b.name.split(/\s+/)[0] || "there"
   const timeLine = when(b.startIso, b.tz)
   const joinLine = b.meetUrl ? `Join on Google Meet: ${b.meetUrl}` : "The calendar invite from adam.moreno@terramore.io has the join link."
+  const followUp =
+    "In a few minutes I will send another short note with what to expect on the call, how to join, and a light prep list."
   const text = [
     `Hi ${first},`,
     "",
@@ -461,6 +530,9 @@ export async function confirmBookingToUser(b: BookingNotice): Promise<SendResult
     joinLine,
     "",
     "A calendar invite is on its way from adam.moreno@terramore.io. Accept it and the reminder is set.",
+    "",
+    followUp,
+    "",
     `Need to move or cancel? ${b.manageUrl}`,
     "",
     "Adam Moreno",
@@ -470,7 +542,7 @@ export async function confirmBookingToUser(b: BookingNotice): Promise<SendResult
 
   const html = emailShell({
     heading: "You are booked",
-    previewText: `${timeLine} (${b.tz})`,
+    previewText: `${timeLine} (${b.tz}) · a short prep note is next`,
     bodyHtml: [
       emailP(`Hi ${first},`),
       emailDetail("When", `${timeLine} (${b.tz})`),
@@ -478,14 +550,100 @@ export async function confirmBookingToUser(b: BookingNotice): Promise<SendResult
         ? emailButton("Join on Google Meet", b.meetUrl)
         : emailP("The calendar invite from adam.moreno@terramore.io has the join link."),
       emailP("A calendar invite is on its way from adam.moreno@terramore.io. Accept it and the reminder is set."),
+      emailP(followUp),
       emailP("Need to move or cancel?"),
       emailButton("Reschedule or cancel", b.manageUrl),
       emailSignoff("Adam Moreno", "Terramore"),
     ].join(""),
   })
 
+  // Free-plan allowlist: best-effort contact create so this phone can receive SMS after
+  // they text the Sendblue line once. Never blocks confirm email / booking success.
+  if (b.phone && sendblueConfigured()) {
+    const parts = b.name.trim().split(/\s+/)
+    void ensureContact({
+      phone: b.phone,
+      firstName: parts[0] || first,
+      lastName: parts.length > 1 ? parts.slice(1).join(" ") : undefined,
+      tags: ["booking", "terramore.io"],
+      updateIfExists: true,
+    }).catch(() => undefined)
+  }
+
   return Promise.all([
     sendEmail({ to: b.email, subject: `Booked: your call with Adam, ${timeLine}`, text, html }),
     b.phone ? sendSms(b.phone, sms) : Promise.resolve(skip("sms", "no phone on this booking")),
   ])
+}
+
+const REPORT_URL = `${SITE}/report`
+const PREP_DELAY_MS = 5 * 60 * 1000
+
+/**
+ * ~5 minutes after booking: what the call is, how to join, light prep.
+ * Soft Digital Footprint CTA when we cannot confirm they already got a report.
+ * Prefer Resend/SendGrid schedule so the HTTP response is never blocked on a sleep.
+ */
+export async function sendBookingPrepEmail(
+  b: BookingNotice,
+  opts: { hasReport: boolean | null } = { hasReport: null },
+): Promise<SendResult> {
+  const first = b.name.split(/\s+/)[0] || "there"
+  const timeLine = when(b.startIso, b.tz)
+  const joinLine = b.meetUrl
+    ? `Join on Google Meet: ${b.meetUrl}`
+    : "Open the calendar invite from adam.moreno@terramore.io for the join link."
+  const hasReport = opts.hasReport === true
+  const reportSoft = hasReport
+    ? "If you already have your Digital Footprint report, skim it once before we talk — it gives us a shared starting point."
+    : `If you have not run a free Digital Footprint report yet, it is a useful first step before the call: ${REPORT_URL}`
+
+  const subject = "Before your call: what to expect"
+  const text = [
+    `Hi ${first},`,
+    "",
+    `Quick note ahead of ${timeLine} (${b.tz}).`,
+    "",
+    "What the call is: a short working conversation about your business — where growth is stuck, what you already pay for, and whether Terramore is a fit. No pitch deck. No hard sell.",
+    "",
+    "How to join:",
+    joinLine,
+    "Be somewhere quiet with a stable connection. Phone works if video is awkward.",
+    "",
+    "Light prep (optional):",
+    "- One outcome you want from the next 90 days",
+    "- The tools you already live in (store, inbox, ads, calendar, CRM)",
+    "- Any link that shows how customers find you today",
+    "",
+    reportSoft,
+    "",
+    `Need to move or cancel? ${b.manageUrl}`,
+    "",
+    "Adam Moreno",
+    "Terramore",
+  ].join("\n")
+
+  const html = emailShell({
+    heading: "Before your call",
+    previewText: `What to expect on ${timeLine}`,
+    bodyHtml: [
+      emailP(`Hi ${first},`),
+      emailP(`Quick note ahead of ${timeLine} (${b.tz}).`),
+      emailP(
+        "What the call is: a short working conversation about your business — where growth is stuck, what you already pay for, and whether Terramore is a fit. No pitch deck. No hard sell.",
+      ),
+      emailP("How to join:"),
+      b.meetUrl ? emailButton("Join on Google Meet", b.meetUrl) : emailP(joinLine),
+      emailP("Be somewhere quiet with a stable connection. Phone works if video is awkward."),
+      emailP("Light prep (optional): one outcome for the next 90 days, the tools you already live in, and any link that shows how customers find you today."),
+      emailP(reportSoft),
+      !hasReport ? emailButton("Get a free Digital Footprint report", REPORT_URL) : "",
+      emailP("Need to move or cancel?"),
+      emailButton("Reschedule or cancel", b.manageUrl),
+      emailSignoff("Adam Moreno", "Terramore"),
+    ].join(""),
+  })
+
+  const scheduledAt = new Date(Date.now() + PREP_DELAY_MS).toISOString()
+  return sendEmail({ to: b.email, subject, text, html, scheduledAt })
 }

@@ -8,7 +8,16 @@ function escapeText(value: string): string {
   return value.replace(/\\/g, "\\\\").replace(/\n/g, "\\n").replace(/[,;]/g, (c) => `\\${c}`)
 }
 
-export function buildIcs(input: { uid: string; startIso: string; endIso: string; title: string; description: string; url?: string | null }): string {
+export type CalendarEventInput = {
+  uid: string
+  startIso: string
+  endIso: string
+  title: string
+  description: string
+  url?: string | null
+}
+
+export function buildIcs(input: CalendarEventInput): string {
   const lines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
@@ -33,4 +42,18 @@ export function buildIcs(input: { uid: string; startIso: string; endIso: string;
     "END:VCALENDAR",
   ].filter(Boolean)
   return lines.join("\r\n") + "\r\n"
+}
+
+/** Google Calendar “template” deep link. Works well on Android Chrome; on iOS opens Google Calendar if installed / web. */
+export function googleCalendarUrl(input: CalendarEventInput): string {
+  const start = icsDate(input.startIso)
+  const end = icsDate(input.endIso)
+  const params = new URLSearchParams({
+    action: "TEMPLATE",
+    text: input.title,
+    dates: `${start}/${end}`,
+    details: input.description,
+  })
+  if (input.url) params.set("location", input.url)
+  return `https://calendar.google.com/calendar/render?${params.toString()}`
 }

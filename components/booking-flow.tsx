@@ -3,7 +3,7 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { browserTimeZone, formatLongDay, formatTime, formatWhen, groupSlotsByDay, tzLabel } from "@/lib/booking-format"
-import { buildIcs } from "@/lib/ics"
+import { buildIcs, googleCalendarUrl } from "@/lib/ics"
 
 export type BookingResult = {
   id: string
@@ -53,6 +53,17 @@ const stepPane = "mt-4 animate-fade-in"
 
 function pad2(n: number) {
   return String(n).padStart(2, "0")
+}
+
+/** Same acceptance rules as `normalizePhone` in lib/notify (kept local so the client does not import notify). */
+function isUsablePhone(raw: string) {
+  const trimmed = raw.trim()
+  if (!trimmed) return false
+  const digits = trimmed.replace(/[^\d]/g, "")
+  if (trimmed.startsWith("+")) return digits.length >= 8
+  if (digits.length === 10) return true
+  if (digits.length === 11 && digits.startsWith("1")) return true
+  return false
 }
 
 /** Local calendar YYYY-MM-DD — matches dayKey() for the browser zone. */
@@ -341,6 +352,10 @@ export function BookingFlow({
       setError("We need a name and an email to send the invite.")
       return
     }
+    if (!isUsablePhone(phone)) {
+      setError("We need a phone number in case you miss the video call.")
+      return
+    }
     setBusy(true)
     // API has no socials field — fold into note like report form packs extras.
     const noteLines = [`Owner: ${isOwner}`, `Type: ${businessType}`, `Stage: ${digitalStage}`]
@@ -353,7 +368,7 @@ export function BookingFlow({
         body: JSON.stringify({
           name: name.trim(),
           email: email.trim(),
-          phone: phone.trim() || null,
+          phone: phone.trim(),
           business: business.trim() || null,
           website: website.trim() || null,
           note,
@@ -499,7 +514,7 @@ export function BookingFlow({
               </div>
               <div className="flex w-full min-w-0 flex-col @[24rem]:flex-1">
                 {day ? (
-                  <div className="flex max-h-[min(40vh,18rem)] flex-col gap-2 overflow-y-auto overscroll-contain pr-1 @[24rem]:max-h-[19rem]">
+                  <div className="flex max-h-[min(36vh,16.5rem)] flex-col gap-2 overflow-y-auto overscroll-contain scroll-pb-8 pb-6 pr-1 @[24rem]:max-h-[17.5rem] @[24rem]:pb-8">
                     {day.slots.map((iso) => (
                       <button
                         key={iso}
@@ -515,6 +530,8 @@ export function BookingFlow({
                         {formatTime(iso, tz)}
                       </button>
                     ))}
+                    {/* Spacer so the last slot clears the scroll edge / modal safe area */}
+                    <div className="h-5 shrink-0" aria-hidden />
                   </div>
                 ) : (
                   <p className="rounded-xl border border-dashed border-ink/15 bg-cream/60 px-3 py-10 text-center text-[13px] text-slate-500 @[24rem]:min-h-[12rem] @[24rem]:py-14">
@@ -534,11 +551,11 @@ export function BookingFlow({
       ) : null}
 
       {!isPick && step === detailsStep && slot ? (
-        <form key="details" onSubmit={submit} className={stepPane}>
+        <form key="details" onSubmit={submit} className={stepPane} aria-busy={busy}>
           <p className="text-[1.35rem] font-bold tracking-tight text-ink">Your details</p>
           <p className="mt-1 text-[14px] text-slate-500">{formatWhen(slot, tz)}. The invite goes to this email.</p>
 
-          <div className="mt-5 flex flex-col gap-4">
+          <fieldset disabled={busy} className="mt-5 flex min-w-0 flex-col gap-4 border-0 p-0">
             <label className="block">
               <span className={detailsLabel}>Full name</span>
               <input
@@ -565,14 +582,15 @@ export function BookingFlow({
             <label className="block">
               <span className={detailsLabel}>Phone</span>
               <input
+                required
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                placeholder="Optional"
+                placeholder="(555) 123-4567"
                 className={detailsInput}
                 autoComplete="tel"
               />
-              <span className="mt-1 block text-[12px] text-slate-500">Optional. We may text a reminder.</span>
+              <span className="mt-1 block text-[12px] text-slate-500">We’ll text if you miss the call.</span>
             </label>
             <label className="block">
               <span className={detailsLabel}>Business name</span>
@@ -605,21 +623,27 @@ export function BookingFlow({
                 className={detailsInput}
               />
             </label>
-          </div>
+          </fieldset>
 
           {error ? <p className="mt-4 text-[14px] text-red-600">{error}</p> : null}
 
           <button
             type="submit"
             disabled={busy}
-            className="mt-6 inline-flex h-11 w-full items-center justify-center rounded-full bg-brand px-6 text-[15px] font-medium text-white hover:bg-brand-hover disabled:opacity-60"
+            className="mt-6 inline-flex h-11 w-full items-center justify-center rounded-full bg-brand px-6 text-[15px] font-medium text-white hover:bg-brand-hover disabled:cursor-wait disabled:opacity-60"
           >
             {busy ? "Booking…" : "Confirm the call"}
           </button>
+          {busy ? (
+            <p className="mt-2 text-center text-[13px] text-slate-500" role="status">
+              Holding your time on the calendar — usually a few seconds.
+            </p>
+          ) : null}
           <button
             type="button"
             onClick={() => setStep(scheduleStep)}
-            className="mt-3 text-[14px] font-medium text-slate-500 hover:text-ink"
+            disabled={busy}
+            className="mt-3 text-[14px] font-medium text-slate-500 hover:text-ink disabled:opacity-50"
           >
             Back
           </button>
@@ -629,15 +653,21 @@ export function BookingFlow({
   )
 }
 
-export function downloadIcs(booking: { id: string; startIso: string; endIso: string; meetUrl: string | null }) {
-  const ics = buildIcs({
+function calendarEventFromBooking(booking: { id: string; startIso: string; endIso: string; meetUrl: string | null }) {
+  return {
     uid: booking.id,
     startIso: booking.startIso,
     endIso: booking.endIso,
     title: "Call with Adam Moreno, Terramore",
-    description: booking.meetUrl ? `Join on Google Meet: ${booking.meetUrl}` : "Join link is on the calendar invite from adam.moreno@terramore.io.",
+    description: booking.meetUrl
+      ? `Join on Google Meet: ${booking.meetUrl}`
+      : "Join link is on the calendar invite from adam.moreno@terramore.io.",
     url: booking.meetUrl,
-  })
+  }
+}
+
+export function downloadIcs(booking: { id: string; startIso: string; endIso: string; meetUrl: string | null }) {
+  const ics = buildIcs(calendarEventFromBooking(booking))
   const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" })
   const url = URL.createObjectURL(blob)
   const a = document.createElement("a")
@@ -651,6 +681,7 @@ export function downloadIcs(booking: { id: string; startIso: string; endIso: str
 
 export function BookingSuccess({ booking, tz, name }: { booking: BookingResult; tz: string; name?: string }) {
   const first = name?.split(/\s+/)[0]
+  const gcal = googleCalendarUrl(calendarEventFromBooking(booking))
   return (
     <div>
       <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-brand">Booked</p>
@@ -670,19 +701,27 @@ export function BookingSuccess({ booking, tz, name }: { booking: BookingResult; 
           "The calendar invite from adam.moreno@terramore.io has the join link."
         )}
       </p>
-      <p className="mt-2 text-[14px] text-slate-600">A calendar invite and a confirmation email are on the way.</p>
+      <p className="mt-2 text-[14px] text-slate-600">
+        A calendar invite and a confirmation email are on the way. A short prep note follows in a few minutes.
+      </p>
       <div className="mt-5 flex flex-wrap items-center gap-3">
+        <a
+          href={gcal}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex h-11 items-center rounded-full bg-ink px-5 text-[15px] font-medium text-white hover:bg-ink/90"
+        >
+          Google Calendar
+        </a>
         <button
           type="button"
           onClick={() => downloadIcs(booking)}
-          className="inline-flex h-11 items-center rounded-full bg-ink px-5 text-[15px] font-medium text-white hover:bg-ink/90"
+          className="inline-flex h-11 items-center rounded-full border border-ink/15 px-5 text-[15px] font-medium text-ink hover:border-ink/40"
         >
-          Add to calendar
+          Download .ics
         </button>
-        <a href={booking.manageUrl} className="text-[14px] font-medium text-slate-500 underline-offset-4 hover:text-ink hover:underline">
-          Move or cancel
-        </a>
       </div>
+      <p className="mt-2 text-[12px] text-slate-400">Apple Calendar and Outlook: use Download .ics. Android: Google Calendar works best.</p>
     </div>
   )
 }

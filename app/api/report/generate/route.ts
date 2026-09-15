@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getServerSupabase } from "@/lib/supabase-server"
-import { emailFromConfigured, emailProvider, postSlack, slackMode, smsConfigured } from "@/lib/notify"
+import { emailFromConfigured, emailProvider, postSlack, slackMode, smsConfigured, smsProvider } from "@/lib/notify"
 import { missingReportKeys, runReportPipeline } from "@/lib/report/pipeline"
 import { modelProvider } from "@/lib/report/write"
 
@@ -65,6 +65,7 @@ export async function GET(request: NextRequest) {
       emailFrom: emailFromConfigured(),
       slack: slackMode(),
       sms: smsConfigured(),
+      smsProvider: smsProvider(),
       places: Boolean(process.env.GOOGLE_PLACES_API_KEY),
     },
     reportPipelineReady: missingReportKeys().length === 0,
