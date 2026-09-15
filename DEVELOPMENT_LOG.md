@@ -1,5 +1,15 @@
 # Development Log - Terramore Website
 
+## 2026-09-15 — Homepage mobile Slack seating (fold peek)
+
+Doubled the prior upward move and shortened the hero column so Slack peeks on mobile arrival.
+
+- Slack wrapper mobile margin: `mt-12` → `mt-8` (`md:mt-0` unchanged). Total 2rem up from `mt-16` baseline.
+- Hero column mobile min-height: `100svh-10rem` → `100svh-14rem` (desktop `md:` min-h unchanged). Middle step between 10rem (too low) and 18rem (original).
+
+### Files
+- `app/page.tsx`
+
 ## 2026-09-15 — Homepage mobile Slack spacing (middle ground)
 
 Nudged Slack tile up from the more-air layout without returning to the original peek.
