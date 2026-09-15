@@ -84,7 +84,7 @@ export default function TerramoreHomepage() {
         <div className="relative z-20 flex min-h-[calc(100svh-10rem)] flex-col justify-start md:-mt-28 md:min-h-[calc(100svh-10.75rem)] md:justify-center md:pt-28">
           <div className="page-shell relative z-20 text-center">
             <div
-              className="mx-auto flex w-full max-w-[22.5rem] flex-col items-center sm:max-w-[28rem] md:max-w-none md:inline-flex"
+              className="mx-auto flex w-full max-w-none flex-col items-center sm:max-w-[28rem] md:max-w-none md:inline-flex"
               data-hero-copy
             >
               <h1 className="mx-auto text-center text-[2.35rem] font-bold leading-[1.08] tracking-[-0.02em] text-ink sm:text-5xl md:text-[72px] md:leading-[75.6px]">
@@ -97,16 +97,17 @@ export default function TerramoreHomepage() {
                 <br />
                 <span className="text-gold">you already built.</span>
               </h1>
-              <p className="mx-auto mt-5 max-w-[20.5rem] text-center text-[16px] font-medium leading-[1.4] text-ink sm:max-w-[26rem] md:mt-8 md:max-w-[626px] md:text-[20px] md:leading-[30px]">
-                We find where the business already wins,
+              {/* Mobile: full hero-copy width so line 2 stays one line (3 forced breaks). */}
+              <p className="mx-auto mt-5 max-w-none text-center text-[16px] font-medium leading-[1.4] text-ink sm:max-w-[26rem] md:mt-8 md:max-w-[626px] md:text-[20px] md:leading-[30px]">
+                We find where the business wins today,
                 <br />
-                then automate proven marketing and sales strategies to get
+                then automate proven marketing and sales strategies
                 <br />
-                <span className={`${brandMore.className} text-[1.15em] font-bold leading-none tracking-[-0.08em] text-ink`}>
+                <span className={`${brandMore.className} text-[1.22em] font-bold leading-none tracking-[-0.08em] text-ink`}>
                   more
                 </span>{" "}
                 customers &{" "}
-                <span className={`${brandMore.className} text-[1.15em] font-bold leading-none tracking-[-0.08em] text-ink`}>
+                <span className={`${brandMore.className} text-[1.22em] font-bold leading-none tracking-[-0.08em] text-ink`}>
                   more
                 </span>{" "}
                 revenue.
