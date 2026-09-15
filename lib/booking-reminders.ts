@@ -4,6 +4,9 @@
  *
  * Offsets before start: 24h, 10h, 2h, 30m, 2m.
  * Only schedule if send time is still > now + 2 minutes (skip past / imminent sends).
+ *
+ * SMS campaign copy (confirm + optional timed) lives in `lib/booking-sms.ts`.
+ * Timed SMS cannot use provider schedule — needs cron + upcoming bookings (see that file).
  */
 
 import { emailButton, emailLinkedImage, emailP, emailShell, emailSignoff } from "@/lib/email-template"

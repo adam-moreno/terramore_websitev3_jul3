@@ -43,7 +43,10 @@ function exampleLine(sample: string) {
 function trackCta() {
   if (typeof window === "undefined") return
   const gtag = (window as Window & { gtag?: (...args: unknown[]) => void }).gtag
-  if (typeof gtag === "function") gtag("event", "cta_click", { cta_id: "report_primary" })
+  if (typeof gtag === "function") {
+    gtag("event", "report_cta_click", { cta_id: "report_primary" })
+    gtag("event", "cta_click", { cta_id: "report_primary" })
+  }
 }
 
 function PdfStack() {

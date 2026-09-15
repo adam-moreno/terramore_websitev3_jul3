@@ -3,11 +3,27 @@
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { FormEvent, useEffect, useState } from "react"
+import {
+  trackEvent,
+  trackReportSubmissionError,
+  trackReportSubmissionSuccess,
+} from "@/lib/analytics"
 
 export type ReportAnswers = Record<string, string>
 
 const ATTR_STORAGE_KEY = "tm_report_attribution"
-const ATTR_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "gclid", "gbraid", "wbraid"] as const
+const ATTR_KEYS = [
+  "utm_source",
+  "utm_medium",
+  "utm_campaign",
+  "utm_content",
+  "utm_term",
+  "gclid",
+  "gbraid",
+  "wbraid",
+  "fbclid",
+  "ttclid",
+] as const
 
 function readAttribution(): Record<string, string> {
   if (typeof window === "undefined") return {}
@@ -40,12 +56,6 @@ function readAttribution(): Record<string, string> {
   }
 }
 
-function track(event: string, params?: Record<string, string | number | boolean>) {
-  if (typeof window === "undefined") return
-  const gtag = (window as Window & { gtag?: (...args: unknown[]) => void }).gtag
-  if (typeof gtag === "function") gtag("event", event, params)
-}
-
 function sampleFromAnswers(answers?: ReportAnswers): "ecommerce" | "service" {
   const type = answers?.type
   if (type === "service" || type === "local" || type === "professional") return "service"
@@ -75,6 +85,7 @@ export function ReportForm({
   const [error, setError] = useState("")
   const [busy, setBusy] = useState(false)
   const [started, setStarted] = useState(false)
+  const [alreadyRequested, setAlreadyRequested] = useState(false)
 
   useEffect(() => {
     readAttribution()
@@ -82,7 +93,7 @@ export function ReportForm({
 
   useEffect(() => {
     if (!started) return
-    track("form_start", { form_id: "digital_footprint_report" })
+    trackEvent("form_start", { form_id: "digital_footprint_report" })
   }, [started])
 
   const markStarted = () => {
@@ -92,6 +103,7 @@ export function ReportForm({
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
     setError("")
+    setAlreadyRequested(false)
 
     if (!firstName.trim() || !lastName.trim() || !email.trim() || !website.trim() || !consent) {
       setError("First name, last name, email, website, and consent are required.")
@@ -118,15 +130,26 @@ export function ReportForm({
         }),
       })
 
-      if (!response.ok && response.status !== 409) {
+      if (response.status === 409) {
+        setAlreadyRequested(true)
+        setError("Already requested. Check your inbox for the report, or talk with us if you need another copy.")
+        trackReportSubmissionError("already_requested")
+        setBusy(false)
+        return
+      }
+
+      if (!response.ok) {
+        trackReportSubmissionError("server_error")
         throw new Error("Could not save the request")
       }
 
-      track("generate_lead", { form_id: "digital_footprint_report", method: "report_form" })
+      // Server-confirmed success only — GA4 generate_lead + Ads conversion + optional Meta/TikTok Lead.
+      trackReportSubmissionSuccess("report_form")
       const sample = sampleFromAnswers(answers)
       router.push(`/report/example?sent=1&sample=${sample}`)
     } catch {
       setError("We could not send that just now. Try again, or talk with us.")
+      trackReportSubmissionError("network_or_client")
       setBusy(false)
     }
   }
@@ -239,7 +262,20 @@ export function ReportForm({
         />
         Send the report and occasional notes about the work. You can leave the list any time.
       </label>
-      {error ? <p className="text-[14px] text-red-600">{error}</p> : null}
+      {error ? (
+        <p className={`text-[14px] ${alreadyRequested ? "text-ink/80" : "text-red-600"}`} role="alert">
+          {error}
+          {alreadyRequested ? (
+            <>
+              {" "}
+              <Link href="/book" className="font-medium text-brand hover:text-brand-hover">
+                Talk with us
+              </Link>
+              .
+            </>
+          ) : null}
+        </p>
+      ) : null}
       <button
         type="submit"
         disabled={busy}

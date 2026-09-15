@@ -1,5 +1,147 @@
 # Development Log - Terramore Website
 
+## 2026-09-15 — Launch readiness Phase 1–3 (shipped to prod)
+
+Paid-acquisition readiness for `/report` → form → delivery → SMS. **Pushed to `origin/main` for Vercel production.**
+
+### Locked decisions applied
+1. Terra IQ booking kept (not Calendly)
+2. GA4 + Google Ads conversion on success; Meta/TikTok env stubs only
+3. Duplicate **5A expanded**: any of email OR phone OR (first+last) OR business name OR website OR socials → 409 `already_requested` (normalized). Email = any prior row; other fields = **7-day** window on `digital_footprint_report` rows
+4. Real DB attribution columns (`utm_*`, `gclid`, `gbraid`, `wbraid`, `fbclid`, `ttclid`) + `phone` / `socials` + SMS markers
+5. Sendblue live; Twilio quiet fallback (unchanged `sendSms`)
+6. No external CRM
+7. Report SMS Message 1 (accept) + Message 2 (after PDF sent); Message 3 stubbed in `lib/report/sms.ts` only
+8. `/report` landing copy/design and “inbox in minutes” untouched
+9. Ads `AW-11353847408` / `XnBzCIeStfgcEPDs96Uq` via env with code defaults; fire only after server 201; no PII in analytics params
+10. GA4 `G-BQN6VCY579` kept; events: `report_cta_click`, `form_start`, `generate_lead`, `report_submission_success` / `report_submission_error`
+11. Silent `201`-on-error catch removed; insert failures return 500 (unique race → 409)
+12. Phone persisted on column when migration present
+
+### Migration
+Run in Supabase SQL Editor: `supabase/migrations/20260915_report_attribution.sql` (after `20260911_report_pipeline.sql` if not already).
+
+### Verify conversion (local / after deploy)
+1. Open `/report?gclid=test123&utm_source=google`
+2. Submit form once → Network: `POST /api/report` **201**; GA4 DebugView / Ads tag assistant: `generate_lead` + `conversion` `send_to=AW-11353847408/XnBzCIeStfgcEPDs96Uq`
+3. Submit again (same email or phone/name/site) → **409**, UI “Already requested”, **no** conversion / no second SMS
+4. With phone + Sendblue: M1 on accept; M2 after pipeline marks `sent`
+
+### Vercel / Ads checklist (Adam)
+- Set Production env: `NEXT_PUBLIC_GOOGLE_ADS_ID`, `NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_LABEL` (or rely on defaults once deployed)
+- Leave Meta/TikTok IDs empty until ready
+- Run SQL migration on dashboard Supabase (`SUPABASE_SCHEMA=website`)
+- Reactivate Google Ads billing if still canceled; wait for “Awaiting conversions” → recorded
+- Optional: create secondary “Meeting booked” conversion later (Phase 4)
+
+### Files
+- New: `supabase/migrations/20260915_report_attribution.sql`, `lib/report/normalize-lead.ts`, `lib/report/duplicates.ts`, `lib/report/sms.ts`, `lib/analytics.ts`, `components/ad-pixels.tsx`
+- Changed: `app/api/report/route.ts`, `app/api/report/generate/route.ts`, `components/report-form.tsx`, `components/digital-footprint-landing.tsx`, `app/layout.tsx`, `lib/notify.ts`, `lib/report/pipeline.ts`, `.env.example`
+
+### Remaining risks
+- Common first+last names can false-positive within 7 days
+- Free Sendblue still inbound-first for cold phones
+- Duplicate lookup scans up to 200 recent report rows (fine at launch volume)
+- Ads conversion may take hours to show in the UI after first fire
+
+## 2026-09-15 — Booking SMS campaign design + mobile Slack air
+
+### Part A — Mobile homepage hero (Slack lower)
+- **Default destination** `app/page.tsx` only (desktop unchanged).
+- Mobile hero column min-height: `100svh-18rem` → `100svh-10rem` (more cream below the CTA before Slack starts).
+- Slack wrapper margin: `mt-8` → `mt-16` on mobile (`md:mt-0` unchanged).
+- Effect: more breathing room above the Slack mock; less aggressive peek into the first viewport.
+
+### Part B — Booking SMS templates + cadence (Sendblue)
+
+**Where to edit confirm + campaign SMS copy:** `lib/booking-sms.ts` (functions `buildConfirm`, `build24h`, `build2h`, `build30m`, `build2m`). Immediate confirm is wired from `confirmBookingToUser` in `lib/notify.ts` — do not hardcode SMS there anymore.
+
+#### Email vs SMS cadence (side by side)
+
+| When | Email | SMS |
+|------|-------|-----|
+| Immediate | Confirm (time, Meet, manage, prep teaser) — **live** | Confirm (short + join) — **live** if phone + Sendblue |
+| ~5 min | Prep / what to expect — **live** (provider schedule) | **Skip** (email covers prep) |
+| 24h before | Prep + agenda + soft DFR — **live** | Short prep + DFR link if no report — **template ready, needs cron** |
+| 10h before | Today prep — **live** | **Skip** (avoid spam) |
+| 2h before | Join details — **live** | Join link — **template ready, needs cron** |
+| 30m before | Join first — **live** | Join link — **template ready, needs cron** |
+| 2m before | Starting now — **live** | Starting now + join — **template ready, needs cron** |
+
+#### Why timed SMS is not live yet
+- Resend/SendGrid can schedule email at booking time (`scheduled_at` / `send_at`).
+- **Sendblue has no schedule API** — send is on-demand only ([Sendblue notifications guide](https://www.sendblue.com/use-cases/notifications): cron / Zapier / your app).
+- This repo books via Terra IQ but has **no upcoming-bookings list** to poll. Nurture cron is day 1/3/5 email only.
+- Skeleton: `app/api/cron/booking-sms/route.ts` (auth like nurture; returns 503 + next steps). **Not** in `vercel.json` until Terra IQ can list upcoming calls + we store sent-kind idempotency.
+
+#### Media / GIF / links
+- `sendSms(..., { mediaUrl })` → Sendblue `media_url` — **API ready**.
+- URL must be **public HTTPS** with a **file extension** (`.gif`, `.png`, `.jpg`, …). No signed URLs. Optional: Sendblue CDN upload APIs.
+- **iMessage:** native attachment (images/GIF/video; keep GIFs small; iMessage up to ~100MB, recommend much smaller).
+- **SMS fallback:** often link-in-text or MMS; carrier MMS caps ~5MB; segments ~160 GSM / ~70 UCS-2 chars — Meet URLs make multi-segment normal; keep prose short.
+- **RCS:** automatic Android fallback when available; not something we configure per message.
+- In templates: leave `mediaUrl` commented until a real CDN asset exists — do not invent thumbs.
+
+#### Limits (honest)
+| Layer | Reality |
+|-------|---------|
+| Free Sendblue shared line | ~10 verified contacts; inbound-first (lead texts your number once). Bad for cold outbound to every booker. |
+| Paid dedicated line | Recommended before scaling booking SMS campaign — outbound without verify friction (still subject to carrier filtering / STOP). |
+| Carriers | Throughput, spam filters, quiet hours, MMS size — not controlled by Sendblue alone. |
+| This app | Fail soft; booking never fails on SMS. |
+
+**Plan recommendation (do not buy from this change):** dedicated Sendblue line for production outbound to new leads; design cadence here first (done); turn on cron after Terra IQ list + idempotency.
+
+#### Files
+- `app/page.tsx` — mobile Slack position
+- `lib/booking-sms.ts` — **new** SMS templates + due-window helper
+- `lib/notify.ts` — confirm SMS uses `buildBookingSms("confirm")`
+- `app/api/cron/booking-sms/route.ts` — **new** cron skeleton (503 until Terra IQ)
+
+## 2026-09-15 — `/api/v2/verify` vs contacts/verify (docs fetch)
+
+Fetched https://docs.sendblue.com/api-v2/verify/ and contacts verify docs.
+
+### Verdict
+**`/api/v2/verify` is a separate inverted-OTP product — not the free-plan messaging allowlist.**
+Do **not** use it to unblock “message this lead after booking.” Keep **`/api/v2/contacts` + `/api/v2/contacts/verify` + inbound text**.
+
+| API | Purpose | Booking / free sandbox? |
+|-----|---------|-------------------------|
+| `POST /api/v2/contacts` | Create/update contact on allowlist | Yes — required first |
+| `POST /api/v2/contacts/verify` `{ "number" }` → `{ "status": "OK" }` | “Send a verification message to a contact” | Yes — fail-soft; often blocked until inbound |
+| `/api/v2/verify/*` | Phone ownership OTP for apps | **No** — wrong product |
+
+### What `/api/v2/verify` actually is
+Inverted OTP: create a **Verify Service** (`POST /api/v2/verify/services`), then a **Verification** (`POST .../services/:sid/verifications` with `{ "to": "+1…" }`). Response includes `delivery_target: { pool_number, code, sms_deep_link }`. User texts the **code** to the **pool number** (Sendblue does not SMS them first). Poll until `approved` / `expired` / `canceled`. Optional hosted widget. Auth: same `sb-api-key-id` / `sb-api-secret-key`. Proves they control a phone for login UX — does **not** mark a free-plan contact verified for outbound messaging.
+
+### Free-plan allowlist (correct path)
+Official: add contact → they text your Sendblue number once ([sending](https://docs.sendblue.com/getting-started/sending-messages/), [receiving](https://docs.sendblue.com/getting-started/receiving-messages)).
+
+### Why Adam saw contact but no inbound
+On **free shared-line** (`+13472812048` shared across sandbox accounts):
+1. Inbound routes to *your* account only if that phone is already a **contact**.
+2. Contact create ≠ verified. Dashboard: “This contact hasn't verified yet…”
+3. Verification finishes when they **text your Sendblue number once after** they exist as a contact.
+4. Texting **before** create → inbound invisible (not a webhook bug).
+5. `contacts/verify` may fail soft on free (outbound chicken/egg); inbound text is still the finisher.
+
+### Code (local)
+`lib/sendblue.ts`: `ensureContact` → fail-soft `verifyContact` (`/api/v2/contacts/verify` only). Explicit comments that `/api/v2/verify` is not wired. Booking calls `ensureContactAndVerify`. Helper `sendblueFromNumber()` for the number to tell leads.
+
+### Tell friend RIGHT NOW
+Contact already exists unverified → text **+13472812048** again (any short message). Refresh dashboard → verified → outbound works.
+
+### Adam can call now (optional retry of verify SMS)
+```bash
+curl -X POST 'https://api.sendblue.com/api/v2/contacts/verify' \
+  -H "sb-api-key-id: $SENDBLUE_API_KEY" \
+  -H "sb-api-secret-key: $SENDBLUE_API_SECRET" \
+  -H 'Content-Type: application/json' \
+  -d '{"number":"+1FRIEND_E164"}'
+```
+If that errors on free, ignore — friend texting the line is the reliable unlock.
+
 ## 2026-09-14 — Sendblue wired (SMS + closing helpers)
 
 ### Enable
@@ -11,7 +153,7 @@ Set all three in `.env.local` / Vercel (never commit values):
 When those three are present, `sendSms` in `lib/notify.ts` uses Sendblue. Otherwise it falls back to Twilio (`TWILIO_ACCOUNT_SID` + `TWILIO_AUTH_TOKEN` + `TWILIO_FROM_NUMBER`). Prod with only Twilio keeps working. Missing both → logged skip; booking/forms never fail on SMS.
 
 ### Free vs paid
-- **Free shared-line:** ~10 verified contacts; inbound-first — `ensureContact` adds the number, then the lead must text your Sendblue number once before outbound delivers. Creating the contact alone is not enough on free.
+- **Free shared-line:** ~10 verified contacts; inbound-first — `ensureContact` + fail-soft `verifyContact`, then the lead must text your Sendblue number once before outbound delivers. Creating the contact alone is not enough on free.
 - **Dedicated / paid:** removes that allowlist; outbound to any number (subject to normal carrier rules).
 
 ### What we wired for closing
@@ -19,7 +161,7 @@ When those three are present, `sendSms` in `lib/notify.ts` uses Sendblue. Otherw
 |--------|--------|
 | Booking / lead confirm SMS via `sendSms` | **Live** → Sendblue when configured |
 | Typing indicator before outbound SMS | **Live** (fail soft; often no-ops on first message / SMS) |
-| `ensureContact` on successful booking with phone | **Live** (fail soft; grows free allowlist) |
+| `ensureContact` + `verifyContact` on booking with phone | **Live** (fail soft; verify may fail on free / no outbound) |
 | Optional `mediaUrl` on `sendSms` / `sendblueSendMessage` | **API ready** — pass only real CDN URLs; we do not invent Loom/report thumbs in SMS today |
 | `markRead`, `sendReaction` | **Helpers exported** — use when inbound webhooks exist |
 | `sendCarousel`, `evaluateService` | **Helpers exported** — carousel needs V2 line + 2–20 HTTPS images; RCS is automatic fallback on Android when available |

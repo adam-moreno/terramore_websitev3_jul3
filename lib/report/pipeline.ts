@@ -2,6 +2,7 @@ import { getServerSupabase, isMissingColumnError } from "@/lib/supabase-server"
 import { ADMIN_EMAIL, REPLY_TO, emailProvider, postSlack, sendEmail } from "@/lib/notify"
 import { footprintToFacts, readFootprint } from "@/lib/report/footprint"
 import { renderReportPdf } from "@/lib/report/pdf"
+import { sendReportDeliveredSms } from "@/lib/report/sms"
 import { modelProvider, reportToText, writeReport } from "@/lib/report/write"
 
 export type ReportRequest = {
@@ -9,6 +10,7 @@ export type ReportRequest = {
   email: string
   businessName: string
   website: string | null
+  phone?: string | null
   answers?: string | null
 }
 
@@ -122,6 +124,22 @@ export async function runReportPipeline(request: ReportRequest): Promise<Pipelin
     await saveReportState(request.email, "sent", { text })
     console.info(`[report] sent to ${request.email} via ${emailResult.channel} using ${report.model} in ${Date.now() - started}ms`)
     await postSlack(`Report sent to ${request.name} <${request.email}> for ${subjectName} (${report.model}, ${Math.round((Date.now() - started) / 1000)}s). Copy is in your inbox.`)
+
+    // Message 2 — fail soft; never blocks delivery success.
+    let phone = request.phone || null
+    if (!phone) {
+      const supabase = getServerSupabase()
+      if (supabase) {
+        const { data } = await supabase.from("free_courses_signups").select("phone,company").eq("email", request.email).maybeSingle()
+        phone = (data?.phone as string | null) || null
+        if (!phone && data?.company) {
+          const match = String(data.company).match(/phone:([+\d().\-\s]+)/i)
+          if (match) phone = match[1]
+        }
+      }
+    }
+    await sendReportDeliveredSms({ email: request.email, name: request.name, phone })
+
     return { ok: true, status: "sent", model: report.model }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)

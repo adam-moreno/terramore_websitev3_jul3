@@ -1,11 +1,22 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import { AdPixels } from '@/components/ad-pixels'
 import { GoogleAnalytics } from '@/components/google-analytics'
 import { SiteChrome } from '@/components/site-header'
+import {
+  GA4_MEASUREMENT_ID,
+  GOOGLE_ADS_ID_DEFAULT,
+} from '@/lib/analytics'
 
 // Vercel has the token under the misspelled name GOOGLE_SITE_VERIFICAITON; accept both so either works.
 const googleSiteVerification =
   process.env.GOOGLE_SITE_VERIFICATION?.trim() || process.env.GOOGLE_SITE_VERIFICAITON?.trim() || undefined
+
+const googleAdsId = (
+  process.env.NEXT_PUBLIC_GOOGLE_ADS_ID ||
+  process.env.NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_ID ||
+  GOOGLE_ADS_ID_DEFAULT
+).trim()
 
 export const metadata: Metadata = {
   ...(googleSiteVerification ? { verification: { google: googleSiteVerification } } : {}),
@@ -69,15 +80,16 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <head>
-        {/* Google tag (gtag.js) - single tag on every page, first in head */}
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-BQN6VCY579"></script>
+        {/* Google tag (gtag.js) — GA4 + Google Ads config (conversion fires only after report success) */}
+        <script async src={`https://www.googletagmanager.com/gtag/js?id=${GA4_MEASUREMENT_ID}`}></script>
         <script
           dangerouslySetInnerHTML={{
             __html: `
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
               gtag('js', new Date());
-              gtag('config', 'G-BQN6VCY579');
+              gtag('config', '${GA4_MEASUREMENT_ID}');
+              gtag('config', '${googleAdsId}');
             `,
           }}
         />
@@ -90,6 +102,7 @@ export default function RootLayout({
       </head>
       <body className="antialiased bg-cream text-ink">
         <GoogleAnalytics />
+        <AdPixels />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

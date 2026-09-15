@@ -21,8 +21,10 @@ function authorized(request: NextRequest): NextResponse | null {
   return null
 }
 
-const LEAD_COLUMNS = "id,first_name,last_name,email,phone,company,email_consent,signup_source,course_type,signup_date,status"
-const REPORT_COLUMNS = "business_name,website,report_status,report_text,report_sent_at,report_error"
+const LEAD_COLUMNS =
+  "id,first_name,last_name,email,phone,company,email_consent,signup_source,course_type,signup_date,status"
+const REPORT_COLUMNS =
+  "business_name,website,socials,report_status,report_text,report_sent_at,report_error,utm_source,utm_medium,utm_campaign,utm_content,utm_term,gclid,gbraid,wbraid,fbclid,ttclid,report_sms_m1_sent_at,report_sms_m2_sent_at"
 const TALK_COLUMNS = "id,location,business_type,revenue,team_size,goal,timeline,budget,name,email,phone,message,application_date,status"
 
 async function probe(table: string, columns: string): Promise<{ ok: boolean; error?: string }> {
@@ -56,7 +58,10 @@ export async function GET(request: NextRequest) {
       free_courses_signups: leads,
       free_courses_signups_report_columns: reportColumns.ok
         ? reportColumns
-        : { ...reportColumns, hint: "Run supabase/migrations/20260911_report_pipeline.sql" },
+        : {
+            ...reportColumns,
+            hint: "Run supabase/migrations/20260911_report_pipeline.sql then 20260915_report_attribution.sql",
+          },
       partner_applications: talks,
     },
     keys: {
@@ -84,22 +89,40 @@ export async function POST(request: NextRequest) {
   let name = String(body.name || "").trim()
   let businessName = String(body.businessName || "").trim()
   let website = String(body.website || "").trim()
+  let phone = String(body.phone || "").trim()
 
-  if (!name || !website || !businessName) {
+  if (!name || !website || !businessName || !phone) {
     const supabase = getServerSupabase()
     if (supabase) {
-      const { data } = await supabase.from("free_courses_signups").select("first_name,last_name,company").eq("email", email).maybeSingle()
+      const { data } = await supabase
+        .from("free_courses_signups")
+        .select("first_name,last_name,company,business_name,website,phone")
+        .eq("email", email)
+        .maybeSingle()
       if (data) {
         if (!name) name = [data.first_name, data.last_name].filter((part) => part && part !== "-").join(" ")
-        // company is stored as "Business · https://site" by /api/report
+        if (!businessName && data.business_name) businessName = String(data.business_name)
+        if (!website && data.website) website = String(data.website)
+        if (!phone && data.phone) phone = String(data.phone)
+        // Legacy: company is stored as "Business · https://site" by older /api/report
         const [companyName, companySite] = String(data.company || "").split(" · ")
         if (!businessName && companyName && !/^https?:\/\//.test(companyName)) businessName = companyName
         if (!website) website = companySite || (/^https?:\/\//.test(companyName || "") ? companyName : "")
+        if (!phone && data.company) {
+          const match = String(data.company).match(/phone:([+\d().\-\s]+)/i)
+          if (match) phone = match[1]
+        }
       }
     }
   }
 
   if (!name) name = "there"
-  const result = await runReportPipeline({ name, email, businessName, website: website || null })
+  const result = await runReportPipeline({
+    name,
+    email,
+    businessName,
+    website: website || null,
+    phone: phone || null,
+  })
   return NextResponse.json(result, { status: result.ok ? 200 : 502 })
 }

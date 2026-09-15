@@ -6,12 +6,29 @@
  *   SENDBLUE_API_SECRET   → header sb-api-secret-key
  *   SENDBLUE_FROM_NUMBER  → from_number (E.164 line on the account)
  *
- * Free shared-line sandbox: outbound only after the recipient is a verified contact
- * (create via ensureContact, then they text your Sendblue number once). Dedicated /
- * paid plans remove that inbound-first allowlist.
+ * Free shared-line sandbox — two different “verify” APIs (do not confuse):
  *
- * Wired in product flows today: send message (+ optional media_url), typing indicator
- * before outbound SMS, ensureContact on booking.
+ * 1) Contact allowlist (THIS file uses this):
+ *    POST /api/v2/contacts          → create/update contact
+ *    POST /api/v2/contacts/verify   → “Send a verification message to a contact”
+ *    Then the lead must text SENDBLUE_FROM_NUMBER once to finish verification.
+ *    Docs: https://docs.sendblue.com/api/resources/contacts/methods/verify
+ *    Official free-plan path: add contact → they text your Sendblue number once
+ *    (https://docs.sendblue.com/getting-started/sending-messages/).
+ *
+ * 2) Sendblue Verify product (NOT used for booking / free-plan messaging):
+ *    /api/v2/verify/* — inverted OTP: create a service, create a verification,
+ *    show user a code + pool_number, they text the code; poll until approved.
+ *    Docs: https://docs.sendblue.com/api-v2/verify/
+ *    That product proves phone ownership for login/signup UX. It does not replace
+ *    the free-plan contact allowlist and is intentionally not wired here.
+ *
+ * Shared free lines only route inbound to your account once the number is a
+ * contact; texting before create is invisible. Dedicated / paid remove allowlist.
+ *
+ * Wired in product flows today: send message (+ optional media_url), typing
+ * indicator before outbound SMS, ensureContact + fail-soft verifyContact on booking.
+ * There is no send-at / schedule parameter — timed SMS needs app cron (see lib/booking-sms.ts).
  *
  * Exported for later closing sequences (not called from booking/lead paths yet):
  *   markRead, sendReaction — inbound reply UX
@@ -41,6 +58,11 @@ function credentials(): Creds | null {
 
 export function sendblueConfigured(): boolean {
   return Boolean(credentials())
+}
+
+/** E.164 Sendblue line from env — tell leads to text this once on free shared-line. */
+export function sendblueFromNumber(): string | null {
+  return credentials()?.from ?? null
 }
 
 /** Same rules as `normalizePhone` in lib/notify (kept local to avoid a circular import). */
@@ -254,6 +276,61 @@ export async function ensureContact(input: {
     },
     creds,
   )
+}
+
+/**
+ * POST /api/v2/contacts/verify — free-plan contact allowlist only.
+ * Body: `{ "number": "+1…" }` → `{ "status": "OK" }` when accepted.
+ * Asks Sendblue to send a verification message. On free shared-line this often
+ * fails (outbound blocked until verified — chicken/egg); always fail soft.
+ * Completing verification still requires the contact to text SENDBLUE_FROM_NUMBER.
+ *
+ * Not /api/v2/verify (OTP product). See file header.
+ */
+export async function verifyContact(phone: string): Promise<SendblueResult> {
+  const creds = credentials()
+  if (!creds) return skip("Sendblue not configured")
+
+  const number = toE164(phone)
+  if (!number) return skip("no usable phone number")
+
+  return post("/api/v2/contacts/verify", { number }, creds)
+}
+
+/**
+ * Create (or update) contact, then best-effort contacts/verify. Never throws;
+ * safe for fire-and-forget from booking. Verify failure does not undo create.
+ * Free sandbox: after this, lead still texts SENDBLUE_FROM_NUMBER once.
+ */
+export async function ensureContactAndVerify(input: {
+  phone: string
+  firstName?: string
+  lastName?: string
+  tags?: string[]
+  updateIfExists?: boolean
+}): Promise<SendblueResult> {
+  const created = await ensureContact(input)
+  if (!created.ok && !created.skipped) {
+    // Still try verify — contact may already exist from a prior booking.
+    const verified = await verifyContact(input.phone)
+    if (verified.ok) return verified
+    return created
+  }
+  if (created.skipped) return created
+
+  const verified = await verifyContact(input.phone)
+  const from = credentials()?.from
+  if (!verified.ok) {
+    console.info(
+      `[sendblue] contacts/verify soft-failed (expected on free if outbound blocked): ${verified.error || "unknown"}. ` +
+        `Lead must text ${from || "SENDBLUE_FROM_NUMBER"} once to finish allowlist verify.`,
+    )
+  } else {
+    console.info(
+      `[sendblue] contacts/verify accepted; if dashboard still shows unverified, lead must text ${from || "SENDBLUE_FROM_NUMBER"} once.`,
+    )
+  }
+  return created
 }
 
 /**

@@ -77,10 +77,11 @@ export default function TerramoreHomepage() {
 
         {/*
           Mobile (Lindy rhythm): generous header→headline air (pt-36), tight message stack,
-          then a top-aligned min-height so Slack only peeks (~7rem) into the first viewport.
-          Do not justify-center on mobile. Desktop tall centered column unchanged.
+          then a taller top-aligned min-height so Slack sits lower (more cream air above;
+          less peek into the first viewport). Do not justify-center on mobile.
+          Desktop tall centered column unchanged.
         */}
-        <div className="relative z-20 flex min-h-[calc(100svh-18rem)] flex-col justify-start md:-mt-28 md:min-h-[calc(100svh-10.75rem)] md:justify-center md:pt-28">
+        <div className="relative z-20 flex min-h-[calc(100svh-10rem)] flex-col justify-start md:-mt-28 md:min-h-[calc(100svh-10.75rem)] md:justify-center md:pt-28">
           <div className="page-shell relative z-20 text-center">
             <div
               className="mx-auto flex w-full max-w-[22.5rem] flex-col items-center sm:max-w-[28rem] md:max-w-none md:inline-flex"
@@ -131,7 +132,7 @@ export default function TerramoreHomepage() {
           <div className="absolute inset-x-0 top-[42%] h-[28%] bg-gradient-to-b from-cream via-white/55 to-cream" />
           <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-b from-transparent to-cream" />
         </div>
-        <div className="page-shell relative z-20 mt-8 pb-10 md:mt-0 md:pb-24">
+        <div className="page-shell relative z-20 mt-16 pb-10 md:mt-0 md:pb-24">
           <div className="mx-auto w-full max-w-[972px]">
             <HeroAnalytics />
           </div>

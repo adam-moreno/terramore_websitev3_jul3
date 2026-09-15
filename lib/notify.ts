@@ -15,9 +15,10 @@
  *                      TWILIO_AUTH_TOKEN, TWILIO_FROM_NUMBER). Failures never throw.
  */
 
+import { buildBookingSms, bookingSmsEnabled } from "./booking-sms"
 import { emailShell, emailButton, emailP, emailDetail, emailSignoff } from "./email-template"
 import {
-  ensureContact,
+  ensureContactAndVerify,
   sendTypingIndicator,
   sendblueConfigured,
   sendblueSendMessage,
@@ -425,8 +426,10 @@ export async function confirmLeadToUser(lead: Lead): Promise<SendResult[]> {
         "Terramore",
       ]
 
+  // Report SMS Message 1 is sent by lib/report/sms.ts (approved copy + idempotency).
+  // Talk forms still get a short SMS here when a phone is present.
   const sms = isReport
-    ? `Terramore: we got it, ${first}. Your report usually lands within a few minutes.`
+    ? null
     : `Terramore: we got it, ${first}. We read the site before we reply, usually within one business day.`
 
   const html = isReport
@@ -457,7 +460,9 @@ export async function confirmLeadToUser(lead: Lead): Promise<SendResult[]> {
 
   return Promise.all([
     sendEmail({ to: lead.email, subject, text: body.join("\n"), html }),
-    lead.phone ? sendSms(lead.phone, sms) : Promise.resolve(skip("sms", "no phone on this form")),
+    sms && lead.phone
+      ? sendSms(lead.phone, sms)
+      : Promise.resolve(skip("sms", isReport ? "report sms handled separately" : "no phone on this form")),
   ])
 }
 
@@ -538,7 +543,8 @@ export async function confirmBookingToUser(b: BookingNotice): Promise<SendResult
     "Adam Moreno",
     "Terramore",
   ].join("\n")
-  const sms = `Terramore: you are booked, ${first}. ${timeLine}.${b.meetUrl ? ` Join: ${b.meetUrl}` : ""}`
+  // SMS body: edit `lib/booking-sms.ts` (buildConfirm), not here.
+  const smsBuilt = bookingSmsEnabled("confirm") ? buildBookingSms("confirm", b) : null
 
   const html = emailShell({
     heading: "You are booked",
@@ -557,11 +563,12 @@ export async function confirmBookingToUser(b: BookingNotice): Promise<SendResult
     ].join(""),
   })
 
-  // Free-plan allowlist: best-effort contact create so this phone can receive SMS after
-  // they text the Sendblue line once. Never blocks confirm email / booking success.
+  // Free-plan allowlist: ensureContact + fail-soft POST /api/v2/contacts/verify
+  // (not /api/v2/verify OTP). Lead still texts SENDBLUE_FROM_NUMBER once on shared free.
+  // Never blocks confirm email / booking success.
   if (b.phone && sendblueConfigured()) {
     const parts = b.name.trim().split(/\s+/)
-    void ensureContact({
+    void ensureContactAndVerify({
       phone: b.phone,
       firstName: parts[0] || first,
       lastName: parts.length > 1 ? parts.slice(1).join(" ") : undefined,
@@ -572,7 +579,9 @@ export async function confirmBookingToUser(b: BookingNotice): Promise<SendResult
 
   return Promise.all([
     sendEmail({ to: b.email, subject: `Booked: your call with Adam, ${timeLine}`, text, html }),
-    b.phone ? sendSms(b.phone, sms) : Promise.resolve(skip("sms", "no phone on this booking")),
+    b.phone && smsBuilt
+      ? sendSms(b.phone, smsBuilt.body, { mediaUrl: smsBuilt.mediaUrl })
+      : Promise.resolve(skip("sms", b.phone ? "booking confirm sms disabled" : "no phone on this booking")),
   ])
 }
 
