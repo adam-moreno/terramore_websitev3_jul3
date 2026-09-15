@@ -23,8 +23,9 @@ function authorized(request: NextRequest): NextResponse | null {
 
 const LEAD_COLUMNS =
   "id,first_name,last_name,email,phone,company,email_consent,signup_source,course_type,signup_date,status"
-const REPORT_COLUMNS =
-  "business_name,website,socials,report_status,report_text,report_sent_at,report_error,utm_source,utm_medium,utm_campaign,utm_content,utm_term,gclid,gbraid,wbraid,fbclid,ttclid,report_sms_m1_sent_at,report_sms_m2_sent_at"
+const REPORT_COLUMNS = "business_name,website,report_status,report_text,report_sent_at,report_error"
+const ATTRIBUTION_COLUMNS =
+  "socials,utm_source,utm_medium,utm_campaign,utm_content,utm_term,gclid,gbraid,wbraid,fbclid,ttclid,report_sms_m1_sent_at,report_sms_m2_sent_at"
 const TALK_COLUMNS = "id,location,business_type,revenue,team_size,goal,timeline,budget,name,email,phone,message,application_date,status"
 
 async function probe(table: string, columns: string): Promise<{ ok: boolean; error?: string }> {
@@ -45,9 +46,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ slack: mode, ...result }, { status: result.ok ? 200 : 502 })
   }
 
-  const [leads, reportColumns, talks] = await Promise.all([
+  const [leads, reportColumns, attributionColumns, talks] = await Promise.all([
     probe("free_courses_signups", LEAD_COLUMNS),
     probe("free_courses_signups", REPORT_COLUMNS),
+    probe("free_courses_signups", ATTRIBUTION_COLUMNS),
     probe("partner_applications", TALK_COLUMNS),
   ])
 
@@ -58,10 +60,10 @@ export async function GET(request: NextRequest) {
       free_courses_signups: leads,
       free_courses_signups_report_columns: reportColumns.ok
         ? reportColumns
-        : {
-            ...reportColumns,
-            hint: "Run supabase/migrations/20260911_report_pipeline.sql then 20260915_report_attribution.sql",
-          },
+        : { ...reportColumns, hint: "Run supabase/migrations/20260911_report_pipeline.sql" },
+      free_courses_signups_attribution_columns: attributionColumns.ok
+        ? attributionColumns
+        : { ...attributionColumns, hint: "Run supabase/migrations/20260915_report_attribution.sql" },
       partner_applications: talks,
     },
     keys: {
