@@ -28,7 +28,7 @@ export default function BookPage() {
             </ul>
           </div>
           <div className="rounded-[1.75rem] bg-white p-7 shadow-[0_8px_30px_rgba(15,30,46,0.04)] md:p-9">
-            <BookingFlow />
+            <BookingFlow source="book" />
           </div>
         </div>
       </section>

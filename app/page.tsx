@@ -53,7 +53,10 @@ function ScheduleFab() {
           : "pointer-events-none translate-y-3 opacity-0 md:pointer-events-auto md:translate-y-0 md:opacity-100"
       }`}
     >
-      <BookingLink className="inline-flex h-11 items-center rounded-2xl bg-brand px-4 text-[14px] font-medium text-white shadow-lg transition-shadow hover:bg-brand-hover hover:shadow-xl">
+      <BookingLink
+        source="floating_cta"
+        className="inline-flex h-11 items-center rounded-2xl bg-brand px-4 text-[14px] font-medium text-white shadow-lg transition-shadow hover:bg-brand-hover hover:shadow-xl"
+      >
         <Calendar className="mr-2 h-4 w-4" aria-hidden />
         Schedule
       </BookingLink>
@@ -115,6 +118,7 @@ export default function TerramoreHomepage() {
               <div className="mt-6 flex flex-col items-center md:mt-8">
                 <BookingLink
                   label="Let's talk"
+                  source="homepage"
                   className="inline-flex h-11 items-center justify-center rounded-full bg-brand px-6 text-[16px] font-medium text-white hover:bg-brand-hover md:h-10 md:px-4"
                 />
                 <div className="mt-2.5 flex flex-col items-center gap-1 text-center text-[13px] font-medium text-ink/45">

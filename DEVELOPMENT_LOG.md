@@ -1,5 +1,51 @@
 # Development Log - Terramore Website
 
+## 2026-09-16 — Booking success: "Add to Calendar" with Apple / Outlook / Google logo buttons
+
+- **Was:** paragraph ("A calendar invite and a confirmation email are on the way…"), a Google Calendar pill, a Download .ics pill, then a grey helper line about Apple/Outlook/Android. Read as clutter.
+- **Now:** one short line ("Confirmation email on the way. A short prep note follows in a few minutes." — accurate: `app/api/booking/route.ts` sends `confirmBookingToUser` immediately and `sendBookingPrepEmail` scheduled +5 min), then an **ADD TO CALENDAR** kicker and three equal `grid-cols-3` cards with inline SVG marks + label: **Apple Calendar** (downloads the existing `.ics` Blob — Apple Calendar / iOS open it natively), **Outlook** (new `outlookCalendarUrl` in `lib/ics.ts` → `https://outlook.live.com/calendar/0/deeplink/compose?path=/calendar/action/compose&rru=addevent&subject&startdt&enddt&body&location`, ISO datetimes), **Google Calendar** (existing `googleCalendarUrl`). Platform-advice sentence removed.
+- Shared as `AddToCalendar` in `components/booking-flow.tsx`; `components/manage-booking.tsx` uses the same block above Move it / Cancel. Success view still has no Move or cancel link and no Email Adam.
+- No `webcal://` — there is no hosted ics URL, and webcal is for subscriptions.
+
+## 2026-09-16 — Booking analytics: `meeting_booked` GA4 event, `source` tag, ad attribution in Terra IQ note
+
+Until now nothing fired in GA4 when a call was booked, and a Google Ad → report → booking path lost its gclid/UTMs at the booking step. This adds one GA4 event, a lightweight entry-point tag, and folds attribution into the note Terra IQ already stores. No Supabase schema change, no Terra IQ API change.
+
+**GA4 event.** `BookingFlow.submit` calls `trackEvent("meeting_booked", …)` from `lib/analytics.ts` exactly once, only when `POST /api/booking` is `ok` and returns a non-empty string `id` (the same branch that calls `setDone`). Never on 409 / non-ok / catch. Params: `booking_id`, `business_type`, `stage`, `source`, `page_path`. No name, email, phone, business, website, socials, time, Meet URL, or manage token.
+
+**`source`.** New optional `source?: string` on `BookingFlow` → `BookingPopup` → `BookingLink`; no existing caller breaks. Tagged: `/book` page → `book`; `SiteHeader` Let's talk (mobile + desktop) → `header`; `SiteChrome` report-funnel header, `digital-footprint-landing` closing CTA, `example-report-shell` "Talk through my report" → `report`; homepage hero → `homepage`; homepage Schedule FAB → `floating_cta`. Untagged callers (`DualCtas`, `pricing`, `LindyPage`) fall back to the pathname: `/` → `homepage`, `/book` → `book`, `/report*` → `report`, otherwise the raw path. `DualCtas` was left untagged on purpose because it renders on `/`, `/about`, story and example-report pages; the pathname fallback labels each correctly.
+
+**Attribution passthrough.** On submit the client reads the same keys report-form stores under sessionStorage `tm_report_attribution`: `gclid`, `gbraid`, `wbraid`, `utm_source/medium/campaign/content/term`, `fbclid`, `ttclid`. Merge order is stored values first, current URL values on top (a fresh click wins per key; an earlier gclid survives a clean URL). Sent as an optional `attribution` object plus `source`.
+
+**Verification finding + fix.** `report-form.tsx` only wrote `tm_report_attribution` from `ReportForm`'s mount effect, and `ReportForm` renders only inside the open `ReportPopup`. So a visitor landing on `/report?gclid=…` who clicked "Let's talk" (or any nav link) without opening the report form, then client-navigated to a clean URL, lost the ad context before booking. Fix: new `lib/attribution.ts` (`ATTR_KEYS`, `readStoredAttribution`, `readUrlAttribution`, `mergedAttribution`, `captureAttributionFromUrl`). `components/google-analytics.tsx` (client component already in the root layout, runs on mount and every `pathname` change) now calls `captureAttributionFromUrl()`, which writes `{...stored, ...url}` only when the URL carries at least one whitelisted key, so a later clean-URL route never clears storage. `booking-flow.tsx` uses `mergedAttribution()`. `report-form.tsx` unchanged (same key, same shape). Checked with a stubbed-window script: landing → clean nav → merged read, empty URL values never wipe stored ones, non-whitelisted params dropped, bad JSON → `{}`. Redirects: `https://terramore.io/report?gclid=…` answers 308 → `https://www.terramore.io/report?gclid=…` (query preserved; verified with curl), and Next redirects in `next.config.mjs` (`/partner` → `/book`) also keep the query. sessionStorage is per tab and per origin; the apex→www hop happens before any page runs, so nothing is stored on the apex origin and the params arrive intact on `www`. A new tab or a different browser starts empty. `app/api/booking/route.ts` whitelists those keys (string, trimmed, ≤200 chars, newlines/semicolons stripped), validates `source` (`^[a-z0-9_\-/]+$`, ≤80), and appends `Source: …` and `Attribution: k=v; …` lines to the `note` sent to Terra IQ. Slack admin notice shows the same note (only place `note` renders). `enrollLead.job` keeps the plain visitor note because nurture emails quote `job` back to the lead.
+
+**Not done, on purpose.** No new Google Ads conversion for bookings; `trackGoogleAdsReportConversion` and the Ads label are untouched. `report-form.tsx` attribution capture and `lib/analytics.ts` report helpers unchanged. Attribution is not added to GA4 beyond `source`.
+
+**Limitations.** Attribution survives only within one tab session (sessionStorage) and only if the visitor landed with UTMs/click IDs; a later direct visit in a new tab books without it. `source` reflects the booking entry point (`homepage`, `header`, …), not the original landing page; the ad context travels in `Attribution:`. GA4 DebugView still needs a live check of `meeting_booked`. `app/__cal-preview/` (untracked scratch route used to eyeball `BookingSuccess` during the calendar work) was deleted rather than shipped. `pnpm build` passed; `tsc --noEmit` errors are all pre-existing (`components/ui/*`, `BookingApiResult` narrowing) and `next.config` has `ignoreBuildErrors`.
+
+### Files
+- `components/booking-flow.tsx` — `source` prop, `readBookingAttribution`, `sourceFromPath`, `meeting_booked` event, `id` required before success
+- `components/booking-popup.tsx` — `source` plumbed through `BookingPopup` / `BookingLink`
+- `lib/attribution.ts` (new) — shared key/whitelist, stored+URL merge, `captureAttributionFromUrl`
+- `components/google-analytics.tsx` — capture attribution on mount and every route change
+- `app/api/booking/route.ts` — whitelist `attribution` + `source`, `noteWithContext`, nurture keeps plain note
+- `app/book/page.tsx`, `app/page.tsx`, `components/site-header.tsx`, `components/digital-footprint-landing.tsx`, `components/example-report-shell.tsx` — `source` tags
+
+## 2026-09-15 — Report delivery email: HTML button, no report text in body
+
+The Digital Footprint delivery email (`runReportPipeline` → `sendEmail`) used to append the whole report as plain text under a `----` rule and linked `/book` as bare text. Now it is a short branded HTML email (same `emailShell` / `emailButton` / `emailP` / `emailSignoff` wrapper as the confirmation and booking emails) with a plain-text fallback. The PDF attachment is the deliverable; the report text is still stored on the Supabase row via `saveReportState` and is no longer in the email body. The CTA is a real button, "Talk through my report" → `https://www.terramore.io/book`, using `SITE_URL` from `lib/booking-api.ts` because the canonical host is `www` (the apex 308s to it).
+
+### Files
+- `lib/report/pipeline.ts` — new body copy, `html` via `emailShell`, `BOOK_URL` from `SITE_URL`; PDF generation and footprint untouched
+
+## 2026-09-15 — Report submit: success popup → home (not example)
+
+Post-submit no longer sends users to `/report/example?sent=1`. On server 201, conversion tracking still fires, then the report popup swaps to a short confirmation (“Your report is on the way” / “In your inbox in minutes”), auto-redirects to `/` after ~3s, or immediately on Done / backdrop / Escape. Sample pages and `?sent=1` banner remain for deep links / browsing.
+
+### Files
+- `components/report-form.tsx` — `onSuccess` after 201; removed example `router.push`
+- `components/report-popup.tsx` — success phase UI + home redirect
+
 ## 2026-09-15 — Homepage mobile Slack: equal side cream + smidge higher
 
 Equalize mobile Slack L/R breathing room and raise the peek one more step.

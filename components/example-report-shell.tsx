@@ -48,6 +48,7 @@ export function ExampleReportShell({
             </p>
             <BookingLink
               label="Talk through my report"
+              source="report"
               onClick={() => track("select_content", { content_type: "cta", cta_id: "report_sent_talk" })}
               className="mt-4 inline-flex h-10 items-center justify-center rounded-full bg-brand px-5 text-[14px] font-medium text-white hover:bg-brand-hover"
             />

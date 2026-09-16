@@ -1,4 +1,6 @@
 import { getServerSupabase, isMissingColumnError } from "@/lib/supabase-server"
+import { SITE_URL } from "@/lib/booking-api"
+import { emailButton, emailP, emailShell, emailSignoff } from "@/lib/email-template"
 import { ADMIN_EMAIL, REPLY_TO, emailProvider, postSlack, sendEmail } from "@/lib/notify"
 import { footprintToFacts, readFootprint } from "@/lib/report/footprint"
 import { renderReportPdf } from "@/lib/report/pdf"
@@ -15,6 +17,9 @@ export type ReportRequest = {
 }
 
 export type ReportStatus = "needs_keys" | "generating" | "sent" | "failed"
+
+/** Canonical host is www (apex 308s to it), so the button never bounces through a redirect. */
+const BOOK_URL = `${SITE_URL}/book`
 
 export type PipelineResult = {
   ok: boolean
@@ -90,6 +95,8 @@ export async function runReportPipeline(request: ReportRequest): Promise<Pipelin
 
     const first = request.name.split(/\s+/)[0] || "there"
     const subjectName = report.businessName
+    const scopeLine = "It only says what we could see on the public web. If a chapter is thin, reply with a link and we read it."
+    // The PDF is the deliverable; the report text stays on the Supabase row, not in the email body.
     const emailResult = await sendEmail({
       to: request.email,
       bcc: ADMIN_EMAIL,
@@ -99,19 +106,26 @@ export async function runReportPipeline(request: ReportRequest): Promise<Pipelin
       text: [
         `Hi ${first},`,
         "",
-        `Here is the Digital Footprint report for ${subjectName}. The PDF is attached.`,
+        `Your Digital Footprint report for ${subjectName} is attached as a PDF.`,
         "",
-        "It says only what we could see on the public web. Anything marked Not found was not visible to us. If a chapter is thin, reply with a link and we read it.",
+        scopeLine,
         "",
-        "Want it fixed? Pick a time: https://terramore.io/book",
+        `Talk through my report: ${BOOK_URL}`,
         "",
         "Adam Moreno",
         "Terramore",
-        "",
-        "----",
-        "",
-        text,
       ].join("\n"),
+      html: emailShell({
+        heading: "Your Digital Footprint report",
+        previewText: `${subjectName}: the PDF is attached.`,
+        bodyHtml: [
+          emailP(`Hi ${first},`),
+          emailP(`Your Digital Footprint report for ${subjectName} is attached as a PDF.`),
+          emailP(scopeLine),
+          emailButton("Talk through my report", BOOK_URL),
+          emailSignoff("Adam Moreno", "Terramore"),
+        ].join(""),
+      }),
       attachments: [{ filename: safeFilename(subjectName), content: pdf, contentType: "application/pdf" }],
     })
 

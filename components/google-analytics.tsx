@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef } from 'react'
+import { captureAttributionFromUrl } from '@/lib/attribution'
 
 declare global {
   interface Window {
@@ -19,6 +20,9 @@ export function GoogleAnalytics() {
   const isFirstRun = useRef(true)
 
   useEffect(() => {
+    // Keep gclid/UTMs for this tab on any landing page (not only when the report form opens),
+    // so a later booking from a clean URL still carries the ad context. Runs before the gtag guard on purpose.
+    captureAttributionFromUrl()
     if (typeof window === 'undefined' || !window.gtag) return
     if (isFirstRun.current) {
       isFirstRun.current = false

@@ -1,7 +1,6 @@
 "use client"
 
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { FormEvent, useEffect, useState } from "react"
 import {
   trackEvent,
@@ -56,24 +55,20 @@ function readAttribution(): Record<string, string> {
   }
 }
 
-function sampleFromAnswers(answers?: ReportAnswers): "ecommerce" | "service" {
-  const type = answers?.type
-  if (type === "service" || type === "local" || type === "professional") return "service"
-  return "ecommerce"
-}
-
 export function ReportForm({
   className = "",
   onCancel,
+  onSuccess,
   answers,
   plain = false,
 }: {
   className?: string
   onCancel?: () => void
+  /** Called after server 201 and conversion tracking. Parent shows confirmation + home redirect. */
+  onSuccess?: () => void
   answers?: ReportAnswers
   plain?: boolean
 }) {
-  const router = useRouter()
   const [firstName, setFirstName] = useState("")
   const [lastName, setLastName] = useState("")
   const [email, setEmail] = useState("")
@@ -145,8 +140,7 @@ export function ReportForm({
 
       // Server-confirmed success only — GA4 generate_lead + Ads conversion + optional Meta/TikTok Lead.
       trackReportSubmissionSuccess("report_form")
-      const sample = sampleFromAnswers(answers)
-      router.push(`/report/example?sent=1&sample=${sample}`)
+      onSuccess?.()
     } catch {
       setError("We could not send that just now. Try again, or talk with us.")
       trackReportSubmissionError("network_or_client")

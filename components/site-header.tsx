@@ -312,6 +312,7 @@ export function SiteHeader() {
           <div className="ml-auto flex items-center gap-1.5 lg:hidden">
             <BookingLink
               label="Let's talk"
+              source="header"
               className="shrink-0 rounded-lg bg-brand px-2.5 py-1.5 text-[12px] font-medium text-white hover:bg-brand-hover"
             />
             <button
@@ -342,6 +343,7 @@ export function SiteHeader() {
             </a>
             <BookingLink
               label="Let's talk"
+              source="header"
               className="rounded-full bg-brand px-4 py-2 text-[13px] font-medium text-white hover:bg-brand-hover"
             />
           </div>
@@ -409,6 +411,7 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
               </a>
               <BookingLink
                 label="Let's talk"
+                source="report"
                 className="inline-flex h-9 items-center justify-center rounded-full bg-brand px-4 text-[14px] font-medium text-white hover:bg-brand-hover"
               />
             </div>

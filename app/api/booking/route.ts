@@ -1,7 +1,8 @@
 /**
  * POST /api/booking
- * Body: { name, email, phone?, business?, website?, note?, startIso, tz }
+ * Body: { name, email, phone?, business?, website?, note?, startIso, tz, source?, attribution? }
  * Books through Terra IQ, then tells Adam (Slack) and the lead (email, SMS with a phone).
+ * `source` and whitelisted `attribution` keys (gclid/UTMs) are folded into the Terra IQ note; no schema change.
  */
 
 import { NextRequest, NextResponse } from "next/server"
@@ -22,6 +23,42 @@ function clean(value: unknown, max: number): string | null {
   return t ? t.slice(0, max) : null
 }
 
+/** Non-PII click IDs / UTMs only. Same keys report-form stores under tm_report_attribution. */
+const ATTRIBUTION_KEYS = [
+  "gclid",
+  "gbraid",
+  "wbraid",
+  "utm_source",
+  "utm_medium",
+  "utm_campaign",
+  "utm_content",
+  "utm_term",
+  "fbclid",
+  "ttclid",
+] as const
+const SOURCE_RE = /^[a-z0-9_\-/]+$/i
+
+/** Whitelist + trim + cap. Anything else in the object is dropped. */
+function cleanAttribution(value: unknown): Record<string, string> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {}
+  const raw = value as Record<string, unknown>
+  const out: Record<string, string> = {}
+  for (const key of ATTRIBUTION_KEYS) {
+    const v = clean(raw[key], 200)
+    if (v) out[key] = v.replace(/[\r\n;]+/g, " ")
+  }
+  return out
+}
+
+/** Appends `Source: …` and `Attribution: k=v; …` lines to the visitor note so Terra IQ keeps them with the booking. */
+function noteWithContext(note: string | null, source: string | null, attribution: Record<string, string>): string | null {
+  const lines = note ? [note] : []
+  if (source) lines.push(`Source: ${source}`)
+  const pairs = Object.entries(attribution).map(([k, v]) => `${k}=${v}`)
+  if (pairs.length > 0) lines.push(`Attribution: ${pairs.join("; ")}`)
+  return lines.length > 0 ? lines.join("\n") : null
+}
+
 export async function POST(request: NextRequest) {
   let body: Record<string, unknown>
   try {
@@ -37,13 +74,18 @@ export async function POST(request: NextRequest) {
   if (!name || !email || !EMAIL_RE.test(email) || !startIso) {
     return NextResponse.json({ error: "invalid_input" }, { status: 400 })
   }
+  const sourceRaw = clean(body.source, 80)
+  const source = sourceRaw && SOURCE_RE.test(sourceRaw) ? sourceRaw : null
+  const attribution = cleanAttribution(body.attribution)
+  const visitorNote = clean(body.note, 1000)
   const lead = {
     name,
     email,
     phone: clean(body.phone, 40),
     business: clean(body.business, 160),
     website: clean(body.website, 300),
-    note: clean(body.note, 1000),
+    // Terra IQ + Slack admin notice see Source/Attribution. Nurture (below) keeps the plain visitor note.
+    note: noteWithContext(visitorNote, source, attribution),
   }
 
   const result = await bookingApi<BookingRecord>("/api/public/booking", { method: "POST", body: { ...lead, startIso, tz } })
@@ -76,7 +118,7 @@ export async function POST(request: NextRequest) {
       source: "book",
       businessName: lead.business,
       website: lead.website,
-      job: lead.note,
+      job: visitorNote,
     })
   })
 

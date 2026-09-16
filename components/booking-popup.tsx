@@ -5,7 +5,16 @@ import { createPortal } from "react-dom"
 import { BookingFlow } from "@/components/booking-flow"
 
 /** Modal booking flow. Same shell as ReportPopup: portal, z-[100], Escape and backdrop close, scroll lock. */
-export function BookingPopup({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function BookingPopup({
+  open,
+  onClose,
+  source,
+}: {
+  open: boolean
+  onClose: () => void
+  /** Entry point tag passed to BookingFlow (analytics + Terra IQ note). Optional. */
+  source?: string
+}) {
   const closeRef = useRef(onClose)
   closeRef.current = onClose
 
@@ -45,7 +54,7 @@ export function BookingPopup({ open, onClose }: { open: boolean; onClose: () => 
           </button>
         </div>
         <div className="px-7 pb-7 pt-5 md:px-9 md:pb-9">
-          <BookingFlow compact />
+          <BookingFlow compact source={source} />
         </div>
       </div>
     </div>,
@@ -58,12 +67,15 @@ export function BookingLink({
   className = "inline-flex h-11 items-center rounded-full bg-brand px-5 text-[15px] font-medium text-white hover:bg-brand-hover",
   children,
   onClick,
+  source,
 }: {
   label?: string
   className?: string
   children?: React.ReactNode
   /** Fires when the button is clicked, before the popup opens (e.g. analytics). */
   onClick?: () => void
+  /** Entry point tag: report | homepage | header | floating_cta | book. Optional. */
+  source?: string
 }) {
   const [open, setOpen] = useState(false)
 
@@ -79,7 +91,7 @@ export function BookingLink({
       >
         {children ?? label}
       </button>
-      <BookingPopup open={open} onClose={() => setOpen(false)} />
+      <BookingPopup open={open} onClose={() => setOpen(false)} source={source} />
     </>
   )
 }

@@ -2,8 +2,10 @@
 
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
+import { trackEvent } from "@/lib/analytics"
+import { mergedAttribution } from "@/lib/attribution"
 import { browserTimeZone, formatLongDay, formatTime, formatWhen, groupSlotsByDay, tzLabel } from "@/lib/booking-format"
-import { buildIcs, googleCalendarUrl } from "@/lib/ics"
+import { buildIcs, googleCalendarUrl, outlookCalendarUrl } from "@/lib/ics"
 
 export type BookingResult = {
   id: string
@@ -50,6 +52,14 @@ const detailsLabel = "block text-[14px] font-bold text-ink"
 const detailsInput =
   "mt-1 h-10 w-full rounded-md border border-ink/25 bg-white px-3 py-2.5 text-[15px] text-ink placeholder:text-ink/35 outline-none focus:border-brand"
 const stepPane = "mt-4 animate-fade-in"
+
+/** Fallback for `source` when the caller did not tag the entry point. */
+function sourceFromPath(pathname: string): string {
+  if (pathname === "/") return "homepage"
+  if (pathname === "/book") return "book"
+  if (pathname === "/report" || pathname.startsWith("/report/")) return "report"
+  return pathname
+}
 
 function pad2(n: number) {
   return String(n).padStart(2, "0")
@@ -239,11 +249,14 @@ export function BookingFlow({
   mode = "book",
   onPick,
   compact = false,
+  source,
 }: {
   mode?: "book" | "pick"
   /** "pick" mode: called with the chosen start; the caller reschedules. */
   onPick?: (startIso: string) => Promise<string | null>
   compact?: boolean
+  /** Entry point for analytics/attribution: report | homepage | header | floating_cta | book. Falls back to the pathname. */
+  source?: string
 }) {
   const isPick = mode === "pick"
   const steps = isPick ? PICK_STEPS : BOOK_STEPS
@@ -361,6 +374,10 @@ export function BookingFlow({
     const noteLines = [`Owner: ${isOwner}`, `Type: ${businessType}`, `Stage: ${digitalStage}`]
     if (socials.trim()) noteLines.push(`Socials: ${socials.trim()}`)
     const note = noteLines.join("\n")
+    const pagePath = typeof window !== "undefined" ? window.location.pathname : ""
+    const bookingSource = source || sourceFromPath(pagePath)
+    // Stored (tab session, written on any landing with params) first, current URL on top. Never throws.
+    const attribution = mergedAttribution()
     try {
       const response = await fetch("/api/booking", {
         method: "POST",
@@ -374,6 +391,8 @@ export function BookingFlow({
           note,
           startIso: slot,
           tz,
+          source: bookingSource,
+          attribution: Object.keys(attribution).length > 0 ? attribution : undefined,
         }),
       })
       const data = (await response.json().catch(() => ({}))) as Partial<BookingResult> & { error?: string }
@@ -383,9 +402,20 @@ export function BookingFlow({
         setStep(scheduleStep)
         return
       }
-      if (!response.ok || !data.startIso || !data.manageUrl) {
+      const bookingId = typeof data.id === "string" ? data.id.trim() : ""
+      if (!response.ok || !bookingId || !data.startIso || !data.manageUrl) {
         setLoadError(loadErrorMessage(response.status, data.error))
         return
+      }
+      // GA4 conversion signal. Fires once per server-confirmed booking. No PII: no name/email/phone/business/time/links.
+      if (typeof window !== "undefined") {
+        trackEvent("meeting_booked", {
+          booking_id: bookingId,
+          business_type: businessType,
+          stage: digitalStage,
+          source: bookingSource,
+          page_path: pagePath,
+        })
       }
       setDone(data as BookingResult)
     } catch {
@@ -679,9 +709,65 @@ export function downloadIcs(booking: { id: string; startIso: string; endIso: str
   URL.revokeObjectURL(url)
 }
 
+type CalendarBooking = { id: string; startIso: string; endIso: string; meetUrl: string | null }
+
+function AppleMark() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-[22px] w-[22px] fill-ink">
+      <path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701" />
+    </svg>
+  )
+}
+
+function OutlookMark() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-[22px] w-[22px]">
+      <rect x="2" y="3" width="20" height="18" rx="3.5" fill="#0F6CBD" />
+      <ellipse cx="12" cy="12" rx="4.4" ry="5.2" fill="none" stroke="#fff" strokeWidth="2.3" />
+    </svg>
+  )
+}
+
+function GoogleMark() {
+  return (
+    <svg viewBox="0 0 48 48" aria-hidden="true" className="h-[22px] w-[22px]">
+      <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
+      <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
+      <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
+      <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
+    </svg>
+  )
+}
+
+const calendarButtonClass =
+  "flex h-[76px] flex-col items-center justify-center gap-1.5 rounded-2xl border border-ink/15 bg-cream text-[12px] font-medium text-ink hover:border-ink/40 hover:bg-white"
+
+/** “Add to Calendar” kicker + Apple / Outlook / Google logo buttons. Shared by booking success and manage. */
+export function AddToCalendar({ booking, className = "" }: { booking: CalendarBooking; className?: string }) {
+  const event = calendarEventFromBooking(booking)
+  return (
+    <div className={className}>
+      <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-slate-500">Add to Calendar</p>
+      <div className="mt-3 grid grid-cols-3 gap-2">
+        <button type="button" onClick={() => downloadIcs(booking)} className={calendarButtonClass}>
+          <AppleMark />
+          Apple Calendar
+        </button>
+        <a href={outlookCalendarUrl(event)} target="_blank" rel="noreferrer" className={calendarButtonClass}>
+          <OutlookMark />
+          Outlook
+        </a>
+        <a href={googleCalendarUrl(event)} target="_blank" rel="noreferrer" className={calendarButtonClass}>
+          <GoogleMark />
+          Google Calendar
+        </a>
+      </div>
+    </div>
+  )
+}
+
 export function BookingSuccess({ booking, tz, name }: { booking: BookingResult; tz: string; name?: string }) {
   const first = name?.split(/\s+/)[0]
-  const gcal = googleCalendarUrl(calendarEventFromBooking(booking))
   return (
     <div>
       <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-brand">Booked</p>
@@ -701,27 +787,8 @@ export function BookingSuccess({ booking, tz, name }: { booking: BookingResult; 
           "The calendar invite from adam.moreno@terramore.io has the join link."
         )}
       </p>
-      <p className="mt-2 text-[14px] text-slate-600">
-        A calendar invite and a confirmation email are on the way. A short prep note follows in a few minutes.
-      </p>
-      <div className="mt-5 flex flex-wrap items-center gap-3">
-        <a
-          href={gcal}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex h-11 items-center rounded-full bg-ink px-5 text-[15px] font-medium text-white hover:bg-ink/90"
-        >
-          Google Calendar
-        </a>
-        <button
-          type="button"
-          onClick={() => downloadIcs(booking)}
-          className="inline-flex h-11 items-center rounded-full border border-ink/15 px-5 text-[15px] font-medium text-ink hover:border-ink/40"
-        >
-          Download .ics
-        </button>
-      </div>
-      <p className="mt-2 text-[12px] text-slate-400">Apple Calendar and Outlook: use Download .ics. Android: Google Calendar works best.</p>
+      <p className="mt-2 text-[14px] text-slate-600">Confirmation email on the way. A short prep note follows in a few minutes.</p>
+      <AddToCalendar booking={booking} className="mt-6" />
     </div>
   )
 }

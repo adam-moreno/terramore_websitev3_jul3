@@ -57,3 +57,17 @@ export function googleCalendarUrl(input: CalendarEventInput): string {
   if (input.url) params.set("location", input.url)
   return `https://calendar.google.com/calendar/render?${params.toString()}`
 }
+
+/** Outlook.com web “compose event” deep link. Opens the new-event form pre-filled; user clicks Save. */
+export function outlookCalendarUrl(input: CalendarEventInput): string {
+  const params = new URLSearchParams({
+    path: "/calendar/action/compose",
+    rru: "addevent",
+    subject: input.title,
+    startdt: new Date(input.startIso).toISOString(),
+    enddt: new Date(input.endIso).toISOString(),
+    body: input.description,
+  })
+  if (input.url) params.set("location", input.url)
+  return `https://outlook.live.com/calendar/0/deeplink/compose?${params.toString()}`
+}

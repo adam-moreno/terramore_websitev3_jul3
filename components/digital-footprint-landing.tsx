@@ -266,6 +266,7 @@ export function DigitalFootprintLanding() {
           </p>
           <BookingLink
             label="Or talk through a report with us"
+            source="report"
             onClick={() => {
               if (typeof window === "undefined") return
               const gtag = (window as Window & { gtag?: (...args: unknown[]) => void }).gtag
