@@ -2,7 +2,7 @@
 
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { trackEvent } from "@/lib/analytics"
+import { trackMeetingBooked } from "@/lib/analytics"
 import { mergedAttribution } from "@/lib/attribution"
 import { browserTimeZone, formatLongDay, formatTime, formatWhen, groupSlotsByDay, tzLabel } from "@/lib/booking-format"
 import { buildIcs, googleCalendarUrl, outlookCalendarUrl } from "@/lib/ics"
@@ -407,16 +407,15 @@ export function BookingFlow({
         setLoadError(loadErrorMessage(response.status, data.error))
         return
       }
-      // GA4 conversion signal. Fires once per server-confirmed booking. No PII: no name/email/phone/business/time/links.
-      if (typeof window !== "undefined") {
-        trackEvent("meeting_booked", {
-          booking_id: bookingId,
-          business_type: businessType,
-          stage: digitalStage,
-          source: bookingSource,
-          page_path: pagePath,
-        })
-      }
+      // Safe conversion point: server confirmed booking (ok + string id + startIso + manageUrl).
+      // 409 / !ok / missing id never reach here. trackMeetingBooked dedupes on booking_id; GA4 only (no Ads conversion).
+      trackMeetingBooked({
+        booking_id: bookingId,
+        business_type: businessType,
+        stage: digitalStage,
+        source: bookingSource,
+        page_path: pagePath,
+      })
       setDone(data as BookingResult)
     } catch {
       setLoadError("Booking is warming up.")

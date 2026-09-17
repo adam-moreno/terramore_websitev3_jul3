@@ -5,6 +5,7 @@ import { GoogleAnalytics } from '@/components/google-analytics'
 import { SiteChrome } from '@/components/site-header'
 import {
   GA4_MEASUREMENT_ID,
+  GA4_MEASUREMENT_ID_LEGACY,
   GOOGLE_ADS_ID_DEFAULT,
 } from '@/lib/analytics'
 
@@ -20,8 +21,9 @@ const googleAdsId = (
 
 export const metadata: Metadata = {
   ...(googleSiteVerification ? { verification: { google: googleSiteVerification } } : {}),
-  title: 'Terramore | A Growth Team for Owners',
-  description: 'Terramore works inside your store, ads, and email to find where you lose sales and fix it. For owners with a shop, a service, or a list. Talk first, or ask for a free Digital Footprint report.',
+  title: 'Terramore | Growth Marketing for Business Owners',
+  description:
+    'Terramore finds where your store, ads, and email lose sales, then fixes that step. For owners with a shop, a service, or a list. Book a free call or request a Digital Footprint report.',
   keywords: 'growth team, small business marketing, ecommerce, email marketing, advertising, digital footprint report',
   authors: [{ name: 'Adam Moreno' }],
   creator: 'Terramore.io',
@@ -31,16 +33,17 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL('https://terramore.io'),
+  metadataBase: new URL('https://www.terramore.io'),
   icons: {
     icon: 'https://res.cloudinary.com/dzzzkruux/image/upload/v1768374905/Screenshot_2026-01-13_at_11.10.56_PM_eqtvoj.png',
     shortcut: 'https://res.cloudinary.com/dzzzkruux/image/upload/v1768374905/Screenshot_2026-01-13_at_11.10.56_PM_eqtvoj.png',
     apple: 'https://res.cloudinary.com/dzzzkruux/image/upload/v1768374905/Screenshot_2026-01-13_at_11.10.56_PM_eqtvoj.png',
   },
   openGraph: {
-    title: 'Terramore | A Growth Team for Owners',
-    description: 'Terramore works inside your store, ads, and email to find where you lose sales and fix it. For owners with a shop, a service, or a list. Talk first, or ask for a free Digital Footprint report.',
-    url: 'https://terramore.io',
+    title: 'Terramore | Growth Marketing for Business Owners',
+    description:
+      'Terramore finds where your store, ads, and email lose sales, then fixes that step. For owners with a shop, a service, or a list. Book a free call or request a Digital Footprint report.',
+    url: 'https://www.terramore.io',
     siteName: 'Terramore.io',
     locale: 'en_US',
     type: 'website',
@@ -55,8 +58,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Terramore | A Growth Team for Owners',
-    description: 'Terramore works inside your store, ads, and email to find where you lose sales and fix it. For owners with a shop, a service, or a list. Talk first, or ask for a free Digital Footprint report.',
+    title: 'Terramore | Growth Marketing for Business Owners',
+    description:
+      'Terramore finds where your store, ads, and email lose sales, then fixes that step. For owners with a shop, a service, or a list. Book a free call or request a Digital Footprint report.',
     images: ['/share/terramore-share-v2-og.png'],
   },
   robots: {
@@ -80,7 +84,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <head>
-        {/* Google tag (gtag.js) — GA4 + Google Ads config (conversion fires only after report success) */}
+        {/* Google tag (gtag.js) — current GA4 + legacy GA4 + Ads config.
+            Ads conversion event fires only after report success (see lib/analytics.ts).
+            meeting_booked is GA4-only — no second Ads conversion. */}
         <script async src={`https://www.googletagmanager.com/gtag/js?id=${GA4_MEASUREMENT_ID}`}></script>
         <script
           dangerouslySetInnerHTML={{
@@ -89,6 +95,7 @@ export default function RootLayout({
               function gtag(){dataLayer.push(arguments);}
               gtag('js', new Date());
               gtag('config', '${GA4_MEASUREMENT_ID}');
+              gtag('config', '${GA4_MEASUREMENT_ID_LEGACY}');
               gtag('config', '${googleAdsId}');
             `,
           }}
@@ -110,16 +117,17 @@ export default function RootLayout({
               '@context': 'https://schema.org',
               '@type': 'WebSite',
               name: 'Terramore.io',
-              url: 'https://terramore.io',
-              description: 'Terramore works inside your store, ads, and email to find where you lose sales and fix it. For owners with a shop, a service, or a list. Talk first, or ask for a free Digital Footprint report.',
+              url: 'https://www.terramore.io',
+              description:
+                'Terramore finds where your store, ads, and email lose sales, then fixes that step. For owners with a shop, a service, or a list. Book a free call or request a Digital Footprint report.',
               publisher: {
                 '@type': 'Organization',
                 name: 'Terramore.io',
-                url: 'https://terramore.io',
+                url: 'https://www.terramore.io',
               },
               potentialAction: {
                 '@type': 'SearchAction',
-                target: { '@type': 'EntryPoint', urlTemplate: 'https://terramore.io/solutions?q={search_term_string}' },
+                target: { '@type': 'EntryPoint', urlTemplate: 'https://www.terramore.io/solutions?q={search_term_string}' },
                 'query-input': 'required name=search_term_string',
               },
             }),

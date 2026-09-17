@@ -138,7 +138,9 @@ export function ReportForm({
         throw new Error("Could not save the request")
       }
 
-      // Server-confirmed success only — GA4 generate_lead + Ads conversion + optional Meta/TikTok Lead.
+      // Safe conversion point: POST /api/report succeeded (not 409). Fires generate_lead +
+      // report_submission_success once, plus existing Ads "Digital Footprint Report Submitted" only.
+      // No PII. Do not fire on button click or failed/duplicate responses.
       trackReportSubmissionSuccess("report_form")
       onSuccess?.()
     } catch {

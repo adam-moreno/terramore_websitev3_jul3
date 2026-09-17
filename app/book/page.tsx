@@ -5,7 +5,7 @@ import { SiteFooter } from "@/components/site-footer"
 export const metadata: Metadata = {
   title: "Book a call | Terramore",
   description: "Pick a time for a free 30-minute call with Adam Moreno. Times show in your time zone and the invite lands in your inbox.",
-  alternates: { canonical: "https://terramore.io/book" },
+  alternates: { canonical: "https://www.terramore.io/book" },
 }
 
 export default function BookPage() {

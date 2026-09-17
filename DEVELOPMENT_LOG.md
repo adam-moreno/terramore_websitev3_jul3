@@ -1,5 +1,91 @@
 # Development Log - Terramore Website
 
+## 2026-09-17 — Semrush Site Audit SEO cleanup (targeted)
+
+Highest-priority searchability fixes only. No redesign. Analytics / GA4 / Ads / booking / report conversion untouched.
+
+### Fixed
+- **Duplicate titles/descriptions (5 pages):** Root homepage metadata was inherited by `/privacy`, `/terms`, `/disclosure`, `/dmca`. Gave the homepage a distinct root title/description and unique metadata + www canonicals on the four legal pages.
+- **Sitemap redirecting URLs:** `app/sitemap.ts` and `app/robots.ts` now emit `https://www.terramore.io` (canonical host). Aligned `metadataBase`, book canonical, OG urls in layouts/story pages, and `llms.txt` links.
+- **Broken internal links:** `/terms` TOC pointed at 21 missing `#section-*` anchors; TOC now lists only sections that exist (1, 2, 6, 25).
+- **Broken external brand icons:** `cdn.simpleicons.org` 404 for `amazon` / `twilio`. Icon URLs switched to jsDelivr simple-icons in hero + software visuals + story pages.
+- **Missing H1:** `/book/manage` (noindex utility) now has an H1 for accessibility.
+
+### Intentionally not fixed
+- Cloudflare `/cdn-cgi/l/email-protection` 404 (email obfuscation; not a real Terramore page).
+- 94 “orphaned” sitemap URLs / low word-count / low text-HTML ratio (tool noise; no filler copy or fake nav).
+- Permanent redirects `/partner`→`/book`, `/courses`→`/`, etc. (legitimate legacy paths).
+- Mass internal linking of deep solution/integration pages.
+
+### Tracking confirmation
+No changes to `lib/analytics.ts`, GA4/Ads tags, `meeting_booked`, `generate_lead`, report Ads conversion, attribution, booking API, or report API.
+
+## 2026-09-16 — Digital Footprint Report MVP (evidence-based diagnostic)
+
+Enhancement of the existing report pipeline (not a rewrite). Lead intake, dedupe, attribution, analytics, and Google Ads conversion paths were **not** modified.
+
+### Architecture
+1. `collectDiagnostic` (`lib/report/diagnostic.ts`) runs deterministic collectors under `lib/report/collect/`.
+2. `scoreDigitalPresence` (`lib/report/score/digital-presence.ts`) computes factor scores + Evidence Coverage; LLM never invents scores.
+3. `buildRecommendations` (`lib/report/recommend.ts`) ranks Top 5 actions from facts.
+4. `writeReportFromDiagnostic` (`lib/report/write.ts`) sends facts+scores to the model for prose only.
+5. `renderReportPdf` / `renderReportHtml` produce consulting-style output; pipeline still emails PDF after async generation.
+6. Structured payload stored in optional `report_json` (migration `20260916_report_diagnostic.sql`).
+
+### Scoring methodology
+| Factor | Weight |
+| Digital Experience | 25% |
+| Discoverability | 25% |
+| Trust & Credibility | 20% |
+| Conversion Readiness | 20% |
+| Technical Health | 10% |
+
+**Evidence Coverage** = available_factor_weight / total_weight. Unavailable factors (e.g. unreachable site, mobile N/A as a subfactor only) are excluded from the overall score; remaining weights renormalize to 100%. Documented on every `ScoreBreakdown.redistributionRule`.
+
+### Collectors / sources checked
+- Homepage + up to 5 key linked pages (about/contact/services/shop/etc.)
+- Technical: HTTPS, title, description, canonical, robots, sitemap, viewport
+- Directories: Instagram, Facebook, TikTok, LinkedIn, YouTube, Yelp (+ X/Maps if linked) — **only if linked from site**
+- Places (optional `GOOGLE_PLACES_API_KEY`)
+- Catalog: Shopify-style `/products.json` when checkout/Shopify signals; else service-page inference
+- Mobile / SERP / full competitor matrix: **Not available** interfaces only
+
+### Deferred (Phase 2+)
+Full SERP API, competitor matrix, Census demographics, ad-library scraping, Playwright mobile, full-site crawl, `report_runs` table.
+
+### QA
+- Fixtures: `scripts/report-qa/fixtures.ts` (10 categories)
+- Runner: `npx tsx scripts/report-qa/run-qa.ts` (collect+score, no LLM)
+- Gate: ≤2 false-invention failures across the set
+- **2026-09-16 run:** 10/10 match, 0 invention failures, GATE PASS
+- E2E Allbirds: score 72, coverage 100%, 6 pages, products.json=30, socials linked; `npx tsx scripts/report-qa/e2e-one.ts` (`RUN_LLM=1` for PDF)
+
+### Known limitations
+- Mobile experience subfactor is null (no browser infra).
+- Competitive context usually "Not available in this report version".
+- Places may match the wrong entity if website host does not align.
+- `/products.json` may be truncated/paginated.
+- Form fields for location/industry not added (optional DB columns only).
+
+### Analytics / conversion
+**Untouched.** `report-form` still fires conversions only after 201. No new GA4/Ads events.
+
+## 2026-09-16 — Controlled conversion verification (no tracking redesign)
+
+No production test mode existed for `/api/report` or `/api/booking` (both write real Supabase / Terra IQ records). Added local-only harness `scripts/verify-conversion-tracking.mjs` (mock gtag; does not hit APIs). Browser verification on `localhost:3010` used `fetch` mocks so no real leads/bookings were created.
+
+**Observed (browser + harness):** report success → exactly one each of `generate_lead`, `report_submission_success`, Ads `conversion` (`AW-11353847408/XnBzCIeStfgcEPDs96Uq`); report 409/500 → zero conversion events (`report_submission_error` only); booking success (mocked) → exactly one `meeting_booked` in `__tmAnalytics` with safe params, zero Ads `conversion`. Gating matrix covers booking 409/500/missing id. Note: 500 path currently logs `report_submission_error` twice (throw into catch) — not a conversion leak.
+
+## 2026-09-16 — Conversion tracking hardening (report + meeting_booked)
+
+Audit-driven pass. No new Google Ads conversion; report Ads label untouched; no redesign of funnel.
+
+**Findings before change.** Report success already fired `generate_lead` + `report_submission_success` + Ads `conversion` (`AW-11353847408/XnBzCIeStfgcEPDs96Uq`) after `POST /api/report` ok. Booking fired `meeting_booked` after ok + string id. Helper lived in `lib/analytics.ts` but lacked dedupe, scrub, and dev diagnostics. Layout configured only legacy `G-BQN6VCY579` + Ads — current property `G-ZC5DY0ES7N` was not in code. CTA pages still call raw `gtag` for non-conversion events (left alone).
+
+**Changes.** Central helper: safe try/catch, PII-key scrub, once-per-key dedupe, dev-only `[analytics] event fired:` log + `window.__tmAnalytics`. `trackMeetingBooked` wraps `meeting_booked` with once=`booking_id`. `trackReportSubmissionSuccess` keeps exact names `generate_lead` / `report_submission_success`, adds `page_path`, once-guards. Layout loads/configs `G-ZC5DY0ES7N` (primary) and keeps `G-BQN6VCY579` (legacy). No Ads path for booking.
+
+**Verify (local):** `pnpm lint` / `pnpm build`; DevTools: after report success look for `en=report_submission_success` + `en=generate_lead` + `en=conversion` with report `send_to`; after booking `en=meeting_booked`. In `next dev`, `window.__tmAnalytics.last`. Ads import status is account-side — not claimed fixed by this change.
+
 ## 2026-09-16 — Booking success: "Add to Calendar" with Apple / Outlook / Google logo buttons
 
 - **Was:** paragraph ("A calendar invite and a confirmation email are on the way…"), a Google Calendar pill, a Download .ics pill, then a grey helper line about Apple/Outlook/Android. Read as clutter.

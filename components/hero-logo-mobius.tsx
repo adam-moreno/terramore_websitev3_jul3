@@ -81,7 +81,7 @@ export function HeroLogoMobius() {
               className="hero-mobius-logo"
               style={{ animationDelay: `${(-index * LOOP_SECONDS) / INTEGRATION_LOGOS.length}s` }}
             >
-              <img src={`https://cdn.simpleicons.org/${logo.slug}`} alt="" />
+              <img src={`https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/${logo.slug}.svg`} alt="" />
             </span>
           ))}
         </div>

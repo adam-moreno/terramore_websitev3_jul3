@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     title: "Integrations | Terramore",
     description:
       "We sit in the tools you already pay for. Email, ads, the store, payments, and the calendar.",
-    url: "https://terramore.io/integrations",
+    url: "https://www.terramore.io/integrations",
   },
 }
 

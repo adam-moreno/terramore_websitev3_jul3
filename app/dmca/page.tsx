@@ -1,4 +1,12 @@
+import type { Metadata } from "next"
 import { SiteFooter } from "@/components/site-footer"
+
+export const metadata: Metadata = {
+  title: "DMCA Policy | Terramore",
+  description:
+    "Terramore.io DMCA policy for reporting copyright infringement on terramore.io, including how to contact the designated copyright agent.",
+  alternates: { canonical: "https://www.terramore.io/dmca" },
+}
 
 export default function DMCAPage() {
   return (

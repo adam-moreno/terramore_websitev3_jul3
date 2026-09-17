@@ -37,7 +37,7 @@ export default function robots(): MetadataRoute.Robots {
         allow: '/',
       },
     ],
-    sitemap: 'https://terramore.io/sitemap.xml',
-    host: 'https://terramore.io',
+    sitemap: 'https://www.terramore.io/sitemap.xml',
+    host: 'https://www.terramore.io',
   }
 }

@@ -102,7 +102,7 @@ export function StoryLinkTiles({ items }: { items: StoryLinkTile[] }) {
         >
           <div className="flex items-center gap-3">
             {item.icon ? (
-              <img src={`https://cdn.simpleicons.org/${item.icon}`} alt="" className="h-6 w-6 object-contain" />
+              <img src={`https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/${item.icon}.svg`} alt="" className="h-6 w-6 object-contain" />
             ) : null}
             <h3 className="text-[1.35rem] font-semibold tracking-tight text-ink">{item.title}</h3>
           </div>

@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'About Terramore | Founder-led growth consultancy',
     description: 'Adam Moreno leads Terramore, a growth consultancy for owners with a shop, a service, or a list. Specialists join when the job needs them.',
-    url: 'https://terramore.io/about',
+    url: 'https://www.terramore.io/about',
   },
 }
 

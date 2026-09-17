@@ -2,7 +2,8 @@ import type { MetadataRoute } from 'next'
 import { CAPABILITIES, capabilityPath, offeringPath } from '@/lib/capabilities'
 import { INTEGRATION_CATEGORIES, integrationPath, integrationToolPath } from '@/lib/integrations'
 
-const baseUrl = 'https://terramore.io'
+/** Canonical production host (apex 308s to www). */
+const baseUrl = 'https://www.terramore.io'
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const routes = [

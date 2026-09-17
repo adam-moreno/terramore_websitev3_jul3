@@ -52,6 +52,7 @@ const CAPABILITY_ICONS: LucideIcon[] = [
 const INTEGRATION_ICONS: Record<string, LucideIcon> = {
   "email-marketing": Mail,
   "calls-texts-and-chat": MessageSquare,
+  communications: MessageSquare,
   advertising: Megaphone,
   ecommerce: ShoppingBag,
   payments: CreditCard,

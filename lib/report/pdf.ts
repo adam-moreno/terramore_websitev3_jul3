@@ -9,12 +9,12 @@ const SLATE = rgb(71 / 255, 85 / 255, 105 / 255)
 const MUTED = rgb(0.55, 0.58, 0.62)
 const CARD = rgb(0.965, 0.955, 0.95)
 const RULE = rgb(0.9, 0.9, 0.9)
+const GOLD = rgb(180 / 255, 140 / 255, 70 / 255)
 
-const PAGE = { width: 612, height: 792 } // US Letter
-const MARGIN = 56
+const PAGE = { width: 612, height: 792 }
+const MARGIN = 48
 const CONTENT_WIDTH = PAGE.width - MARGIN * 2
 
-/** pdf-lib standard fonts only cover WinAnsi. Drop anything they cannot draw. */
 function clean(value: string): string {
   return value
     .replace(/[\u2013\u2014]/g, "-")
@@ -32,9 +32,8 @@ function wrap(text: string, font: PDFFont, size: number, maxWidth: number): stri
   let current = ""
   for (const word of words) {
     const candidate = current ? `${current} ${word}` : word
-    if (font.widthOfTextAtSize(candidate, size) <= maxWidth) {
-      current = candidate
-    } else {
+    if (font.widthOfTextAtSize(candidate, size) <= maxWidth) current = candidate
+    else {
       if (current) lines.push(current)
       current = word
     }
@@ -54,12 +53,12 @@ type Ctx = {
 }
 
 function footer(ctx: Ctx) {
-  ctx.page.drawText(clean(ctx.footer), { x: MARGIN, y: 30, size: 8.5, font: ctx.regular, color: MUTED })
+  ctx.page.drawText(clean(ctx.footer), { x: MARGIN, y: 28, size: 8, font: ctx.regular, color: MUTED })
   const label = `${ctx.pageNumber}`
   ctx.page.drawText(label, {
-    x: PAGE.width - MARGIN - ctx.regular.widthOfTextAtSize(label, 8.5),
-    y: 30,
-    size: 8.5,
+    x: PAGE.width - MARGIN - ctx.regular.widthOfTextAtSize(label, 8),
+    y: 28,
+    size: 8,
     font: ctx.regular,
     color: MUTED,
   })
@@ -74,10 +73,10 @@ function newPage(ctx: Ctx) {
 }
 
 function ensure(ctx: Ctx, needed: number) {
-  if (ctx.y - needed < MARGIN + 20) newPage(ctx)
+  if (ctx.y - needed < MARGIN + 24) newPage(ctx)
 }
 
-function paragraph(ctx: Ctx, text: string, size: number, font: PDFFont, color = SLATE, width = CONTENT_WIDTH, x = MARGIN, leading = 1.45) {
+function paragraph(ctx: Ctx, text: string, size: number, font: PDFFont, color = SLATE, width = CONTENT_WIDTH, x = MARGIN, leading = 1.4) {
   const lines = wrap(text, font, size, width)
   for (const line of lines) {
     ensure(ctx, size * leading)
@@ -87,87 +86,177 @@ function paragraph(ctx: Ctx, text: string, size: number, font: PDFFont, color = 
   return lines.length
 }
 
+function sectionTitle(ctx: Ctx, kicker: string, title: string) {
+  ensure(ctx, 56)
+  ctx.page.drawText(clean(kicker).toUpperCase(), { x: MARGIN, y: ctx.y - 10, size: 8.5, font: ctx.regular, color: MUTED })
+  ctx.y -= 24
+  for (const line of wrap(title, ctx.bold, 20, CONTENT_WIDTH)) {
+    ensure(ctx, 24)
+    ctx.page.drawText(line, { x: MARGIN, y: ctx.y - 18, size: 20, font: ctx.bold, color: INK })
+    ctx.y -= 24
+  }
+  ctx.y -= 8
+}
+
+function scoreBar(ctx: Ctx, label: string, score: number | null, note?: string) {
+  const h = note ? 36 : 28
+  ensure(ctx, h + 6)
+  ctx.page.drawText(clean(label), { x: MARGIN, y: ctx.y - 12, size: 10, font: ctx.bold, color: INK })
+  const value = score == null ? "N/A" : `${score}`
+  ctx.page.drawText(value, {
+    x: PAGE.width - MARGIN - ctx.bold.widthOfTextAtSize(value, 11),
+    y: ctx.y - 12,
+    size: 11,
+    font: ctx.bold,
+    color: INK,
+  })
+  const barX = MARGIN
+  const barY = ctx.y - 22
+  const barW = CONTENT_WIDTH
+  ctx.page.drawRectangle({ x: barX, y: barY, width: barW, height: 6, color: RULE })
+  if (score != null) {
+    ctx.page.drawRectangle({
+      x: barX,
+      y: barY,
+      width: Math.max(2, (barW * Math.min(100, Math.max(0, score))) / 100),
+      height: 6,
+      color: GOLD,
+    })
+  }
+  ctx.y -= 28
+  if (note) {
+    paragraph(ctx, note, 9, ctx.regular, MUTED)
+    ctx.y -= 4
+  }
+}
+
+function bulletList(ctx: Ctx, items: string[]) {
+  for (const item of items) {
+    const lines = wrap(`• ${item}`, ctx.regular, 10.5, CONTENT_WIDTH)
+    ensure(ctx, lines.length * 15 + 2)
+    for (const line of lines) {
+      ctx.page.drawText(line, { x: MARGIN, y: ctx.y - 10.5, size: 10.5, font: ctx.regular, color: SLATE })
+      ctx.y -= 15
+    }
+  }
+}
+
+function findingCard(
+  ctx: Ctx,
+  rank: number,
+  priority: string,
+  finding: string,
+  evidence: string,
+  impact: string,
+  action: string,
+) {
+  const blocks = [
+    `FINDING  ${finding}`,
+    `EVIDENCE  ${evidence}`,
+    `IMPACT  ${impact}`,
+    `ACTION  ${action}`,
+  ]
+  const lineSets = blocks.map((b) => wrap(b, ctx.regular, 10, CONTENT_WIDTH - 28))
+  const height = 22 + lineSets.reduce((s, ls) => s + ls.length * 13, 0) + 16
+  ensure(ctx, height + 8)
+  ctx.page.drawRectangle({ x: MARGIN, y: ctx.y - height, width: CONTENT_WIDTH, height, color: CARD })
+  let y = ctx.y - 14
+  ctx.page.drawText(clean(`${rank}. ${priority.toUpperCase()}`), {
+    x: MARGIN + 14,
+    y: y - 8,
+    size: 8.5,
+    font: ctx.bold,
+    color: GOLD,
+  })
+  y -= 18
+  for (const lines of lineSets) {
+    for (const line of lines) {
+      ctx.page.drawText(line, { x: MARGIN + 14, y: y - 10, size: 10, font: ctx.regular, color: SLATE })
+      y -= 13
+    }
+    y -= 2
+  }
+  ctx.y -= height + 8
+}
+
 function cover(ctx: Ctx, report: ReportContent) {
   const page = ctx.page
   page.drawRectangle({ x: 0, y: 0, width: PAGE.width, height: PAGE.height, color: INK })
 
   page.drawText("TERRAMORE", { x: MARGIN, y: PAGE.height - MARGIN - 10, size: 11, font: ctx.bold, color: CREAM })
-  page.drawText("DIGITAL FOOTPRINT REPORT", { x: MARGIN, y: PAGE.height - MARGIN - 28, size: 9, font: ctx.regular, color: CREAM_DIM })
+  page.drawText("DIGITAL FOOTPRINT REPORT", {
+    x: MARGIN,
+    y: PAGE.height - MARGIN - 28,
+    size: 9,
+    font: ctx.regular,
+    color: CREAM_DIM,
+  })
 
-  let y = PAGE.height - 260
-  const titleLines = wrap(report.businessName, ctx.bold, 40, CONTENT_WIDTH)
-  for (const line of titleLines.slice(0, 3)) {
-    page.drawText(line, { x: MARGIN, y, size: 40, font: ctx.bold, color: CREAM })
-    y -= 46
+  let y = PAGE.height - 220
+  for (const line of wrap(report.businessName, ctx.bold, 36, CONTENT_WIDTH).slice(0, 3)) {
+    page.drawText(line, { x: MARGIN, y, size: 36, font: ctx.bold, color: CREAM })
+    y -= 42
   }
   y -= 8
-  for (const line of wrap("Digital footprint, current audience, current wins, and the openings we would take first.", ctx.regular, 15, CONTENT_WIDTH - 60)) {
-    page.drawText(line, { x: MARGIN, y, size: 15, font: ctx.regular, color: CREAM_DIM })
-    y -= 22
-  }
+  page.drawText("Public digital presence, examined as a first-time customer would see it.", {
+    x: MARGIN,
+    y,
+    size: 12,
+    font: ctx.regular,
+    color: CREAM_DIM,
+  })
+  y -= 40
 
-  y -= 30
-  const facts: Array<[string, string]> = [
-    ["SITE", report.website ? report.website.replace(/^https?:\/\//, "").replace(/\/$/, "") : "Not given"],
-    ["READ DATE", report.readDate],
-  ]
-  for (const [label, value] of facts) {
-    page.drawText(label, { x: MARGIN, y, size: 8.5, font: ctx.regular, color: CREAM_DIM })
-    page.drawText(clean(value).slice(0, 70), { x: MARGIN, y: y - 16, size: 13, font: ctx.regular, color: CREAM })
-    y -= 44
-  }
+  const scoreLabel = report.overallScore == null ? "n/a" : `${report.overallScore}`
+  page.drawText("DIGITAL PRESENCE SCORE", { x: MARGIN, y, size: 8.5, font: ctx.regular, color: CREAM_DIM })
+  page.drawText(scoreLabel, { x: MARGIN, y: y - 28, size: 32, font: ctx.bold, color: CREAM })
+  page.drawText("/ 100", { x: MARGIN + ctx.bold.widthOfTextAtSize(scoreLabel, 32) + 8, y: y - 20, size: 12, font: ctx.regular, color: CREAM_DIM })
 
-  y -= 10
-  for (const line of wrap(report.headline, ctx.regular, 13, CONTENT_WIDTH)) {
-    page.drawText(line, { x: MARGIN, y, size: 13, font: ctx.regular, color: CREAM })
-    y -= 19
-  }
+  page.drawText("EVIDENCE COVERAGE", { x: MARGIN + 220, y, size: 8.5, font: ctx.regular, color: CREAM_DIM })
+  page.drawText(`${report.evidenceCoverage}%`, { x: MARGIN + 220, y: y - 28, size: 32, font: ctx.bold, color: CREAM })
 
-  page.drawText("Prepared by Adam Moreno, Terramore. terramore.io", { x: MARGIN, y: 40, size: 9, font: ctx.regular, color: CREAM_DIM })
+  y -= 70
+  page.drawText("SITE", { x: MARGIN, y, size: 8, font: ctx.regular, color: CREAM_DIM })
+  page.drawText(
+    clean(report.website ? report.website.replace(/^https?:\/\//, "").replace(/\/$/, "") : "Not given").slice(0, 70),
+    { x: MARGIN, y: y - 16, size: 12, font: ctx.regular, color: CREAM },
+  )
+  y -= 44
+  page.drawText("READ DATE", { x: MARGIN, y, size: 8, font: ctx.regular, color: CREAM_DIM })
+  page.drawText(clean(report.readDate), { x: MARGIN, y: y - 16, size: 12, font: ctx.regular, color: CREAM })
+  y -= 50
+  for (const line of wrap(report.headline, ctx.regular, 12, CONTENT_WIDTH)) {
+    page.drawText(line, { x: MARGIN, y, size: 12, font: ctx.regular, color: CREAM })
+    y -= 17
+  }
+  page.drawText("Prepared by Terramore · terramore.io", { x: MARGIN, y: 40, size: 9, font: ctx.regular, color: CREAM_DIM })
 }
 
 function chapter(ctx: Ctx, kicker: string, title: string, items: Array<{ label: string; value: string; note: string }>, summary: string) {
-  newPage(ctx)
-  ctx.page.drawText(clean(kicker).toUpperCase(), { x: MARGIN, y: ctx.y - 10, size: 9, font: ctx.regular, color: MUTED })
-  ctx.y -= 26
-  for (const line of wrap(title, ctx.bold, 24, CONTENT_WIDTH)) {
-    ctx.page.drawText(line, { x: MARGIN, y: ctx.y - 24, size: 24, font: ctx.bold, color: INK })
-    ctx.y -= 30
-  }
-  ctx.y -= 14
-
+  sectionTitle(ctx, kicker, title)
   for (const item of items) {
-    const noteLines = wrap(item.note, ctx.regular, 10.5, CONTENT_WIDTH - 32)
-    const valueLines = wrap(item.value, ctx.bold, 13, CONTENT_WIDTH - 32)
-    const height = 14 + 12 + valueLines.length * 17 + (noteLines.length ? noteLines.length * 15 + 4 : 0) + 14
-    ensure(ctx, height + 8)
+    const noteLines = wrap(item.note, ctx.regular, 10, CONTENT_WIDTH - 28)
+    const valueLines = wrap(item.value, ctx.bold, 12, CONTENT_WIDTH - 28)
+    const height = 12 + 10 + valueLines.length * 15 + (noteLines.length ? noteLines.length * 13 + 2 : 0) + 12
+    ensure(ctx, height + 6)
     ctx.page.drawRectangle({ x: MARGIN, y: ctx.y - height, width: CONTENT_WIDTH, height, color: CARD })
-    let y = ctx.y - 14
-    ctx.page.drawText(clean(item.label).toUpperCase(), { x: MARGIN + 16, y: y - 8, size: 8.5, font: ctx.regular, color: MUTED })
-    y -= 12 + 8
+    let y = ctx.y - 12
+    ctx.page.drawText(clean(item.label).toUpperCase(), { x: MARGIN + 14, y: y - 8, size: 8, font: ctx.regular, color: MUTED })
+    y -= 18
     for (const line of valueLines) {
-      ctx.page.drawText(line, { x: MARGIN + 16, y: y - 13, size: 13, font: ctx.bold, color: INK })
-      y -= 17
-    }
-    y -= 4
-    for (const line of noteLines) {
-      ctx.page.drawText(line, { x: MARGIN + 16, y: y - 10.5, size: 10.5, font: ctx.regular, color: SLATE })
+      ctx.page.drawText(line, { x: MARGIN + 14, y: y - 12, size: 12, font: ctx.bold, color: INK })
       y -= 15
     }
-    ctx.y -= height + 8
+    y -= 2
+    for (const line of noteLines) {
+      ctx.page.drawText(line, { x: MARGIN + 14, y: y - 10, size: 10, font: ctx.regular, color: SLATE })
+      y -= 13
+    }
+    ctx.y -= height + 6
   }
-
-  ctx.y -= 10
-  ensure(ctx, 30)
-  ctx.page.drawLine({ start: { x: MARGIN, y: ctx.y }, end: { x: MARGIN + CONTENT_WIDTH, y: ctx.y }, thickness: 0.75, color: RULE })
-  ctx.y -= 16
-  paragraph(ctx, summary, 11.5, ctx.regular, SLATE)
-}
-
-function moves(ctx: Ctx, report: ReportContent) {
-  if (!report.moves.length) return
-  const items = report.moves.map((move) => ({ label: move.window, value: move.title, note: move.body }))
-  chapter(ctx, "05 · Next 90 days", "Three moves, in order.", items, "Talk with us and we map the work in a meeting. terramore.io/book")
+  ctx.y -= 6
+  paragraph(ctx, summary, 10.5, ctx.regular, SLATE)
+  ctx.y -= 8
 }
 
 export async function renderReportPdf(report: ReportContent): Promise<Buffer> {
@@ -184,34 +273,93 @@ export async function renderReportPdf(report: ReportContent): Promise<Buffer> {
     regular: await doc.embedFont(StandardFonts.Helvetica),
     bold: await doc.embedFont(StandardFonts.HelveticaBold),
     pageNumber: 1,
-    footer: `Terramore · Digital Footprint report · ${report.businessName}`,
+    footer: `Terramore · Digital Footprint · ${report.businessName}`,
   }
 
   cover(ctx, report)
-  for (const section of report.chapters) chapter(ctx, section.kicker, section.title, section.items, section.summary)
-  moves(ctx, report)
 
-  // Closing page
+  // Executive summary
   newPage(ctx)
-  ctx.page.drawText("WANT THIS FIXED?", { x: MARGIN, y: ctx.y - 10, size: 9, font: ctx.regular, color: MUTED })
-  ctx.y -= 26
-  for (const line of wrap("Talk with us. We map the work in a meeting.", ctx.bold, 24, CONTENT_WIDTH)) {
-    ctx.page.drawText(line, { x: MARGIN, y: ctx.y - 24, size: 24, font: ctx.bold, color: INK })
-    ctx.y -= 30
+  sectionTitle(ctx, "Executive summary", "Score, coverage, and priorities.")
+  paragraph(ctx, report.whatCustomersSee, 11, ctx.regular, SLATE)
+  ctx.y -= 10
+  if (report.working.length) {
+    ensure(ctx, 20)
+    ctx.page.drawText("WHAT IS WORKING", { x: MARGIN, y: ctx.y - 10, size: 8.5, font: ctx.bold, color: MUTED })
+    ctx.y -= 18
+    bulletList(ctx, report.working)
+    ctx.y -= 8
   }
-  ctx.y -= 10
-  paragraph(ctx, "The first call is free. You see the step where you lose sales before you pay to fix it. At day 90 you have a written plan with owners and dates.", 12, ctx.regular, SLATE)
-  ctx.y -= 10
-  paragraph(ctx, "Book: terramore.io/book", 12, ctx.bold, INK)
-  paragraph(ctx, "Reply to this email or write adam.moreno@terramore.io", 12, ctx.regular, SLATE)
-  ctx.y -= 24
+  if (report.opportunities.length) {
+    ensure(ctx, 20)
+    ctx.page.drawText("BIGGEST OPPORTUNITIES", { x: MARGIN, y: ctx.y - 10, size: 8.5, font: ctx.bold, color: MUTED })
+    ctx.y -= 18
+    bulletList(ctx, report.opportunities)
+    ctx.y -= 8
+  }
+
+  sectionTitle(ctx, "Digital Presence Score", "Deterministic factors from observed evidence.")
   paragraph(
     ctx,
-    "This report states only what we could see on the public web on the read date. Items marked Not found were not visible to us. Numbers are as shown by the source. No result is promised.",
-    9,
+    `Overall ${report.overallScore ?? "n/a"} / 100 with ${report.evidenceCoverage}% evidence coverage. Missing factors are marked Not available; their weight is redistributed across measured factors.`,
+    10,
     ctx.regular,
-    MUTED,
+    SLATE,
   )
+  ctx.y -= 8
+  for (const factor of report.scoreFactors) {
+    scoreBar(
+      ctx,
+      factor.label,
+      factor.available ? factor.score : null,
+      factor.available ? factor.evidence.slice(0, 2).join(" · ") : factor.unavailableReason,
+    )
+  }
+
+  for (const section of report.chapters) {
+    newPage(ctx)
+    chapter(ctx, section.kicker, section.title, section.items, section.summary)
+  }
+
+  newPage(ctx)
+  sectionTitle(ctx, "Competitive context", "Public sources only.")
+  paragraph(ctx, report.competitiveNote, 11, ctx.regular, SLATE)
+  ctx.y -= 12
+
+  sectionTitle(ctx, "Top 5 actions", "Prioritized from evidence.")
+  for (const r of report.recommendations) {
+    findingCard(ctx, r.rank, r.priority, r.finding, r.evidence, r.impact, r.action)
+  }
+
+  if (report.moves.length) {
+    ctx.y -= 6
+    sectionTitle(ctx, "Next 90 days", "Three moves, in order.")
+    for (const move of report.moves) {
+      ensure(ctx, 40)
+      ctx.page.drawText(clean(move.window).toUpperCase(), { x: MARGIN, y: ctx.y - 10, size: 8, font: ctx.regular, color: MUTED })
+      ctx.y -= 18
+      paragraph(ctx, move.title, 12, ctx.bold, INK)
+      paragraph(ctx, move.body, 10.5, ctx.regular, SLATE)
+      ctx.y -= 8
+    }
+  }
+
+  newPage(ctx)
+  sectionTitle(ctx, "Evidence appendix", "Traceable observations.")
+  for (const row of report.evidenceAppendix.slice(0, 18)) {
+    const line = `${row.date} · ${row.source} · ${row.observation} (${row.confidence})`
+    paragraph(ctx, line, 8.5, ctx.regular, SLATE)
+    ctx.y -= 2
+  }
+
+  ctx.y -= 12
+  sectionTitle(ctx, "Disclaimers", "How to read this report.")
+  for (const d of report.disclaimers) {
+    paragraph(ctx, `• ${d}`, 9, ctx.regular, MUTED)
+  }
+  ctx.y -= 16
+  paragraph(ctx, "Talk through this report: terramore.io/book", 11, ctx.bold, INK)
+  paragraph(ctx, "Prepared by Terramore. No private analytics or revenue data was used.", 9, ctx.regular, MUTED)
 
   const bytes = await doc.save()
   return Buffer.from(bytes)

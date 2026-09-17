@@ -1,4 +1,12 @@
+import type { Metadata } from "next"
 import { SiteFooter } from "@/components/site-footer"
+
+export const metadata: Metadata = {
+  title: "Privacy Policy | Terramore",
+  description:
+    "How Terramore.io collects, uses, and shares personal information on terramore.io, including California privacy rights and how to contact us.",
+  alternates: { canonical: "https://www.terramore.io/privacy" },
+}
 
 export default function PrivacyPolicyPage() {
   return (

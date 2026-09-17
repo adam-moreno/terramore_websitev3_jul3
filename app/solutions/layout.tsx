@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Solutions | Terramore',
     description: 'Pick the job that is stuck. Sell more from the store, fill the appointment book, bring customers back, get found, reach people ready to buy, or spend less.',
-    url: 'https://terramore.io/solutions',
+    url: 'https://www.terramore.io/solutions',
   },
 }
 

@@ -1,4 +1,12 @@
+import type { Metadata } from "next"
 import { SiteFooter } from "@/components/site-footer"
+
+export const metadata: Metadata = {
+  title: "Disclosure | Terramore",
+  description:
+    "Affiliate and general disclosures for terramore.io, including how Terramore.io handles affiliate relationships and recommendations.",
+  alternates: { canonical: "https://www.terramore.io/disclosure" },
+}
 
 export default function DisclosurePage() {
   return (

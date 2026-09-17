@@ -62,7 +62,7 @@ function BrandLogo({
   // When a className is given it owns the size, so the logo can change size across breakpoints.
   return (
     <img
-      src={`https://cdn.simpleicons.org/${slug}`}
+      src={`https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/${slug}.svg`}
       alt={name}
       className={`object-contain ${className ?? ""}`}
       style={className ? undefined : { width: size, height: size }}

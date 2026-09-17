@@ -2,10 +2,10 @@ import { getServerSupabase, isMissingColumnError } from "@/lib/supabase-server"
 import { SITE_URL } from "@/lib/booking-api"
 import { emailButton, emailP, emailShell, emailSignoff } from "@/lib/email-template"
 import { ADMIN_EMAIL, REPLY_TO, emailProvider, postSlack, sendEmail } from "@/lib/notify"
-import { footprintToFacts, readFootprint } from "@/lib/report/footprint"
+import { collectDiagnostic } from "@/lib/report/diagnostic"
 import { renderReportPdf } from "@/lib/report/pdf"
 import { sendReportDeliveredSms } from "@/lib/report/sms"
-import { modelProvider, reportToText, writeReport } from "@/lib/report/write"
+import { modelProvider, reportToText, writeReportFromDiagnostic } from "@/lib/report/write"
 
 export type ReportRequest = {
   name: string
@@ -42,12 +42,17 @@ export function missingReportKeys(): string[] {
  * migration in supabase/migrations has run. Without it, falls back to the legacy status column for
  * needs_keys and failed so the row still says something went wrong.
  */
-async function saveReportState(email: string, status: ReportStatus, extra: { text?: string; error?: string } = {}) {
+async function saveReportState(
+  email: string,
+  status: ReportStatus,
+  extra: { text?: string; error?: string; reportJson?: unknown } = {},
+) {
   const supabase = getServerSupabase()
   if (!supabase) return
 
   const full: Record<string, unknown> = { report_status: status }
   if (extra.text) full.report_text = extra.text
+  if (extra.reportJson) full.report_json = extra.reportJson
   if (status === "sent") full.report_sent_at = new Date().toISOString()
   if (extra.error) full.report_error = extra.error.slice(0, 500)
 
@@ -55,6 +60,22 @@ async function saveReportState(email: string, status: ReportStatus, extra: { tex
   if (!error) return
 
   if (isMissingColumnError(error)) {
+    // Retry without optional MVP columns if migration not applied yet.
+    if (extra.reportJson) {
+      const withoutJson: Record<string, unknown> = { report_status: status }
+      if (extra.text) withoutJson.report_text = extra.text
+      if (status === "sent") withoutJson.report_sent_at = new Date().toISOString()
+      if (extra.error) withoutJson.report_error = extra.error.slice(0, 500)
+      const retry = await supabase.from("free_courses_signups").update(withoutJson).eq("email", email)
+      if (!retry.error) {
+        console.warn("[report] report_json column missing. Run supabase/migrations/20260916_report_diagnostic.sql.")
+        return
+      }
+      if (!isMissingColumnError(retry.error)) {
+        console.error("[report] could not save report state:", retry.error.message)
+        return
+      }
+    }
     console.warn("[report] report_* columns missing. Run supabase/migrations/20260911_report_pipeline.sql.")
     if (status === "needs_keys" || status === "failed") {
       const fallback = await supabase.from("free_courses_signups").update({ status }).eq("email", email)
@@ -71,8 +92,8 @@ function safeFilename(value: string): string {
 }
 
 /**
- * Reads the public footprint, writes the four chapters, renders the PDF, and emails it to the
- * requester with a copy to Adam. Never throws. Every exit path is logged and stored on the row.
+ * Collects public evidence, scores deterministically, writes consulting prose, renders PDF, emails it.
+ * Never throws. Every exit path is logged and stored on the row. Lead 201 path is unchanged.
  */
 export async function runReportPipeline(request: ReportRequest): Promise<PipelineResult> {
   const missing = missingReportKeys()
@@ -87,9 +108,8 @@ export async function runReportPipeline(request: ReportRequest): Promise<Pipelin
   const started = Date.now()
 
   try {
-    const footprint = await readFootprint(request.businessName, request.website)
-    const facts = footprintToFacts(footprint)
-    const report = await writeReport({ businessName: request.businessName, website: footprint.input.website, facts })
+    const diagnostic = await collectDiagnostic(request.businessName, request.website)
+    const report = await writeReportFromDiagnostic(diagnostic)
     const text = reportToText(report)
     const pdf = await renderReportPdf(report)
 
@@ -129,15 +149,37 @@ export async function runReportPipeline(request: ReportRequest): Promise<Pipelin
       attachments: [{ filename: safeFilename(subjectName), content: pdf, contentType: "application/pdf" }],
     })
 
+    const reportJson = {
+      version: 2,
+      overallScore: report.overallScore,
+      evidenceCoverage: report.evidenceCoverage,
+      scoreFactors: report.scoreFactors,
+      recommendations: report.recommendations,
+      evidenceAppendix: report.evidenceAppendix,
+      competitiveNote: report.competitiveNote,
+      disclaimers: report.disclaimers,
+      diagnostic,
+      model: report.model,
+      readAt: diagnostic.readAt,
+    }
+
     if (!emailResult.ok) {
-      await saveReportState(request.email, "failed", { text, error: `Email failed: ${emailResult.error || "unknown"}` })
+      await saveReportState(request.email, "failed", {
+        text,
+        error: `Email failed: ${emailResult.error || "unknown"}`,
+        reportJson,
+      })
       await postSlack(`Report for ${request.name} <${request.email}> was written (${report.model}) but the email failed: ${emailResult.error}. Text is on the row.`)
       return { ok: false, status: "failed", model: report.model, error: emailResult.error }
     }
 
-    await saveReportState(request.email, "sent", { text })
-    console.info(`[report] sent to ${request.email} via ${emailResult.channel} using ${report.model} in ${Date.now() - started}ms`)
-    await postSlack(`Report sent to ${request.name} <${request.email}> for ${subjectName} (${report.model}, ${Math.round((Date.now() - started) / 1000)}s). Copy is in your inbox.`)
+    await saveReportState(request.email, "sent", { text, reportJson })
+    console.info(
+      `[report] sent to ${request.email} via ${emailResult.channel} using ${report.model} score=${report.overallScore} coverage=${report.evidenceCoverage}% in ${Date.now() - started}ms`,
+    )
+    await postSlack(
+      `Report sent to ${request.name} <${request.email}> for ${subjectName} (score ${report.overallScore ?? "n/a"}, coverage ${report.evidenceCoverage}%, ${report.model}, ${Math.round((Date.now() - started) / 1000)}s). Copy is in your inbox.`,
+    )
 
     // Message 2 — fail soft; never blocks delivery success.
     let phone = request.phone || null

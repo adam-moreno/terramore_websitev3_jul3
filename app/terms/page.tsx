@@ -1,4 +1,12 @@
+import type { Metadata } from "next"
 import { SiteFooter } from "@/components/site-footer"
+
+export const metadata: Metadata = {
+  title: "Terms of Service | Terramore",
+  description:
+    "Terms that govern use of terramore.io and Terramore.io services, including website use, disclaimers, and how to contact us.",
+  alternates: { canonical: "https://www.terramore.io/terms" },
+}
 
 export default function TermsPage() {
   return (
@@ -58,7 +66,7 @@ export default function TermsPage() {
               To sign up as a paying Terramore.io client, you will be required to agree to additional contractual terms.
             </p>
 
-            {/* Table of Contents */}
+            {/* Table of Contents — only sections present on this page */}
             <div className="bg-gray-50 p-6 rounded-lg mb-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Table of Contents:</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
@@ -68,71 +76,8 @@ export default function TermsPage() {
                 <a href="#section-2" className="text-blue-600 hover:text-blue-800">
                   2. WEBSITE USER CONDUCT AND RESTRICTIONS
                 </a>
-                <a href="#section-3" className="text-blue-600 hover:text-blue-800">
-                  3. OUR PRIVACY POLICY AND YOUR PERSONAL INFORMATION
-                </a>
-                <a href="#section-4" className="text-blue-600 hover:text-blue-800">
-                  4. PROHIBITED USE OF THE WEBSITE
-                </a>
-                <a href="#section-5" className="text-blue-600 hover:text-blue-800">
-                  5. INFORMATION YOU PROVIDE; REGISTRATION; USERNAMES AND PASSWORDS
-                </a>
                 <a href="#section-6" className="text-blue-600 hover:text-blue-800">
-                  6. DISCLAIMER – YOUR BUSINESS'S INDIVIDUAL RESULTS WILL VARY
-                </a>
-                <a href="#section-7" className="text-blue-600 hover:text-blue-800">
-                  7. YOUR RESPONSIBILITIES IN RUNNING YOUR BUSINESS
-                </a>
-                <a href="#section-8" className="text-blue-600 hover:text-blue-800">
-                  8. TESTIMONIALS, REVIEWS, AND PICTURES/VIDEOS
-                </a>
-                <a href="#section-9" className="text-blue-600 hover:text-blue-800">
-                  9. DISCLAIMERS OF OTHER WARRANTIES
-                </a>
-                <a href="#section-10" className="text-blue-600 hover:text-blue-800">
-                  10. LIMITATIONS OF LIABILITIES
-                </a>
-                <a href="#section-11" className="text-blue-600 hover:text-blue-800">
-                  11. DISPUTE RESOLUTION BY MANDATORY BINDING ARBITRATION
-                </a>
-                <a href="#section-12" className="text-blue-600 hover:text-blue-800">
-                  12. TERRAMORE.IO'S ADDITIONAL REMEDIES
-                </a>
-                <a href="#section-13" className="text-blue-600 hover:text-blue-800">
-                  13. INDEMNIFICATION
-                </a>
-                <a href="#section-14" className="text-blue-600 hover:text-blue-800">
-                  14. NOTICE AND TAKEDOWN PROCEDURES; COPYRIGHT AGENT
-                </a>
-                <a href="#section-15" className="text-blue-600 hover:text-blue-800">
-                  15. THIRD-PARTY LINKS
-                </a>
-                <a href="#section-16" className="text-blue-600 hover:text-blue-800">
-                  16. TERMINATION
-                </a>
-                <a href="#section-17" className="text-blue-600 hover:text-blue-800">
-                  17. NO WAIVER
-                </a>
-                <a href="#section-18" className="text-blue-600 hover:text-blue-800">
-                  18. GOVERNING LAW AND VENUE
-                </a>
-                <a href="#section-19" className="text-blue-600 hover:text-blue-800">
-                  19. FORCE MAJEURE
-                </a>
-                <a href="#section-20" className="text-blue-600 hover:text-blue-800">
-                  20. ASSIGNMENT
-                </a>
-                <a href="#section-21" className="text-blue-600 hover:text-blue-800">
-                  21. ELECTRONIC SIGNATURE
-                </a>
-                <a href="#section-22" className="text-blue-600 hover:text-blue-800">
-                  22. CHANGES TO THE AGREEMENT
-                </a>
-                <a href="#section-23" className="text-blue-600 hover:text-blue-800">
-                  23. SEVERABILITY
-                </a>
-                <a href="#section-24" className="text-blue-600 hover:text-blue-800">
-                  24. ENTIRE AGREEMENT
+                  6. DISCLAIMER – YOUR BUSINESS&apos;S INDIVIDUAL RESULTS WILL VARY
                 </a>
                 <a href="#section-25" className="text-blue-600 hover:text-blue-800">
                   25. CONTACTING US

@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     openGraph: {
       title: `${capability.title} | Terramore`,
       description: capability.story[0],
-      url: `https://terramore.io/solutions/${capability.slug}`,
+      url: `https://www.terramore.io/solutions/${capability.slug}`,
     },
   }
 }

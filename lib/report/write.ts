@@ -1,11 +1,15 @@
 /**
- * Turns observed footprint facts into the four report chapters, in the house voice.
+ * Turns observed diagnostic facts + deterministic scores into consulting prose.
+ * The LLM must not invent scores, competitors, rankings, demographics, or metrics.
  *
  * Model key (first found wins):
  * - OPENAI_API_KEY      default model gpt-4.1-mini
  * - ANTHROPIC_API_KEY   default model claude-haiku-4-5
  * Override the model id with REPORT_MODEL.
  */
+
+import { diagnosticToFactsPrompt } from "@/lib/report/recommend"
+import type { DiagnosticBundle, Finding, Recommendation, ScoreFactor } from "@/lib/report/types"
 
 export type ReportItem = { label: string; value: string; note: string }
 export type ReportChapter = { kicker: string; title: string; items: ReportItem[]; summary: string }
@@ -19,13 +23,26 @@ export type ReportContent = {
   chapters: ReportChapter[]
   moves: ReportMove[]
   model: string
+  /** MVP diagnostic fields */
+  overallScore: number | null
+  evidenceCoverage: number
+  whatCustomersSee: string
+  working: string[]
+  opportunities: string[]
+  scoreFactors: ScoreFactor[]
+  findings: Finding[]
+  recommendations: Recommendation[]
+  evidenceAppendix: Array<{ source: string; observation: string; date: string; confidence: "high" | "medium" | "low" }>
+  competitiveNote: string
+  disclaimers: string[]
+  diagnostic: DiagnosticBundle
 }
 
 const CHAPTERS = [
-  { kicker: "01 · Digital footprint", title: "Where you already show up." },
-  { kicker: "02 · Current audience", title: "Who already looks, and who already buys." },
-  { kicker: "03 · Current wins", title: "What already pays." },
-  { kicker: "04 · Current openings", title: "Where cash is leaking." },
+  { kicker: "01 · First impression", title: "What a customer understands first." },
+  { kicker: "02 · Trust & credibility", title: "What makes the business believable." },
+  { kicker: "03 · Discoverability", title: "Where the business shows up publicly." },
+  { kicker: "04 · Catalog & conversion", title: "Offer clarity and the next step." },
 ] as const
 
 export function modelProvider(): { provider: "openai" | "anthropic"; model: string } | null {
@@ -35,20 +52,32 @@ export function modelProvider(): { provider: "openai" | "anthropic"; model: stri
   return null
 }
 
-const SYSTEM = `You write Digital Footprint reports for Terramore, a growth team for small-business owners.
+const SYSTEM = `You write Digital Footprint diagnostic reports for Terramore.
 
-Voice rules. Short sentences. Plain words an owner reads in one pass. No em dashes anywhere. Never use the word "tiles". Speak to the owner as "you". No hype, no jargon, no filler.
+Voice. Consulting-oriented. Short sentences. Plain words. No em dashes. Never use the word "tiles". Speak to the owner as "you". No hype, no "in today's digital landscape", no filler.
 
-Truth rules. You only get a list of facts we observed on the public web. State only what is in the facts. If a fact is missing, the value is "Not found" and the note says what we could not see and how the owner can show us. Never invent numbers, followers, reviews, revenue, audience sizes, products, or tools. Do not guess who the customer is unless the site text says so. When a chapter has little evidence, say so plainly and keep it short.
+Truth rules (critical):
+- You receive OBSERVED FACTS and DETERMINISTIC SCORES.
+- You must NOT invent or change any score numbers.
+- You must NOT invent competitors, rankings, demographics, reviews, locations, revenue, conversion rates, or follower counts.
+- If something is missing, write exactly: Not found in sources checked
+- Never say "This business does not have X." Say it was not found in sources checked.
+- Rephrase the provided Top recommendations; do not reorder priorities or invent new top actions.
 
-Output. Return one JSON object and nothing else, shaped exactly like this:
+Output. Return one JSON object only:
 {
-  "headline": "one sentence on the biggest thing we saw",
+  "headline": "one sentence on the biggest evidence-backed finding",
+  "whatCustomersSee": "2-4 sentences: what a stranger can currently understand",
+  "working": ["up to 5 short strengths grounded in facts"],
+  "opportunities": ["up to 5 short opportunities grounded in facts"],
   "chapters": [
-    { "kicker": "01 · Digital footprint", "title": "Where you already show up.", "items": [{ "label": "", "value": "", "note": "" }], "summary": "" },
-    { "kicker": "02 · Current audience", "title": "Who already looks, and who already buys.", "items": [...], "summary": "" },
-    { "kicker": "03 · Current wins", "title": "What already pays.", "items": [...], "summary": "" },
-    { "kicker": "04 · Current openings", "title": "Where cash is leaking.", "items": [...], "summary": "" }
+    { "kicker": "01 · First impression", "title": "What a customer understands first.", "items": [{ "label": "", "value": "", "note": "" }], "summary": "" },
+    { "kicker": "02 · Trust & credibility", "title": "What makes the business believable.", "items": [...], "summary": "" },
+    { "kicker": "03 · Discoverability", "title": "Where the business shows up publicly.", "items": [...], "summary": "" },
+    { "kicker": "04 · Catalog & conversion", "title": "Offer clarity and the next step.", "items": [...], "summary": "" }
+  ],
+  "recommendationCopy": [
+    { "rank": 1, "finding": "", "evidence": "", "impact": "", "action": "" }
   ],
   "moves": [
     { "window": "Week 1 to 3", "title": "", "body": "" },
@@ -56,10 +85,10 @@ Output. Return one JSON object and nothing else, shaped exactly like this:
     { "window": "Week 8 to 12", "title": "", "body": "" }
   ]
 }
-Each chapter has 3 to 6 items. Labels are short (Site, Instagram, Google Business, Tracking, Email tool, Checkout, Booking). Values are short facts. Notes are one or two sentences. Summaries are two to four sentences. Moves are what Terramore would do first, in order, grounded in the openings you listed.`
+Each chapter has 3 to 6 items. recommendationCopy must align 1:1 with the deterministic top recommendations provided (same rank order).`
 
 function buildUserPrompt(facts: string, businessName: string): string {
-  return `Business: ${businessName || "not given"}\n\nObserved facts:\n${facts}\n\nWrite the report JSON now.`
+  return `Business: ${businessName || "not given"}\n\n${facts}\n\nWrite the report JSON now. Do not invent scores or metrics.`
 }
 
 async function callOpenAI(model: string, facts: string, businessName: string): Promise<string> {
@@ -68,7 +97,7 @@ async function callOpenAI(model: string, facts: string, businessName: string): P
     headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}`, "Content-Type": "application/json" },
     body: JSON.stringify({
       model,
-      temperature: 0.3,
+      temperature: 0.25,
       response_format: { type: "json_object" },
       messages: [
         { role: "system", content: SYSTEM },
@@ -93,8 +122,8 @@ async function callAnthropic(model: string, facts: string, businessName: string)
     },
     body: JSON.stringify({
       model,
-      max_tokens: 3000,
-      temperature: 0.3,
+      max_tokens: 4000,
+      temperature: 0.25,
       system: SYSTEM,
       messages: [{ role: "user", content: buildUserPrompt(facts, businessName) }],
     }),
@@ -106,7 +135,6 @@ async function callAnthropic(model: string, facts: string, businessName: string)
   return text
 }
 
-/** House style guard applied after the model: no em dashes, no "tiles". */
 export function houseStyle(value: string): string {
   return value
     .replace(/\s*[—–]\s*/g, ", ")
@@ -126,22 +154,43 @@ function asString(value: unknown, fallback = ""): string {
   return typeof value === "string" ? houseStyle(value) : fallback
 }
 
-export async function writeReport(input: {
-  businessName: string
-  website: string | null
-  facts: string
-}): Promise<ReportContent> {
+function asStringList(value: unknown, max = 5): string[] {
+  if (!Array.isArray(value)) return []
+  return value.map((v) => asString(v)).filter(Boolean).slice(0, max)
+}
+
+function buildAppendix(diagnostic: DiagnosticBundle) {
+  return diagnostic.facts
+    .filter((f) => f.available || f.provenance.sourceType !== "derived")
+    .slice(0, 40)
+    .map((f) => ({
+      source: f.provenance.sourceUrl || f.provenance.sourceType,
+      observation: `${f.label}: ${f.available ? String(f.value) : "Not found in sources checked"}${f.note ? ` — ${f.note}` : ""}`,
+      date: f.provenance.observedAt.slice(0, 10),
+      confidence: f.provenance.confidence,
+    }))
+}
+
+/**
+ * Preferred entry: write from structured diagnostic (scores already fixed).
+ */
+export async function writeReportFromDiagnostic(diagnostic: DiagnosticBundle): Promise<ReportContent> {
   const chosen = modelProvider()
   if (!chosen) throw new Error("No model key. Set OPENAI_API_KEY or ANTHROPIC_API_KEY.")
 
+  const facts = diagnosticToFactsPrompt(diagnostic)
   const raw =
     chosen.provider === "openai"
-      ? await callOpenAI(chosen.model, input.facts, input.businessName)
-      : await callAnthropic(chosen.model, input.facts, input.businessName)
+      ? await callOpenAI(chosen.model, facts, diagnostic.businessName)
+      : await callAnthropic(chosen.model, facts, diagnostic.businessName)
 
   const parsed = extractJson(raw) as {
     headline?: unknown
+    whatCustomersSee?: unknown
+    working?: unknown
+    opportunities?: unknown
     chapters?: Array<{ items?: Array<Record<string, unknown>>; summary?: unknown }>
+    recommendationCopy?: Array<Record<string, unknown>>
     moves?: Array<Record<string, unknown>>
   }
 
@@ -151,52 +200,123 @@ export async function writeReport(input: {
       .slice(0, 6)
       .map((item) => ({
         label: asString(item.label, "Item"),
-        value: asString(item.value, "Not found"),
+        value: asString(item.value, "Not found in sources checked"),
         note: asString(item.note),
       }))
     return {
       kicker: fixed.kicker,
       title: fixed.title,
-      items: items.length ? items : [{ label: "Evidence", value: "Not found", note: "We could not see enough on the public web for this chapter." }],
-      summary: asString(source?.summary, "Not enough public evidence for this chapter."),
+      items: items.length
+        ? items
+        : [{ label: "Evidence", value: "Not found in sources checked", note: "Not enough public evidence for this section." }],
+      summary: asString(source?.summary, "Not enough public evidence for this section."),
+    }
+  })
+
+  const recommendations: Recommendation[] = diagnostic.recommendations.map((rec, index) => {
+    const copy = parsed.recommendationCopy?.[index]
+    return {
+      ...rec,
+      finding: asString(copy?.finding, rec.finding),
+      evidence: asString(copy?.evidence, rec.evidence),
+      impact: asString(copy?.impact, rec.impact),
+      action: asString(copy?.action, rec.action),
     }
   })
 
   const moves: ReportMove[] = (parsed.moves || []).slice(0, 3).map((move, index) => ({
     window: asString(move.window, ["Week 1 to 3", "Week 4 to 7", "Week 8 to 12"][index]),
-    title: asString(move.title, "Review with the owner"),
-    body: asString(move.body),
+    title: asString(move.title, recommendations[index]?.action || "Review with the owner"),
+    body: asString(move.body, recommendations[index]?.impact || ""),
   }))
 
   return {
-    businessName: input.businessName || input.website || "Your business",
-    website: input.website,
+    businessName: diagnostic.businessName || diagnostic.website || "Your business",
+    website: diagnostic.website,
     readDate: new Date().toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: "America/Los_Angeles" }),
     headline: asString(parsed.headline, "Here is what we could see from the outside."),
     chapters,
     moves,
     model: `${chosen.provider}:${chosen.model}`,
+    overallScore: diagnostic.scores.overall,
+    evidenceCoverage: diagnostic.scores.evidenceCoverage,
+    whatCustomersSee: asString(
+      parsed.whatCustomersSee,
+      "A first-time visitor can see only what was publicly observable in the sources checked.",
+    ),
+    working: asStringList(parsed.working),
+    opportunities: asStringList(parsed.opportunities),
+    scoreFactors: diagnostic.scores.factors,
+    findings: diagnostic.recommendations,
+    recommendations,
+    evidenceAppendix: buildAppendix(diagnostic),
+    competitiveNote: diagnostic.competitive.note,
+    disclaimers: diagnostic.disclaimers,
+    diagnostic,
   }
 }
 
-/** Plain text version stored in Supabase and used as the email body fallback. */
+/** @deprecated Prefer writeReportFromDiagnostic. Kept for any direct callers. */
+export async function writeReport(input: {
+  businessName: string
+  website: string | null
+  facts: string
+}): Promise<ReportContent> {
+  const { collectDiagnostic } = await import("@/lib/report/diagnostic")
+  const diagnostic = await collectDiagnostic(input.businessName, input.website)
+  return writeReportFromDiagnostic(diagnostic)
+}
+
 export function reportToText(report: ReportContent): string {
   const lines: string[] = [
     `Digital Footprint report: ${report.businessName}`,
     report.website ? `Site: ${report.website}` : "",
     `Read date: ${report.readDate}`,
+    `Digital Presence Score: ${report.overallScore ?? "n/a"} / 100`,
+    `Evidence Coverage: ${report.evidenceCoverage}%`,
     "",
     report.headline,
     "",
+    "What customers can currently understand",
+    report.whatCustomersSee,
+    "",
   ]
+  if (report.working.length) {
+    lines.push("What is working", ...report.working.map((w) => `- ${w}`), "")
+  }
+  if (report.opportunities.length) {
+    lines.push("Biggest opportunities", ...report.opportunities.map((o) => `- ${o}`), "")
+  }
+  lines.push("Score breakdown")
+  for (const f of report.scoreFactors) {
+    lines.push(
+      `- ${f.label}: ${f.available ? `${f.score}/100` : `Not available (${f.unavailableReason || ""})`}`,
+    )
+  }
+  lines.push("")
   for (const chapter of report.chapters) {
     lines.push(`${chapter.kicker}`, chapter.title, "")
     for (const item of chapter.items) lines.push(`- ${item.label}: ${item.value}${item.note ? `. ${item.note}` : ""}`)
     lines.push("", chapter.summary, "")
   }
-  if (report.moves.length) {
-    lines.push("05 · Next 90 days", "Three moves, in order.", "")
-    for (const move of report.moves) lines.push(`- ${move.window}: ${move.title}${move.body ? `. ${move.body}` : ""}`)
+  if (report.recommendations.length) {
+    lines.push("Top 5 actions", "")
+    for (const r of report.recommendations) {
+      lines.push(`${r.rank}. [${r.priority}] ${r.finding}`)
+      lines.push(`   Evidence: ${r.evidence}`)
+      lines.push(`   Impact: ${r.impact}`)
+      lines.push(`   Action: ${r.action}`)
+      lines.push("")
+    }
   }
+  lines.push("Competitive context", report.competitiveNote, "")
+  if (report.evidenceAppendix.length) {
+    lines.push("Evidence appendix")
+    for (const row of report.evidenceAppendix.slice(0, 25)) {
+      lines.push(`- [${row.date}] ${row.source}: ${row.observation} (${row.confidence})`)
+    }
+    lines.push("")
+  }
+  lines.push("Disclaimers", ...report.disclaimers.map((d) => `- ${d}`))
   return lines.filter((line, index, all) => !(line === "" && all[index - 1] === "")).join("\n").trim()
 }
