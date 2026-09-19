@@ -328,6 +328,9 @@ export function SiteHeader() {
           </div>
 
           <nav className="ml-auto hidden items-center gap-6 text-[13px] font-medium text-slate-600 lg:flex">
+            <Link href="/marketing" className="hover:text-slate-900">
+              Marketing
+            </Link>
             <HeaderMenu label="Solutions" sections={solutionsSections} columns={2} />
             <HeaderMenu label="Integrations" items={integrationLinks} columns={2} />
             <HeaderMenu label="Resources" items={resourceLinks} />
@@ -362,6 +365,9 @@ export function SiteHeader() {
               <span className="mt-0.5 block text-[12px] font-medium text-brand/60">Current clients. Invite only.</span>
             </a>
 
+            <Link href="/marketing" onClick={close} className="block border-b border-black/[0.04] py-4 text-[17px] font-medium text-ink">
+              Marketing
+            </Link>
             <MobileAccordion label="Solutions">
               {solutionsSections.map((section) => (
                 <MobileSection

@@ -8,6 +8,7 @@ import { useDoNotSellPopup } from "@/hooks/use-do-not-sell-popup"
 import { DASHBOARD_LOGIN_URL } from "@/lib/dashboard"
 
 const PRIMARY = [
+  { href: "/marketing", label: "Marketing" },
   { href: "/solutions", label: "Solutions" },
   { href: "/integrations", label: "Integrations" },
   { href: "/pricing", label: "Pricing" },

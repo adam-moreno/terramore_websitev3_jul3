@@ -2,10 +2,12 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Solutions | Terramore',
-  description: 'Pick the job that is stuck. Sell more from the store, fill the appointment book, bring customers back, get found, reach people ready to buy, or spend less.',
+  description:
+    'Growth problems do not sit alone. Terramore connects strategy, marketing, automation, and data to the problem that is stuck.',
   openGraph: {
     title: 'Solutions | Terramore',
-    description: 'Pick the job that is stuck. Sell more from the store, fill the appointment book, bring customers back, get found, reach people ready to buy, or spend less.',
+    description:
+      'More leads, better conversion, less manual work, and a clear view of what is working.',
     url: 'https://www.terramore.io/solutions',
   },
 }
