@@ -85,6 +85,328 @@
   transition: opacity 0.5s ease-out, transform 0.5s ease-out;
 }
 
+/* Scroll-reveal variant: unrevealed tiles stay faintly visible as a tease
+   that there is more to scroll to, then lift to full strength. */
+.solutions-node-tease {
+  opacity: 0.22;
+  transform: translateY(14px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+/* Marketing hero phone: the analytics feed drifts up and back, like the
+   user is scrolling their own dashboard. */
+@keyframes marketing-phone-scroll {
+  0%,
+  12% {
+    transform: translateY(0);
+  }
+  45%,
+  60% {
+    transform: translateY(-38%);
+  }
+  88%,
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.marketing-phone-feed {
+  animation: marketing-phone-scroll 11s ease-in-out infinite;
+}
+
+/* Creative tiles: motion where the medium calls for it. */
+@keyframes marketing-playhead-sweep {
+  0% {
+    left: 2%;
+  }
+  100% {
+    left: 96%;
+  }
+}
+
+.marketing-playhead {
+  animation: marketing-playhead-sweep 5s linear infinite;
+}
+
+@keyframes marketing-motion-spin-kf {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.marketing-motion-spin {
+  animation: marketing-motion-spin-kf 6s linear infinite;
+}
+
+@keyframes marketing-motion-bounce-kf {
+  0%,
+  100% {
+    transform: translateY(8px) rotate(-6deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(8deg);
+  }
+}
+
+.marketing-motion-bounce {
+  animation: marketing-motion-bounce-kf 2.6s ease-in-out infinite;
+}
+
+@keyframes marketing-motion-pulse-kf {
+  0%,
+  100% {
+    transform: scale(0.88);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
+}
+
+.marketing-motion-pulse {
+  animation: marketing-motion-pulse-kf 3.2s ease-in-out infinite;
+}
+
+.marketing-draw {
+  stroke-dasharray: 260;
+  stroke-dashoffset: 260;
+  animation: marketing-draw-kf 4.5s ease-in-out infinite;
+}
+
+@keyframes marketing-draw-kf {
+  0% {
+    stroke-dashoffset: 260;
+  }
+  45%,
+  75% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: -260;
+  }
+}
+
+@keyframes marketing-lang-a-kf {
+  0%,
+  38% {
+    transform: translate(-26%, -34%) scale(1);
+    opacity: 1;
+    z-index: 2;
+  }
+  50%,
+  88% {
+    transform: translate(-34%, -46%) scale(0.82);
+    opacity: 0.45;
+    z-index: 1;
+  }
+  100% {
+    transform: translate(-26%, -34%) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes marketing-lang-b-kf {
+  0%,
+  38% {
+    transform: translate(26%, 34%) scale(0.82);
+    opacity: 0.45;
+    z-index: 1;
+  }
+  50%,
+  88% {
+    transform: translate(34%, 46%) scale(1);
+    opacity: 1;
+    z-index: 2;
+  }
+  100% {
+    transform: translate(26%, 34%) scale(0.82);
+    opacity: 0.45;
+  }
+}
+
+.marketing-lang-a {
+  animation: marketing-lang-a-kf 5s ease-in-out infinite;
+}
+
+.marketing-lang-b {
+  animation: marketing-lang-b-kf 5s ease-in-out infinite;
+}
+
+/* Copywriting: lines type themselves out. */
+@keyframes marketing-type-kf {
+  0% {
+    width: 0;
+  }
+  55%,
+  90% {
+    width: 100%;
+  }
+  100% {
+    width: 100%;
+    opacity: 0;
+  }
+}
+
+.marketing-type {
+  width: 0;
+  animation: marketing-type-kf 6s ease-out infinite;
+}
+
+@keyframes marketing-caret-kf {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.marketing-caret {
+  animation: marketing-caret-kf 1s step-end infinite;
+}
+
+/* Social: hearts float up and fade. */
+@keyframes marketing-heart-kf {
+  0% {
+    transform: translateY(0) scale(0.6);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-72px) scale(1.1);
+    opacity: 0;
+  }
+}
+
+.marketing-heart {
+  animation: marketing-heart-kf 3.4s ease-out infinite;
+}
+
+/* Landing: shimmer sweeps across the page skeleton. */
+@keyframes marketing-shimmer-kf {
+  0% {
+    left: -35%;
+  }
+  60%,
+  100% {
+    left: 105%;
+  }
+}
+
+.marketing-shimmer {
+  left: -35%;
+  animation: marketing-shimmer-kf 3.8s ease-in-out infinite;
+}
+
+/* Footer characters: dragon crosses left→right with a gentle bob,
+   the monster-truck chase crosses right→left. */
+@keyframes marketing-dragon-fly-kf {
+  0% {
+    transform: translateX(-18rem);
+  }
+  100% {
+    transform: translateX(calc(100vw + 6rem));
+  }
+}
+
+.marketing-dragon-fly {
+  animation: marketing-dragon-fly-kf 38s linear infinite;
+}
+
+@keyframes marketing-dragon-bob-kf {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-14px);
+  }
+}
+
+.marketing-dragon-bob {
+  animation: marketing-dragon-bob-kf 2.4s ease-in-out infinite;
+}
+
+@keyframes marketing-chase-run-kf {
+  0% {
+    transform: translateX(calc(100vw + 6rem));
+  }
+  100% {
+    transform: translateX(-32rem);
+  }
+}
+
+.marketing-chase-run {
+  animation: marketing-chase-run-kf 26s linear infinite;
+}
+
+/* Static ads: the fanned deck sways gently. */
+@keyframes marketing-fan-kf {
+  0%,
+  100% {
+    transform: rotate(-2deg);
+  }
+  50% {
+    transform: rotate(2.5deg);
+  }
+}
+
+.marketing-fan {
+  animation: marketing-fan-kf 6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marketing-phone-feed,
+  .marketing-playhead,
+  .marketing-motion-spin,
+  .marketing-motion-bounce,
+  .marketing-motion-pulse,
+  .marketing-lang-a,
+  .marketing-lang-b,
+  .marketing-type,
+  .marketing-caret,
+  .marketing-heart,
+  .marketing-shimmer,
+  .marketing-fan,
+  .marketing-dragon-fly,
+  .marketing-dragon-bob,
+  .marketing-chase-run {
+    animation: none;
+  }
+
+  .marketing-dragon-fly,
+  .marketing-chase-run {
+    display: none;
+  }
+
+  .marketing-type {
+    width: 100%;
+  }
+
+  .marketing-heart,
+  .marketing-shimmer {
+    display: none;
+  }
+
+  .marketing-draw {
+    stroke-dasharray: none;
+    stroke-dashoffset: 0;
+  }
+
+  .marketing-lang-a {
+    transform: translate(-26%, -34%);
+  }
+
+  .marketing-lang-b {
+    transform: translate(26%, 34%);
+  }
+}
+
 .solutions-node-on {
   opacity: 1;
   transform: translateY(0);
@@ -197,7 +519,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .solutions-node,
-  .solutions-connector {
+  .solutions-connector,
+  .solutions-node-tease {
     opacity: 1;
     transform: none;
     transition: none;

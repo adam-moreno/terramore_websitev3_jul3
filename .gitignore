@@ -104,6 +104,7 @@ dist
 # but track the folders the site references by absolute path (/founder, /reviews, /vlair, /share, /report).
 public/*
 !public/founder/
+!public/marketing/
 !public/reviews/
 !public/vlair/
 !public/share/

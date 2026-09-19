@@ -59,14 +59,46 @@ function useRevealOnce<T extends HTMLElement>() {
   return { ref, on }
 }
 
-export function GrowthSystemFlow() {
-  const { ref, on } = useRevealOnce<HTMLDivElement>()
+/** One stage tile that reveals itself when it scrolls into view, so on
+ *  mobile the 01 → 02 → 03 sequence appears as the user scrolls instead of
+ *  all at once. The next tile peeks in dimmed until it crosses the fold. */
+function StageItem({ stage, index }: { stage: (typeof STAGES)[number]; index: number }) {
+  const { ref, on } = useRevealOnce<HTMLLIElement>()
 
   return (
-    <div
-      ref={ref}
-      className="relative overflow-hidden rounded-[1.75rem] bg-ink px-5 py-7 text-cream shadow-[0_20px_50px_-28px_rgba(15,23,42,0.4)] md:px-9 md:py-9"
-    >
+    <li ref={ref} className="flex flex-col lg:flex-1 lg:flex-row">
+      <div
+        className={`solutions-node-tease flex-1 rounded-2xl bg-white/[0.06] p-4 ring-1 ring-white/10 ${on ? "solutions-node-on" : ""}`}
+        style={{ transitionDelay: `${(index % 3) * 120}ms` }}
+      >
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-gold">{`0${index + 1}`}</p>
+        <p className="mt-1 text-[17px] font-semibold tracking-tight text-cream">{stage.label}</p>
+        <p className="text-[12px] text-cream/55">{stage.note}</p>
+        <ul className="mt-3 flex flex-wrap gap-1.5">
+          {stage.chips.map((chip) => (
+            <li key={chip} className="rounded-full bg-white/[0.08] px-2.5 py-1 text-[11px] font-medium text-cream/80">
+              {chip}
+            </li>
+          ))}
+        </ul>
+      </div>
+      {index < STAGES.length - 1 ? (
+        <div
+          aria-hidden
+          className={`solutions-connector flex items-center justify-center py-1.5 text-brand lg:px-1 lg:py-0 ${on ? "solutions-node-on" : ""}`}
+          style={{ transitionDelay: `${(index % 3) * 120 + 90}ms` }}
+        >
+          <ArrowDown className="h-4 w-4 lg:hidden" strokeWidth={2.25} />
+          <ArrowRight className="hidden h-4 w-4 lg:block" strokeWidth={2.25} />
+        </div>
+      ) : null}
+    </li>
+  )
+}
+
+export function GrowthSystemFlow() {
+  return (
+    <div className="relative overflow-hidden rounded-[1.75rem] bg-ink px-5 py-7 text-cream shadow-[0_20px_50px_-28px_rgba(15,23,42,0.4)] md:px-9 md:py-9">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-cream/50">The Terramore growth system</p>
         <p className="text-[13px] text-cream/60">Every stage feeds the next.</p>
@@ -74,33 +106,7 @@ export function GrowthSystemFlow() {
 
       <ol className="mt-6 flex flex-col gap-0 lg:flex-row lg:items-stretch lg:gap-0">
         {STAGES.map((stage, index) => (
-          <li key={stage.label} className="flex flex-col lg:flex-1 lg:flex-row">
-            <div
-              className={`solutions-node flex-1 rounded-2xl bg-white/[0.06] p-4 ring-1 ring-white/10 ${on ? "solutions-node-on" : ""}`}
-              style={{ transitionDelay: `${index * 140}ms` }}
-            >
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-gold">{`0${index + 1}`}</p>
-              <p className="mt-1 text-[17px] font-semibold tracking-tight text-cream">{stage.label}</p>
-              <p className="text-[12px] text-cream/55">{stage.note}</p>
-              <ul className="mt-3 flex flex-wrap gap-1.5">
-                {stage.chips.map((chip) => (
-                  <li key={chip} className="rounded-full bg-white/[0.08] px-2.5 py-1 text-[11px] font-medium text-cream/80">
-                    {chip}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            {index < STAGES.length - 1 ? (
-              <div
-                aria-hidden
-                className={`solutions-connector flex items-center justify-center py-1.5 text-brand lg:px-1 lg:py-0 ${on ? "solutions-node-on" : ""}`}
-                style={{ transitionDelay: `${index * 140 + 90}ms` }}
-              >
-                <ArrowDown className="h-4 w-4 lg:hidden" strokeWidth={2.25} />
-                <ArrowRight className="hidden h-4 w-4 lg:block" strokeWidth={2.25} />
-              </div>
-            ) : null}
-          </li>
+          <StageItem key={stage.label} stage={stage} index={index} />
         ))}
       </ol>
 
