@@ -1,5 +1,20 @@
 # Development Log - Terramore Website
 
+## 2026-09-18 — Commercial pages for Google Ads (`/marketing`, `/solutions`, `/book`)
+
+Smallest change set to make the three ad destinations production-ready. No redesign, no new components, no new dependencies. Booking backend, GA4, Ads conversions, `meeting_booked`, attribution, and `/report` untouched.
+
+### Changed
+- **`/marketing` (new route, was a 404):** no `app/marketing/page.tsx` existed and nothing redirected there, so the route was created as a server component using existing tokens (`page-shell`, cream/ink/brand, white rounded cards). Hierarchy: outcome hero → five-stage system (Strategy → Demand → Conversion → Automation → Measurement) → six capability cards → who it is for → `Let's talk` → `/book`. Registered in `components/site-header.tsx` (desktop nav + mobile menu), `components/site-footer.tsx`, and `app/sitemap.ts`.
+- **`/solutions` information architecture:** replaced the capability/job list (`StoryHero`/`StoryLinkTiles`) with five problem cards stated in the owner's words, each with capability chips and a `Learn more` link into the existing capability/integration pages, then a short "they work together" row (Strategy + Marketing + Automation + Data) and a single CTA pair. Child routes `/solutions/[slug]` and `/solutions/[slug]/[offering]` unchanged.
+- **`/book` page chrome only:** added a why-book hero, a four-step "What the call covers" section, and a "Who should book" box above the existing `BookingFlow source="book"`. The booking component, `/api/booking`, calendar behavior, confirmation state, and `meeting_booked` were not modified.
+
+### Reasoning
+Google Ads sitelinks need every destination to return 200 and to answer "what do I get" before asking for a form. The problem-first framing on `/solutions` was chosen over shortening paragraphs because the old page made the visitor map their own problem onto department names. On `/book`, the calendar stayed exactly where it was so tracking and the API contract could not regress; only the reason-to-book content is new.
+
+### Intentionally not done
+No claims about revenue, headcount, or results that are not already approved site copy. No second booking system, no homepage/`/report` changes, no global style or font changes.
+
 ## 2026-09-17 — Semrush Site Audit SEO cleanup (targeted)
 
 Highest-priority searchability fixes only. No redesign. Analytics / GA4 / Ads / booking / report conversion untouched.
