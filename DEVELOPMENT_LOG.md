@@ -1,5 +1,67 @@
 # Development Log - Terramore Website
 
+## 2026-09-19 (final) — /solutions reset to prod baseline + targeted edits
+
+User direction: revert to the deployed prod version of /solutions (commit `dff2271`), not the local experimental rebuild. `git checkout HEAD -- app/solutions/page.tsx components/solutions-visuals.tsx` wiped this session's local page rework (problem→solution deck, CTA reshuffle, proof/footprint rewrites). On top of the prod baseline:
+- **Adam de-emphasized everywhere:** solutions proof card "Adam leads every engagement…" → "Founded on 10+ years at Kantar and Samba TV — the backbone of marketing analytics for major advertisers. Specialists in ads, email, and build join when the scope needs them." (source: "How Terramore runs"). About page "Adam leads every engagement." → "Terramore pairs that experience with specialists…". Founder bio framing kept; footer legal line untouched.
+- **Hero clock (`HeroEngine`) desktop-only** (`hidden lg:block` wrapper).
+- **EngineExplorer funnel removed:** the 3D SVG cone + slab geometry (`ENGINE_SLABS`, `slabPath`) deleted. The section keeps the stage bubbles (pill tabs) + description panel, now styled as a white card. Works identically on mobile — no hover dependency left.
+- **Survived the revert (separate files):** footer redesign (Explore/Company columns, legal bottom row), /marketing stage-name alignment.
+- Everything below is superseded local-only experimentation that never shipped.
+
+## 2026-09-19 (later, superseded) — Mobile deck reverted to desktop experience; Adam de-emphasized
+
+- **ProblemSolutionDeck now renders the same mosaic → rail + funnel at every breakpoint.** `ProblemSolutionMobile` (story-card variant) and its `FUNNEL_WALK` helper deleted; the `hidden lg:block` gates removed. Instruction copy is now device-neutral ("Tap a problem…").
+- **Proof copy:** "Adam leads every engagement" removed → "Terramore was founded on 10+ years at Kantar and Samba TV — the measurement backbone behind how major advertisers read what people watch and buy." Founder framing only; footer legal line untouched.
+- Hero clock (`HeroEngine`) stays desktop-only from the earlier pass.
+- Known mobile caveats of the reverted deck (flagged to user): funnel `onMouseEnter` hover-select can misfire under touch emulation; open state stacks 5 rail buttons above the funnel card (scrolling needed); "Hover or tap a funnel stage" copy mentions hover.
+
+## 2026-09-19 — Mobile problem deck: story-card redesign (funnel dropped, superseded)
+
+Mobile `ProblemSolutionMobile` redesigned again per feedback ("doesn't look well designed; funnel not needed — it appears earlier"):
+- **Progress segments:** five thin tappable bars fill brand-blue as the auto-walk advances (3.2s/step), Instagram-story style.
+- **Problem pills:** horizontal rail of plain-language phrases; active pill is ink-filled and auto-centers as the walk moves.
+- **Stage card:** one card per stage using the tile's tint gradient — uppercase stage name + `N / 5` counter, quoted problem phrase, teaser, divider, "How Terramore solves it" + capability chips.
+- Tap a segment or pill to pause the walk. All cards stacked in one grid cell so height stays fixed at the tallest. `SolutionFunnel` remains for the desktop deck only. Desktop unchanged.
+
+### Earlier same day (superseded): problem | stage | funnel side-by-side layout.
+
+### Same session — mobile polish pass
+- **Hero clock hidden on mobile** (`hidden lg:block`): growth-system cards now come right after the hero copy.
+- **Growth-system rail affordance:** mobile header now says "Swipe through all 6 stages →" and the rail has a right-edge fade into the dark panel so it's obvious more stages exist.
+- **"Search has changed" tightened:** heading → "Buyers check everywhere before they call.", one short paragraph, removed the duplicate three-bullet list (right-column report sections carry that content).
+- **Proof section restyled:** three equal white cards (Experience / The deliverable / Ownership) with uppercase label + bold line + copy, replacing the mismatched stat/label layout.
+- **Booking heading deduped:** "Ready to find where growth is getting stuck?" → "Talk it through in 30 minutes." (the deck already owns the "getting stuck" line).
+- **Footer (site-wide `site-footer.tsx`):** the 12-link "Visit" column split into Explore/Company columns; legal links + do-not-sell moved to a bottom rule row with the disclaimer; shorter blurb.
+
+## 2026-09-18 (night) — Problem→solution interactive deck
+
+Merged the separate "stuck" cards and EngineExplorer into `ProblemSolutionDeck`:
+- **Desktop (lg+):** mosaic tiles → click shifts to left rail + funnel solution (unchanged).
+- **Mobile:** short owner phrases (“My advertising isn't working”, “Traffic but no sales”, “Leads go cold”, etc.). Funnel auto-walks Strategy→Intelligence on scroll reveal (~2.4s/step); tap a phrase or funnel stage pauses the walk and shows problem + funnel stage + “How Terramore solves it” underneath. No problem-detail cards on mobile. Reduced-motion skips the auto-walk.
+- Hash deep-links on desktop; funnel hover/click switches problems.
+- Removed the duplicate stuck grid + standalone explorer section from `app/solutions/page.tsx`.
+
+### Narrative order (now)
+Hero → GrowthSystemFlow → FunnelStory → ProblemSolutionDeck → Pillars → Digital Footprint → condensed proof → BookingFlow → footer.
+
+### Changes
+- **CTA hierarchy:** Hero primary is `BookingLink` ("Let's talk", `source="solutions"`). Secondary is `ReportPopupLink` ("See your digital footprint"). Removed hero website input form and the duplicate `HeroWebsiteInput` inside EngineExplorer.
+- **Canonical taxonomy:** Strategy → Acquisition → Conversion → Automation → Intelligence → Revenue everywhere on `/solutions`. Hero ring label Follow-up → Automation. `/marketing` SYSTEM row aligned to the same stage names.
+- **GrowthSystemFlow:** Dropped service-chip menus; outcome emphasis on Strategy/Revenue; mobile is a contained horizontal snap rail (no page overflow); single `<ol>` for a11y.
+- **Restored stuck section:** Five lean problem cards linking to explorer stage hashes (`#acquisition`, etc.); EngineExplorer reads hash and selects the matching tab.
+- **Pillars:** Shorter copy; eyebrow reframed to "Why Terramore can run it."
+- **Explorer:** Outcome-oriented stage copy (problem / job / outcome / implements); no website input.
+- **Proof:** Compressed to three typographic blocks (experience, deliverable, ownership) — no "Proof, not promises."
+- **Booking bridge:** "Ready to find where growth is getting stuck?" before `startAtSchedule` calendar.
+- **Hero clock:** Lower opacity so the ring stays atmospheric.
+
+### Untouched
+Report API/popup submit path, booking API, Ads/GA conversion semantics, header/footer chrome, FunnelStory comparison (kept), brand tokens.
+
+### QA
+Local `:3111` — section order, hero CTAs, pipeline rail, stuck → explorer hash, no duplicate website inputs. Not pushed in this pass unless requested.
+
 ## 2026-09-18 (late) — /solutions lower half rebuilt to WebFX rhythm (LOCAL ONLY, not deployed)
 
 User supplied three more WebFX screenshots (proof mosaic, featured case-study narrative, 3D hover funnel, team band) and asked to mimic those four sections in order, replacing the "How Terramore connects growth" module grid and everything under it. Constraint honored: no invented statistics or client quotes — all proof cards are factual (Kantar/Samba TV background, founder-led model, sample Digital Footprint report).

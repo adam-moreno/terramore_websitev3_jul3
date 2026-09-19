@@ -707,26 +707,6 @@ const ENGINE_STAGES = [
   },
 ] as const
 
-/* Funnel slab geometry: top y, top/bottom half-widths. Centered on x=150. */
-const ENGINE_SLABS = [
-  { y: 24, topHalf: 126, botHalf: 100 },
-  { y: 84, topHalf: 96, botHalf: 74 },
-  { y: 144, topHalf: 70, botHalf: 52 },
-  { y: 204, topHalf: 48, botHalf: 34 },
-  { y: 264, topHalf: 30, botHalf: 22 },
-] as const
-
-const SLAB_HEIGHT = 44
-
-function slabPath(slab: (typeof ENGINE_SLABS)[number]) {
-  const { y, topHalf, botHalf } = slab
-  const ry = Math.max(6, topHalf * 0.14)
-  const ryBot = Math.max(5, botHalf * 0.14)
-  // Cone body: elliptical arc across the top (front), straight sides,
-  // elliptical arc back across the bottom.
-  return `M ${150 - topHalf} ${y} A ${topHalf} ${ry} 0 0 0 ${150 + topHalf} ${y} L ${150 + botHalf} ${y + SLAB_HEIGHT} A ${botHalf} ${ryBot} 0 0 1 ${150 - botHalf} ${y + SLAB_HEIGHT} Z`
-}
-
 export function EngineExplorer() {
   const [active, setActive] = useState(0)
   const stage = ENGINE_STAGES[active]
@@ -748,89 +728,9 @@ export function EngineExplorer() {
         </div>
       </div>
 
-      {/* Right: funnel + active-stage detail. */}
-      <div className="grid items-center gap-6 sm:grid-cols-[auto_1fr]">
-        <svg
-          viewBox="0 0 300 340"
-          className="mx-auto w-[220px] shrink-0 sm:w-[240px]"
-          role="img"
-          aria-label="The Terramore growth engine funnel: strategy, acquisition, conversion, automation, and intelligence"
-        >
-          <defs>
-            {ENGINE_STAGES.map((item, index) => (
-              <linearGradient key={item.id} id={`engine-grad-${index}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={item.grad[0]} />
-                <stop offset="100%" stopColor={item.grad[1]} />
-              </linearGradient>
-            ))}
-            <filter id="engine-shadow" x="-30%" y="-30%" width="160%" height="160%">
-              <feDropShadow dx="0" dy="5" stdDeviation="6" floodColor="#0f1e2e" floodOpacity="0.22" />
-            </filter>
-          </defs>
-          {ENGINE_SLABS.map((slab, index) => {
-            const selected = active === index
-            const { y, topHalf } = slab
-            const ry = Math.max(6, topHalf * 0.14)
-            return (
-              <g key={ENGINE_STAGES[index].id} aria-hidden>
-                {/* Cone body. */}
-                <path
-                  d={slabPath(slab)}
-                  fill={selected ? `url(#engine-grad-${index})` : "#c3ccd7"}
-                  filter={selected ? "url(#engine-shadow)" : undefined}
-                  className="transition-[fill] duration-200"
-                />
-                {/* Top rim ellipse sells the 3D cone. */}
-                <ellipse
-                  cx="150"
-                  cy={y}
-                  rx={topHalf}
-                  ry={ry}
-                  fill={selected ? ENGINE_STAGES[index].grad[0] : "#d7dde5"}
-                  stroke={selected ? "#ffffff" : "#eef1f5"}
-                  strokeOpacity="0.5"
-                  strokeWidth="1"
-                  className="transition-[fill] duration-200"
-                />
-                {selected && (
-                  <path
-                    d={`M 150 ${y + 8} L 150 ${y + 24} M 144 ${y + 18} L 150 ${y + 24} L 156 ${y + 18}`}
-                    stroke="#ffffff"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    fill="none"
-                  />
-                )}
-              </g>
-            )
-          })}
-          {/* Contiguous invisible hit bands. The visible slabs have gaps
-              between them, which made hover flicker when the cursor crossed
-              a gap; these bands cover the full column with no dead zones. */}
-          {ENGINE_SLABS.map((slab, index) => {
-            const top = index === 0 ? 0 : slab.y - 8
-            const bottom = index === ENGINE_SLABS.length - 1 ? 340 : ENGINE_SLABS[index + 1].y - 8
-            return (
-              <rect
-                key={`hit-${ENGINE_STAGES[index].id}`}
-                x="10"
-                y={top}
-                width="280"
-                height={bottom - top}
-                fill="transparent"
-                className="cursor-pointer"
-                onClick={() => setActive(index)}
-                onMouseEnter={() => setActive(index)}
-                aria-hidden
-              />
-            )
-          })}
-        </svg>
-
-        {/* Active stage detail. Buttons double as the accessible control. */}
-        <div>
-          <div className="flex flex-wrap gap-1.5" role="tablist" aria-label="Growth engine stages">
+      {/* Right: stage bubbles + active-stage detail (funnel removed). */}
+      <div>
+        <div className="flex flex-wrap gap-2" role="tablist" aria-label="Growth engine stages">
             {ENGINE_STAGES.map((item, index) => (
               <button
                 key={item.id}
@@ -847,19 +747,18 @@ export function EngineExplorer() {
                 {item.title}
               </button>
             ))}
-          </div>
-          <div key={stage.id} className="mt-5 animate-fade-in">
-            <h3 className="text-[1.25rem] font-semibold tracking-tight text-ink">{stage.title}</h3>
-            <p className="mt-1.5 text-[15px] leading-relaxed text-slate-600">{stage.line}</p>
-            <ul className="mt-4 space-y-2">
-              {stage.items.map((item) => (
-                <li key={item} className="flex items-center gap-2 text-[14px] font-medium text-ink/80">
-                  <ArrowRight className="h-3.5 w-3.5 text-brand" strokeWidth={2} aria-hidden />
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
+        </div>
+        <div key={stage.id} className="mt-5 animate-fade-in rounded-[1.5rem] border border-black/[0.06] bg-white p-6 shadow-[0_8px_30px_rgba(15,30,46,0.04)] md:p-7">
+          <h3 className="text-[1.25rem] font-semibold tracking-tight text-ink">{stage.title}</h3>
+          <p className="mt-1.5 text-[15px] leading-relaxed text-slate-600">{stage.line}</p>
+          <ul className="mt-4 space-y-2">
+            {stage.items.map((item) => (
+              <li key={item} className="flex items-center gap-2 text-[14px] font-medium text-ink/80">
+                <ArrowRight className="h-3.5 w-3.5 text-brand" strokeWidth={2} aria-hidden />
+                {item}
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </div>

@@ -93,7 +93,8 @@ export default function AboutPage() {
               and fix the page in the same week.
             </p>
             <p>
-              Adam leads every engagement. Specialists in ads, email, and build join when the job needs them.
+              Terramore pairs that experience with specialists in ads, email, and build, who join when the job needs
+              them.
             </p>
           </div>
         </div>

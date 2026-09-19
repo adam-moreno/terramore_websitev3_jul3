@@ -46,8 +46,8 @@ const PROOF_CARDS = [
     kind: "quote" as const,
     eyebrow: "Founder-led",
     eyebrowColor: "text-gold",
-    body: "Adam leads every engagement. Specialists in ads, email, and build join when the scope needs them, so the person reading your numbers is the person fixing the page.",
-    source: "How engagements run",
+    body: "Founded on 10+ years at Kantar and Samba TV — the backbone of marketing analytics for major advertisers. Specialists in ads, email, and build join when the scope needs them.",
+    source: "How Terramore runs",
   },
   {
     kind: "quote" as const,
@@ -86,7 +86,10 @@ export default function SolutionsPage() {
               <HeroWebsiteInput />
             </div>
           </div>
-          <HeroEngine />
+          {/* Decorative clock ring is desktop-only. */}
+          <div className="hidden lg:block">
+            <HeroEngine />
+          </div>
         </div>
       </section>
 

@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   },
 }
 
-const SYSTEM = ["Strategy", "Demand", "Conversion", "Automation", "Measurement"] as const
+const SYSTEM = ["Strategy", "Acquisition", "Conversion", "Automation", "Intelligence"] as const
 
 const CAPABILITIES = [
   {
