@@ -250,6 +250,7 @@ export function BookingFlow({
   onPick,
   compact = false,
   source,
+  startAtSchedule = false,
 }: {
   mode?: "book" | "pick"
   /** "pick" mode: called with the chosen start; the caller reschedules. */
@@ -257,16 +258,21 @@ export function BookingFlow({
   compact?: boolean
   /** Entry point for analytics/attribution: report | homepage | header | floating_cta | book. Falls back to the pathname. */
   source?: string
+  /** Skip the qualifier steps and open on the calendar. Details are still collected before confirming. */
+  startAtSchedule?: boolean
 }) {
   const isPick = mode === "pick"
-  const steps = isPick ? PICK_STEPS : BOOK_STEPS
+  const skipQualifiers = startAtSchedule && !isPick
+  const steps = isPick ? PICK_STEPS : skipQualifiers ? BOOK_STEPS.slice(QUALIFIER_COUNT) : BOOK_STEPS
   const scheduleStep = isPick ? 0 : QUALIFIER_COUNT
   const detailsStep = scheduleStep + 1
+
+  const stepOffset = skipQualifiers ? QUALIFIER_COUNT : 0
 
   const [tz, setTz] = useState("UTC")
   const [slots, setSlots] = useState<string[] | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
-  const [step, setStep] = useState(0)
+  const [step, setStep] = useState(skipQualifiers ? QUALIFIER_COUNT : 0)
   const [dayKey, setDayKey] = useState<string | null>(null)
   const [slot, setSlot] = useState<string | null>(null)
 
@@ -371,7 +377,10 @@ export function BookingFlow({
     }
     setBusy(true)
     // API has no socials field — fold into note like report form packs extras.
-    const noteLines = [`Owner: ${isOwner}`, `Type: ${businessType}`, `Stage: ${digitalStage}`]
+    // Skip empty qualifier answers (schedule-first entry points never ask them).
+    const noteLines = [`Owner: ${isOwner}`, `Type: ${businessType}`, `Stage: ${digitalStage}`].filter(
+      (line) => !line.endsWith(": ")
+    )
     if (socials.trim()) noteLines.push(`Socials: ${socials.trim()}`)
     const note = noteLines.join("\n")
     const pagePath = typeof window !== "undefined" ? window.location.pathname : ""
@@ -448,11 +457,11 @@ export function BookingFlow({
     <div>
       <div className="flex items-center gap-3">
         <span className="text-[12px] font-semibold text-brand">
-          {Math.min(step, steps.length - 1) + 1} of {steps.length}
+          {Math.min(step - stepOffset, steps.length - 1) + 1} of {steps.length}
         </span>
         <div className="flex flex-1 gap-1.5">
           {steps.map((label, index) => (
-            <span key={label} className={`h-1 flex-1 rounded-full ${index <= step ? "bg-brand" : "bg-ink/10"}`} />
+            <span key={label} className={`h-1 flex-1 rounded-full ${index <= step - stepOffset ? "bg-brand" : "bg-ink/10"}`} />
           ))}
         </div>
       </div>
@@ -571,7 +580,7 @@ export function BookingFlow({
             </div>
           </div>
           {error ? <p className="mt-3 text-[14px] text-red-600">{error}</p> : null}
-          {!isPick ? (
+          {!isPick && !skipQualifiers ? (
             <button type="button" onClick={() => setStep(2)} className="mt-4 text-[14px] font-medium text-slate-500 hover:text-ink">
               Back
             </button>

@@ -76,6 +76,166 @@
   }
 }
 
+/* /solutions growth-system visuals. Motion is decorative only and disabled
+   under prefers-reduced-motion; content is fully readable without it. */
+.solutions-node,
+.solutions-connector {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+
+.solutions-node-on {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@keyframes solutions-pulse-travel {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(400%);
+  }
+}
+
+.solutions-pulse {
+  animation: solutions-pulse-travel 3.2s ease-in-out infinite;
+}
+
+@keyframes solutions-ring-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.solutions-ring {
+  animation: solutions-ring-spin 48s linear infinite;
+  transform-origin: 50% 50%;
+}
+
+.solutions-orbit {
+  animation: solutions-ring-spin 14s linear infinite;
+  transform-origin: 50% 50%;
+}
+
+@keyframes solutions-node-blink {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.solutions-node-pulse {
+  animation: solutions-node-blink 2.4s ease-in-out infinite;
+}
+
+@keyframes solutions-dash-travel {
+  to {
+    stroke-dashoffset: -48;
+  }
+}
+
+.solutions-dash-flow {
+  animation: solutions-dash-travel 2.8s linear infinite;
+}
+
+/* Funnel labels live in a 640-unit viewBox; phones render it around 340px wide,
+   so the label type scales up in SVG units to stay readable. */
+.solutions-funnel-label {
+  font-size: 13px;
+}
+
+.solutions-funnel-loop-label {
+  font-size: 12px;
+}
+
+.solutions-funnel-old {
+  font-size: 12px;
+}
+
+/* Hero engine clock hands. One shared 0-360 rotation; each hand supplies its
+   own period (60s / 3600s / 43200s) and a negative delay equal to the elapsed
+   time in that period, so the hands read the actual time. Linear timing gives
+   the second hand a continuous automatic-watch sweep rather than a tick. */
+@keyframes solutions-clock-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.solutions-clock-hand {
+  transform-origin: 200px 200px;
+  transform-box: view-box;
+  animation-name: solutions-clock-spin;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@media (max-width: 640px) {
+  .solutions-funnel-label {
+    font-size: 22px;
+  }
+
+  .solutions-funnel-loop-label {
+    font-size: 19px;
+  }
+
+  .solutions-funnel-old {
+    font-size: 15px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .solutions-node,
+  .solutions-connector {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .solutions-pulse {
+    animation: none;
+    opacity: 0;
+  }
+
+  .solutions-ring {
+    animation: none;
+  }
+
+  .solutions-orbit {
+    animation: none;
+  }
+
+  .solutions-node-pulse {
+    animation: none;
+    opacity: 1;
+  }
+
+  .solutions-dash-flow {
+    animation: none;
+  }
+
+  /* SMIL motion dots cannot be paused from CSS keyframes, so hide them. */
+  .solutions-flow-dot circle {
+    display: none;
+  }
+
+  /* Clock hands freeze at the mount-time reading (inline transform). */
+  .solutions-clock-hand {
+    animation: none;
+  }
+}
+
 .text-gold {
   background-image: linear-gradient(var(--gold-from), var(--gold-to));
   -webkit-background-clip: text;

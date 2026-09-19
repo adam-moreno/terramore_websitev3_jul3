@@ -1,5 +1,42 @@
 # Development Log - Terramore Website
 
+## 2026-09-18 (late) — /solutions lower half rebuilt to WebFX rhythm (LOCAL ONLY, not deployed)
+
+User supplied three more WebFX screenshots (proof mosaic, featured case-study narrative, 3D hover funnel, team band) and asked to mimic those four sections in order, replacing the "How Terramore connects growth" module grid and everything under it. Constraint honored: no invented statistics or client quotes — all proof cards are factual (Kantar/Samba TV background, founder-led model, sample Digital Footprint report).
+
+### Changed
+- `app/solutions/page.tsx`: removed the six-card module grid, `EngineBand`, "Where is growth getting stuck?" cards, and the compact proof band. Added, in order: (1) proof mosaic — mixed stat/quote/dark-report cards in a 3-col grid, all sourced from approved About-page facts; (2) "Search has changed" narrative with a featured Digital Footprint report card (bullets left, four check-marked report sections right, CTAs to /report and /report/example); (3) `EngineExplorer` interactive funnel section; (4) founder team band linking to /about. Final CTA and footer kept. The old `#strategy`-style anchors were removed along with the cards that linked to them, so no dangling links.
+- `components/solutions-visuals.tsx`: new `EngineExplorer` client component — WebFX-style 3D stacked-cone funnel (SVG ellipse-arc slabs with per-stage gradients and drop shadow). Hover/click a slab or use the accessible tab buttons to reveal the work inside each stage (the former MODULES content lives here now). Reuses `HeroWebsiteInput`, so the report popup infrastructure is unchanged.
+- Earlier same session: `FunnelStory` depth pass — per-layer vertical gradients + top-edge highlights + drop shadow, SMIL data dots flowing down the connected side (hidden under `prefers-reduced-motion` since SMIL can't be CSS-paused), old-tactic labels (One-off ads / Brochure website / Spreadsheet leads / Manual follow-up) and red ⊗ break markers with leak trails on the gray side. `app/globals.css`: `.solutions-funnel-old` type scale + reduced-motion guard for `.solutions-flow-dot`.
+
+### Reasoning
+WebFX's proof grid runs on client stats and video testimonials Terramore doesn't have; the honest equivalent is the founder's verifiable background plus the tangible deliverable (sample report), styled in the same mosaic rhythm. The module grid wasn't deleted content-wise — it became the funnel explorer's stage panels, which matches WebFX's "hover to explore our services" pattern.
+
+### Addendum — hero engine clock
+`HeroEngine` now has real hour/minute/second hands behind the Acquisition/Conversion/Follow-up/Intelligence ring. Angles are computed once on mount (client-only state, so no hydration mismatch); a single shared 0–360° CSS keyframe (`solutions-clock-spin`) with per-hand periods (60s/3600s/43200s) and negative `animation-delay` equal to elapsed time keeps them accurate. Linear timing gives the second hand a continuous automatic-watch sweep (no tick); it's a thin gold hand with counterweight whose tip clears the ring, while hour/minute are low-opacity ink and mostly peek out from under the hub. Under `prefers-reduced-motion` the animation is off and the inline transform freezes the hands at the mount-time reading. Verified in-browser that computed hand angles match the actual clock time.
+
+### Addendum — inline booking calendar, section removals, funnel hover fix
+- Removed the founder team band and the "Your business already has the pieces" final CTA from `/solutions` (and the now-unused `Ctas` helper). The page now closes with a direct booking section.
+- New "Grab 30 minutes this week" section under the engine explorer renders `BookingFlow source="solutions"` with a new `startAtSchedule` prop: calendar + available times first, qualifier questions skipped, details form still collected before confirming. Same `/api/booking` availability + booking endpoints, 409 handling, and `meeting_booked` tracking as `/book` — nothing forked. In `components/booking-flow.tsx` the prop offsets the step index (progress reads "1 of 2" Schedule → "2 of 2" Details), hides the Back-to-qualifiers button, and drops empty qualifier answers from the booking note.
+- `EngineExplorer` hover flicker fix: the visible funnel slabs have gaps, so crossing between Acquisition and Conversion fired enter/leave jitter. Mouse/click handling moved to invisible contiguous hit rects covering the full funnel column; visible slabs are display-only.
+- QA: verified live availability loads (Sep days selectable), picking a day shows the real time slots (26 on a weekday), picking a time advances to the details form at "2 of 2". Did not submit a booking to avoid creating a real calendar event.
+
+### QA (local, dev on :3111)
+Verified all four sections render and the funnel explorer switches stages (click + tabs, gold highlight follows). No console errors after clean reload (the dev-overlay "1 Issue" badge was stale hot-reload residue). No horizontal overflow at 390px; funnel/explorer stack vertically on mobile. Not pushed to production.
+
+## 2026-09-18 — /solutions growth-system rebuild (LOCAL ONLY, not deployed)
+
+WebFX-inspired information architecture, Terramore brand. No new dependencies; CSS-only motion with prefers-reduced-motion guards.
+
+### Changed
+- `app/solutions/page.tsx`: new section rhythm — hero → dark growth-system panel (Acquisition → Conversion → Follow-up → Intelligence → Revenue with capability chips) → website-input Digital Footprint band → Fragmented/Connected comparison toggle → five system modules with anchor ids → problem cards linking to those anchors → sample-report proof band → final CTA. Canonical/H1/OG kept on `/solutions`.
+- `components/solutions-visuals.tsx` (new client file): `GrowthSystemFlow` (IntersectionObserver staggered reveal), `WaysToggle` (state toggle, no library), `FootprintCta` (input that opens the existing `ReportPopup` with the URL prefilled).
+- `components/report-form.tsx` / `components/report-popup.tsx`: optional `initialWebsite`/`website` prefill props only. Submit path, `/api/report`, and all conversion tracking untouched.
+- `app/globals.css`: `.solutions-node/.solutions-connector/.solutions-pulse` keyframes, disabled under reduced motion.
+
+### QA (local)
+`pnpm build` clean; no lint errors in changed files (pre-existing lint failures unchanged). Verified in browser: toggle, popup prefill (example.com), anchors, CTAs to /book and /report; no horizontal overflow at 320/375/390/430; only "console error" is the Cursor browser tooling's injected `data-cursor-ref` attributes triggering a dev-only hydration notice — not site code.
+
 ## 2026-09-18 — Commercial pages for Google Ads (`/marketing`, `/solutions`, `/book`)
 
 Smallest change set to make the three ad destinations production-ready. No redesign, no new components, no new dependencies. Booking backend, GA4, Ads conversions, `meeting_booked`, attribution, and `/report` untouched.

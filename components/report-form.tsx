@@ -61,6 +61,7 @@ export function ReportForm({
   onSuccess,
   answers,
   plain = false,
+  initialWebsite,
 }: {
   className?: string
   onCancel?: () => void
@@ -68,12 +69,14 @@ export function ReportForm({
   onSuccess?: () => void
   answers?: ReportAnswers
   plain?: boolean
+  /** Optional prefill (e.g. the /solutions website input). Does not change submit or tracking behavior. */
+  initialWebsite?: string
 }) {
   const [firstName, setFirstName] = useState("")
   const [lastName, setLastName] = useState("")
   const [email, setEmail] = useState("")
   const [phone, setPhone] = useState("")
-  const [website, setWebsite] = useState("")
+  const [website, setWebsite] = useState(initialWebsite ?? "")
   const [socials, setSocials] = useState("")
   const [businessName, setBusinessName] = useState("")
   const [consent, setConsent] = useState(false)

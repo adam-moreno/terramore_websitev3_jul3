@@ -37,7 +37,16 @@ const QUESTIONS = [
 const REASSURE_MS = 750
 const SUCCESS_REDIRECT_MS = 3000
 
-export function ReportPopup({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function ReportPopup({
+  open,
+  onClose,
+  website,
+}: {
+  open: boolean
+  onClose: () => void
+  /** Optional website prefill passed through to the report form. */
+  website?: string
+}) {
   const router = useRouter()
   const [step, setStep] = useState(0)
   const [answers, setAnswers] = useState<ReportAnswers>({})
@@ -193,7 +202,7 @@ export function ReportPopup({ open, onClose }: { open: boolean; onClose: () => v
               <div className="px-7 pb-7 pt-6 md:px-9 md:pb-9">
                 <p className="text-[12px] font-semibold text-brand">Last step</p>
                 <p className="mt-2 text-[1.2rem] font-semibold tracking-tight text-ink">Where should the report go?</p>
-                <ReportForm plain className="mt-4" answers={answers} onSuccess={() => setSuccess(true)} />
+                <ReportForm plain className="mt-4" answers={answers} initialWebsite={website} onSuccess={() => setSuccess(true)} />
               </div>
             )}
           </>
