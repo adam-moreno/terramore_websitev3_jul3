@@ -55,7 +55,7 @@ export function SiteHeader() {
             animate={false}
             on="light"
             className="min-w-0 shrink"
-            wordmarkClassName="!h-7 w-auto lg:!h-8"
+            wordmarkClassName="!h-6 w-auto sm:!h-7 lg:!h-8"
           />
 
           <div className="ml-auto flex items-center gap-1.5 lg:hidden">

@@ -345,47 +345,28 @@
   animation: marketing-chase-run-kf 26s linear infinite;
 }
 
-/* /book hero deck: stage timer bar + popup annotation tiles. */
-@keyframes deck-progress-kf {
+/* /book hero diagnostic card: hairline state timer. Duration is set
+   inline per state; the bar is re-mounted on every state change. */
+@keyframes diag-timer-kf {
   from {
-    width: 0%;
+    transform: scaleX(0);
   }
   to {
-    width: 100%;
+    transform: scaleX(1);
   }
 }
 
-.deck-progress {
-  animation-name: deck-progress-kf;
+.diag-timer {
+  transform-origin: left center;
+  animation-name: diag-timer-kf;
   animation-timing-function: linear;
   animation-fill-mode: forwards;
 }
 
-@keyframes deck-pop-kf {
-  from {
-    opacity: 0;
-    transform: translateY(10px) scale(0.94);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-.deck-pop {
-  opacity: 0;
-  animation: deck-pop-kf 0.5s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .deck-progress {
+  .diag-timer {
     animation: none;
-    width: 100%;
-  }
-
-  .deck-pop {
-    animation: none;
-    opacity: 1;
+    transform: scaleX(1);
   }
 }
 

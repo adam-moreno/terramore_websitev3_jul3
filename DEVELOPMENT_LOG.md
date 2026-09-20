@@ -1780,3 +1780,13 @@ site-header.tsx rewritten: Marketing (/marketing), Solutions (/solutions), How w
 ## /book hero gradient + prod push – September 19, 2026
 
 Hero section on /book now wraps the headline AND the HeroSystemDeck carousel in one gradient band (cream -> brand tint -> cream, plus soft gold radial glow behind the deck) so the carousel reads as part of the hero. Sanity check: tsc clean for touched files, next build succeeded, 375px mobile has zero horizontal overflow, deck strip renders all 6 stages. Pushed to main (8c8cf26) — includes full /book rebuild, popup CTA behavior, flat header menu.
+
+## /book hero visualization → DiagnosticCard (LOCAL ONLY, not pushed) – September 19, 2026
+
+Replaced the HeroSystemDeck (card-deck carousel) with `components/book-diagnostic.tsx` — a single premium card that loops through four states: Business snapshot (Northline Atelier, channel ledger with rAF count-ups) → Customer journey (Ad → Landing page → Inquiry → Follow-up → Sale, Follow-up highlighted in gold with 31/18 evidence bar) → Opportunity found (Missed follow-up, 13 not contacted, "First place we'd look") → Next move (Qualify / Route / Follow up / Track conversion, "Ready to discuss"). Chargebee used as interaction reference only; typography-and-hairline construction, no charts/dashboard chrome, existing brand/gold/ink/cream tokens (no green token exists in the codebase, so none introduced).
+
+Motion: CSS transitions only (no new deps). 720ms cubic-bezier(0.22,1,0.36,1), 8–12px lifts, masked heading reveals, staggered delays on entry only (everything leaves together). Card height eases to the active panel via ResizeObserver so shorter states don't leave dead space; min-height keeps them from collapsing. Hold times 4.6s / 5.2s / 3.6s / 3.9s. Loop pauses offscreen (IntersectionObserver). prefers-reduced-motion → no auto-advance, 320ms opacity-only crossfades, hairline timer becomes a manual switcher (always clickable anyway). Removed deck-* keyframes from globals.css; added diag-timer.
+
+Mobile: journey and next-move chains stack vertically; timer shows hairlines + one current label instead of four cramped labels; evidence numbers sit above labels so wrapping never misaligns. Verified 375 and 320 with zero overflow; CTA stays above the fold. Header wordmark shrinks one step below sm to stop the 320px squeeze against the "Let's talk" pill.
+
+Untouched: BookingFlow, booking API, tracking, conversion events, routing, qualification questions. Note: the brief quoted an older hero headline ("Let's talk about the business."); the live headline from the previous rebuild was kept since this task was scoped to the visualization.

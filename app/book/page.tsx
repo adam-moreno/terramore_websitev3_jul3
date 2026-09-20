@@ -1,7 +1,8 @@
 import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
-import { ConnectedChain, HeroSystemDeck, Reveal, StagedShowcase, TerraIQTile } from "@/components/book-visuals"
+import { DiagnosticCard } from "@/components/book-diagnostic"
+import { ConnectedChain, Reveal, StagedShowcase, TerraIQTile } from "@/components/book-visuals"
 import { BookingLink } from "@/components/booking-popup"
 import { ReportPopupLink } from "@/components/report-popup"
 import { BookingFlow } from "@/components/booking-flow"
@@ -109,11 +110,12 @@ export default function BookPage() {
           </div>
         </div>
 
-        {/* The deck: the same methodology we'd instill in your business. */}
-        <div className="mx-auto mt-12 max-w-5xl md:mt-16">
-          <HeroSystemDeck />
-          <p className="mt-5 text-center text-[14px] text-slate-500">
-            This is the system we&apos;d build around your business — walk through it live on the call.
+        {/* The diagnostic: a miniature of what happens on the call —
+            look at the business, find where the journey leaks, name the first fix. */}
+        <div className="mt-12 md:mt-16">
+          <DiagnosticCard />
+          <p className="mx-auto mt-6 max-w-md text-center text-[14px] leading-relaxed text-slate-500">
+            We look at your business, find where the customer journey is leaking, and tell you what we&apos;d fix first.
           </p>
         </div>
         </div>
