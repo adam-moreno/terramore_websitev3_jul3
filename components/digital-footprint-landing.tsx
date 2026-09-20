@@ -163,15 +163,7 @@ export function DigitalFootprintLanding() {
             <div className="pb-4 md:pb-0">
               <PdfStack />
               <p className="mt-7 text-center text-[12px] text-ink/40 lg:text-left">
-                Sample pages. Numbers for illustration — not a live client file.
-              </p>
-              <p className="mt-2 text-center text-[12px] lg:text-left">
-                <Link
-                  href="/report/example"
-                  className="font-medium text-ink/45 underline-offset-4 hover:text-ink hover:underline"
-                >
-                  View sample reports
-                </Link>
+                Illustrative pages — your report reads your business.
               </p>
             </div>
           </div>

@@ -76,8 +76,8 @@ export function HomeFaq() {
                 ) : null}
                 {item.q === "What is the Digital Footprint report?" ? (
                   <p className="mt-3">
-                    <Link href="/report/example" className="font-medium text-brand hover:text-brand-hover">
-                      Open the sample report
+                    <Link href="/report" className="font-medium text-brand hover:text-brand-hover">
+                      Get your free report
                     </Link>
                   </p>
                 ) : null}

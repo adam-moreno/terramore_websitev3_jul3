@@ -1790,3 +1790,39 @@ Motion: CSS transitions only (no new deps). 720ms cubic-bezier(0.22,1,0.36,1), 8
 Mobile: journey and next-move chains stack vertically; timer shows hairlines + one current label instead of four cramped labels; evidence numbers sit above labels so wrapping never misaligns. Verified 375 and 320 with zero overflow; CTA stays above the fold. Header wordmark shrinks one step below sm to stop the 320px squeeze against the "Let's talk" pill.
 
 Untouched: BookingFlow, booking API, tracking, conversion events, routing, qualification questions. Note: the brief quoted an older hero headline ("Let's talk about the business."); the live headline from the previous rebuild was kept since this task was scoped to the visualization.
+
+## /book hero deck restored + card faces rebuilt as Terramore report screens (LOCAL ONLY, not pushed) – September 19, 2026
+
+Direction changed: the DiagnosticCard was reverted (book-diagnostic.tsx deleted; page.tsx, book-visuals.tsx, globals.css restored to the HeroSystemDeck version). The deck frame, stage strip and slide-down transition are unchanged; only the six card faces and the popup tiles were redone.
+
+**Card faces.** Every face now reads as one of Terramore's own reporting surfaces — monospace section labels, tables with column headers, one chart or side panel — rather than a story about a client. The fictional "Northline Atelier" and every "sample data / illustrative" note were removed; figures stay plausible working numbers with generic labels. Strategy = Growth roadmap (findings ranked by impact + channel audit). Acquisition = Campaign performance table (campaign / channel / spend / leads / CPL, total row). Conversion = landing-page mock + page-conversion funnel (1,284 → 211 → 92, 7.2%). Automation = Follow-up log for one inquiry (event / time / status) + first-reply distribution (median 2 min). Intelligence = Terra IQ revenue trend bars + revenue-by-source table (total $12,480, matching the Terra IQ tile lower on the page). Revenue = monthly performance table (Jul–Oct, current month highlighted) + booked-calls-by-week line. Shared primitives added inside book-visuals.tsx: ReportLabel, TableHead (supports sm-only columns so headers stay aligned with hidden columns), Panel, Status.
+
+**Pop tiles.** `DeckPop` is now `{ label, value, delta?, deltaTone?, chips?, position }` and renders as a small white card (ring + soft shadow) with a mono uppercase eyebrow, bold value, and either a tinted delta chip (brand / gold / muted) or a row of tag chips — Chargebee's annotation style, Terramore tokens. Two per card; positions are shared constants (top-right hangs off the upper edge, bottom-left hangs off the lower edge) so neither covers the card title or the last table row.
+
+**Mobile (375px).** Right-hand panels and secondary columns are `hidden sm:*`; header meta text, pop chips, the Acquisition total row and the follow-up log sublines are also hidden below sm so nothing spills past the card; mobile deck height 20rem; top pop lifted to -top-8 so it clears long card titles. Programmatic sweep: all six faces end ≥16px above the card edge, zero horizontal overflow. Desktop verified at 1200px per card. tsc clean for touched files (only the pre-existing app/api/booking errors remain). NOT committed/pushed.
+
+## /book hero deck — mobile spacing audit + fixes (LOCAL ONLY, not committed; to be split into PRs) – September 19, 2026
+
+User report: deck card data wasn't all fitting on mobile. Audited all six faces at 320 / 375 / 390 / 430px under emulated `prefers-reduced-motion: reduce` (freezes auto-advance so each stage can be selected), checking every visible descendant against the card face box and each pop tile against text. Findings at 320px before the fix: card title wrapped into the section label on Intelligence ("Terra IQ · revenue by source"); the bottom-left pop covered the month axis (Intelligence) and the form row (Conversion); "12.5k" bar label spilled to the card edge; finding titles truncated ("Brand search lands…") and detail lines truncated on Strategy; "Prospecting — video" truncated on Acquisition; all three feature tiles and the input placeholder truncated on Conversion; event names truncated on Automation; top pop's shadow abutted the card title on every card.
+
+**Fixes (all `<sm`; every `sm:` value restores the previous desktop rendering).**
+- Deck frame: container `mt-8 h-[22rem] pb-14` (was `mt-7 h-[20rem] pb-10`), card wrapper `bottom-14` → face grows 280 → 296px and the bottom pop has room to hang; bottom pop `-bottom-9` (was `-bottom-7`) so it clears the last row; card title is single-line `truncate`, `top-5 text-[10px] tracking-[0.12em]`, art padding `pt-9`.
+- Strategy: finding titles wrap instead of truncating; detail lines hidden below sm.
+- Acquisition: campaign names wrap instead of truncating.
+- Conversion: feature tiles 2-up (third tile sm+); input placeholder "Phone" (" or email" sm+).
+- Automation: Time column sm+ only (header + cells), rows `py-2` so event names stay whole.
+- Intelligence: Mar/Apr bars sm+ only — six bars fit with their value labels.
+- Revenue: no change needed beyond the shared frame fixes.
+
+**Verification.** After the fix, every card at 320/375/390/430: no horizontal scroll, all visible content ≥17px inside the face on all sides, zero pop-over-text intersections, zero truncated text (only the intentional URL-bar line on Conversion at 320), bottom pop ends 21px above the deck's rounded edge. Desktop 1200px re-verified unchanged (title 11px / 0.16em / top 16px, art pt 32px, face inset 40px, 8 bars, Time column and detail lines present). `tsc --noEmit`: only the pre-existing app/api/booking and components/ui errors. `next build`: passed. Working tree also carries the restored deck `app/book/page.tsx` + `app/globals.css`, the deleted `components/book-diagnostic.tsx`, and the `site-header.tsx` wordmark tweak — all intentionally left uncommitted for the PR split.
+
+## Cross-site CTA / marketing / book polish – September 19, 2026
+
+- All "Book a demo" CTAs (marketing page, CreativeCtaCard, immersive footer, articles, resources Ready-to-talk card) open BookingLink popup instead of navigating to /book.
+- Digital Footprint: solutions hero "See my Digital Footprint" disabled until website entered; sample-report links removed from report band, report form, homepage FAQ, solutions featured card, digital-footprint landing, report-scan chapter links.
+- Report chapter swipe: fixed card width + trailing spacer so chapter 4 is reachable; "What you get" no longer clipped by flex squeeze.
+- Connect channels: removed Mei Tan block from Ads beat; tightened Email/Site beat spacing; taller mobile detail card.
+- Marketing hero: heavier left scrim + text-shadow for legibility; creative tiles stronger bottom scrim.
+- Stats: replaced "7 days" with "100% you own every account".
+- /book: Logo above Ready-to-build CTA; footer DualCtas + tagline removed; Founder-led trust tile → Month to month; showcase outbound page links removed; mobile deck stage headers use rotating carousel (prev/next + dots).
+- Footer: Company column removed sitewide; marketing immersive footer uses same Explore links as homepage.

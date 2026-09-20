@@ -883,14 +883,6 @@ function ChannelDetail({ beat }: { beat: number }) {
           <DataRow loud label="Page" value="/shop" />
           <DataRow loud label="Device" value="iPhone 15" />
         </div>
-        <div className="mt-2 flex items-center gap-2 border-t border-black/[0.05] pt-2">
-          <Face src="https://images.unsplash.com/photo-1554151228-14d9def656e4?auto=format&fit=crop&w=96&h=96&q=80" name="Mei Tan" size={36} />
-          <div className="min-w-0">
-            <p className="text-[12px] font-semibold text-brand">New visit</p>
-            <p className="text-[13px] font-semibold text-ink">Mei Tan</p>
-            <p className="text-[12px] text-slate-500">Google Ads · Miami</p>
-          </div>
-        </div>
       </div>
     )
   }
@@ -950,47 +942,36 @@ function ChannelDetail({ beat }: { beat: number }) {
   if (beat === 2) {
     return (
       <div className={`${TILE} software-story-pop flex h-full flex-col overflow-hidden p-2.5`}>
-        <div className="flex items-center gap-2.5">
-          <Face src="https://images.unsplash.com/photo-1607746882042-944635dfe10e?auto=format&fit=crop&w=96&h=96&q=80" name="Renee Okoye" size={48} />
+        <div className="flex items-center gap-2">
+          <Face src="https://images.unsplash.com/photo-1607746882042-944635dfe10e?auto=format&fit=crop&w=96&h=96&q=80" name="Renee Okoye" size={40} />
           <div className="min-w-0">
-            <p className="text-[12px] font-semibold text-brand">Quiet 6 weeks</p>
-            <p className="text-[15px] font-semibold tracking-tight text-ink">Renee Okoye</p>
-            <p className="text-[12px] text-slate-500">Last buy Jan 12</p>
+            <p className="text-[11px] font-semibold text-brand">Quiet 6 weeks</p>
+            <p className="truncate text-[14px] font-semibold tracking-tight text-ink">Renee Okoye</p>
+            <p className="text-[11px] text-slate-500">Last buy Jan 12</p>
           </div>
         </div>
-        <p className="mt-2 text-[13px] leading-snug text-ink/70">One text. She booked.</p>
-        <div className="mt-2 space-y-1.5">
-          <div className="flex items-start gap-2">
-            <div className="software-icon-tile mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center">
-              <BrandLogo slug="mailchimp" name="Mailchimp" size={14} />
+        <p className="mt-2 text-[12px] leading-snug text-ink/70">One text. She booked.</p>
+        <div className="mt-2 min-h-0 flex-1 space-y-1.5 overflow-hidden">
+          <div className="flex items-start gap-2 rounded-xl bg-[#f7f8fa] p-2">
+            <div className="software-icon-tile mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center">
+              <BrandLogo slug="mailchimp" name="Mailchimp" size={12} />
             </div>
             <div className="min-w-0">
-              <p className="text-[13px] font-semibold text-ink">Email</p>
-              <p className="text-[12px] text-slate-600">Still want the consult? · opened</p>
+              <p className="text-[12px] font-semibold text-ink">Email</p>
+              <p className="truncate text-[11px] text-slate-600">Still want the consult? · opened</p>
             </div>
           </div>
-          <div className="flex items-start gap-2">
-            <div className="software-icon-tile mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center">
-              <BrandLogo slug="whatsapp" name="WhatsApp" size={14} />
+          <div className="flex items-start gap-2 rounded-xl bg-[#f7f8fa] p-2">
+            <div className="software-icon-tile mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center">
+              <BrandLogo slug="whatsapp" name="WhatsApp" size={12} />
             </div>
             <div className="min-w-0">
-              <p className="text-[13px] font-semibold text-ink">WhatsApp</p>
-              <p className="text-[12px] text-slate-600">Yes. Tuesday works.</p>
-            </div>
-          </div>
-          <div className="flex items-start gap-2">
-            <div className="software-icon-tile mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center">
-              <BrandLogo slug="hubspot" name="HubSpot" size={14} />
-            </div>
-            <div className="min-w-0">
-              <p className="text-[13px] font-semibold text-ink">HubSpot</p>
-              <p className="text-[12px] text-slate-600">Booked Tue 8:00 am</p>
+              <p className="text-[12px] font-semibold text-ink">WhatsApp</p>
+              <p className="truncate text-[11px] text-slate-600">Yes. Tuesday works.</p>
             </div>
           </div>
         </div>
-        <p className="mt-2 border-t border-black/[0.05] pt-2 text-[13px] font-semibold text-[#0f766e]">
-          Old lead came back.
-        </p>
+        <p className="mt-2 shrink-0 text-[11px] font-semibold text-[#14804a]">+ $420 booked</p>
       </div>
     )
   }
@@ -1140,7 +1121,7 @@ export function ChannelValueVisual() {
           ))}
         </div>
 
-        <div className="h-[17rem] min-h-0 md:absolute md:inset-y-0 md:right-0 md:h-auto md:w-[52%]">
+        <div className="h-[18rem] min-h-0 md:absolute md:inset-y-0 md:right-0 md:h-auto md:w-[52%]">
           <ChannelDetail beat={active} />
         </div>
       </div>

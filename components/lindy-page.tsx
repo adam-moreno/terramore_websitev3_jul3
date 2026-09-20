@@ -50,10 +50,13 @@ export function LindyCard({
   title,
   body,
   href,
+  book,
 }: {
   title: string
   body: string
   href?: string
+  /** Opens the booking popup instead of navigating. */
+  book?: boolean
 }) {
   const inner = (
     <>
@@ -64,6 +67,17 @@ export function LindyCard({
 
   const className =
     "rounded-3xl border border-black/[0.06] bg-white p-6 shadow-[0_8px_30px_rgba(0,0,0,0.04)]"
+
+  if (book) {
+    return (
+      <BookingLink
+        source="resources"
+        className={`${className} block w-full text-left transition hover:-translate-y-0.5 hover:shadow-md`}
+      >
+        {inner}
+      </BookingLink>
+    )
+  }
 
   if (href) {
     return (

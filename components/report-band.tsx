@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import Link from "next/link"
 import { ReportPopup } from "@/components/report-popup"
 import { ReportScanVisual } from "@/components/report-scan-visual"
 import { CHAPTERS } from "@/lib/report/chapters"
@@ -22,13 +21,11 @@ export function ReportBand() {
         </p>
 
         <div className="card-radius mx-auto mt-12 grid max-w-[980px] overflow-hidden border border-black/[0.06] bg-white shadow-[0_20px_50px_-28px_rgba(15,23,42,0.22)] md:rounded-[1.75rem] lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
-          <div className="card-pad relative flex min-h-[26rem] flex-col bg-ink text-cream md:p-7">
-            <div className="min-h-0 flex-1">
-              <ReportScanVisual />
-            </div>
-            <div className="mt-5 border-t border-white/10 pt-4">
+          <div className="card-pad relative flex flex-col bg-ink text-cream md:p-7">
+            <ReportScanVisual />
+            <div className="mt-5 shrink-0 border-t border-white/10 pt-4">
               <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-cream/50">What you get</p>
-              <p className="mt-1.5 text-[1.35rem] font-semibold tracking-tight">A file about your business.</p>
+              <p className="mt-1.5 text-[1.25rem] font-semibold tracking-tight sm:text-[1.35rem]">A file about your business.</p>
               <p className="mt-1.5 max-w-sm text-[14px] leading-relaxed text-cream/75">
                 No login. No call. A written read of what is already public.
               </p>
@@ -60,9 +57,6 @@ export function ReportBand() {
           >
             Send me the free report
           </button>
-          <Link href="/report/example" className="text-[15px] font-medium text-ink/55 underline-offset-4 hover:text-ink hover:underline">
-            See sample reports
-          </Link>
         </div>
       </div>
 
