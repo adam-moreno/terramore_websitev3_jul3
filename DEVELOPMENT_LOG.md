@@ -1776,3 +1776,7 @@ QA: tsc clean; persona transform verified 0→176px between stages; Terra IQ til
 ## Header simplified to flat 3-link menu (LOCAL ONLY) – September 19, 2026
 
 site-header.tsx rewritten: Marketing (/marketing), Solutions (/solutions), How we work (/book) — no dropdowns, no carets, desktop and mobile. Log in + "Let's talk" popup button retained. All dropdown machinery (HeaderMenu, MobileAccordion, solutions/integrations/resources link sets, icon maps) removed. Solutions subpages, integrations pages, resources, pricing, etc. remain as live ROUTES (for backlinks) but are no longer reachable from the nav. Verified in browser: nav renders exactly the 3 links, 0 caret icons. tsc clean.
+
+## /book hero gradient + prod push – September 19, 2026
+
+Hero section on /book now wraps the headline AND the HeroSystemDeck carousel in one gradient band (cream -> brand tint -> cream, plus soft gold radial glow behind the deck) so the carousel reads as part of the hero. Sanity check: tsc clean for touched files, next build succeeded, 375px mobile has zero horizontal overflow, deck strip renders all 6 stages. Pushed to main (8c8cf26) — includes full /book rebuild, popup CTA behavior, flat header menu.
