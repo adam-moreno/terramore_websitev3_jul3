@@ -1,6 +1,8 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import Image from "next/image"
+import { BookingLink } from "@/components/booking-popup"
+import { ReportPopupLink } from "@/components/report-popup"
 import {
   CollaborationSteps,
   CreativeCtaCard,
@@ -25,12 +27,12 @@ export const metadata: Metadata = {
 
 function TalkButton({ className = "" }: { className?: string }) {
   return (
-    <Link
-      href="/book"
+    <BookingLink
+      source="marketing"
       className={`inline-flex h-11 w-full items-center justify-center rounded-full bg-brand px-6 text-[16px] font-medium text-white hover:bg-brand-hover sm:w-auto ${className}`}
     >
       Book a demo
-    </Link>
+    </BookingLink>
   )
 }
 
@@ -79,7 +81,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "How fast can we launch?",
-    a: "Strategy and setup typically take the first week. Most clients have their first campaign live within about 7 days of kickoff, with landing pages and follow-up automation in place shortly after.",
+    a: "Kickoff usually takes a focused week of strategy and setup. From there we move channel by channel — creative, pages, and follow-up — so each piece is ready before we scale spend. We'll tell you the realistic timeline for your scope on the call.",
   },
   {
     q: "Do I need a big ad budget to work with you?",
@@ -126,32 +128,35 @@ export default function MarketingPage() {
           width={1600}
           height={900}
           priority
-          className="absolute inset-0 h-full w-full object-cover object-[70%_center]"
+          className="absolute inset-0 h-full w-full object-cover object-[78%_center]"
           sizes="100vw"
         />
-        {/* Restrained scrim: heavier over the text side only. */}
-        <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-ink/80 via-ink/45 to-transparent md:from-ink/70 md:via-ink/25" />
-        <div aria-hidden className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-ink/40 to-transparent" />
+        {/* Heavy left scrim so type stays readable over the photo; image keeps breathing room on the right. */}
+        <div
+          aria-hidden
+          className="absolute inset-0 bg-gradient-to-r from-ink via-ink/85 to-ink/20 md:from-ink/95 md:via-ink/70 md:to-transparent"
+        />
+        <div aria-hidden className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-ink/50 to-transparent" />
         <div className="page-shell relative flex min-h-[34rem] items-center py-20 md:min-h-[40rem] md:py-28">
-          <div className="max-w-2xl">
+          <div className="max-w-2xl [text-shadow:0_1px_18px_rgba(15,30,46,0.45)]">
             <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-gold-from">
               Marketing &amp; advertising for growing businesses
             </p>
             <h1 className="mt-4 text-[2.2rem] font-bold leading-[1.08] tracking-[-0.02em] text-white sm:text-5xl md:text-[3.4rem]">
               On-brand, on-time marketing designed to perform.
             </h1>
-            <p className="mt-5 max-w-xl text-[17px] leading-relaxed text-white/80 md:text-[18px]">
+            <p className="mt-5 max-w-xl text-[17px] leading-relaxed text-white/90 md:text-[18px]">
               Whether it&apos;s Google, Meta, TikTok, email, or your website, get the campaigns you need fast — planned,
               built, launched, and measured by one connected system.
             </p>
             <div className="mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
               <TalkButton />
-              <Link
-                href="/report"
-                className="text-center text-[15px] font-medium text-white/70 underline-offset-4 hover:text-white hover:underline sm:text-left"
+              <ReportPopupLink
+                direct
+                className="text-center text-[15px] font-medium text-white/80 underline-offset-4 hover:text-white hover:underline sm:text-left"
               >
                 Or get a free Digital Footprint report
-              </Link>
+              </ReportPopupLink>
             </div>
           </div>
         </div>
@@ -206,12 +211,12 @@ export default function MarketingPage() {
             <p className="mx-auto mt-3 max-w-xl text-[15px] leading-relaxed text-white/70 md:text-[16px]">
               See how Terramore keeps creative, campaigns, and follow-up fresh — live, on your own numbers.
             </p>
-            <Link
-              href="/book"
+            <BookingLink
+              source="marketing"
               className="mt-7 inline-flex h-11 items-center justify-center rounded-full bg-white px-7 text-[15px] font-semibold text-ink transition hover:bg-white/90"
             >
               Book a demo
-            </Link>
+            </BookingLink>
           </div>
         </div>
       </section>
@@ -318,9 +323,9 @@ export default function MarketingPage() {
           </div>
           <p className="mt-6 text-center text-[14px] text-slate-500">
             Still have a question?{" "}
-            <Link href="/book" className="font-semibold text-brand underline-offset-4 hover:underline">
+            <BookingLink source="marketing" className="font-semibold text-brand underline-offset-4 hover:underline">
               Book a demo
-            </Link>{" "}
+            </BookingLink>{" "}
             and ask us live.
           </p>
         </div>

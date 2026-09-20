@@ -17,6 +17,7 @@
 
 import { useEffect, useRef, useState, type FormEvent } from "react"
 import { ArrowDown, ArrowRight, BarChart3, Target, Workflow } from "lucide-react"
+import { BookingLink } from "@/components/booking-popup"
 import { ReportPopup } from "@/components/report-popup"
 
 /* ------------------------------------------------------------------ */
@@ -446,6 +447,7 @@ export function HeroWebsiteInput() {
 
   const submit = (event: FormEvent) => {
     event.preventDefault()
+    if (!website.trim()) return
     setOpen(true)
   }
 
@@ -465,19 +467,21 @@ export function HeroWebsiteInput() {
         </label>
         <button
           type="submit"
-          className="inline-flex h-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-b from-[var(--gold-from)] to-[var(--gold-to)] px-6 text-[15px] font-semibold text-white shadow-[0_10px_24px_-12px_rgba(198,136,9,0.6)] transition hover:brightness-[0.97]"
+          disabled={!website.trim()}
+          title={!website.trim() ? "Enter your business website first" : undefined}
+          className="inline-flex h-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-b from-[var(--gold-from)] to-[var(--gold-to)] px-6 text-[15px] font-semibold text-white shadow-[0_10px_24px_-12px_rgba(198,136,9,0.6)] transition hover:brightness-[0.97] disabled:cursor-not-allowed disabled:opacity-60"
         >
           See my Digital Footprint
         </button>
       </form>
       <p className="mt-3 text-[14px] text-ink/50">
         Free written report, in your inbox in minutes. Or{" "}
-        <a href="/book" className="font-medium text-brand underline-offset-4 hover:text-brand-hover hover:underline">
+        <BookingLink source="solutions" className="font-medium text-brand underline-offset-4 hover:text-brand-hover hover:underline">
           let&apos;s talk
-        </a>
+        </BookingLink>
         .
       </p>
-      <ReportPopup open={open} onClose={() => setOpen(false)} website={website.trim() || undefined} />
+      <ReportPopup open={open} onClose={() => setOpen(false)} website={website.trim() || undefined} direct />
     </div>
   )
 }

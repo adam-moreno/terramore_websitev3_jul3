@@ -5,6 +5,7 @@ import { ConnectedChain, HeroSystemDeck, Reveal, StagedShowcase, TerraIQTile } f
 import { BookingLink } from "@/components/booking-popup"
 import { ReportPopupLink } from "@/components/report-popup"
 import { BookingFlow } from "@/components/booking-flow"
+import { Logo } from "@/components/logo"
 import { SiteFooter } from "@/components/site-footer"
 
 export const metadata: Metadata = {
@@ -23,7 +24,7 @@ export const metadata: Metadata = {
 const TRUST_FACTS = [
   { value: "10+ years", label: "In marketing, data, and measurement — including work behind Fortune 500 advertisers" },
   { value: "$0", label: "Your growth roadmap is built before you sign anything, and it's yours to keep" },
-  { value: "Founder-led", label: "You talk to the person responsible for the work, not a sales team" },
+  { value: "Month to month", label: "No long lock-ins — we keep the work by performing, not by contract" },
 ] as const
 
 /* Compact capability rows — editorial rhythm, not a service grid. */
@@ -299,7 +300,7 @@ export default function BookPage() {
         </div>
       </section>
 
-      {/* FINAL CTA — Chargebee-style glow band in Terramore colors, flowing into the footer */}
+      {/* FINAL CTA — brand mark + Chargebee-style glow band */}
       <section className="relative overflow-hidden">
         <div
           aria-hidden
@@ -311,7 +312,10 @@ export default function BookPage() {
         />
         <div className="page-shell relative py-20 md:py-28">
           <Reveal className="mx-auto max-w-2xl text-center">
-            <h2 className="text-[1.9rem] font-bold leading-[1.12] tracking-[-0.02em] text-ink md:text-[2.5rem]">
+            <div className="flex justify-center">
+              <Logo size="md" animate={false} on="light" />
+            </div>
+            <h2 className="mt-8 text-[1.9rem] font-bold leading-[1.12] tracking-[-0.02em] text-ink md:text-[2.5rem]">
               Ready to build a stronger <span className="text-gold">growth system?</span>
             </h2>
             <p className="mt-4 text-[16.5px] leading-relaxed text-slate-700">
@@ -329,7 +333,7 @@ export default function BookPage() {
         </div>
       </section>
 
-      <SiteFooter />
+      <SiteFooter showDualCtas={false} tagline="" />
     </div>
   )
 }

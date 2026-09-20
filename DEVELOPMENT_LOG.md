@@ -1815,3 +1815,14 @@ User report: deck card data wasn't all fitting on mobile. Audited all six faces 
 - Revenue: no change needed beyond the shared frame fixes.
 
 **Verification.** After the fix, every card at 320/375/390/430: no horizontal scroll, all visible content ≥17px inside the face on all sides, zero pop-over-text intersections, zero truncated text (only the intentional URL-bar line on Conversion at 320), bottom pop ends 21px above the deck's rounded edge. Desktop 1200px re-verified unchanged (title 11px / 0.16em / top 16px, art pt 32px, face inset 40px, 8 bars, Time column and detail lines present). `tsc --noEmit`: only the pre-existing app/api/booking and components/ui errors. `next build`: passed. Working tree also carries the restored deck `app/book/page.tsx` + `app/globals.css`, the deleted `components/book-diagnostic.tsx`, and the `site-header.tsx` wordmark tweak — all intentionally left uncommitted for the PR split.
+
+## Cross-site CTA / marketing / book polish – September 19, 2026
+
+- All "Book a demo" CTAs (marketing page, CreativeCtaCard, immersive footer, articles, resources Ready-to-talk card) open BookingLink popup instead of navigating to /book.
+- Digital Footprint: solutions hero "See my Digital Footprint" disabled until website entered; sample-report links removed from report band, report form, homepage FAQ, solutions featured card, digital-footprint landing, report-scan chapter links.
+- Report chapter swipe: fixed card width + trailing spacer so chapter 4 is reachable; "What you get" no longer clipped by flex squeeze.
+- Connect channels: removed Mei Tan block from Ads beat; tightened Email/Site beat spacing; taller mobile detail card.
+- Marketing hero: heavier left scrim + text-shadow for legibility; creative tiles stronger bottom scrim.
+- Stats: replaced "7 days" with "100% you own every account".
+- /book: Logo above Ready-to-build CTA; footer DualCtas + tagline removed; Founder-led trust tile → Month to month; showcase outbound page links removed; mobile deck stage headers use rotating carousel (prev/next + dots).
+- Footer: Company column removed sitewide; marketing immersive footer uses same Explore links as homepage.

@@ -44,9 +44,9 @@ const PROOF_CARDS = [
   },
   {
     kind: "quote" as const,
-    eyebrow: "Founder-led",
+    eyebrow: "Built to leave you stronger",
     eyebrowColor: "text-gold",
-    body: "Founded on 10+ years at Kantar and Samba TV — the backbone of marketing analytics for major advertisers. Specialists in ads, email, and build join when the scope needs them.",
+    body: "Every engagement starts with a written read of the business and ends with a roadmap you keep — whether we stay on or not. Specialists in ads, email, and build join when the scope needs them.",
     source: "How Terramore runs",
   },
   {
@@ -155,10 +155,9 @@ export default function SolutionsPage() {
               )
             }
             return (
-              <Link
+              <div
                 key={index}
-                href="/report/example"
-                className="group flex flex-col justify-between rounded-[1.5rem] border border-black/[0.06] bg-gradient-to-br from-ink to-[#1c3350] p-6 shadow-[0_8px_30px_rgba(15,30,46,0.12)] transition hover:-translate-y-0.5"
+                className="flex flex-col justify-between rounded-[1.5rem] border border-black/[0.06] bg-gradient-to-br from-ink to-[#1c3350] p-6 shadow-[0_8px_30px_rgba(15,30,46,0.12)]"
               >
                 <div>
                   <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-gold">The deliverable</p>
@@ -166,10 +165,10 @@ export default function SolutionsPage() {
                     Every engagement starts with a written read of your business.
                   </p>
                 </div>
-                <p className="mt-5 text-[14px] font-medium text-white/80 group-hover:text-white">
-                  Open a sample Digital Footprint report &rarr;
+                <p className="mt-5 text-[14px] font-medium text-white/80">
+                  Free Digital Footprint report — in your inbox in minutes.
                 </p>
-              </Link>
+              </div>
             )
           })}
         </div>
@@ -212,12 +211,6 @@ export default function SolutionsPage() {
                   className="inline-flex h-11 items-center justify-center rounded-full bg-brand px-6 text-[15px] font-medium text-white hover:bg-brand-hover"
                 >
                   Get my free report
-                </Link>
-                <Link
-                  href="/report/example"
-                  className="inline-flex h-11 items-center justify-center rounded-full border border-ink/15 px-6 text-[15px] font-medium text-ink hover:border-ink/30"
-                >
-                  Explore the sample &rarr;
                 </Link>
               </div>
             </div>

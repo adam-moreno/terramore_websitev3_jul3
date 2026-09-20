@@ -13,6 +13,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { useEffect, useRef, useState } from "react"
+import { BookingLink } from "@/components/booking-popup"
 import { ArrowUpRight, Bell, CreditCard, TrendingUp } from "lucide-react"
 
 const PAYMENTS = [
@@ -236,7 +237,7 @@ export function ServiceCarousel() {
 const STATS = [
   { value: 10, decimals: 0, prefix: "", suffix: "+", label: "Years in marketing, data, and measurement — including work behind Fortune 500 advertisers" },
   { value: 0, decimals: 0, prefix: "$", suffix: "", label: "What your growth roadmap costs — we build it before you ever sign up, and it's yours to keep" },
-  { value: 7, decimals: 0, prefix: "", suffix: " days", label: "From kickoff to your first campaign live" },
+  { value: 100, decimals: 0, prefix: "", suffix: "%", label: "You own every ad account, creative file, and login — always" },
 ] as const
 
 /* ------------------------------------------------------------------ */
@@ -362,14 +363,14 @@ export function CreativeTilesGrid() {
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               className={`absolute inset-0 h-full w-full object-cover ${tile.position} ${tile.motion} transition-transform duration-700 group-hover:scale-[1.05]`}
             />
-            {/* Editorial caption over a bottom scrim, not a card chrome. */}
-            <div aria-hidden className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-ink/80 via-ink/35 to-transparent" />
-            <div className="absolute bottom-4 left-5 right-5 transition-transform duration-500 group-hover:-translate-y-1">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/70">{tile.label}</p>
+            {/* Stronger bottom scrim + text shadow so captions stay readable on busy photos. */}
+            <div aria-hidden className="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-ink via-ink/70 to-transparent" />
+            <div className="absolute bottom-4 left-5 right-5 transition-transform duration-500 group-hover:-translate-y-1 [text-shadow:0_1px_12px_rgba(15,30,46,0.65)]">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white">{tile.label}</p>
               {big ? (
                 <p className="mt-1 max-w-md text-[15px] font-medium leading-snug text-white">{tile.note}</p>
               ) : (
-                <p className="mt-0.5 text-[13px] leading-snug text-white/90">{tile.note}</p>
+                <p className="mt-0.5 text-[13px] font-medium leading-snug text-white/95">{tile.note}</p>
               )}
             </div>
           </div>
@@ -512,15 +513,12 @@ export function CreativeCtaCard() {
           Strategy, creative, and campaigns from one team — book a demo and see what that looks like for your business.
         </p>
         <div className="mt-7 flex flex-wrap items-center gap-4">
-          <Link
-            href="/book"
+          <BookingLink
+            source="marketing"
             className="inline-flex items-center rounded-full bg-white px-6 py-3 text-[14px] font-semibold text-ink transition hover:bg-white/90"
           >
             Book a demo
-          </Link>
-          <Link href="/solutions" className="text-[14px] font-semibold text-white/80 underline-offset-4 transition hover:text-white hover:underline">
-            See all services
-          </Link>
+          </BookingLink>
         </div>
       </div>
     </div>

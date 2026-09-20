@@ -1,7 +1,7 @@
 "use client"
 
-import Link from "next/link"
 import { FormEvent, useEffect, useState } from "react"
+import { BookingLink } from "@/components/booking-popup"
 import {
   trackEvent,
   trackReportSubmissionError,
@@ -267,9 +267,9 @@ export function ReportForm({
           {alreadyRequested ? (
             <>
               {" "}
-              <Link href="/book" className="font-medium text-brand hover:text-brand-hover">
+              <BookingLink source="report" className="font-medium text-brand hover:text-brand-hover">
                 Talk with us
-              </Link>
+              </BookingLink>
               .
             </>
           ) : null}
@@ -284,13 +284,6 @@ export function ReportForm({
       >
         {busy ? "Sending…" : website.trim() ? "Get my free Digital Footprint report" : "Enter your website to get the report"}
       </button>
-      <p className="text-center text-[14px] text-slate-500">
-        Want to see the shape first?{" "}
-        <Link href="/report/example" className="font-medium text-brand hover:text-brand-hover">
-          Open a sample
-        </Link>
-        .
-      </p>
     </form>
   )
 }

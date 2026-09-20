@@ -11,7 +11,6 @@
  */
 
 import Image from "next/image"
-import Link from "next/link"
 import { useEffect, useRef, useState, type ReactNode } from "react"
 import { BookingLink } from "@/components/booking-popup"
 
@@ -542,8 +541,59 @@ export function HeroSystemDeck() {
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      {/* Stage strip: the "timer" that says what's coming next. */}
-      <div className="scrollbar-none overflow-x-auto px-4 pt-6 sm:px-8">
+      {/* Mobile: rotating stage carousel so the active header is always readable.
+          Desktop keeps the full stage strip. */}
+      <div className="px-4 pt-6 sm:hidden">
+        <div className="relative mx-auto flex max-w-sm items-center justify-between gap-2">
+          <button
+            type="button"
+            aria-label="Previous stage"
+            onClick={() => goTo((stage - 1 + DECK_STAGES.length) % DECK_STAGES.length)}
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ink/[0.05] text-ink/60"
+          >
+            ‹
+          </button>
+          <div className="min-w-0 flex-1 text-center">
+            <p className="truncate text-[12px] font-bold uppercase tracking-[0.16em] text-brand">{DECK_STAGES[stage].label}</p>
+            <span aria-hidden className="mx-auto mt-1.5 block h-[2px] w-16 overflow-hidden rounded-full bg-ink/[0.08]">
+              {!reduced ? (
+                <span
+                  key={stage}
+                  className="deck-progress block h-full rounded-full bg-brand"
+                  style={{ animationDuration: `${DECK_INTERVAL_MS}ms`, animationPlayState: paused ? "paused" : "running" }}
+                />
+              ) : (
+                <span className="block h-full rounded-full bg-brand" />
+              )}
+            </span>
+            <p className="mt-1.5 text-[10px] tabular-nums text-ink/40">
+              {stage + 1} / {DECK_STAGES.length}
+            </p>
+          </div>
+          <button
+            type="button"
+            aria-label="Next stage"
+            onClick={() => goTo((stage + 1) % DECK_STAGES.length)}
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ink/[0.05] text-ink/60"
+          >
+            ›
+          </button>
+        </div>
+        <div className="mt-3 flex justify-center gap-1.5">
+          {DECK_STAGES.map((s, i) => (
+            <button
+              key={s.id}
+              type="button"
+              aria-label={`Show ${s.label}`}
+              aria-current={i === stage ? "step" : undefined}
+              onClick={() => goTo(i)}
+              className={`h-1.5 rounded-full transition-all ${i === stage ? "w-5 bg-brand" : "w-1.5 bg-ink/20"}`}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div className="scrollbar-none hidden overflow-x-auto px-4 pt-6 sm:block sm:px-8">
         <ol className="mx-auto flex w-max items-center gap-1 sm:gap-2">
           {DECK_STAGES.map((s, i) => (
             <li key={s.id} className="flex items-center">
@@ -557,7 +607,6 @@ export function HeroSystemDeck() {
                 }`}
               >
                 {s.label}
-                {/* Per-stage progress underline = the timer. */}
                 <span aria-hidden className="absolute inset-x-2.5 -bottom-0.5 h-[2px] overflow-hidden rounded-full bg-ink/[0.08]">
                   {i === stage && !reduced ? (
                     <span
@@ -820,14 +869,12 @@ const SHOWCASE_STAGES: ShowcaseStage[] = [
         kind: "text",
         title: "Start with strategy, not spend",
         body: "We map where growth is stuck, what's already working, and which channels deserve budget — before a single dollar goes to ads.",
-        cta: { label: "Marketing strategy →", href: "/marketing" },
       },
       {
         kind: "dark",
         art: "campaigns",
         title: "Campaigns across Google, Meta, and TikTok",
         body: "Built, launched, and operated by one team — creative, budgets, and audiences working together.",
-        cta: { label: "Ad campaigns →", href: "/marketing" },
       },
       {
         kind: "photo",
@@ -835,7 +882,6 @@ const SHOWCASE_STAGES: ShowcaseStage[] = [
         alt: "A wall of colorful ad concept variations in a bright studio",
         title: "Creative that stays fresh",
         body: "Scheduled refreshes keep your ads working while everyone else's fatigue.",
-        cta: { label: "Ad creative →", href: "/marketing" },
       },
     ],
   },
@@ -855,13 +901,11 @@ const SHOWCASE_STAGES: ShowcaseStage[] = [
         alt: "A landing page shown on desktop and mobile, built around one clear call to action",
         title: "Landing pages built to convert",
         body: "The click gets a page with one job: turn attention into a lead.",
-        cta: { label: "Conversion →", href: "/solutions" },
       },
       {
         kind: "flow",
         title: "Follow-up in minutes, not days",
         body: "Lead capture, qualification, routing, and follow-up run automatically.",
-        cta: { label: "Automation →", href: "/solutions" },
       },
       {
         kind: "gold",
@@ -886,7 +930,6 @@ const SHOWCASE_STAGES: ShowcaseStage[] = [
         art: "chart",
         title: "Terra IQ ties revenue to its source",
         body: "Campaigns, leads, and sales in one picture — so budget moves toward what pays.",
-        cta: { label: "Analytics & attribution →", href: "/marketing" },
       },
       {
         kind: "text",
@@ -937,27 +980,18 @@ function ShowcaseArt({ art }: { art: "campaigns" | "chart" }) {
 }
 
 function ShowcaseTileCard({ tile }: { tile: ShowcaseTile }) {
-  /* CTAs that used to anchor to the calendar now open the booking popup
-     (same qualifying questionnaire) in place — no jumping around the page. */
-  const cta = tile.cta ? (
-    <span className="mt-4 inline-block">
-      {tile.cta.href.startsWith("#") ? (
+  /* Only in-page booking CTAs remain — no links out to other marketing pages. */
+  const cta =
+    tile.cta && tile.cta.href.startsWith("#") ? (
+      <span className="mt-4 inline-block">
         <BookingLink
           source="book"
           className="inline-flex rounded-full border border-current px-3.5 py-1.5 text-[12px] font-semibold"
         >
           {tile.cta.label}
         </BookingLink>
-      ) : (
-        <Link
-          href={tile.cta.href}
-          className="inline-flex rounded-full border border-current px-3.5 py-1.5 text-[12px] font-semibold"
-        >
-          {tile.cta.label}
-        </Link>
-      )}
-    </span>
-  ) : null
+      </span>
+    ) : null
 
   switch (tile.kind) {
     case "dark":

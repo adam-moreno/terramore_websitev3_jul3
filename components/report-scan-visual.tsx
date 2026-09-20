@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import Link from "next/link"
 import { CHAPTERS } from "@/lib/report/chapters"
 
 export function ReportScanVisual() {
@@ -45,12 +44,12 @@ export function ReportScanVisual() {
         What is in your free report
       </p>
       <p className="mt-1.5 text-[15px] font-medium leading-snug text-cream/70">
-        Four pages. Swipe through the sample from Northline Atelier.
+        Four chapters. Swipe through what you&apos;ll get.
       </p>
 
       <div
         ref={scroller}
-        className="mt-4 -mx-1 flex snap-x snap-mandatory gap-3 overflow-x-auto px-1 pb-1 scrollbar-hide"
+        className="mt-4 -mx-1 flex snap-x snap-mandatory gap-3 overflow-x-auto px-1 pb-2 scrollbar-hide"
         aria-label="Report chapters"
       >
         {CHAPTERS.map((chapter) => {
@@ -59,35 +58,31 @@ export function ReportScanVisual() {
             <article
               key={chapter.n}
               data-report-card
-              className="flex w-[min(100%,18.5rem)] shrink-0 snap-start flex-col rounded-2xl bg-white/[0.06] p-4 ring-1 ring-white/10"
+              className="flex w-[15.5rem] shrink-0 snap-start flex-col rounded-2xl bg-white/[0.06] p-4 ring-1 ring-white/10 sm:w-[17rem]"
             >
               <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-cream/45">
                 Chapter {chapter.n}
               </p>
-              <h3 className="mt-3 text-[1.65rem] font-semibold leading-tight tracking-tight text-cream">
+              <h3 className="mt-3 text-[1.5rem] font-semibold leading-tight tracking-tight text-cream sm:text-[1.65rem]">
                 {chapter.kicker}
               </h3>
               <p
-                className={`mt-3 text-[1.35rem] font-semibold tabular-nums leading-none ${
+                className={`mt-3 text-[1.25rem] font-semibold tabular-nums leading-none ${
                   warn ? "text-[#ffb59e]/80" : "text-gold/85"
                 }`}
               >
                 {chapter.stat}
               </p>
               <p className="mt-3 text-[13px] leading-relaxed text-cream/70">{chapter.caption}</p>
-              <Link
-                href={`/report/example#chapter-${chapter.n}`}
-                className="mt-4 inline-flex items-center gap-1.5 text-[12px] font-medium text-cream/55 underline-offset-4 hover:text-cream hover:underline"
-              >
-                {chapter.title}
-                <span aria-hidden>→</span>
-              </Link>
+              <p className="mt-4 text-[12px] font-medium text-cream/55">{chapter.title}</p>
             </article>
           )
         })}
+        {/* Trailing spacer so the last card can snap fully into view. */}
+        <div aria-hidden className="w-2 shrink-0 sm:w-4" />
       </div>
 
-      <div className="mt-4 flex items-center gap-2">
+      <div className="mt-3 flex items-center gap-2">
         {CHAPTERS.map((item, index) => {
           const on = index === active
           return (
@@ -104,10 +99,6 @@ export function ReportScanVisual() {
           )
         })}
       </div>
-
-      <p className="mt-3 text-[11px] text-cream/45">
-        Sample pages from the Northline Atelier report. Yours reads your business.
-      </p>
     </div>
   )
 }

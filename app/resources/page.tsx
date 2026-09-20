@@ -66,7 +66,7 @@ export default function ResourcesPage() {
           <LindyCard
             title="Ready to talk?"
             body="Tell us where the business is stuck. We map the work and tell you if we are the right team."
-            href="/book"
+            book
           />
         </div>
         <p className="page-shell mt-10 text-center text-[15px] text-ink/70">
