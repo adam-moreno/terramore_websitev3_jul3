@@ -275,12 +275,14 @@ export function ReportForm({
           ) : null}
         </p>
       ) : null}
+      {/* Disabled until a website is entered — the report can't run without it. */}
       <button
         type="submit"
-        disabled={busy}
-        className="inline-flex h-11 w-full items-center justify-center rounded-full bg-brand text-[15px] font-medium text-white hover:bg-brand-hover disabled:opacity-60"
+        disabled={busy || !website.trim()}
+        title={!website.trim() ? "Enter your business website first" : undefined}
+        className="inline-flex h-11 w-full items-center justify-center rounded-full bg-brand text-[15px] font-medium text-white hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {busy ? "Sending…" : "Get my free Digital Footprint report"}
+        {busy ? "Sending…" : website.trim() ? "Get my free Digital Footprint report" : "Enter your website to get the report"}
       </button>
       <p className="text-center text-[14px] text-slate-500">
         Want to see the shape first?{" "}

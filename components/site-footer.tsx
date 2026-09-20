@@ -2,6 +2,7 @@
 
 import Image from "next/image"
 import Link from "next/link"
+import { BookingLink } from "@/components/booking-popup"
 import { DualCtas } from "@/components/dual-ctas"
 import { DoNotSellPopup } from "@/components/do-not-sell-popup"
 import { Logo } from "@/components/logo"
@@ -17,12 +18,13 @@ const EXPLORE = [
   { href: "/resources", label: "Start here" },
 ]
 
+/* "Talk with us" is rendered separately as a booking-popup button —
+   /book is reserved for the Google Ads landing page. */
 const COMPANY = [
   { href: "/about", label: "About" },
   { href: "/security", label: "Security" },
   { href: "/#faq", label: "Questions" },
   { href: "/enterprise", label: "Larger teams" },
-  { href: "/book", label: "Talk with us" },
 ]
 
 /* Second column group for the immersive footer, mirroring how Superside
@@ -162,6 +164,11 @@ export function SiteFooter({
                       </li>
                     ))}
                     <li>
+                      <BookingLink source="footer" className="text-[13px] text-white/60 transition hover:text-white">
+                        Talk with us
+                      </BookingLink>
+                    </li>
+                    <li>
                       <a href={DASHBOARD_LOGIN_URL} className="text-[13px] text-white/60 transition hover:text-white">
                         Log in
                       </a>
@@ -244,6 +251,11 @@ export function SiteFooter({
                     </Link>
                   </li>
                 ))}
+                <li>
+                  <BookingLink source="footer" className="text-[14px] text-slate-600 hover:text-ink">
+                    Talk with us
+                  </BookingLink>
+                </li>
                 <li>
                   <a href={DASHBOARD_LOGIN_URL} className="text-[14px] text-slate-600 hover:text-ink">
                     Log in

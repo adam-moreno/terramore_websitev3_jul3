@@ -41,11 +41,16 @@ export function ReportPopup({
   open,
   onClose,
   website,
+  direct = false,
 }: {
   open: boolean
   onClose: () => void
   /** Optional website prefill passed through to the report form. */
   website?: string
+  /** Skip the qualifying questions and go straight to the details form
+      (used on the /book ads landing page). Also stays on the page after
+      success instead of redirecting home. */
+  direct?: boolean
 }) {
   const router = useRouter()
   const [step, setStep] = useState(0)
@@ -60,7 +65,7 @@ export function ReportPopup({
 
   const goHome = () => {
     closeRef.current()
-    router.push("/")
+    if (!direct) router.push("/")
   }
 
   useEffect(() => {
@@ -71,7 +76,7 @@ export function ReportPopup({
     setSuccess(false)
     const onKey = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return
-      if (successRef.current) {
+      if (successRef.current && !direct) {
         closeRef.current()
         router.push("/")
         return
@@ -87,13 +92,13 @@ export function ReportPopup({
   }, [open, router])
 
   useEffect(() => {
-    if (!success) return
+    if (!success || direct) return
     const id = window.setTimeout(() => {
       closeRef.current()
       router.push("/")
     }, SUCCESS_REDIRECT_MS)
     return () => window.clearTimeout(id)
-  }, [success, router])
+  }, [success, router, direct])
 
   useEffect(() => {
     if (picked === null) return
@@ -106,7 +111,7 @@ export function ReportPopup({
 
   if (!open || typeof document === "undefined") return null
 
-  const question = !success && step < QUESTIONS.length ? QUESTIONS[step] : null
+  const question = !success && !direct && step < QUESTIONS.length ? QUESTIONS[step] : null
 
   const choose = (key: string, value: string) => {
     if (picked !== null) return
@@ -150,7 +155,9 @@ export function ReportPopup({
               <div>
                 <p className="text-[12px] font-medium uppercase tracking-[0.16em] text-ink/40">Free Digital Footprint report</p>
                 <p className="mt-2 text-[15px] leading-relaxed text-ink/75">
-                  Two quick questions, then your details. In your inbox in minutes.
+                  {direct
+                    ? "Your details below — you'll find the report in your inbox."
+                    : "Two quick questions, then your details. In your inbox in minutes."}
                 </p>
               </div>
               <button type="button" onClick={onClose} className="shrink-0 text-[13px] font-medium text-slate-400 hover:text-ink">
@@ -200,9 +207,13 @@ export function ReportPopup({
               </div>
             ) : (
               <div className="px-7 pb-7 pt-6 md:px-9 md:pb-9">
-                <p className="text-[12px] font-semibold text-brand">Last step</p>
-                <p className="mt-2 text-[1.2rem] font-semibold tracking-tight text-ink">Where should the report go?</p>
-                <ReportForm plain className="mt-4" answers={answers} initialWebsite={website} onSuccess={() => setSuccess(true)} />
+                {direct ? null : (
+                  <>
+                    <p className="text-[12px] font-semibold text-brand">Last step</p>
+                    <p className="mt-2 text-[1.2rem] font-semibold tracking-tight text-ink">Where should the report go?</p>
+                  </>
+                )}
+                <ReportForm plain className={direct ? "" : "mt-4"} answers={answers} initialWebsite={website} onSuccess={() => setSuccess(true)} />
               </div>
             )}
           </>
@@ -217,10 +228,13 @@ export function ReportPopupLink({
   label = "Or get a free Digital Footprint report",
   children,
   className = "text-[14px] font-medium text-ink/50 underline-offset-4 hover:text-ink hover:underline",
+  direct = false,
 }: {
   label?: string
   children?: ReactNode
   className?: string
+  /** Skip the qualifying questions — straight to the details form. */
+  direct?: boolean
 }) {
   const [open, setOpen] = useState(false)
 
@@ -229,7 +243,7 @@ export function ReportPopupLink({
       <button type="button" onClick={() => setOpen(true)} className={className}>
         {children ?? label}
       </button>
-      <ReportPopup open={open} onClose={() => setOpen(false)} />
+      <ReportPopup open={open} onClose={() => setOpen(false)} direct={direct} />
     </>
   )
 }

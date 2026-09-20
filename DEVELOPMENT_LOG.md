@@ -1728,3 +1728,51 @@ Recovered the preserved `tm-main-wt lib/notify.ts` stash (WIP from an interrupte
 **Duplication findings (brief §8/§13):** the source has NO duplicate Analytics entry (the marquee duplicates the list aria-hidden for seamless looping — presentation only). "Ad campaigns" did not previously exist as a separate service (only "Paid campaigns"); the showcase now distinguishes operations (Ad campaigns) from media buying (Paid campaigns) per the brief.
 
 **QA.** tsc clean for touched files (pre-existing errors in components/ui/resizable.tsx and booking API routes unrelated). No dev-overlay errors on clean reload, zero horizontal overflow, hero + tiles verified at 1440px and 390px, CTAs unchanged. NOT committed/pushed per instructions.
+
+## /book rebuild — Chargebee-inspired architecture (LOCAL ONLY, not deployed) – September 19, 2026
+
+**Structure (WHY TALK → WHAT WE'LL DO → WHO YOU'LL TALK TO → PROOF → BOOK):** cinematic image-led hero (new `public/book/hero.png`, primary CTA anchors to #calendar, secondary → /report) → horizontal growth-system nav (Strategy→Acquisition→Conversion→Automation→Intelligence→Revenue; anchor scroll + IntersectionObserver active highlight; swipeable on mobile, `.scrollbar-none` utility added) → minimal trust band (real facts only: 10+ years/F500, $0 roadmap, founder-led — NO fabricated counts) → centered outcome chapter → five alternating visual stories reusing existing service photography (strategy/campaigns/landing/analytics) with slow-push motion; Automation story is an animated workflow (New lead→Qualify→Route→Follow up→Booked→Client, staged loop) → connected-chain editorial visual (id=revenue; simpler than the /solutions diagram, not a duplicate) → 5 compact capability rows → founder section (real headshot `/founder/adam-moreno-headshot.png`) → Digital Footprint teaser (`/report/pdf-cover.png`) → booking section (BookingFlow source="book" UNTOUCHED — API, tracking, meeting_booked, GA4/Ads all preserved by construction) → final CTA anchoring back to #calendar → default SiteFooter.
+
+**Customer stories (§16):** omitted — no polished real case studies exist; credibility folded into trust band + founder section instead of fabricating.
+
+**New files:** `components/book-visuals.tsx` (Reveal, SystemNav, AutomationFlow, ConnectedChain — all client-side presentation, reduced-motion aware). **Changed:** `app/book/page.tsx` (rebuilt), `app/globals.css` (scrollbar-none), `public/book/hero.png` (new AI editorial image, green-accented working session).
+
+**QA:** tsc clean for touched files (booking API type errors pre-existing/untouched). Zero horizontal overflow at 320/390/430/1440. Single H1. 6 nav anchors + all section ids present. BookingFlow renders (qualification step 1 of 5). /report links intact. Reduced-motion: 0 animated images, all content visible (only global-nav hover dropdowns hidden, as designed). NOT committed/pushed pending approval.
+
+## /book hero deck — Chargebee card-deck treatment (LOCAL ONLY) – September 19, 2026
+
+Replaced the /book cinematic image hero with a Chargebee-style animated system deck: centered editorial headline/CTAs over a light cream→gold gradient panel containing (1) a stage strip (Strategy→Acquisition→Conversion→Automation→Intelligence→Revenue) whose active label carries an animated progress underline (the "timer"), and (2) a deck of six brand-colored interface cards — one per stage — where the active card falls off the deck (translate/rotate/fade) as the next rises from behind, each annotated by staggered popup tiles (e.g. "Built before you sign anything", "Reply sent in 2 minutes", "This is what we'd build for you"). Auto-advances every 5s, pauses on hover, labels are clickable; reduced-motion = manual static switcher, full progress bar, popups visible. Caption below ties it to booking: "This is the system we'd build around your business — walk through it live on the call."
+
+The standalone SystemNav strip and plain trust band were replaced by a mixed tile band (per Chargebee's below-hero tiles): large dark tile = free Digital Footprint report callout with pdf cover art + "Get your free digital report →", stacked white tiles = real credential facts. The redundant lower-page report teaser section was removed, and the unused public/book/hero.png was deleted (gitignore allowlist reverted).
+
+QA: tsc clean for touched files; deck verified auto-advancing (Automation→…→Strategy), zero horizontal overflow at 390px, strip swipeable, popups within bounds on mobile. NOT committed/pushed.
+
+## /book staged showcase — Chargebee sticky-rail pattern (LOCAL ONLY) – September 19, 2026
+
+Replaced the five stacked visual-story sections with a StagedShowcase mirroring Chargebee's "Automate your revenue and billing workflows" navigation: sticky left rail with three stage pills (Get discovered / Turn attention into booked work / Know what's actually working) that highlight via IntersectionObserver as the right column scrolls, plus a crossfading persona card under the pills — Adam's real headshot (Founder) for stage 1, and two AI-GENERATED PLACEHOLDER headshots in matching studio style (public/founder/team-sales.png "Head of Sales", team-product.png "Head of Product"; no fabricated personal names used — swap for real team photos/names when available). Right column: per-stage tile mosaics mimicking Chargebee's tile structure (lead tile full-width, then mixed white text tiles, dark ink tiles with mini campaign-bar/chart visuals, photo tiles reusing service photography with slow-push motion, gold accent tiles) — all Terramore copy, with pill CTAs (marketing/solutions links, "Book a demo →" and "Get your roadmap →" anchoring to #calendar). Mobile: rail collapses into per-group stage pill + compact persona chip. Removed unused STORIES data; AutomationFlow component retained but unused.
+
+QA: tsc clean for touched files; verified pill+persona swap between stages 1→3 at 1440px; zero horizontal overflow at 390px; 3 mobile persona chips render. NOT committed/pushed.
+
+## /book polish pass — persona slide, Terra IQ tile, founder CTA, glow footer band (LOCAL ONLY) – September 19, 2026
+
+1. StagedShowcase persona now slides top→middle→bottom (translateY 0/88/176px, 700ms) inside the sticky rail as stages activate, in addition to crossfading; spacer reserves room. Showcase section sits on a subtle white gradient band against the cream page.
+2. New TerraIQTile after the showcase, modeled on Chargebee's invoice card: dark ink panel, copy + "See it on your numbers →" (#calendar) left; right artifact = "Sample Business Co. — Monthly snapshot · illustrative" with a gold-bordered "Revenue attributed $12,480" chip, channel/leads/revenue line items (top row highlighted gold), and a total row. Clearly labeled illustrative data.
+3. Founder section restyled into a value-add CTA panel: brand→gold tinted gradient card, real headshot, added "you leave with a growth roadmap — built before you sign anything, yours to keep" plus the Book CTA inline with the name block.
+4. Final CTA is now a full-bleed Chargebee-style glow band in Terramore colors: cream → brand tint → gold radial glow at the bottom edge flowing directly into the footer, gold-accent headline, dark ink pill button anchoring to #calendar.
+
+QA: tsc clean; persona transform verified 0→176px between stages; Terra IQ tile renders (earlier text-check false-negative was CSS text-transform uppercasing); glow band + footer verified visually at 1440px; zero horizontal overflow at 390px. NOT committed/pushed.
+
+## CTA popups everywhere + menu audit (LOCAL ONLY) – September 19, 2026
+
+**CTA behavior.** No CTA jumps around the page anymore. Two popup routes:
+- Booking route ("Book a 30-minute conversation", tile "Book a demo →" / "Get your roadmap →", Terra IQ "See it on your numbers →", founder CTA, final "Let's talk →"): all open BookingPopup (existing qualifying questionnaire + calendar via BookingFlow, source="book"). On-page #calendar section retained as the landing page's primary conversion.
+- Report route ("See your digital footprint", trust tile "Get your free digital report →"): ReportPopup gained a `direct` mode — skips the 2 qualifying questions, straight to the details form (website, name, business name optional, phone optional, email, consent) with copy "Your details below — you'll find the report in your inbox." Direct mode also stays on the page after success instead of redirecting home (ads landing context preserved).
+- ReportForm submit is now hard-disabled until a website is entered; button reads "Enter your website to get the report" until then.
+
+**Menu audit (all header/footer targets verified against real routes):** every dropdown link resolves — Solutions jobs/capabilities (dynamic routes), Integrations categories + /integrations (page exists, KEPT), Resources: /pricing /report /about /security /#faq /resources (all exist; homepage anchors #faq/#use-cases/#how-we-work verified in components). Changes: (1) removed "Talk with us → /book" from the Resources dropdown — /book is now Google-Ads-only and the header's "Let's talk" popup button sits right beside the menu; (2) footer "Talk with us" converted from a /book link to a booking-popup button in both footer variants. Remaining intentional /book references: ReportForm's rare "already requested" error link (functional, low-traffic edge case).
+
+**QA.** tsc clean for touched files. Verified live: report popup skips quiz, submit disabled until website entered then enables; booking popup opens the questionnaire in place (stays on /book); zero `#calendar` anchors and zero /book links remain on the page; footer popup button renders. NOT committed/pushed.
+
+## Header simplified to flat 3-link menu (LOCAL ONLY) – September 19, 2026
+
+site-header.tsx rewritten: Marketing (/marketing), Solutions (/solutions), How we work (/book) — no dropdowns, no carets, desktop and mobile. Log in + "Let's talk" popup button retained. All dropdown machinery (HeaderMenu, MobileAccordion, solutions/integrations/resources link sets, icon maps) removed. Solutions subpages, integrations pages, resources, pricing, etc. remain as live ROUTES (for backlinks) but are no longer reachable from the nav. Verified in browser: nav renders exactly the 3 links, 0 caret icons. tsc clean.
