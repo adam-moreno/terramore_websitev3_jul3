@@ -345,6 +345,43 @@
   animation: marketing-chase-run-kf 26s linear infinite;
 }
 
+/* Creative showcase: editorial motion library.
+   push = slow cinematic zoom; pan = slow lateral drift.
+   Long durations + alternate direction keep it premium, not flashy. */
+@keyframes marketing-showcase-push-kf {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.07);
+  }
+}
+
+.marketing-showcase-push {
+  animation: marketing-showcase-push-kf 26s ease-in-out infinite alternate;
+}
+
+@keyframes marketing-showcase-pan-kf {
+  from {
+    transform: scale(1.08) translateX(-1.6%);
+  }
+  to {
+    transform: scale(1.08) translateX(1.6%);
+  }
+}
+
+.marketing-showcase-pan {
+  animation: marketing-showcase-pan-kf 30s ease-in-out infinite alternate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marketing-showcase-push,
+  .marketing-showcase-pan {
+    animation: none;
+    transform: none;
+  }
+}
+
 /* Static ads: the fanned deck sways gently. */
 @keyframes marketing-fan-kf {
   0%,

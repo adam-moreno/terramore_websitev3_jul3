@@ -232,210 +232,145 @@ export function ServiceCarousel() {
 /* view. All stats are factual Terramore claims.                       */
 /* ------------------------------------------------------------------ */
 
-/* PLACEHOLDER numbers (user-approved fakes for now) — replace with real
-   client results before these can ship as claims. */
+/* Promise/fact-based stats — all verifiable, no invented results claims. */
 const STATS = [
-  { value: 3.4, decimals: 1, prefix: "", suffix: "x", label: "Average return on ad spend across managed campaigns" },
+  { value: 10, decimals: 0, prefix: "", suffix: "+", label: "Years in marketing, data, and measurement — including work behind Fortune 500 advertisers" },
+  { value: 0, decimals: 0, prefix: "$", suffix: "", label: "What your growth roadmap costs — we build it before you ever sign up, and it's yours to keep" },
   { value: 7, decimals: 0, prefix: "", suffix: " days", label: "From kickoff to your first campaign live" },
-  { value: 38, decimals: 0, prefix: "+", suffix: "%", label: "Average lift in booked calls within the first 90 days" },
 ] as const
 
 /* ------------------------------------------------------------------ */
-/* CreativeTilesGrid: non-clickable creative-service tiles with        */
-/* motion where the medium calls for it. Same rules as the carousel    */
-/* (each tile = a different kind of work), all animation is CSS and    */
-/* stops under prefers-reduced-motion.                                 */
+/* CreativeTilesGrid: the creative showcase — photographic service     */
+/* tiles, each its own visual world (different environment, palette,   */
+/* subject, and motion). Layout: 3-col bento on desktop (two 2x2,      */
+/* three 1x2 talls, four 1x1 = a perfectly filled 3x6 grid), uniform   */
+/* stacked tiles on mobile. Motion is a small library of editorial     */
+/* behaviors (slow push, lateral pan) assigned per service; hover      */
+/* shifts the crop slightly and lifts the caption. All motion stops    */
+/* under prefers-reduced-motion.                                       */
 /* ------------------------------------------------------------------ */
 
-/* 8 tiles. `span` controls the desktop bento layout (4-col grid):
-   two 2x2 squares, two 1x2 talls, four 1x1 squares = a perfectly
-   filled 4x4 grid. On mobile every tile is the same size, stacked. */
 const CREATIVE_TILES = [
-  { id: "video", label: "Video production", note: "Filming, editing, and cutdowns for ads, launches, and social.", span: "lg:col-span-2 lg:row-span-2" },
-  { id: "motion", label: "Motion graphics", note: "Animated content for web, social, and mobile.", span: "" },
-  { id: "illustration", label: "Illustration", note: "Original, on-brand artwork.", span: "" },
-  { id: "translation", label: "Transcreation & translation", note: "Creative adapted for local markets.", span: "" },
-  { id: "copywriting", label: "Copywriting", note: "Headlines, hooks, and scripts that sell.", span: "" },
-  { id: "social", label: "Social content", note: "Vertical-first posts and stories.", span: "lg:row-span-2" },
-  { id: "landing", label: "Landing pages", note: "Pages built to convert the click.", span: "lg:row-span-2" },
-  { id: "ads", label: "Static ad design", note: "Scroll-stopping concepts, ready for every placement.", span: "lg:col-span-2 lg:row-span-2" },
+  {
+    id: "creative",
+    label: "Ad creative",
+    note: "Concepts, variations, and finished ads people actually stop for.",
+    image: "/marketing/services/creative.png",
+    alt: "A wall of colorful ad concept variations being pinned up in a bright studio",
+    span: "lg:col-span-2 lg:row-span-2",
+    motion: "marketing-showcase-pan", // horizontal creative-wall drift
+    position: "object-center",
+  },
+  {
+    id: "video",
+    label: "Short-form content",
+    note: "Shot, cut, captioned, shipped.",
+    image: "/marketing/services/video.png",
+    alt: "A vertical video being recorded and edited in a bright creator studio",
+    span: "lg:row-span-2",
+    motion: "marketing-showcase-push",
+    position: "object-[30%_center]",
+  },
+  {
+    id: "automation",
+    label: "Automation",
+    note: "The system that works when nobody's touching it.",
+    image: "/marketing/services/automation.png",
+    alt: "A dark workflow interface routing a lead through qualification and follow-up",
+    span: "lg:row-span-2",
+    motion: "marketing-showcase-push",
+    position: "object-center",
+  },
+  {
+    id: "strategy",
+    label: "Marketing strategy",
+    note: "Where the business should go, mapped.",
+    image: "/marketing/services/strategy.png",
+    alt: "A top-down strategic planning workspace with journey diagrams and notes",
+    span: "",
+    motion: "marketing-showcase-push",
+    position: "object-center",
+  },
+  {
+    id: "campaigns",
+    label: "Ad campaigns",
+    note: "Built, launched, and operated.",
+    image: "/marketing/services/campaigns.png",
+    alt: "A campaign operations console with audiences, ad groups, and statuses",
+    span: "",
+    motion: "marketing-showcase-pan",
+    position: "object-[20%_center]",
+  },
+  {
+    id: "analytics",
+    label: "Analytics & attribution",
+    note: "See what marketing is actually producing — ad to lead to sale.",
+    image: "/marketing/services/analytics.png",
+    alt: "A dark analytics interface tracing conversion paths from ads to revenue",
+    span: "lg:col-span-2 lg:row-span-2",
+    motion: "marketing-showcase-push",
+    position: "object-center",
+  },
+  {
+    id: "paid",
+    label: "Paid campaigns",
+    note: "Budget moved toward what works.",
+    image: "/marketing/services/paid.png",
+    alt: "A media-buying workstation reviewing spend and performance",
+    span: "",
+    motion: "marketing-showcase-push",
+    position: "object-[center_30%]",
+  },
+  {
+    id: "landing",
+    label: "Landing pages",
+    note: "The click has somewhere intelligent to go.",
+    image: "/marketing/services/landing.png",
+    alt: "A clean landing page shown on desktop and mobile side by side",
+    span: "",
+    motion: "marketing-showcase-pan",
+    position: "object-center",
+  },
+  {
+    id: "email",
+    label: "Email & SMS",
+    note: "The conversation after the lead arrives.",
+    image: "/marketing/services/email.png",
+    alt: "A phone with a text thread beside a laptop showing an email sequence, on a warm desk",
+    span: "lg:row-span-2",
+    motion: "marketing-showcase-push",
+    position: "object-[35%_center]",
+  },
 ] as const
-
-function CreativeVisual({ id }: { id: (typeof CREATIVE_TILES)[number]["id"] }) {
-  switch (id) {
-    case "video":
-      // Editing timeline with a playhead sweeping across the clips.
-      return (
-        <div className="relative flex h-full w-full flex-col justify-end gap-1.5 overflow-hidden bg-gradient-to-br from-ink to-[#1c3350] p-5">
-          <div className="absolute inset-x-5 top-5 bottom-16 rounded-lg bg-white/[0.07] ring-1 ring-white/10">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/15 ring-1 ring-white/25">
-                <span aria-hidden className="ml-0.5 border-y-[6px] border-l-[10px] border-y-transparent border-l-white" />
-              </span>
-            </div>
-          </div>
-          <div className="relative">
-            <div className="flex gap-1">
-              {[14, 22, 10, 18, 12, 24].map((w, i) => (
-                <span key={i} className="h-3 rounded-sm bg-brand/70" style={{ width: `${w}%` }} />
-              ))}
-            </div>
-            <div className="mt-1 flex gap-1">
-              {[20, 12, 26, 16, 14].map((w, i) => (
-                <span key={i} className="h-3 rounded-sm bg-gold-from/60" style={{ width: `${w}%` }} />
-              ))}
-            </div>
-            {/* Playhead */}
-            <span aria-hidden className="marketing-playhead absolute -top-1 bottom-0 w-[2px] rounded-full bg-white/90" />
-          </div>
-        </div>
-      )
-    case "motion":
-      // Shapes in motion: orbiting dot, bouncing square, pulsing ring.
-      return (
-        <div className="relative flex h-full w-full items-center justify-center gap-5 overflow-hidden bg-gradient-to-br from-brand/[0.12] to-gold-from/[0.1] p-5">
-          <span aria-hidden className="marketing-motion-spin relative h-12 w-12 rounded-full border-2 border-dashed border-brand/50">
-            <span className="absolute -top-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rounded-full bg-brand" />
-          </span>
-          <span aria-hidden className="marketing-motion-bounce h-9 w-9 rounded-lg bg-gold-from shadow-md" />
-          <span aria-hidden className="marketing-motion-pulse h-11 w-11 rounded-full border-[6px] border-ink/70" />
-        </div>
-      )
-    case "illustration":
-      // A line drawing that draws itself, looping.
-      return (
-        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-gold-from/[0.18] to-brand/[0.06] p-5">
-          <svg viewBox="0 0 120 80" className="h-full w-auto" aria-hidden>
-            {/* Simple mountain-and-sun sketch */}
-            <circle cx="92" cy="20" r="10" fill="none" stroke="var(--gold-to)" strokeWidth="2.5" className="marketing-draw" style={{ animationDelay: "0.6s" }} />
-            <path
-              d="M 8 66 L 38 28 L 56 50 L 70 34 L 112 66 Z"
-              fill="none"
-              stroke="var(--ink, #16283c)"
-              strokeWidth="2.5"
-              strokeLinejoin="round"
-              className="marketing-draw"
-            />
-            <path d="M 20 66 Q 60 58 100 66" fill="none" stroke="var(--brand)" strokeWidth="2" className="marketing-draw" style={{ animationDelay: "1.2s" }} />
-          </svg>
-        </div>
-      )
-    case "translation":
-      // Two speech bubbles trading places — one message, two languages.
-      return (
-        <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-gradient-to-br from-ink/[0.05] to-brand/[0.1] p-5">
-          <div className="marketing-lang-a absolute flex items-center gap-2 rounded-2xl rounded-bl-sm bg-white px-4 py-2.5 shadow-md ring-1 ring-black/[0.05]">
-            <span className="text-[15px] font-bold text-ink">Aa</span>
-            <span className="h-1.5 w-14 rounded-full bg-ink/15" />
-          </div>
-          <div className="marketing-lang-b absolute flex items-center gap-2 rounded-2xl rounded-br-sm bg-brand px-4 py-2.5 shadow-md">
-            <span className="text-[15px] font-bold text-white">文A</span>
-            <span className="h-1.5 w-14 rounded-full bg-white/40" />
-          </div>
-        </div>
-      )
-    case "copywriting":
-      // Copy lines typing themselves out, with a blinking caret.
-      return (
-        <div className="flex h-full w-full flex-col justify-center gap-2.5 bg-gradient-to-br from-ink/[0.04] to-gold-from/[0.12] px-6">
-          <span className="marketing-type h-2 rounded-full bg-ink/70" style={{ maxWidth: "72%" }} />
-          <span className="marketing-type h-2 rounded-full bg-ink/40" style={{ maxWidth: "88%", animationDelay: "0.5s" }} />
-          <span className="flex items-center gap-1">
-            <span className="marketing-type h-2 rounded-full bg-ink/40" style={{ maxWidth: "55%", animationDelay: "1s" }} />
-            <span aria-hidden className="marketing-caret h-3.5 w-[2px] bg-brand" />
-          </span>
-        </div>
-      )
-    case "social":
-      // Vertical phone playing a story, hearts popping up.
-      return (
-        <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-gradient-to-b from-brand/[0.14] to-ink/[0.06] p-4">
-          <div className="relative flex h-[85%] w-auto min-w-[52%] max-w-[70%] flex-col overflow-hidden rounded-2xl bg-ink shadow-lg ring-4 ring-ink/80" style={{ aspectRatio: "9/16" }}>
-            <div className="mx-3 mt-2 flex gap-1">
-              <span className="h-0.5 flex-1 rounded-full bg-white/80" />
-              <span className="h-0.5 flex-1 rounded-full bg-white/25" />
-              <span className="h-0.5 flex-1 rounded-full bg-white/25" />
-            </div>
-            <div className="mx-3 mt-2 flex items-center gap-1.5">
-              <span className="h-4 w-4 rounded-full bg-gradient-to-br from-gold-from to-gold-to" />
-              <span className="h-1 w-10 rounded-full bg-white/50" />
-            </div>
-            <div className="mt-auto mb-3 px-3">
-              <span className="block h-1.5 w-3/4 rounded-full bg-white/70" />
-              <span className="mt-1 block h-1.5 w-1/2 rounded-full bg-white/35" />
-            </div>
-            {/* Hearts floating up */}
-            <span aria-hidden className="marketing-heart absolute bottom-8 right-2 text-[14px]">❤️</span>
-            <span aria-hidden className="marketing-heart absolute bottom-8 right-5 text-[11px]" style={{ animationDelay: "1.1s" }}>❤️</span>
-            <span aria-hidden className="marketing-heart absolute bottom-8 right-3 text-[9px]" style={{ animationDelay: "2.2s" }}>❤️</span>
-          </div>
-        </div>
-      )
-    case "landing":
-      // Browser page skeleton with a shimmer passing over it.
-      return (
-        <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-gradient-to-b from-ink/[0.05] to-brand/[0.08] p-4">
-          <div className="relative flex h-[85%] w-[88%] flex-col overflow-hidden rounded-xl bg-white shadow-lg ring-1 ring-black/[0.06]">
-            <div className="flex items-center gap-1 border-b border-black/[0.06] px-2.5 py-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#f87171]" />
-              <span className="h-1.5 w-1.5 rounded-full bg-gold-from" />
-              <span className="h-1.5 w-1.5 rounded-full bg-[#34d399]" />
-              <span className="ml-2 h-1.5 flex-1 rounded-full bg-ink/[0.07]" />
-            </div>
-            <div className="flex flex-1 flex-col gap-1.5 p-3">
-              <span className="h-2.5 w-3/4 rounded bg-ink/80" />
-              <span className="h-1.5 w-1/2 rounded bg-ink/25" />
-              <span className="mt-1 h-4 w-16 rounded-md bg-brand" />
-              <div className="mt-auto grid grid-cols-3 gap-1.5">
-                <span className="h-8 rounded bg-ink/[0.08]" />
-                <span className="h-8 rounded bg-ink/[0.08]" />
-                <span className="h-8 rounded bg-ink/[0.08]" />
-              </div>
-            </div>
-            <span aria-hidden className="marketing-shimmer absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-brand/[0.08] to-transparent" />
-          </div>
-        </div>
-      )
-    case "ads":
-      // A fan of static ad concepts, gently swaying.
-      return (
-        <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-gradient-to-br from-[#1c3350] to-ink p-6">
-          <div className="marketing-fan relative h-[70%] w-[38%] max-w-[10rem]">
-            <div className="absolute inset-0 -rotate-[10deg] rounded-xl bg-gradient-to-br from-gold-from to-gold-to opacity-70 shadow-xl" style={{ transformOrigin: "bottom center" }} />
-            <div className="absolute inset-0 rotate-[9deg] rounded-xl bg-gradient-to-br from-brand to-[#7aa2ff] opacity-80 shadow-xl" style={{ transformOrigin: "bottom center" }} />
-            <div className="absolute inset-0 flex flex-col justify-between rounded-xl bg-white p-3 shadow-2xl">
-              <div>
-                <span className="block h-2 w-3/4 rounded bg-ink/85" />
-                <span className="mt-1 block h-2 w-1/2 rounded bg-ink/30" />
-              </div>
-              <div className="mx-auto h-12 w-12 rounded-full bg-gradient-to-br from-gold-from to-gold-to" />
-              <span className="mx-auto block h-4 w-16 rounded-full bg-ink" />
-            </div>
-          </div>
-        </div>
-      )
-  }
-}
 
 export function CreativeTilesGrid() {
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:grid-flow-dense lg:auto-rows-[11rem]">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:auto-rows-[11.5rem]">
       {CREATIVE_TILES.map((tile) => {
         const big = tile.span.includes("col-span-2")
         return (
           <div
             key={tile.id}
-            className={`relative h-52 overflow-hidden rounded-[1.5rem] border border-black/[0.06] bg-white shadow-[0_8px_30px_rgba(15,30,46,0.05)] lg:h-auto ${tile.span}`}
+            className={`group relative h-56 overflow-hidden rounded-[1.5rem] shadow-[0_12px_40px_rgba(15,30,46,0.1)] lg:h-auto ${tile.span}`}
           >
-            <div className="absolute inset-0">
-              <CreativeVisual id={tile.id} />
-            </div>
-            {/* Label overlays the visual so every tile size works. */}
-            <div className="absolute bottom-3 left-3 right-3">
-              <div className="inline-block max-w-full rounded-xl bg-white/90 px-3.5 py-2 shadow-sm ring-1 ring-black/[0.05] backdrop-blur">
-                <p className="text-[13px] font-semibold leading-tight tracking-tight text-ink">{tile.label}</p>
-                {big ? <p className="mt-0.5 text-[12px] leading-snug text-ink/55">{tile.note}</p> : null}
-              </div>
+            {/* Photograph is the subject; motion is a slow editorial push or pan. */}
+            <Image
+              src={tile.image}
+              alt={tile.alt}
+              width={1024}
+              height={768}
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              className={`absolute inset-0 h-full w-full object-cover ${tile.position} ${tile.motion} transition-transform duration-700 group-hover:scale-[1.05]`}
+            />
+            {/* Editorial caption over a bottom scrim, not a card chrome. */}
+            <div aria-hidden className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-ink/80 via-ink/35 to-transparent" />
+            <div className="absolute bottom-4 left-5 right-5 transition-transform duration-500 group-hover:-translate-y-1">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/70">{tile.label}</p>
+              {big ? (
+                <p className="mt-1 max-w-md text-[15px] font-medium leading-snug text-white">{tile.note}</p>
+              ) : (
+                <p className="mt-0.5 text-[13px] leading-snug text-white/90">{tile.note}</p>
+              )}
             </div>
           </div>
         )

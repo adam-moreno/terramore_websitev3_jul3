@@ -5,7 +5,6 @@ import {
   CollaborationSteps,
   CreativeCtaCard,
   CreativeTilesGrid,
-  MarketingHeroVisual,
   ServiceCarousel,
   StatsCountUp,
 } from "@/components/marketing-visuals"
@@ -119,17 +118,29 @@ const FAQ_ITEMS = [
 export default function MarketingPage() {
   return (
     <div className="min-h-screen bg-cream">
-      {/* HERO — copy left, owner-on-phone visual with live dashboard right */}
-      <section className="page-shell pb-14 pt-8 md:pt-12 lg:pb-20">
-        <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
-          <div>
-            <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-brand">
+      {/* HERO — cinematic image-led composition, copy over the calm left side */}
+      <section className="relative overflow-hidden">
+        <Image
+          src="/marketing/hero-cinematic.png"
+          alt="A campaign being produced at a creative studio desk — ad concepts, color swatches, and a vertical video edit in progress"
+          width={1600}
+          height={900}
+          priority
+          className="absolute inset-0 h-full w-full object-cover object-[70%_center]"
+          sizes="100vw"
+        />
+        {/* Restrained scrim: heavier over the text side only. */}
+        <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-ink/80 via-ink/45 to-transparent md:from-ink/70 md:via-ink/25" />
+        <div aria-hidden className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-ink/40 to-transparent" />
+        <div className="page-shell relative flex min-h-[34rem] items-center py-20 md:min-h-[40rem] md:py-28">
+          <div className="max-w-2xl">
+            <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-gold-from">
               Marketing &amp; advertising for growing businesses
             </p>
-            <h1 className="mt-3 max-w-3xl text-[2.2rem] font-bold leading-[1.08] tracking-[-0.02em] text-ink sm:text-5xl md:text-[3.2rem]">
-              On-brand, on-time marketing <span className="text-gold">designed to perform.</span>
+            <h1 className="mt-4 text-[2.2rem] font-bold leading-[1.08] tracking-[-0.02em] text-white sm:text-5xl md:text-[3.4rem]">
+              On-brand, on-time marketing designed to perform.
             </h1>
-            <p className="mt-5 max-w-xl text-[17px] leading-relaxed text-slate-600 md:text-[18px]">
+            <p className="mt-5 max-w-xl text-[17px] leading-relaxed text-white/80 md:text-[18px]">
               Whether it&apos;s Google, Meta, TikTok, email, or your website, get the campaigns you need fast — planned,
               built, launched, and measured by one connected system.
             </p>
@@ -137,13 +148,12 @@ export default function MarketingPage() {
               <TalkButton />
               <Link
                 href="/report"
-                className="text-center text-[15px] font-medium text-ink/60 underline-offset-4 hover:text-ink hover:underline sm:text-left"
+                className="text-center text-[15px] font-medium text-white/70 underline-offset-4 hover:text-white hover:underline sm:text-left"
               >
                 Or get a free Digital Footprint report
               </Link>
             </div>
           </div>
-          <MarketingHeroVisual />
         </div>
       </section>
 
