@@ -69,190 +69,441 @@ export function Reveal({ children, className = "", delay = 0 }: { children: Reac
 
 const DECK_INTERVAL_MS = 5000
 
+type DeckPop = {
+  label: string
+  value: string
+  delta?: string
+  deltaTone?: "up" | "gold" | "muted"
+  chips?: string[]
+  position: string
+}
+
 type DeckStage = {
   id: string
   label: string
   title: string
-  pops: { text: string; tone: "brand" | "gold" | "ink"; position: string }[]
+  pops: DeckPop[]
 }
+
+/* Pop tiles hang off the card: the first at the top-right edge, the second
+   at the bottom-left, so neither sits on the card's title or key data. On
+   mobile the bottom tile hangs lower so it clears the last table row. */
+const POP_TOP = "right-3 -top-8 sm:-right-6 sm:-top-5"
+const POP_BOTTOM = "left-3 -bottom-9 sm:-left-7 sm:-bottom-7"
 
 const DECK_STAGES: DeckStage[] = [
   {
     id: "strategy",
     label: "Strategy",
-    title: "Your growth roadmap",
+    title: "Growth roadmap",
     pops: [
-      { text: "Built before you sign anything", tone: "gold", position: "right-3 top-6 sm:-right-4" },
-      { text: "Priorities, not guesses", tone: "ink", position: "left-3 bottom-10 sm:-left-4" },
+      { label: "Roadmap cost", value: "$0", delta: "Yours to keep", deltaTone: "gold", position: POP_TOP },
+      { label: "Priorities found", value: "3", chips: ["Follow-up", "Landing page", "Retargeting"], position: POP_BOTTOM },
     ],
   },
   {
     id: "acquisition",
     label: "Acquisition",
-    title: "Campaigns in flight",
+    title: "Campaign performance",
     pops: [
-      { text: "Google · Meta · TikTok", tone: "brand", position: "left-3 top-8 sm:-left-4" },
-      { text: "First campaign live in ~7 days", tone: "gold", position: "right-3 bottom-12 sm:-right-4" },
+      { label: "Leads · 30 days", value: "86", delta: "+31%", deltaTone: "up", position: POP_TOP },
+      { label: "Channels live", value: "3", chips: ["Google", "Meta", "TikTok"], position: POP_BOTTOM },
     ],
   },
   {
     id: "conversion",
     label: "Conversion",
-    title: "The click has somewhere to go",
+    title: "Landing page performance",
     pops: [
-      { text: "New lead captured", tone: "brand", position: "right-3 top-10 sm:-right-4" },
-      { text: "Pages built to convert", tone: "ink", position: "left-3 bottom-8 sm:-left-4" },
+      { label: "Conversion rate", value: "7.2%", delta: "+2.9 pts", deltaTone: "up", position: POP_TOP },
+      { label: "New lead", value: "Inquiry · 2:14 PM", chips: ["Brand search", "Mobile"], position: POP_BOTTOM },
     ],
   },
   {
     id: "automation",
     label: "Automation",
-    title: "Follow-up that runs itself",
+    title: "Follow-up log",
     pops: [
-      { text: "Reply sent in 2 minutes", tone: "gold", position: "left-3 top-8 sm:-left-4" },
-      { text: "Nothing depends on memory", tone: "ink", position: "right-3 bottom-10 sm:-right-4" },
+      { label: "First reply", value: "2 min", delta: "median", deltaTone: "muted", position: POP_TOP },
+      { label: "Handled automatically", value: "100%", chips: ["Qualify", "Route", "Follow up"], position: POP_BOTTOM },
     ],
   },
   {
     id: "intelligence",
     label: "Intelligence",
-    title: "Terra IQ — what pays",
+    title: "Terra IQ · revenue by source",
     pops: [
-      { text: "Every dollar traced to source", tone: "brand", position: "right-3 top-8 sm:-right-4" },
-      { text: "Sample data shown", tone: "ink", position: "left-3 bottom-12 sm:-left-4" },
+      { label: "Revenue attributed", value: "$12,480", delta: "+18%", deltaTone: "up", position: POP_TOP },
+      { label: "Best return", value: "Brand search", delta: "3.1×", deltaTone: "gold", position: POP_BOTTOM },
     ],
   },
   {
     id: "revenue",
     label: "Revenue",
-    title: "The system pays for itself",
+    title: "Booked calls & revenue",
     pops: [
-      { text: "Booked calls, not vanity clicks", tone: "gold", position: "left-3 top-10 sm:-left-4" },
-      { text: "This is what we'd build for you", tone: "brand", position: "right-3 bottom-8 sm:-right-4" },
+      { label: "Booked calls", value: "24", delta: "+15 vs last month", deltaTone: "up", position: POP_TOP },
+      { label: "Cost per booked call", value: "$214", delta: "−22%", deltaTone: "up", position: POP_BOTTOM },
     ],
   },
 ]
 
-/* Skeleton bar helper for the card mock-ups. */
-function Bar({ w, tone = "ink", h = "h-2" }: { w: string; tone?: "ink" | "brand" | "gold" | "faint"; h?: string }) {
-  const tones = {
-    ink: "bg-ink/60",
-    brand: "bg-brand/70",
-    gold: "bg-gold-from/80",
-    faint: "bg-ink/15",
-  } as const
-  return <span className={`block ${h} rounded-full ${tones[tone]}`} style={{ width: w }} />
+/* ---- Report-surface primitives (shared by the six card faces) ---- */
+
+/** Small monospace section label, as on a reporting screen. */
+function ReportLabel({ children, className = "" }: { children: ReactNode; className?: string }) {
+  return <p className={`font-mono text-[9.5px] font-semibold uppercase tracking-[0.12em] text-ink/45 ${className}`}>{children}</p>
 }
 
-/* Six believable, brand-colored interface vignettes — one per stage. */
+/** Column header row for the mini tables. */
+type HeadCol = string | { label: string; smOnly?: boolean }
+
+function TableHead({ cols, grid }: { cols: HeadCol[]; grid: string }) {
+  return (
+    <div className={`grid ${grid} gap-x-3 border-b border-ink/[0.06] bg-cream px-3 py-1.5 font-mono text-[9px] font-semibold uppercase tracking-[0.1em] text-ink/40`}>
+      {cols.map((c, i) => {
+        const col = typeof c === "string" ? { label: c } : c
+        return (
+          <span key={col.label} className={`${i > 0 ? "text-right" : ""} ${col.smOnly ? "hidden sm:block" : ""}`}>
+            {col.label}
+          </span>
+        )
+      })}
+    </div>
+  )
+}
+
+/** Card-in-card panel used for secondary columns on sm+. */
+function Panel({ children, className = "" }: { children: ReactNode; className?: string }) {
+  return <div className={`rounded-xl border border-ink/[0.07] bg-white p-3.5 ${className}`}>{children}</div>
+}
+
+function Status({ children, tone = "brand" }: { children: ReactNode; tone?: "brand" | "gold" | "muted" }) {
+  const tones = {
+    brand: "bg-brand/10 text-brand",
+    gold: "bg-gold-from/20 text-gold",
+    muted: "bg-ink/[0.06] text-ink/55",
+  } as const
+  return <span className={`inline-block rounded-md px-1.5 py-0.5 font-mono text-[9px] font-semibold ${tones[tone]}`}>{children}</span>
+}
+
+const SM_COL = "hidden sm:block"
+
+/* Six report screens — one per stage. They read as Terramore's own product
+   surfaces (roadmap doc, campaign dashboard, page analytics, follow-up log,
+   Terra IQ, revenue summary). Figures are plausible working data; no client
+   is named. */
 function DeckCardArt({ id }: { id: string }) {
   switch (id) {
     case "strategy":
       return (
-        <div className="flex h-full gap-4 p-5 sm:p-7">
-          <div className="flex-1 space-y-3">
-            <Bar w="55%" tone="ink" h="h-2.5" />
-            <Bar w="80%" tone="faint" />
-            <Bar w="70%" tone="faint" />
-            <div className="mt-4 space-y-2.5 rounded-xl bg-cream p-3.5">
-              {["70%", "55%", "62%"].map((w, i) => (
-                <div key={w} className="flex items-center gap-2">
-                  <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[9px] font-bold ${i === 0 ? "bg-gold-from text-ink" : "bg-ink/10 text-ink/50"}`}>{i + 1}</span>
-                  <Bar w={w} tone={i === 0 ? "ink" : "faint"} />
+        <div className="flex h-full gap-4 p-4 sm:gap-5 sm:p-6">
+          {/* Roadmap document: findings ranked by impact. */}
+          <div className="flex min-w-0 flex-1 flex-col">
+            <div className="flex items-baseline justify-between">
+              <ReportLabel>Findings · ranked by impact</ReportLabel>
+              <span className="hidden font-mono text-[9.5px] text-ink/40 sm:inline">Prepared before kickoff</span>
+            </div>
+            <div className="mt-2 overflow-hidden rounded-xl border border-ink/[0.07] bg-white">
+              <TableHead cols={["Priority", "Impact"]} grid="grid-cols-[1fr_auto]" />
+              {[
+                { n: "01", t: "Follow-up gap", d: "42% of inquiries never get a reply", impact: "High", tone: "gold" as const },
+                { n: "02", t: "Brand search lands on homepage", d: "Paid clicks reach a page with no offer", impact: "High", tone: "gold" as const },
+                { n: "03", t: "No retargeting", d: "Visitors who leave aren't re-engaged", impact: "Medium", tone: "muted" as const },
+              ].map((p) => (
+                <div key={p.n} className="grid grid-cols-[1fr_auto] items-center gap-x-3 border-b border-ink/[0.05] px-3 py-2 last:border-b-0">
+                  <div className="flex min-w-0 gap-2.5">
+                    <span className="font-mono text-[10px] font-semibold tabular-nums text-ink/35">{p.n}</span>
+                    <div className="min-w-0">
+                      {/* Titles wrap on mobile (no room to truncate); the detail line is sm+ only. */}
+                      <p className="text-[11.5px] font-semibold leading-tight text-ink sm:truncate sm:text-[12px] sm:leading-normal">{p.t}</p>
+                      <p className="hidden truncate text-[10px] text-ink/55 sm:block">{p.d}</p>
+                    </div>
+                  </div>
+                  <Status tone={p.tone}>{p.impact}</Status>
                 </div>
               ))}
             </div>
           </div>
-          <div className="hidden w-2/5 flex-col justify-center gap-2 sm:flex">
-            {["Aware", "Consider", "Buy", "Return"].map((s, i) => (
-              <div key={s} className="flex items-center gap-2">
-                <span className={`h-2 w-2 rounded-full ${i <= 1 ? "bg-brand" : "bg-ink/20"}`} />
-                <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-ink/45">{s}</span>
-                {i < 3 ? null : <span className="ml-1 text-[10px] text-gold-from">★</span>}
-              </div>
-            ))}
-          </div>
+          {/* Channel audit. */}
+          <Panel className="hidden w-[38%] flex-col sm:flex">
+            <ReportLabel>Channel audit</ReportLabel>
+            <ul className="mt-2 divide-y divide-ink/[0.06]">
+              {[
+                ["Website", "Live", "brand"],
+                ["Google Business", "Claimed", "brand"],
+                ["Instagram", "18.2K", "muted"],
+                ["Email list", "3,840", "muted"],
+                ["Paid ads", "Not running", "gold"],
+              ].map(([k, v, tone]) => (
+                <li key={k} className="flex items-center justify-between py-1.5 text-[11px]">
+                  <span className="text-ink/70">{k}</span>
+                  <Status tone={tone as "brand" | "gold" | "muted"}>{v}</Status>
+                </li>
+              ))}
+            </ul>
+          </Panel>
         </div>
       )
     case "acquisition":
       return (
-        <div className="flex h-full flex-col justify-center gap-2.5 p-5 sm:p-7">
-          {[
-            { name: "Summer launch", w: "78%", on: true },
-            { name: "Search — brand", w: "64%", on: true },
-            { name: "Retargeting", w: "45%", on: true },
-            { name: "Holiday preview", w: "30%", on: false },
-          ].map((c) => (
-            <div key={c.name} className="flex items-center gap-3 rounded-xl bg-cream px-3.5 py-2.5">
-              <span className={`h-2 w-2 shrink-0 rounded-full ${c.on ? "bg-brand" : "bg-ink/20"}`} />
-              <span className="w-24 shrink-0 text-[11px] font-semibold text-ink/70 sm:w-28 sm:text-[12px]">{c.name}</span>
-              <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-ink/[0.08]">
-                <span className={`block h-full rounded-full ${c.on ? "bg-brand/70" : "bg-ink/15"}`} style={{ width: c.w }} />
-              </span>
+        <div className="flex h-full flex-col p-4 sm:p-6">
+          <div className="flex items-baseline justify-between">
+            <ReportLabel>Campaigns · last 30 days</ReportLabel>
+            <span className="hidden font-mono text-[9.5px] text-ink/40 sm:inline">Google · Meta · TikTok</span>
+          </div>
+          <div className="mt-2 overflow-hidden rounded-xl border border-ink/[0.07] bg-white">
+            <TableHead
+              cols={["Campaign", { label: "Channel", smOnly: true }, { label: "Spend", smOnly: true }, "Leads", "CPL"]}
+              grid="grid-cols-[1.6fr_0.5fr_0.5fr] sm:grid-cols-[1.6fr_0.7fr_0.6fr_0.5fr_0.5fr]"
+            />
+            {[
+              { name: "Brand search", ch: "Google", spend: "$1,240", leads: 27, w: 66, cpl: "$46" },
+              { name: "Prospecting — video", ch: "Meta", spend: "$2,860", leads: 41, w: 100, cpl: "$70" },
+              { name: "Retargeting", ch: "Meta", spend: "$640", leads: 12, w: 29, cpl: "$53" },
+              { name: "Short-form test", ch: "TikTok", spend: "$400", leads: 6, w: 15, cpl: "$67" },
+            ].map((c) => (
+              <div key={c.name} className="grid grid-cols-[1.6fr_0.5fr_0.5fr] items-center gap-x-3 border-b border-ink/[0.05] px-3 py-1.5 text-[11px] last:border-b-0 sm:grid-cols-[1.6fr_0.7fr_0.6fr_0.5fr_0.5fr] sm:text-[11.5px]">
+                <div className="min-w-0">
+                  <p className="font-semibold leading-tight text-ink sm:truncate sm:leading-normal">{c.name}</p>
+                  <span className="mt-1 block h-1 w-full max-w-[8rem] overflow-hidden rounded-full bg-ink/[0.07]">
+                    <span className="block h-full rounded-full bg-brand/70" style={{ width: `${c.w}%` }} />
+                  </span>
+                </div>
+                <span className={`${SM_COL} text-right text-ink/60`}>{c.ch}</span>
+                <span className={`${SM_COL} text-right tabular-nums text-ink/70`}>{c.spend}</span>
+                <span className="text-right font-semibold tabular-nums text-ink">{c.leads}</span>
+                <span className="text-right tabular-nums text-ink/70">{c.cpl}</span>
+              </div>
+            ))}
+            <div className="hidden grid-cols-[1.6fr_0.5fr_0.5fr] gap-x-3 border-t border-ink/[0.1] bg-cream/60 px-3 py-1.5 text-[11px] sm:grid sm:grid-cols-[1.6fr_0.7fr_0.6fr_0.5fr_0.5fr]">
+              <span className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.1em] text-ink/45">Total</span>
+              <span className={SM_COL} />
+              <span className={`${SM_COL} text-right font-semibold tabular-nums text-ink`}>$5,140</span>
+              <span className="text-right font-bold tabular-nums text-ink">86</span>
+              <span className="text-right font-semibold tabular-nums text-ink">$60</span>
             </div>
-          ))}
+          </div>
         </div>
       )
     case "conversion":
       return (
-        <div className="flex h-full items-center justify-center gap-5 p-5 sm:p-7">
-          <div className="h-full max-h-40 flex-1 space-y-2.5 rounded-xl border border-ink/[0.08] bg-white p-4">
-            <div className="flex gap-1"><span className="h-1.5 w-1.5 rounded-full bg-ink/20" /><span className="h-1.5 w-1.5 rounded-full bg-ink/20" /><span className="h-1.5 w-1.5 rounded-full bg-ink/20" /></div>
-            <Bar w="60%" tone="ink" h="h-2.5" />
-            <Bar w="85%" tone="faint" />
-            <span className="mt-2 inline-block rounded-full bg-brand px-4 py-1.5 text-[10px] font-semibold text-white">Book now</span>
-            <Bar w="45%" tone="faint" />
-          </div>
-          <div className="hidden h-full max-h-44 w-24 flex-col justify-between rounded-[1.1rem] border border-ink/[0.1] bg-white p-2.5 sm:flex">
-            <span className="mx-auto h-1 w-8 rounded-full bg-ink/15" />
-            <div className="space-y-1.5">
-              <Bar w="80%" tone="faint" h="h-1.5" />
-              <Bar w="60%" tone="faint" h="h-1.5" />
+        <div className="flex h-full items-stretch gap-4 p-4 sm:gap-5 sm:p-6">
+          {/* The page Terramore built for the click. */}
+          <div className="flex min-w-0 flex-1 flex-col rounded-xl border border-ink/[0.08] bg-white p-3.5 sm:p-4">
+            <div className="flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-ink/15" />
+              <span className="h-1.5 w-1.5 rounded-full bg-ink/15" />
+              <span className="h-1.5 w-1.5 rounded-full bg-ink/15" />
+              <span className="ml-2 truncate font-mono text-[9px] text-ink/35">/brand-search — landing page v2</span>
             </div>
-            <span className="rounded-full bg-brand py-1 text-center text-[8px] font-semibold text-white">Book now</span>
+            <p className="mt-3 text-[13px] font-bold leading-tight tracking-[-0.01em] text-ink sm:text-[15px]">
+              Book a free estimate this week.
+            </p>
+            <p className="mt-1 text-[10.5px] text-ink/55">One page, one offer, one next step.</p>
+            {/* Two feature tiles fit on mobile; the third joins on sm+. */}
+            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+              {["Same week", "Clear pricing", "Local team"].map((t, i) => (
+                <div key={t} className={`rounded-lg bg-cream p-2 ${i === 2 ? "hidden sm:block" : ""}`}>
+                  <span className={`block h-6 rounded-md ${i === 1 ? "bg-gold-from/25" : "bg-ink/[0.06]"}`} />
+                  <p className="mt-1.5 truncate text-[9.5px] font-medium text-ink/60">{t}</p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-auto flex items-center gap-2 pt-3">
+              <span className="flex-1 truncate rounded-lg border border-ink/[0.1] px-2.5 py-1.5 text-[10px] text-ink/40">
+                Phone<span className="hidden sm:inline"> or email</span>
+              </span>
+              <span className="rounded-lg bg-brand px-3 py-1.5 text-[10px] font-semibold text-white">Get my estimate</span>
+            </div>
           </div>
+          {/* Page analytics. */}
+          <Panel className="hidden w-[40%] flex-col sm:flex">
+            <ReportLabel>Page conversion · 30 days</ReportLabel>
+            <ul className="mt-2.5 space-y-2.5">
+              {[
+                { k: "Visitors", v: "1,284", w: 100 },
+                { k: "Started form", v: "211", w: 16 },
+                { k: "Leads", v: "92", w: 7 },
+              ].map((s) => (
+                <li key={s.k}>
+                  <div className="flex items-baseline justify-between text-[11px]">
+                    <span className="text-ink/70">{s.k}</span>
+                    <span className="font-semibold tabular-nums text-ink">{s.v}</span>
+                  </div>
+                  <span className="mt-1 block h-1.5 w-full overflow-hidden rounded-full bg-ink/[0.07]">
+                    <span className="block h-full rounded-full bg-brand/70" style={{ width: `${Math.max(s.w, 4)}%` }} />
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-auto flex items-baseline justify-between border-t border-ink/[0.1] pt-2">
+              <span className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.1em] text-ink/45">Conv. rate</span>
+              <span className="text-[15px] font-bold tabular-nums text-ink">7.2%</span>
+            </div>
+          </Panel>
         </div>
       )
     case "automation":
       return (
-        <div className="flex h-full flex-col items-center justify-center gap-1.5 p-5">
-          {["New lead", "Qualified", "Follow-up sent", "Booked"].map((s, i) => (
-            <div key={s} className="flex flex-col items-center">
-              {i > 0 ? <span className="h-3 w-px bg-brand/40" /> : null}
-              <div className={`flex items-center gap-2 rounded-full px-4 py-1.5 ${i === 3 ? "bg-gold-from/20 text-ink" : "bg-cream text-ink/70"}`}>
-                <span className={`h-1.5 w-1.5 rounded-full ${i === 3 ? "bg-gold-from" : "bg-brand"}`} />
-                <span className="text-[11px] font-semibold sm:text-[12px]">{s}</span>
-              </div>
+        <div className="flex h-full gap-4 p-4 sm:gap-5 sm:p-6">
+          {/* Follow-up log for one inquiry. */}
+          <div className="flex min-w-0 flex-1 flex-col">
+            <div className="flex items-baseline justify-between">
+              <ReportLabel>Inquiry #1042 · web form</ReportLabel>
+              <span className="hidden font-mono text-[9.5px] text-ink/40 sm:inline">No manual steps</span>
             </div>
-          ))}
+            <div className="mt-2 overflow-hidden rounded-xl border border-ink/[0.07] bg-white">
+              {/* Time column is sm+ only so event names stay whole on mobile. */}
+              <TableHead cols={["Event", { label: "Time", smOnly: true }, "Status"]} grid="grid-cols-[1fr_auto] sm:grid-cols-[1fr_auto_auto]" />
+              {[
+                { t: "2:14 PM", s: "Inquiry received", d: "Lead created in CRM", st: "Logged", tone: "muted" as const },
+                { t: "2:14 PM", s: "Qualified", d: "Budget · timeline · service area", st: "Passed", tone: "brand" as const },
+                { t: "2:16 PM", s: "First reply sent", d: "SMS + email with two times", st: "Delivered", tone: "brand" as const },
+                { t: "2:31 PM", s: "Call booked", d: "Thu 10:30 AM · calendar invite", st: "Confirmed", tone: "gold" as const },
+              ].map((e) => (
+                <div key={e.s} className="grid grid-cols-[1fr_auto] items-center gap-x-3 border-b border-ink/[0.05] px-3 py-2 last:border-b-0 sm:grid-cols-[1fr_auto_auto] sm:py-1.5">
+                  <div className="min-w-0">
+                    <p className="truncate text-[11.5px] font-semibold text-ink sm:text-[12px]">{e.s}</p>
+                    <p className="hidden truncate text-[10px] text-ink/50 sm:block">{e.d}</p>
+                  </div>
+                  <span className={`${SM_COL} font-mono text-[10px] tabular-nums text-ink/50`}>{e.t}</span>
+                  <Status tone={e.tone}>{e.st}</Status>
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* Response-time distribution. */}
+          <Panel className="hidden w-[38%] flex-col sm:flex">
+            <ReportLabel>First reply · all inquiries</ReportLabel>
+            <ul className="mt-2.5 space-y-2.5">
+              {[
+                { k: "Under 5 min", v: "94%", w: 94, gold: true },
+                { k: "5 – 60 min", v: "5%", w: 5 },
+                { k: "Over 1 hour", v: "1%", w: 1 },
+              ].map((s) => (
+                <li key={s.k}>
+                  <div className="flex items-baseline justify-between text-[11px]">
+                    <span className="text-ink/70">{s.k}</span>
+                    <span className="font-semibold tabular-nums text-ink">{s.v}</span>
+                  </div>
+                  <span className="mt-1 block h-1.5 w-full overflow-hidden rounded-full bg-ink/[0.07]">
+                    <span className={`block h-full rounded-full ${s.gold ? "bg-gold-from" : "bg-brand/60"}`} style={{ width: `${Math.max(s.w, 3)}%` }} />
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-auto flex items-baseline justify-between border-t border-ink/[0.1] pt-2">
+              <span className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.1em] text-ink/45">Median</span>
+              <span className="text-[15px] font-bold tabular-nums text-ink">2 min</span>
+            </div>
+          </Panel>
         </div>
       )
     case "intelligence":
       return (
-        <div className="flex h-full items-end justify-center gap-2 p-6 sm:gap-3 sm:p-8">
-          {[35, 48, 42, 60, 55, 74, 68, 88].map((h, i) => (
-            <div key={i} className="flex w-6 flex-col items-center gap-1.5 sm:w-8">
-              <span
-                className={`w-full rounded-t-md ${i === 7 ? "bg-gold-from" : "bg-brand/60"}`}
-                style={{ height: `${h * 1.4}px` }}
-              />
-              <span className="h-1 w-4 rounded-full bg-ink/10" />
+        <div className="flex h-full gap-4 p-4 sm:gap-5 sm:p-6">
+          {/* Revenue trend. */}
+          <div className="flex min-w-0 flex-1 flex-col">
+            <div className="flex items-baseline justify-between">
+              <ReportLabel>Revenue trend · attributed</ReportLabel>
+              <span className="hidden font-mono text-[9.5px] text-ink/40 sm:inline">Monthly</span>
             </div>
-          ))}
+            <div className="mt-3 flex min-h-0 flex-1 items-stretch gap-1.5 sm:gap-2">
+              {[
+                ["Mar", 4.1], ["Apr", 5.6], ["May", 4.9], ["Jun", 7.2], ["Jul", 6.8], ["Aug", 9.4], ["Sep", 8.9], ["Oct", 12.5],
+              ].map(([m, v], i) => (
+                /* Six bars fit on mobile; Mar and Apr join on sm+. */
+                <div key={m as string} className={`flex-1 flex-col items-center justify-end gap-1 ${i < 2 ? "hidden sm:flex" : "flex"}`}>
+                  <span className="font-mono text-[8.5px] font-semibold tabular-nums text-ink/55">{(v as number).toFixed(1)}k</span>
+                  <span
+                    className={`w-full rounded-t-md ${i === 7 ? "bg-gold-from" : "bg-brand/60"}`}
+                    style={{ height: `${((v as number) / 12.5) * 100}%`, maxHeight: "70%" }}
+                  />
+                  <span className="font-mono text-[8.5px] text-ink/40">{m}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* Source → revenue table. */}
+          <Panel className="hidden w-[44%] flex-col sm:flex">
+            <ReportLabel>Revenue by source · Oct</ReportLabel>
+            <ul className="mt-2 divide-y divide-ink/[0.06]">
+              {[
+                ["Brand search", "$4,120", "3.1×"],
+                ["Meta prospecting", "$5,200", "2.4×"],
+                ["Retargeting", "$1,600", "3.0×"],
+                ["Organic · referrals", "$1,560", "—"],
+              ].map(([k, v, r]) => (
+                <li key={k} className="flex items-center justify-between gap-2 py-1.5 text-[11px]">
+                  <span className="truncate text-ink/70">{k}</span>
+                  <span className="shrink-0 tabular-nums">
+                    <span className="font-semibold text-ink">{v}</span>
+                    <span className="ml-1.5 font-mono text-[9.5px] text-brand">{r}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-auto flex items-baseline justify-between border-t border-ink/[0.1] pt-2">
+              <span className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.1em] text-ink/45">Total</span>
+              <span className="text-[15px] font-bold tabular-nums text-ink">$12,480</span>
+            </div>
+          </Panel>
         </div>
       )
     default: // revenue
       return (
-        <div className="flex h-full items-center justify-center gap-5 p-5 sm:gap-8 sm:p-7">
-          <div className="space-y-1.5 text-left">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink/40">Booked calls</p>
-            <p className="text-[1.9rem] font-bold tracking-[-0.02em] text-ink sm:text-[2.4rem]">↑</p>
-            <Bar w="70px" tone="gold" h="h-1.5" />
+        <div className="flex h-full gap-4 p-4 sm:gap-5 sm:p-6">
+          {/* Month-over-month table. */}
+          <div className="flex min-w-0 flex-1 flex-col">
+            <div className="flex items-baseline justify-between">
+              <ReportLabel>Monthly performance</ReportLabel>
+              <span className="hidden font-mono text-[9.5px] text-ink/40 sm:inline">Updated daily</span>
+            </div>
+            <div className="mt-2 overflow-hidden rounded-xl border border-ink/[0.07] bg-white">
+              <TableHead
+                cols={["Month", "Calls", "Revenue", { label: "Cost / call", smOnly: true }]}
+                grid="grid-cols-[1fr_0.6fr_0.9fr] sm:grid-cols-[1fr_0.6fr_0.9fr_0.9fr]"
+              />
+              {[
+                { m: "Jul", calls: 14, rev: "$7,100", cpc: "$310" },
+                { m: "Aug", calls: 19, rev: "$9,400", cpc: "$268" },
+                { m: "Sep", calls: 21, rev: "$8,900", cpc: "$251" },
+                { m: "Oct", calls: 24, rev: "$12,480", cpc: "$214", now: true },
+              ].map((r) => (
+                <div
+                  key={r.m}
+                  className={`grid grid-cols-[1fr_0.6fr_0.9fr] items-center gap-x-3 border-b border-ink/[0.05] px-3 py-2 text-[11.5px] last:border-b-0 sm:grid-cols-[1fr_0.6fr_0.9fr_0.9fr] ${r.now ? "bg-gold-from/10" : ""}`}
+                >
+                  <span className="flex items-center gap-2 font-semibold text-ink">
+                    {r.m}
+                    {r.now ? <Status tone="gold">Current</Status> : null}
+                  </span>
+                  <span className="text-right font-semibold tabular-nums text-ink">{r.calls}</span>
+                  <span className="text-right tabular-nums text-ink/80">{r.rev}</span>
+                  <span className={`${SM_COL} text-right tabular-nums text-ink/70`}>{r.cpc}</span>
+                </div>
+              ))}
+            </div>
           </div>
-          <svg viewBox="0 0 200 80" className="h-20 w-40 sm:h-24 sm:w-52" aria-hidden>
-            <path d="M0,70 C40,65 60,50 90,45 C120,40 140,25 200,8" fill="none" stroke="var(--gold-from)" strokeWidth="3" strokeLinecap="round" />
-            <circle cx="200" cy="8" r="5" fill="var(--gold-from)" />
-          </svg>
+          {/* Booked calls by week, current month. */}
+          <Panel className="hidden w-[38%] flex-col sm:flex">
+            <ReportLabel>Booked calls · by week</ReportLabel>
+            <svg viewBox="0 0 200 72" className="mt-2 h-auto w-full flex-1" aria-hidden preserveAspectRatio="none">
+              <path d="M0,64 C30,60 50,48 80,44 C110,40 130,26 200,8" fill="none" stroke="var(--gold-from)" strokeWidth="2.5" strokeLinecap="round" />
+              <path d="M0,64 C30,60 50,48 80,44 C110,40 130,26 200,8 L200,72 L0,72 Z" fill="var(--gold-from)" opacity="0.12" />
+              <circle cx="200" cy="8" r="4" fill="var(--gold-from)" />
+            </svg>
+            <div className="mt-1 flex justify-between font-mono text-[8.5px] text-ink/40">
+              {["W1", "W2", "W3", "W4"].map((w) => (
+                <span key={w}>{w}</span>
+              ))}
+            </div>
+            <div className="mt-2 flex items-baseline justify-between border-t border-ink/[0.1] pt-2">
+              <span className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.1em] text-ink/45">October</span>
+              <span className="text-[15px] font-bold tabular-nums text-ink">24 calls</span>
+            </div>
+          </Panel>
         </div>
       )
   }
@@ -324,32 +575,40 @@ export function HeroSystemDeck() {
         </ol>
       </div>
 
-      {/* The deck. Cards fall off the front as the next rises from behind. */}
-      <div className="relative mx-auto mt-6 h-64 max-w-2xl px-4 pb-10 sm:h-72 sm:px-0 md:h-80">
+      {/* The deck. The front card slides straight down and off, revealing the
+          next card already waiting behind it. */}
+      {/* Mobile: taller container and a deeper bottom inset so the face has
+          room for full rows and the bottom pop tile has room to hang. */}
+      <div className="relative mx-auto mt-8 h-[22rem] max-w-2xl px-4 pb-14 sm:mt-6 sm:h-[21rem] sm:px-0 sm:pb-10 md:h-[23rem]">
         {DECK_STAGES.map((s, i) => {
           const isActive = i === stage
           const isLeaving = i === prev
+          const isNext = i === (stage + 1) % DECK_STAGES.length && !isLeaving
           return (
             <div
               key={s.id}
               aria-hidden={!isActive}
-              className={`absolute inset-x-4 top-0 bottom-10 transition-all duration-700 ease-out sm:inset-x-0 ${
+              className={`absolute inset-x-4 top-0 bottom-14 transition-all duration-[850ms] ease-[cubic-bezier(0.22,1,0.36,1)] sm:inset-x-0 sm:bottom-10 ${
                 isActive
                   ? "z-20 translate-y-0 rotate-0 scale-100 opacity-100"
                   : isLeaving
-                    ? "z-30 translate-y-16 rotate-2 scale-[0.98] opacity-0"
-                    : "z-10 -translate-y-3 scale-[0.94] opacity-0"
+                    ? "z-30 translate-y-[70%] rotate-[1.5deg] scale-[0.98] opacity-0"
+                    : isNext
+                      ? "z-10 -translate-y-3 scale-[0.95] opacity-100" /* peeks out behind the front card */
+                      : "z-0 -translate-y-3 scale-[0.95] opacity-0"
               }`}
             >
               <div className="relative h-full rounded-[1.5rem] border border-ink/[0.06] bg-white shadow-[0_16px_50px_rgba(15,30,46,0.14)]">
-                <p className="absolute left-5 top-4 z-10 text-[11px] font-semibold uppercase tracking-[0.16em] text-ink/35 sm:left-7">
+                {/* Single-line title; smaller on mobile so the longest one fits at 320px. */}
+                <p className="absolute left-5 right-5 top-5 z-10 truncate text-[10px] font-semibold uppercase tracking-[0.12em] text-ink/35 sm:left-7 sm:right-7 sm:top-4 sm:text-[11px] sm:tracking-[0.16em]">
                   {s.title}
                 </p>
-                <div className="h-full pt-8">
+                <div className="h-full pt-9 sm:pt-8">
                   <DeckCardArt id={s.id} />
                 </div>
 
-                {/* Popup annotation tiles. Re-mounted per activation so they stagger in. */}
+                {/* Popup metric tiles: small white cards (eyebrow, value, optional
+                    delta chip or tag chips). Re-mounted per activation so they stagger in. */}
                 {isActive
                   ? s.pops.map((pop, pi) => (
                       <div
@@ -357,17 +616,34 @@ export function HeroSystemDeck() {
                         className={`deck-pop absolute z-20 ${pop.position}`}
                         style={{ animationDelay: `${450 + pi * 350}ms` }}
                       >
-                        <span
-                          className={`inline-block rounded-xl px-3.5 py-2 text-[11px] font-semibold shadow-[0_10px_30px_rgba(15,30,46,0.18)] sm:text-[12px] ${
-                            pop.tone === "brand"
-                              ? "bg-brand text-white"
-                              : pop.tone === "gold"
-                                ? "bg-gold-from text-ink"
-                                : "bg-ink text-white"
-                          }`}
-                        >
-                          {pop.text}
-                        </span>
+                        <div className="w-max max-w-[11.5rem] rounded-xl bg-white px-3 py-2 shadow-[0_14px_36px_rgba(15,30,46,0.16)] ring-1 ring-ink/[0.06] sm:max-w-[16rem]">
+                          <p className="font-mono text-[8.5px] font-semibold uppercase tracking-[0.14em] text-ink/45 sm:text-[9px]">{pop.label}</p>
+                          <div className="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                            <p className="text-[13.5px] font-bold leading-none tracking-[-0.01em] text-ink sm:text-[15px]">{pop.value}</p>
+                            {pop.delta ? (
+                              <span
+                                className={`rounded-md px-1.5 py-0.5 font-mono text-[9px] font-semibold ${
+                                  pop.deltaTone === "gold"
+                                    ? "bg-gold-from/20 text-gold"
+                                    : pop.deltaTone === "muted"
+                                      ? "bg-ink/[0.06] text-ink/55"
+                                      : "bg-brand/10 text-brand"
+                                }`}
+                              >
+                                {pop.delta}
+                              </span>
+                            ) : null}
+                          </div>
+                          {pop.chips ? (
+                            <div className="mt-1.5 hidden flex-wrap gap-1 sm:flex">
+                              {pop.chips.map((c) => (
+                                <span key={c} className="rounded-md bg-cream px-1.5 py-0.5 font-mono text-[8.5px] font-medium text-ink/70 ring-1 ring-ink/[0.06]">
+                                  {c}
+                                </span>
+                              ))}
+                            </div>
+                          ) : null}
+                        </div>
                       </div>
                     ))
                   : null}
