@@ -68,6 +68,7 @@ export function BookingLink({
   children,
   onClick,
   source,
+  "aria-label": ariaLabel,
 }: {
   label?: string
   className?: string
@@ -76,6 +77,7 @@ export function BookingLink({
   onClick?: () => void
   /** Entry point tag: report | homepage | header | floating_cta | book. Optional. */
   source?: string
+  "aria-label"?: string
 }) {
   const [open, setOpen] = useState(false)
 
@@ -83,6 +85,7 @@ export function BookingLink({
     <>
       <button
         type="button"
+        aria-label={ariaLabel}
         onClick={() => {
           onClick?.()
           setOpen(true)

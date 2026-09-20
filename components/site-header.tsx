@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
 import { BookingLink } from "@/components/booking-popup"
 import { Logo } from "@/components/logo"
+import { ScheduleFab } from "@/components/schedule-fab"
 import { DASHBOARD_LOGIN_URL } from "@/lib/dashboard"
 
 /* Flat menu — no dropdowns. Solutions subpages, integrations, and resources
@@ -152,6 +153,7 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
           </div>
         </header>
         <div>{children}</div>
+        <ScheduleFab />
       </>
     )
   }
@@ -160,6 +162,7 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
     <>
       <SiteHeader />
       <div className={isHome ? "" : "pt-24"}>{children}</div>
+      <ScheduleFab />
     </>
   )
 }

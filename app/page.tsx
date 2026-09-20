@@ -1,10 +1,8 @@
 "use client"
 
-import { Calendar } from "lucide-react"
 import { BookingLink } from "@/components/booking-popup"
 import { League_Spartan } from "next/font/google"
 import { ReportPopupLink } from "@/components/report-popup"
-import { useEffect, useState } from "react"
 import { HomeFaq } from "@/components/home-faq"
 import { ReportBand } from "@/components/report-band"
 import { ReviewCarousel } from "@/components/review-carousel"
@@ -24,51 +22,9 @@ const brandMore = League_Spartan({
   display: "swap",
 })
 
-function ScheduleFab() {
-  const [pastHero, setPastHero] = useState(false)
-
-  useEffect(() => {
-    const sync = () => {
-      const mobile = window.matchMedia("(max-width: 767px)").matches
-      if (!mobile) {
-        setPastHero(true)
-        return
-      }
-      setPastHero(window.scrollY > window.innerHeight * 0.7)
-    }
-    sync()
-    window.addEventListener("scroll", sync, { passive: true })
-    window.addEventListener("resize", sync)
-    return () => {
-      window.removeEventListener("scroll", sync)
-      window.removeEventListener("resize", sync)
-    }
-  }, [])
-
-  return (
-    <div
-      className={`fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-[70] transition duration-300 ease-out ${
-        pastHero
-          ? "translate-y-0 opacity-100"
-          : "pointer-events-none translate-y-3 opacity-0 md:pointer-events-auto md:translate-y-0 md:opacity-100"
-      }`}
-    >
-      <BookingLink
-        source="floating_cta"
-        className="inline-flex h-11 items-center rounded-2xl bg-brand px-4 text-[14px] font-medium text-white shadow-lg transition-shadow hover:bg-brand-hover hover:shadow-xl"
-      >
-        <Calendar className="mr-2 h-4 w-4" aria-hidden />
-        Schedule
-      </BookingLink>
-    </div>
-  )
-}
-
 export default function TerramoreHomepage() {
   return (
     <div className="min-h-screen bg-cream">
-      <ScheduleFab />
-
       <section className="relative isolate overflow-hidden bg-cream pt-36 pb-0 md:pt-32 md:pb-0">
         {/* The orbit only runs from md up. On phones it floated over the headline, so the marks move to a slim row under the CTA. */}
         <div className="pointer-events-none absolute inset-x-0 top-0 z-0 hidden h-[100svh] overflow-hidden md:block">
