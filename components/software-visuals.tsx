@@ -1061,14 +1061,14 @@ export function ChannelValueVisual() {
   }
 
   return (
-    <Wash className="software-visual-wash-hot flex flex-col p-3">
-      <p className="relative z-[4] px-1 text-center text-[14px] font-semibold tracking-tight text-ink">
+    <Wash className="software-visual-wash-hot flex h-full flex-col p-3">
+      <p className="relative z-[4] shrink-0 px-1 text-center text-[14px] font-semibold tracking-tight text-ink">
         {beat.line}
       </p>
 
       {/* Phones: a clear badge names the active source, then its apps sit in one row. The strip below
           is the switcher, so a first-time viewer can follow which channel is live as it rotates. */}
-      <div className="mt-2 flex flex-col items-center gap-1 md:hidden">
+      <div className="mt-2 flex shrink-0 flex-col items-center gap-1 md:hidden">
         <span className="rounded-full bg-brand/10 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-brand ring-1 ring-brand/20">
           {beat.source}
         </span>
@@ -1085,48 +1085,54 @@ export function ChannelValueVisual() {
         </div>
       </div>
 
-      {/* The detail card holds a fixed height on phones (sized to the tallest channel) so the whole
-          visual never grows or shrinks as the active channel rotates. */}
-      <div className="relative mt-2 flex min-h-0 flex-col md:block">
-        <div className="hidden md:absolute md:inset-y-0 md:left-0 md:flex md:w-[46%] md:flex-col md:justify-between md:gap-1.5 md:pr-2">
-          {MONEY_BEATS.map((item, index) => (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => holdBeat(index)}
-              aria-pressed={index === active}
-              className={`rounded-2xl px-2 py-1.5 text-left transition ${
-                index === active ? "bg-white/80 ring-2 ring-brand/30" : "opacity-45"
-              }`}
-            >
-              <p
-                className={`text-[10px] font-semibold ${
-                  index === active ? "text-brand" : "text-slate-400"
+      {/* Desktop uses a real grid (not absolute inset) so the channel list and detail card share
+          height without collapsing the middle band. Mobile keeps a fixed-height detail card. */}
+      <div className="relative mt-2 flex min-h-0 flex-1 flex-col">
+        <div className="hidden h-full min-h-0 md:grid md:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] md:gap-2.5">
+          <div className="flex min-h-0 flex-col justify-between gap-1.5">
+            {MONEY_BEATS.map((item, index) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => holdBeat(index)}
+                aria-pressed={index === active}
+                className={`rounded-2xl px-2 py-1.5 text-left transition ${
+                  index === active ? "bg-white/80 ring-2 ring-brand/30" : "opacity-45"
                 }`}
               >
-                {item.source}
-              </p>
-              <div className="mt-1 flex items-center gap-1.5">
-                {item.apps.map((app, appIndex) => (
-                  <div
-                    key={app.slug}
-                    className="software-icon-tile flex h-9 w-9 items-center justify-center"
-                    style={{ animationDelay: `${appIndex * 0.2}s` }}
-                  >
-                    <BrandLogo slug={app.slug} name={app.name} size={16} />
-                  </div>
-                ))}
-              </div>
-            </button>
-          ))}
+                <p
+                  className={`text-[10px] font-semibold ${
+                    index === active ? "text-brand" : "text-slate-400"
+                  }`}
+                >
+                  {item.source}
+                </p>
+                <div className="mt-1 flex items-center gap-1.5">
+                  {item.apps.map((app, appIndex) => (
+                    <div
+                      key={app.slug}
+                      className="software-icon-tile flex h-9 w-9 items-center justify-center"
+                      style={{ animationDelay: `${appIndex * 0.2}s` }}
+                    >
+                      <BrandLogo slug={app.slug} name={app.name} size={16} />
+                    </div>
+                  ))}
+                </div>
+              </button>
+            ))}
+          </div>
+
+          <div className="min-h-0">
+            <ChannelDetail beat={active} />
+          </div>
         </div>
 
-        <div className="h-[18rem] min-h-0 md:absolute md:inset-y-0 md:right-0 md:h-auto md:w-[52%]">
+        <div className="h-[18rem] min-h-0 md:hidden">
           <ChannelDetail beat={active} />
         </div>
       </div>
 
-      <div className={`${TILE} mt-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 px-3 py-2 md:flex-nowrap`}>
+      <div className={`${TILE} mt-2 flex shrink-0 flex-wrap items-center justify-between gap-x-3 gap-y-1.5 px-3 py-2 md:flex-nowrap`}>
         <div className="flex w-full min-w-0 gap-1 md:w-auto md:flex-1">
           {MONEY_BEATS.map((item, index) => (
             <button
@@ -1456,7 +1462,7 @@ export function AudienceIntelVisual() {
   const bought = reduce || walk >= 3
 
   return (
-    <Wash className="flex h-full flex-col justify-between gap-2 p-2.5 lg:gap-3 lg:p-4">
+    <Wash className="flex h-full flex-col justify-start gap-1.5 p-2.5 md:justify-between md:gap-2.5 lg:gap-3 lg:p-4">
       <p className="sr-only">
         We watch Maya and Eli from the first ad or Instagram tap, through the site, to the city.
         When they are ready to buy, reach, leads, deals, and buys go up.
@@ -1958,12 +1964,12 @@ export function RefillSequenceVisual() {
 }
 
 const FIND_PLACES = [
+  { key: "chatgpt", slug: "openai", name: "ChatGPT", role: "AI answers", state: "Cited" },
+  { key: "seo", slug: "google", name: "Google Search", role: "Organic", state: "Page 1" },
+  { key: "maps", slug: "google", name: "Google Maps", role: "Local", state: "Live" },
   { key: "shopify", slug: "shopify", name: "Shopify", role: "Your store", state: "Live" },
   { key: "amazon", slug: "amazon", name: "Amazon", role: "Second store", state: "Live" },
-  { key: "etsy", slug: "etsy", name: "Etsy", role: "Third store", state: "Live" },
-  { key: "maps", slug: "google", name: "Google Maps", role: "Local", state: "Live" },
-  { key: "seo", slug: "google", name: "Your SEO", role: "Search", state: "Page 1" },
-  { key: "yelp", slug: "yelp", name: "Yelp", role: "Aggregator", state: "Claimed" },
+  { key: "yelp", slug: "yelp", name: "Yelp", role: "Listings", state: "Claimed" },
 ] as const
 
 export function DiscoverabilityVisual() {
@@ -1974,14 +1980,14 @@ export function DiscoverabilityVisual() {
   return (
     <Wash className="flex h-full flex-col justify-center p-3 lg:p-4">
       <p className="sr-only">
-        The shop or the service is live in more than one place. Shopify, Amazon, and Etsy for stores.
-        Google Maps, search, and Yelp for people looking nearby.
+        The business shows up in ChatGPT answers, Google Search, and Google Maps, plus the store and
+        listing sites people already open.
       </p>
       <div className="text-center">
         <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
-          The store, Maps, search, and the listing they already trust
+          ChatGPT, Google Search, and Maps
         </p>
-        <p className="mt-0.5 text-[14px] font-semibold text-ink">More than one door is open.</p>
+        <p className="mt-0.5 text-[14px] font-semibold text-ink">Found where buyers already look.</p>
       </div>
       <div className="mt-2 grid grid-cols-1 gap-1.5 min-[360px]:grid-cols-2">
         {FIND_PLACES.map((place, index) => {

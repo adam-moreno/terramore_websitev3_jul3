@@ -27,11 +27,11 @@ const FOR_OWNERS = [
 const CHAPTERS = [
   {
     title: "Kantar",
-    body: "Years in market research. The job was reading who people are, what they watch, and what they actually buy, across digital and social platforms, for large brands.",
+    body: "Brand reports for large advertisers across every social channel — who saw the work, how people responded, and what to change next in the media plan.",
   },
   {
     title: "Samba TV",
-    body: "Measuring whether TV and streaming ads moved sales for Fortune 500 advertisers, and building the audience targeting behind those campaigns.",
+    body: "TV advertising and TV analytics for Fortune 500 brands: whether streaming and linear ads reached the right households, and whether those households bought.",
   },
   {
     title: "Building and selling the software",
@@ -39,7 +39,7 @@ const CHAPTERS = [
   },
   {
     title: "Terramore",
-    body: "The same craft, pointed at owners who already have a shop, a service, or a customer list. Software, data, and the work of connecting them, without an enterprise price tag.",
+    body: "The same craft, pointed at owners who already have a shop, a service, or a customer list. Software, data, and the work of connecting them — so you see what pays and what to fix first.",
   },
 ]
 

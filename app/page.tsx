@@ -84,7 +84,7 @@ export default function TerramoreHomepage() {
           Slack peeks into the first viewport — one step above 14rem, still below 18rem.
           Do not justify-center on mobile. Desktop tall centered column unchanged.
         */}
-        <div className="relative z-20 flex min-h-[calc(100svh-15rem)] flex-col justify-start md:-mt-28 md:min-h-[calc(100svh-10.75rem)] md:justify-center md:pt-28">
+        <div className="relative z-20 flex min-h-[calc(100svh-18rem)] flex-col justify-start md:-mt-28 md:min-h-[calc(100svh-14rem)] md:justify-center md:pt-28">
           <div className="page-shell relative z-20 text-center">
             <div
               className="mx-auto flex w-full max-w-none flex-col items-center sm:max-w-[28rem] md:max-w-none md:inline-flex"

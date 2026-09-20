@@ -1,6 +1,5 @@
 import type { Metadata } from "next"
 import Image from "next/image"
-import Link from "next/link"
 import { ConnectedChain, HeroSystemDeck, Reveal, StagedShowcase, TerraIQTile } from "@/components/book-visuals"
 import { BookingLink } from "@/components/booking-popup"
 import { ReportPopupLink } from "@/components/report-popup"
@@ -33,31 +32,26 @@ const CAPABILITIES = [
     id: "strategy",
     label: "Strategy",
     body: "Growth strategy, positioning, and channel planning built around the business you already have.",
-    href: "/solutions",
   },
   {
     id: "acquisition",
     label: "Acquisition",
     body: "Paid advertising, content, search, and creative that put you in front of the right people.",
-    href: "/marketing",
   },
   {
     id: "conversion",
     label: "Conversion",
     body: "Websites, landing pages, lead capture, and booking flows that turn attention into opportunities.",
-    href: "/solutions",
   },
   {
     id: "automation",
     label: "Automation",
     body: "CRM, email, SMS, lead routing, and workflows that keep the system moving without you.",
-    href: "/solutions",
   },
   {
     id: "intelligence",
     label: "Intelligence",
     body: "Analytics, attribution, and reporting through Terra IQ — so you can see what pays.",
-    href: "/solutions",
   },
 ] as const
 
@@ -226,15 +220,9 @@ export default function BookPage() {
         <div className="mt-8 divide-y divide-black/[0.06] border-y border-black/[0.06]">
           {CAPABILITIES.map((cap, i) => (
             <Reveal key={cap.id} delay={i * 80}>
-              <div className="grid gap-2 py-6 sm:grid-cols-[10rem_1fr_auto] sm:items-baseline sm:gap-8">
+              <div className="grid gap-2 py-6 sm:grid-cols-[10rem_1fr] sm:items-baseline sm:gap-8">
                 <p className="text-[13px] font-semibold uppercase tracking-[0.16em] text-ink">{cap.label}</p>
                 <p className="max-w-2xl text-[15px] leading-relaxed text-slate-600">{cap.body}</p>
-                <Link
-                  href={cap.href}
-                  className="text-[13px] font-semibold text-brand underline-offset-4 hover:underline"
-                >
-                  Learn more →
-                </Link>
               </div>
             </Reveal>
           ))}
@@ -264,8 +252,11 @@ export default function BookPage() {
               </h2>
               <p className="mt-4 max-w-lg text-[16px] leading-relaxed text-slate-600 md:text-[17px]">
                 You&apos;ll talk directly with Terramore about your business, where you&apos;re trying to go, and what
-                needs to change to get there. Terramore is built on more than a decade of marketing measurement work
-                behind large advertisers at Kantar and Samba TV.
+                needs to change to get there. The work behind that conversation comes from a decade measuring
+                campaigns for large advertisers: at Samba TV, tying TV and streaming ads to who watched and what they
+                bought; at Kantar, writing brand reports across every social channel so brands knew what their ads
+                actually did. Terramore points that same craft at owners — what is working, what is leaking, and what
+                to fix first.
               </p>
               <p className="mt-4 max-w-lg text-[15px] leading-relaxed text-slate-600">
                 And whatever happens, you leave with a growth roadmap for your business —{" "}

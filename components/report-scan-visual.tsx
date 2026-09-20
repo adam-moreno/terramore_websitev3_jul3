@@ -11,23 +11,32 @@ export function ReportScanVisual() {
     const root = scroller.current
     if (!root) return
 
-    const cards = Array.from(root.querySelectorAll<HTMLElement>("[data-report-card]"))
-    if (cards.length === 0) return
+    const syncActive = () => {
+      const cards = Array.from(root.querySelectorAll<HTMLElement>("[data-report-card]"))
+      if (cards.length === 0) return
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0]
-        if (!visible) return
-        const index = cards.indexOf(visible.target as HTMLElement)
-        if (index >= 0) setActive(index)
-      },
-      { root, threshold: [0.55, 0.7] }
-    )
+      // Pick the card whose left edge is closest to the scroller's left edge.
+      // IntersectionObserver ratios mis-fire on the last card because of the trailing spacer.
+      const left = root.scrollLeft
+      let best = 0
+      let bestDist = Infinity
+      cards.forEach((card, index) => {
+        const dist = Math.abs(card.offsetLeft - left)
+        if (dist < bestDist) {
+          bestDist = dist
+          best = index
+        }
+      })
+      setActive((current) => (current === best ? current : best))
+    }
 
-    cards.forEach((card) => observer.observe(card))
-    return () => observer.disconnect()
+    syncActive()
+    root.addEventListener("scroll", syncActive, { passive: true })
+    window.addEventListener("resize", syncActive)
+    return () => {
+      root.removeEventListener("scroll", syncActive)
+      window.removeEventListener("resize", syncActive)
+    }
   }, [])
 
   const scrollTo = (index: number) => {

@@ -1826,3 +1826,16 @@ User report: deck card data wasn't all fitting on mobile. Audited all six faces 
 - Stats: replaced "7 days" with "100% you own every account".
 - /book: Logo above Ready-to-build CTA; footer DualCtas + tagline removed; Founder-led trust tile → Month to month; showcase outbound page links removed; mobile deck stage headers use rotating carousel (prev/next + dots).
 - Footer: Company column removed sitewide; marketing immersive footer uses same Explore links as homepage.
+
+
+## Marketing + homepage polish + prod push – September 20, 2026
+
+- Connect channels desktop: replaced absolute inset layout with a real two-column grid so the channel list and detail card share height without collapsing.
+- Reach buyers mobile: tightened top/bottom tile gap (justify-start + half the mobile gap).
+- Report chapter dots: scroll-position sync instead of IntersectionObserver so the last card lights the 4th bubble.
+- Marketing hero: shorter viewport + ink→cream gradient behind the service carousel so it reads as part of the hero and peeks the next section.
+- Mid-page CTA matches the photo-led CreativeCtaCard; roadmap stat counts $1000 → $0; creative bento uses explicit grid placement (no white holes).
+- Founder/proof copy is outcome-specific (Samba TV = TV ads + analytics; Kantar = brand reports across social).
+- Discoverability leads with ChatGPT, Google Search, and Maps.
+- /book: removed Learn more links; owner question answers always stack.
+- Homepage hero min-height reduced so the Slack/analytics band peeks sooner.

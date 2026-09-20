@@ -11,7 +11,6 @@
  */
 
 import Image from "next/image"
-import Link from "next/link"
 import { useEffect, useRef, useState } from "react"
 import { BookingLink } from "@/components/booking-popup"
 import { ArrowUpRight, Bell, CreditCard, TrendingUp } from "lucide-react"
@@ -233,11 +232,12 @@ export function ServiceCarousel() {
 /* view. All stats are factual Terramore claims.                       */
 /* ------------------------------------------------------------------ */
 
-/* Promise/fact-based stats — all verifiable, no invented results claims. */
+/* Promise/fact-based stats — all verifiable, no invented results claims.
+   Roadmap uses from→to so the number counts down from $1,000 to $0. */
 const STATS = [
-  { value: 10, decimals: 0, prefix: "", suffix: "+", label: "Years in marketing, data, and measurement — including work behind Fortune 500 advertisers" },
-  { value: 0, decimals: 0, prefix: "$", suffix: "", label: "What your growth roadmap costs — we build it before you ever sign up, and it's yours to keep" },
-  { value: 100, decimals: 0, prefix: "", suffix: "%", label: "You own every ad account, creative file, and login — always" },
+  { value: 10, from: 0, decimals: 0, prefix: "", suffix: "+", label: "Years in marketing, data, and measurement — including work behind Fortune 500 advertisers" },
+  { value: 0, from: 1000, decimals: 0, prefix: "$", suffix: "", label: "What your growth roadmap costs — we build it before you ever sign up, and it's yours to keep" },
+  { value: 100, from: 0, decimals: 0, prefix: "", suffix: "%", label: "You own every ad account, creative file, and login — always" },
 ] as const
 
 /* ------------------------------------------------------------------ */
@@ -258,8 +258,8 @@ const CREATIVE_TILES = [
     note: "Concepts, variations, and finished ads people actually stop for.",
     image: "/marketing/services/creative.png",
     alt: "A wall of colorful ad concept variations being pinned up in a bright studio",
-    span: "lg:col-span-2 lg:row-span-2",
-    motion: "marketing-showcase-pan", // horizontal creative-wall drift
+    span: "lg:col-span-2 lg:row-span-2 lg:col-start-1 lg:row-start-1",
+    motion: "marketing-showcase-pan",
     position: "object-center",
   },
   {
@@ -268,7 +268,7 @@ const CREATIVE_TILES = [
     note: "Shot, cut, captioned, shipped.",
     image: "/marketing/services/video.png",
     alt: "A vertical video being recorded and edited in a bright creator studio",
-    span: "lg:row-span-2",
+    span: "lg:row-span-2 lg:col-start-3 lg:row-start-1",
     motion: "marketing-showcase-push",
     position: "object-[30%_center]",
   },
@@ -278,7 +278,7 @@ const CREATIVE_TILES = [
     note: "The system that works when nobody's touching it.",
     image: "/marketing/services/automation.png",
     alt: "A dark workflow interface routing a lead through qualification and follow-up",
-    span: "lg:row-span-2",
+    span: "lg:row-span-2 lg:col-start-1 lg:row-start-3",
     motion: "marketing-showcase-push",
     position: "object-center",
   },
@@ -288,7 +288,7 @@ const CREATIVE_TILES = [
     note: "Where the business should go, mapped.",
     image: "/marketing/services/strategy.png",
     alt: "A top-down strategic planning workspace with journey diagrams and notes",
-    span: "",
+    span: "lg:col-start-2 lg:row-start-3",
     motion: "marketing-showcase-push",
     position: "object-center",
   },
@@ -298,7 +298,7 @@ const CREATIVE_TILES = [
     note: "Built, launched, and operated.",
     image: "/marketing/services/campaigns.png",
     alt: "A campaign operations console with audiences, ad groups, and statuses",
-    span: "",
+    span: "lg:col-start-3 lg:row-start-3",
     motion: "marketing-showcase-pan",
     position: "object-[20%_center]",
   },
@@ -308,9 +308,19 @@ const CREATIVE_TILES = [
     note: "See what marketing is actually producing — ad to lead to sale.",
     image: "/marketing/services/analytics.png",
     alt: "A dark analytics interface tracing conversion paths from ads to revenue",
-    span: "lg:col-span-2 lg:row-span-2",
+    span: "lg:col-span-2 lg:row-span-2 lg:col-start-2 lg:row-start-4",
     motion: "marketing-showcase-push",
     position: "object-center",
+  },
+  {
+    id: "email",
+    label: "Email & SMS",
+    note: "The conversation after the lead arrives.",
+    image: "/marketing/services/email.png",
+    alt: "A phone with a text thread beside a laptop showing an email sequence, on a warm desk",
+    span: "lg:row-span-2 lg:col-start-1 lg:row-start-5",
+    motion: "marketing-showcase-push",
+    position: "object-[35%_center]",
   },
   {
     id: "paid",
@@ -318,7 +328,7 @@ const CREATIVE_TILES = [
     note: "Budget moved toward what works.",
     image: "/marketing/services/paid.png",
     alt: "A media-buying workstation reviewing spend and performance",
-    span: "",
+    span: "lg:col-start-2 lg:row-start-6",
     motion: "marketing-showcase-push",
     position: "object-[center_30%]",
   },
@@ -328,19 +338,9 @@ const CREATIVE_TILES = [
     note: "The click has somewhere intelligent to go.",
     image: "/marketing/services/landing.png",
     alt: "A clean landing page shown on desktop and mobile side by side",
-    span: "",
+    span: "lg:col-start-3 lg:row-start-6",
     motion: "marketing-showcase-pan",
     position: "object-center",
-  },
-  {
-    id: "email",
-    label: "Email & SMS",
-    note: "The conversation after the lead arrives.",
-    image: "/marketing/services/email.png",
-    alt: "A phone with a text thread beside a laptop showing an email sequence, on a warm desk",
-    span: "lg:row-span-2",
-    motion: "marketing-showcase-push",
-    position: "object-[35%_center]",
   },
 ] as const
 
@@ -565,16 +565,19 @@ export function StatsCountUp() {
 
   return (
     <div ref={ref} className="grid gap-8 sm:grid-cols-3 sm:gap-6">
-      {STATS.map((stat) => (
-        <div key={stat.label} className="border-t border-black/[0.1] pt-5">
-          <p className="text-[2.6rem] font-bold leading-none tracking-tight text-ink md:text-[3.2rem]">
-            {stat.prefix}
-            {(stat.value * progress).toFixed(stat.decimals)}
-            {stat.suffix}
-          </p>
-          <p className="mt-3 max-w-[16rem] text-[14px] leading-relaxed text-slate-500">{stat.label}</p>
-        </div>
-      ))}
+      {STATS.map((stat) => {
+        const display = Math.round(stat.from + (stat.value - stat.from) * progress)
+        return (
+          <div key={stat.label} className="border-t border-black/[0.1] pt-5">
+            <p className="text-[2.6rem] font-bold leading-none tracking-tight text-ink md:text-[3.2rem]">
+              {stat.prefix}
+              {display.toFixed(stat.decimals)}
+              {stat.suffix}
+            </p>
+            <p className="mt-3 max-w-[16rem] text-[14px] leading-relaxed text-slate-500">{stat.label}</p>
+          </div>
+        )
+      })}
     </div>
   )
 }

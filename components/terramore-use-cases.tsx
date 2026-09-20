@@ -69,11 +69,11 @@ export const JOBS: {
   {
     id: "discoverability",
     label: "Get found online",
-    headline: "Show up where people look.",
-    copy: "A second store. Maps. Your own search. The listing sites people already use. The facts stay the same.",
+    headline: "Show up in ChatGPT, Google, and Maps.",
+    copy: "AI answers, Google Search, and Google Maps are where buyers look first — and Maps is still underused by most local businesses. We get you found there, then keep names, hours, and listings in sync.",
     visual: <DiscoverabilityVisual />,
     quote: "We only show up if someone types our name.",
-    reply: "Maps is live. Search is on. You are on the stores people open first.",
+    reply: "Maps is live. Search is on. You show up when people ask ChatGPT too.",
   },
   {
     id: "audience",

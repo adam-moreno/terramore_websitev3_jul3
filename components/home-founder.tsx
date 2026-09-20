@@ -20,8 +20,9 @@ export function HomeFounder() {
             Adam Moreno
           </h2>
           <p className="section-lede mt-4 text-ink/75 md:mt-5 md:text-[1.05rem] md:leading-relaxed">
-            A decade in corporate market research at Kantar and Samba TV, then solutions and sales engineering for
-            Fortune 500 advertisers. Terramore is that same work, built for owners who already have a business.
+            A decade measuring what ads actually do for large advertisers — TV and streaming analytics at Samba TV,
+            brand reports across every social channel at Kantar — then solutions and sales engineering for Fortune 500
+            teams. Terramore points that same craft at owners: what is working, what is leaking, and what to fix first.
           </p>
           <Link href="/about" className="mt-6 inline-block text-[15px] font-medium text-brand hover:text-brand-hover">
             Read the full story

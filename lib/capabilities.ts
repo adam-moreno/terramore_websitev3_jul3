@@ -1139,8 +1139,8 @@ export const CAPABILITIES: Capability[] = [
     navTitle: "Get Found",
     title: "Get Found",
     story: [
-      "People cannot buy what they cannot find. Terramore gets the shop or the service live in more than one place, and the facts stay the same.",
-      "A second store. Google Maps. Your own search. The listing sites people already open. We put you there, then we keep names, hours, and products in sync.",
+      "People cannot buy what they cannot find. Terramore gets you into ChatGPT answers, Google Search, and Google Maps — then keeps the facts the same everywhere else buyers look.",
+      "Maps is still underused by most local businesses. We claim and clean the listing, strengthen search and AI discoverability, then keep names, hours, and products in sync across stores and listing sites.",
     ],
     offeringsTitle: "Our Discoverability Services",
     offerings: [

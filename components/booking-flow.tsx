@@ -470,7 +470,7 @@ export function BookingFlow({
         <div key="q-owner" className={stepPane}>
           <p className="text-[1.2rem] font-semibold tracking-tight text-ink">Are you a business owner?</p>
           <p className="mt-1 text-[14px] text-slate-500">So we know who we are talking with.</p>
-          <div className={`mt-4 grid gap-2 ${choiceGrid}`}>
+          <div className="mt-4 grid grid-cols-1 gap-2">
             {OWNER_OPTIONS.map((item) => (
               <button
                 key={item}

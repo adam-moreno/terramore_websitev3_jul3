@@ -137,7 +137,8 @@ export default function MarketingPage() {
           className="absolute inset-0 bg-gradient-to-r from-ink via-ink/85 to-ink/20 md:from-ink/95 md:via-ink/70 md:to-transparent"
         />
         <div aria-hidden className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-ink/50 to-transparent" />
-        <div className="page-shell relative flex min-h-[34rem] items-center py-20 md:min-h-[40rem] md:py-28">
+        {/* Shorter first viewport so the service rail peeks and invites the scroll. */}
+        <div className="page-shell relative flex min-h-[28rem] items-center py-16 md:min-h-[32rem] md:py-20">
           <div className="max-w-2xl [text-shadow:0_1px_18px_rgba(15,30,46,0.45)]">
             <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-gold-from">
               Marketing &amp; advertising for growing businesses
@@ -162,9 +163,18 @@ export default function MarketingPage() {
         </div>
       </section>
 
-      {/* SERVICE CAROUSEL — infinite marquee, right under the hero. Full-bleed. */}
-      <section className="overflow-hidden pb-14 md:pb-20" aria-label="What Terramore builds">
-        <ServiceCarousel />
+      {/* SERVICE CAROUSEL — continues the hero ink plane on desktop, then fades to cream. */}
+      <section
+        className="relative overflow-hidden bg-ink pb-14 pt-2 md:bg-transparent md:pb-20 md:pt-0"
+        aria-label="What Terramore builds"
+      >
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 hidden bg-gradient-to-b from-ink via-ink/90 to-cream md:block"
+        />
+        <div className="relative pt-4 md:pt-6">
+          <ServiceCarousel />
+        </div>
       </section>
 
       {/* AD FATIGUE — copy left, lifestyle photo right */}
@@ -198,22 +208,32 @@ export default function MarketingPage() {
         </div>
       </section>
 
-      {/* MID-PAGE CTA TILE */}
+      {/* MID-PAGE CTA — same photo-led treatment as the lower CreativeCtaCard */}
       <section className="page-shell pb-14 md:pb-20">
-        <div className="relative overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-ink to-[#1c3350] px-7 py-10 text-center shadow-[0_20px_60px_rgba(15,30,46,0.2)] sm:px-12 md:py-14">
-          {/* Soft brand glow accents */}
-          <span aria-hidden className="pointer-events-none absolute -left-20 -top-20 h-64 w-64 rounded-full bg-brand/25 blur-3xl" />
-          <span aria-hidden className="pointer-events-none absolute -bottom-24 -right-16 h-64 w-64 rounded-full bg-gold-from/20 blur-3xl" />
-          <div className="relative">
-            <h2 className="mx-auto max-w-2xl text-[1.6rem] font-bold leading-[1.15] tracking-[-0.02em] text-white md:text-[2.1rem]">
-              Never let a campaign go stale again.
+        <div className="relative overflow-hidden rounded-[1.75rem] shadow-[0_20px_60px_rgba(15,30,46,0.18)]">
+          <Image
+            src="/marketing/cta-pocket.png"
+            alt="Phone in a jean back pocket showing a mobile ad"
+            width={1600}
+            height={900}
+            className="absolute inset-0 h-full w-full object-cover object-[center_35%]"
+            sizes="(max-width: 896px) 100vw, 896px"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-ink/90 via-ink/60 to-ink/15" aria-hidden />
+          <div className="relative px-7 py-12 sm:px-12 sm:py-16 md:max-w-[36rem] md:py-20">
+            <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-gold-from">
+              Fresh campaigns fuel performance
+            </p>
+            <h2 className="mt-3 text-[1.7rem] font-bold leading-[1.12] tracking-[-0.02em] text-white md:text-[2.2rem]">
+              Get ads people actually stop for.
             </h2>
-            <p className="mx-auto mt-3 max-w-xl text-[15px] leading-relaxed text-white/70 md:text-[16px]">
-              See how Terramore keeps creative, campaigns, and follow-up fresh — live, on your own numbers.
+            <p className="mt-3 max-w-md text-[15px] leading-relaxed text-white/75">
+              Strategy, creative, and campaigns from one team — book a demo and see what that looks like for your
+              business.
             </p>
             <BookingLink
               source="marketing"
-              className="mt-7 inline-flex h-11 items-center justify-center rounded-full bg-white px-7 text-[15px] font-semibold text-ink transition hover:bg-white/90"
+              className="mt-7 inline-flex items-center rounded-full bg-white px-6 py-3 text-[14px] font-semibold text-ink transition hover:bg-white/90"
             >
               Book a demo
             </BookingLink>

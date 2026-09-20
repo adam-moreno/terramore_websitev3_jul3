@@ -32,8 +32,8 @@ const PROOF_CARDS = [
     kind: "quote" as const,
     eyebrow: "Market research",
     eyebrowColor: "text-brand",
-    body: "At Kantar, the job was reading who people are, what they watch, and what they actually buy, across digital and social platforms, for large brands.",
-    source: "Kantar",
+    body: "At Kantar, that meant brand reports across every social channel for large advertisers — who saw the work and whether it moved them. At Samba TV, TV and streaming ads tied to who watched and what they bought.",
+    source: "Kantar + Samba TV",
   },
   {
     kind: "stat" as const,
