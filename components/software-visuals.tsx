@@ -888,14 +888,16 @@ function ChannelDetail({ beat }: { beat: number }) {
   }
 
   if (beat === 1) {
+    // Compact stacked panels — no flex-1 image row, so Cart/Checkout never collide with the tee photo
+    // inside the fixed mobile detail height.
     return (
       <div className={`${TILE} software-story-pop flex h-full flex-col overflow-hidden p-2.5`}>
-        <p className="text-[12px] font-semibold text-brand">Order just in</p>
-        <p className="text-[15px] font-semibold tracking-tight text-ink">Navy tee · $86</p>
-        <p className="text-[12px] text-slate-500">Caught in Shopify and Stripe</p>
+        <p className="shrink-0 text-[12px] font-semibold text-brand">Order just in</p>
+        <p className="shrink-0 text-[15px] font-semibold tracking-tight text-ink">Navy tee · $86</p>
+        <p className="shrink-0 text-[12px] text-slate-500">Caught in Shopify and Stripe</p>
 
-        <div className="mt-2 flex min-h-0 flex-1 flex-col gap-1.5">
-          <div className="flex min-h-0 flex-1 flex-col rounded-2xl bg-[#f7f8fa] p-2 ring-1 ring-black/[0.05]">
+        <div className="mt-2 flex min-h-0 flex-1 flex-col justify-center gap-1.5">
+          <div className="shrink-0 rounded-2xl bg-[#f7f8fa] p-2 ring-1 ring-black/[0.05]">
             <div className="flex items-center gap-1.5">
               <div className="software-icon-tile flex h-7 w-7 items-center justify-center">
                 <BrandLogo slug="shopify" name="Shopify" size={14} />
@@ -903,24 +905,23 @@ function ChannelDetail({ beat }: { beat: number }) {
               <p className="text-[12px] font-semibold text-ink">Shopify</p>
               <p className="ml-auto text-[10px] font-medium text-slate-400">#1042</p>
             </div>
-            <div className="mt-2 flex min-h-0 flex-1 items-center gap-2">
+            <div className="mt-2 flex items-center gap-2">
               <img
                 src="https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&w=200&q=80"
                 alt="Navy tee"
-                className="h-11 w-11 shrink-0 rounded-xl object-cover ring-1 ring-black/5"
+                className="h-10 w-10 shrink-0 rounded-xl object-cover ring-1 ring-black/5"
               />
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <p className="text-[13px] font-semibold leading-tight text-ink">Navy tee</p>
-                <p className="text-[11px] text-slate-500">Qty 1 · $86</p>
+                <p className="text-[11px] leading-snug text-slate-500">Qty 1 · $86</p>
+                <p className="mt-0.5 text-[11px] font-medium leading-snug text-ink/70">
+                  Cart in · Checkout started
+                </p>
               </div>
-            </div>
-            <div className="mt-1 space-y-0.5">
-              <DataRow compact loud label="Cart" value="1 item in" />
-              <DataRow compact loud label="Checkout" value="Started" />
             </div>
           </div>
 
-          <div className="flex min-h-0 flex-1 flex-col rounded-2xl bg-[#ecfdf5] p-2 ring-1 ring-[#14804a]/12">
+          <div className="shrink-0 rounded-2xl bg-[#ecfdf5] p-2 ring-1 ring-[#14804a]/12">
             <div className="flex items-center gap-1.5">
               <div className="software-icon-tile flex h-7 w-7 items-center justify-center">
                 <BrandLogo slug="stripe" name="Stripe" size={14} />
@@ -928,10 +929,13 @@ function ChannelDetail({ beat }: { beat: number }) {
               <p className="text-[12px] font-semibold text-ink">Stripe</p>
               <p className="ml-auto text-[10px] font-semibold text-[#14804a]">Paid</p>
             </div>
-            <p className="mt-2 text-[22px] font-semibold tracking-tight text-ink">$86.00</p>
-            <div className="mt-auto space-y-0.5">
-              <DataRow compact loud label="Card" value="Visa · 4242" />
-              <DataRow compact loud label="Receipt" value="Sent" />
+            <div className="mt-1.5 flex items-end justify-between gap-2">
+              <p className="text-[20px] font-semibold tracking-tight text-ink md:text-[22px]">$86.00</p>
+              <p className="pb-0.5 text-right text-[11px] leading-snug text-slate-500">
+                Visa · 4242
+                <br />
+                Receipt sent
+              </p>
             </div>
           </div>
         </div>
@@ -1127,37 +1131,37 @@ export function ChannelValueVisual() {
           </div>
         </div>
 
-        <div className="h-[18rem] min-h-0 md:hidden">
+        <div className="h-[17.5rem] min-h-0 md:hidden">
           <ChannelDetail beat={active} />
         </div>
       </div>
 
-      <div className={`${TILE} mt-2 flex shrink-0 flex-wrap items-center justify-between gap-x-3 gap-y-1.5 px-3 py-2 md:flex-nowrap`}>
-        <div className="flex w-full min-w-0 gap-1 md:w-auto md:flex-1">
+      <div className={`${TILE} mt-2 flex shrink-0 flex-col gap-1.5 px-2.5 py-2 sm:px-3 md:flex-row md:flex-wrap md:items-center md:justify-between md:gap-x-3`}>
+        <div className="grid w-full min-w-0 grid-cols-4 gap-1 md:flex md:flex-1 md:gap-1">
           {MONEY_BEATS.map((item, index) => (
             <button
               key={item.id}
               type="button"
               onClick={() => holdBeat(index)}
               aria-pressed={index === active}
-              className={`min-w-0 flex-1 rounded-xl px-1.5 py-1 text-left transition ${
+              className={`min-w-0 rounded-xl px-1.5 py-1.5 text-left transition md:flex-1 md:py-1 ${
                 index === active ? "bg-[#eef3fb] ring-2 ring-inset ring-brand/40" : "opacity-50"
               }`}
             >
               <p
-                className={`truncate text-[10px] font-medium ${
+                className={`truncate text-[9px] font-medium sm:text-[10px] ${
                   index === active ? "text-brand" : "text-slate-400"
                 }`}
               >
                 {item.source}
               </p>
-              <p className="text-[12px] font-semibold tabular-nums text-ink">
+              <p className="truncate text-[11px] font-semibold tabular-nums text-ink sm:text-[12px]">
                 ${item.add.toLocaleString()}
               </p>
             </button>
           ))}
         </div>
-        <div className="flex w-full items-baseline justify-between border-t border-black/[0.05] pt-1.5 md:block md:w-[5.5rem] md:shrink-0 md:border-0 md:pt-0 md:text-right">
+        <div className="flex w-full items-baseline justify-between border-t border-black/[0.05] px-0.5 pt-1.5 md:block md:w-[5.5rem] md:shrink-0 md:border-0 md:px-0 md:pt-0 md:text-right">
           <p className="text-[10px] font-medium text-slate-400">Example</p>
           <p className="text-[13px] font-semibold tabular-nums text-[#14804a]">
             ${running.toLocaleString()}
