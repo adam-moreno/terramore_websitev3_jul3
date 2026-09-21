@@ -1,5 +1,9 @@
 # Development Log - Terramore Website
 
+## 2026-09-21 — Calendar-first `/schedule` for outbound booking
+
+Shareable calendar-first booking page for sales emails: `https://www.terramore.io/schedule`. Uses existing `BookingFlow` with `startAtSchedule` (same pattern as `/solutions`) — skips qualifier questions, opens on day/time, still collects details before confirm. Analytics `source="schedule"`. Also supports `/book?schedule=1`. Noindex on `/schedule`. Gateway proposal PDF stays local-only under `public/proposals/` (covered by `public/*` gitignore; not deployed).
+
 ## 2026-09-19 (afternoon) — Growth-system scroll tease + /marketing Superside-style hero
 
 ### Growth system tiles reveal on scroll (`GrowthSystemFlow`)

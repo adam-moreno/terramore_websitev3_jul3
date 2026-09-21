@@ -68,7 +68,14 @@ function BookCta({ className = "" }: { className?: string }) {
   )
 }
 
-export default function BookPage() {
+export default async function BookPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ schedule?: string }>
+}) {
+  const params = await searchParams
+  const startAtSchedule = params.schedule === "1" || params.schedule === "true"
+
   return (
     <div className="min-h-screen bg-cream">
       {/* HERO — centered editorial headline over the animated system deck.
@@ -287,7 +294,7 @@ export default function BookPage() {
           </p>
         </Reveal>
         <div className="mt-10 rounded-[1.75rem] bg-white p-5 shadow-[0_16px_50px_rgba(15,30,46,0.08)] md:p-9">
-          <BookingFlow source="book" />
+          <BookingFlow source="book" startAtSchedule={startAtSchedule} />
         </div>
       </section>
 
