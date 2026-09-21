@@ -7,6 +7,7 @@ import {
   GA4_MEASUREMENT_ID,
   GA4_MEASUREMENT_ID_LEGACY,
   GOOGLE_ADS_ID_DEFAULT,
+  GOOGLE_TAG_ID,
 } from '@/lib/analytics'
 
 // Vercel has the token under the misspelled name GOOGLE_SITE_VERIFICAITON; accept both so either works.
@@ -87,7 +88,7 @@ export default function RootLayout({
         {/* Google tag (gtag.js) — current GA4 + legacy GA4 + Ads config.
             Ads conversion event fires only after report success (see lib/analytics.ts).
             meeting_booked is GA4-only — no second Ads conversion. */}
-        <script async src={`https://www.googletagmanager.com/gtag/js?id=${GA4_MEASUREMENT_ID}`}></script>
+        <script async src={`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_TAG_ID}`}></script>
         <script
           dangerouslySetInnerHTML={{
             __html: `

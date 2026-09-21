@@ -8,6 +8,12 @@
  * No PII in event params. Helpers never throw if gtag is unavailable.
  */
 
+/**
+ * Canonical Google tag bootstrap ID for gtag/js loader only.
+ * Do not use this as a gtag('config') destination — destinations remain the G-/AW- IDs below.
+ */
+export const GOOGLE_TAG_ID = "GT-5TGBVFTR"
+
 /** Current GA4 property (Realtime / reporting). */
 export const GA4_MEASUREMENT_ID = "G-ZC5DY0ES7N"
 
