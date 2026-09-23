@@ -1,8 +1,28 @@
 # Development Log - Terramore Website
 
+## 2026-09-23 — `/schedule` share card (post-report booking)
+
+Dedicated OG/Twitter image for outbound calendar links: `/share/terramore-share-schedule-og.png`. Headline: “Book a call — you're one step away from changing your business.” Sub: free 30 minutes with Adam. Replaces sitewide Digital Footprint share card when the URL is `/schedule`. Metadata on `app/schedule/page.tsx` points at the new asset.
+
 ## 2026-09-21 — Calendar-first `/schedule` for outbound booking
 
 Shareable calendar-first booking page for sales emails: `https://www.terramore.io/schedule`. Uses existing `BookingFlow` with `startAtSchedule` (same pattern as `/solutions`) — skips qualifier questions, opens on day/time, still collects details before confirm. Analytics `source="schedule"`. Also supports `/book?schedule=1`. Noindex on `/schedule`. Gateway proposal PDF stays local-only under `public/proposals/` (covered by `public/*` gitignore; not deployed).
+
+## 2026-09-21 — Construction industry landing page (`/industries/construction`)
+
+New long-form landing for construction companies / GCs / remodelers. Structural/UX rhythm inspired by Blue Collar Marketing’s homepage (section sequence, image/text alternation, stage qualification, conversion cadence) rebuilt in Terramore tokens — not a brand/copy/price clone. Positioning: growth **system** around the construction business (projects → content → visibility → opportunities → follow-up → revenue), not contractor marketing packages.
+
+**Files:** `app/industries/construction/page.tsx`, `components/industries/construction-landing.tsx`; sitemap adds `/industries/construction`. CTAs: `BookingLink source="construction"` (“Let’s Talk” / growth plan / talk through business); `ReportPopupLink direct` for Digital Footprint. Footer DualCtas off. Tracking: no new gtag loader/events. Assets: hero video `public/industries/construction/hero-portrait.mp4` + poster (SAS Builds 0921); capability tiles reuse `/marketing/services/*` as illustrative. Case study is **In progress** — no fabricated metrics.
+
+**Mobile hero (later same day):** Pulls flush under sticky chrome with `-mt-24` + `min-h-[100svh]` so the next section does not peek. Copy (eyebrow / H1 / body / CTAs / capability line) pinned with `justify-end`; subtle bouncing chevron (`.construction-hero-scroll-hint`) anchors to `#construction-problem`. Problem section uses `pt-8` (~32px) so the title sits close after one swipe without a teaser strip.
+
+**Problem section + hero CTA (same day):** Five problem beats become a visual composition — phone beside an equal-structure list (cue + short title + one-line body). Hero secondary CTA is Digital Footprint. Locality stays inside one metro (timezone hint when IP fails).
+
+**Solution phone (same day):** Replaced 01–06 growth tiles with mirrored phone — proof published → cross-device ads (TV / laptop / phone / iPad) → Google with Your Company on top → estimate answered/booked → illustrative revenue. Metro names always wrap in full (no ellipsis). `construction-solution-phone.tsx`. Headline: “Same phone. Different ending.”
+
+## 2026-09-23 — Footer Explore aligned to header
+
+Footer Explore no longer lists Integrations / Pricing / Free report / Start here. It matches header nav: Marketing, Solutions, How we work (`/book`), plus Talk with us and Log in. Legal links unchanged.
 
 ## 2026-09-19 (afternoon) — Growth-system scroll tease + /marketing Superside-style hero
 
