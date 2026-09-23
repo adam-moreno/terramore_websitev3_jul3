@@ -2,7 +2,7 @@
 
 ## 2026-09-23 — `/schedule` share card (post-report booking)
 
-Dedicated OG/Twitter image for outbound calendar links: `/share/terramore-share-schedule-og.png`. Headline: “Book a call — you're one step away from changing your business.” Sub: free 30 minutes with Adam. Replaces sitewide Digital Footprint share card when the URL is `/schedule`. Metadata on `app/schedule/page.tsx` points at the new asset.
+Dedicated OG/Twitter image for outbound calendar links: `/share/terramore-share-schedule-og.png`. Headline (two lines): “The report showed the gaps,” / “this call closes them.” Sub: “Free 30 minutes to discuss how we can work together.” with gold underline on Free (same treatment as the sitewide Digital Footprint share card). Metadata on `app/schedule/page.tsx` points at the asset.
 
 ## 2026-09-21 — Calendar-first `/schedule` for outbound booking
 
