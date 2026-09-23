@@ -7,28 +7,28 @@ import { SiteFooter } from "@/components/site-footer"
 export const metadata: Metadata = {
   title: "Book a call | Terramore",
   description:
-    "The report showed the gaps. This call closes them. Free 30 minutes to discuss how we can work together.",
+    "The report showed the gaps, this call closes them. Free 30 minutes to discuss how we can work together.",
   alternates: { canonical: "https://www.terramore.io/schedule" },
   openGraph: {
     title: "Book a call | Terramore",
-    description: "The report showed the gaps. This call closes them. Free 30 minutes to discuss how we can work together.",
+    description: "The report showed the gaps, this call closes them. Free 30 minutes to discuss how we can work together.",
     url: "https://www.terramore.io/schedule",
     siteName: "Terramore.io",
     type: "website",
     images: [
       {
-        url: "/share/terramore-share-schedule-og.png?v=2",
+        url: "/share/terramore-share-schedule-og.png?v=3",
         width: 1200,
         height: 630,
-        alt: "The report showed the gaps. This call closes them.",
+        alt: "Book a call — you're one step away from changing your business.",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Book a call | Terramore",
-    description: "The report showed the gaps. This call closes them. Free 30 minutes to discuss how we can work together.",
-    images: ["/share/terramore-share-schedule-og.png?v=2"],
+    description: "The report showed the gaps, this call closes them. Free 30 minutes to discuss how we can work together.",
+    images: ["/share/terramore-share-schedule-og.png?v=3"],
   },
   robots: { index: false, follow: true },
 }
