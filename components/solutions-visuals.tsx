@@ -475,15 +475,15 @@ export function HeroWebsiteInput() {
           See my Digital Footprint
         </button>
       </form>
-      <p className="mt-3 text-[14px] text-ink/50">Free written report, in your inbox in minutes.</p>
-      <div className="mt-3">
+      <p className="mt-3 text-[14px] text-ink/50">
+        Free written report, in your inbox in minutes. Rather talk it through?{" "}
         <BookingLink
           source="solutions"
-          className="inline-flex h-11 items-center justify-center rounded-full border border-ink/15 bg-white px-5 text-[15px] font-medium text-ink hover:border-ink/30"
+          className="whitespace-nowrap font-medium text-brand underline-offset-4 hover:text-brand-hover hover:underline"
         >
-          Talk about growth
+          Book a call →
         </BookingLink>
-      </div>
+      </p>
       <ReportPopup open={open} onClose={() => setOpen(false)} website={website.trim() || undefined} direct />
     </div>
   )
