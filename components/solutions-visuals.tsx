@@ -25,11 +25,11 @@ import { ReportPopup } from "@/components/report-popup"
 /* ------------------------------------------------------------------ */
 
 const STAGES = [
-  { label: "Acquisition", note: "Get seen", chips: ["Google", "Meta", "TikTok", "Content", "Search"] },
-  { label: "Conversion", note: "Get chosen", chips: ["Website", "Landing pages", "Lead capture", "Offers"] },
-  { label: "Follow-up", note: "Stay in it", chips: ["CRM", "Email", "SMS", "Routing", "Automation"] },
-  { label: "Intelligence", note: "Know why", chips: ["Analytics", "Attribution", "Terra IQ", "Reporting"] },
-  { label: "Revenue", note: "The point", chips: ["Qualified pipeline", "Customers", "Growth"] },
+  { label: "Acquisition", note: "Get seen" },
+  { label: "Conversion", note: "Get chosen" },
+  { label: "Follow-up", note: "Stay in it" },
+  { label: "Intelligence", note: "Know why" },
+  { label: "Revenue", note: "The point" },
 ] as const
 
 /** Reveal-on-scroll: adds `data-on` once, so CSS can stagger children in. */
@@ -69,19 +69,12 @@ function StageItem({ stage, index }: { stage: (typeof STAGES)[number]; index: nu
   return (
     <li ref={ref} className="flex flex-col lg:flex-1 lg:flex-row">
       <div
-        className={`solutions-node-tease flex-1 rounded-2xl bg-white/[0.06] p-4 ring-1 ring-white/10 ${on ? "solutions-node-on" : ""}`}
+        className={`solutions-node-tease flex flex-1 items-baseline gap-3 rounded-2xl bg-white/[0.06] px-4 py-3 ring-1 ring-white/10 lg:block lg:p-4 ${on ? "solutions-node-on" : ""}`}
         style={{ transitionDelay: `${(index % 3) * 120}ms` }}
       >
         <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-gold">{`0${index + 1}`}</p>
-        <p className="mt-1 text-[17px] font-semibold tracking-tight text-cream">{stage.label}</p>
-        <p className="text-[12px] text-cream/55">{stage.note}</p>
-        <ul className="mt-3 flex flex-wrap gap-1.5">
-          {stage.chips.map((chip) => (
-            <li key={chip} className="rounded-full bg-white/[0.08] px-2.5 py-1 text-[11px] font-medium text-cream/80">
-              {chip}
-            </li>
-          ))}
-        </ul>
+        <p className="text-[17px] font-semibold tracking-tight text-cream lg:mt-1">{stage.label}</p>
+        <p className="ml-auto text-[13px] text-cream/55 lg:ml-0 lg:text-[12px]">{stage.note}</p>
       </div>
       {index < STAGES.length - 1 ? (
         <div
@@ -463,7 +456,7 @@ export function HeroWebsiteInput() {
             placeholder="Enter your website"
             autoComplete="url"
             inputMode="url"
-            className="h-12 w-full rounded-full border border-ink/10 bg-white px-5 text-[15px] text-ink placeholder:text-ink/40 shadow-[0_8px_30px_rgba(15,30,46,0.04)] outline-none focus:border-brand"
+            className="h-12 w-full rounded-full border border-ink/10 bg-white px-5 text-[16px] text-ink placeholder:text-ink/40 shadow-[0_8px_30px_rgba(15,30,46,0.04)] outline-none focus:border-brand"
           />
         </label>
         <button

@@ -56,17 +56,6 @@ const PROOF_NOTES = [
   },
 ] as const
 
-const CAPABILITY_SIGNAL = [
-  "Strategy",
-  "Google & Meta Ads",
-  "Content",
-  "Websites",
-  "CRM",
-  "Email & SMS",
-  "Automation",
-  "Analytics",
-] as const
-
 const RECOGNIZABLE_PROBLEMS = [
   "You're getting traffic, but not enough leads.",
   "You're getting leads, but follow-up is inconsistent.",
@@ -96,24 +85,12 @@ export default function SolutionsPage() {
               Marketing that connects all the way to <span className="text-gold">revenue.</span>
             </h1>
             <p className="mt-5 max-w-xl text-[17px] leading-relaxed text-slate-600 md:text-[18px]">
-              Terramore helps growing businesses find customers, convert more of them, and automate the follow-up —
-              across advertising, content, websites, CRM, email, SMS, automation, and analytics.
+              Terramore helps growing businesses find customers, convert more of them, and automate what happens next.
+              Then we show you what&apos;s actually driving revenue.
             </p>
             <div className="mt-8">
               <HeroWebsiteInput />
             </div>
-            <ul aria-label="What Terramore connects" className="mt-6 flex max-w-xl flex-wrap gap-x-2 gap-y-1.5 text-[12.5px] font-medium leading-snug text-ink/50">
-              {CAPABILITY_SIGNAL.map((item, index) => (
-                <li key={item} className="inline-flex items-center">
-                  {item}
-                  {index < CAPABILITY_SIGNAL.length - 1 ? (
-                    <span aria-hidden className="ml-2 text-ink/25">
-                      ·
-                    </span>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
           </div>
           {/* Decorative clock ring is desktop-only. */}
           <div className="hidden lg:block">
@@ -138,11 +115,6 @@ export default function SolutionsPage() {
         </div>
       </section>
 
-      {/* CAPABILITIES — all five groups visible at once. */}
-      <section className="page-shell pb-10 md:pb-14">
-        <CapabilityGrid />
-      </section>
-
       {/* THIS IS PROBABLY YOU — recognition moment, one compact card. */}
       <section className="page-shell pb-14 md:pb-20">
         <div className="grid gap-6 rounded-[1.75rem] border border-black/[0.06] bg-white p-6 shadow-[0_8px_30px_rgba(15,30,46,0.04)] md:grid-cols-[0.9fr_1.1fr] md:items-center md:gap-10 md:p-10">
@@ -161,6 +133,11 @@ export default function SolutionsPage() {
             ))}
           </ul>
         </div>
+      </section>
+
+      {/* CAPABILITIES — the one place the service details live. */}
+      <section className="page-shell pb-14 md:pb-20">
+        <CapabilityGrid />
       </section>
 
       {/* PROOF — two factual stats, then three short notes. */}
