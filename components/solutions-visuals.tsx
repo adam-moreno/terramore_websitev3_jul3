@@ -311,7 +311,8 @@ export function FunnelStory() {
           <div className="text-center">
             <p className="text-[15px] font-semibold text-slate-500">Disconnected marketing</p>
             <p className="mt-1.5 text-[14px] leading-relaxed text-slate-500">
-              Each channel optimized on its own. The funnel cracks, and nobody sees where it leaks.
+              Ads, website, CRM, follow-up, and reporting each run on their own. Leads leak at every hand-off, and
+              nobody can tie spend to customers.
             </p>
           </div>
           <div className="text-center">
@@ -474,13 +475,15 @@ export function HeroWebsiteInput() {
           See my Digital Footprint
         </button>
       </form>
-      <p className="mt-3 text-[14px] text-ink/50">
-        Free written report, in your inbox in minutes. Or{" "}
-        <BookingLink source="solutions" className="font-medium text-brand underline-offset-4 hover:text-brand-hover hover:underline">
-          let&apos;s talk
+      <p className="mt-3 text-[14px] text-ink/50">Free written report, in your inbox in minutes.</p>
+      <div className="mt-3">
+        <BookingLink
+          source="solutions"
+          className="inline-flex h-11 items-center justify-center rounded-full border border-ink/15 bg-white px-5 text-[15px] font-medium text-ink hover:border-ink/30"
+        >
+          Talk about growth
         </BookingLink>
-        .
-      </p>
+      </div>
       <ReportPopup open={open} onClose={() => setOpen(false)} website={website.trim() || undefined} direct />
     </div>
   )
@@ -674,103 +677,87 @@ export function HeroEngine({ compact = false }: { compact?: boolean }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* EngineExplorer: WebFX-style 3D funnel where each stage of the       */
-/* growth engine reveals the work inside it. Left: copy + website      */
-/* input. Right: stacked-cone funnel + detail panel for the active     */
-/* stage. Keyboard users get the stage buttons; the funnel mirrors.    */
+/* CapabilityGrid: the five capability groups, all visible at once so  */
+/* the actual services read as concrete work, not a framework to click */
+/* through. Mobile: two columns, the fifth group spans both.           */
+/* ------------------------------------------------------------------ */
 
-const ENGINE_STAGES = [
+const CAPABILITY_GROUPS = [
   {
     id: "strategy",
     title: "Strategy",
-    line: "Know what to fix before spending more to drive traffic.",
-    items: ["Positioning", "Offer strategy", "Audience", "Growth roadmap", "Acquisition planning"],
-    grad: ["#4d7fff", "#1e4ecc"],
+    line: "Know what to fix first.",
+    items: ["Positioning", "Offer", "Audience", "Growth roadmap"],
+    dot: "bg-brand",
   },
   {
     id: "acquisition",
     title: "Acquisition",
-    line: "Put the right message in front of the right people.",
-    items: ["Google Ads", "Meta Ads", "TikTok", "Content", "Search", "Demand generation"],
-    grad: ["#87a2ff", "#5272e0"],
+    line: "Reach the right buyers.",
+    items: ["Google Ads", "Meta", "TikTok", "Content", "Search"],
+    dot: "bg-[#6b8cff]",
   },
   {
     id: "conversion",
     title: "Conversion",
-    line: "Turn attention into conversations and opportunities.",
-    items: ["Websites", "Landing pages", "Lead capture", "Qualification", "Routing", "Booking"],
-    grad: ["#f9c463", "#d69518"],
+    line: "Turn visits into leads.",
+    items: ["Websites", "Landing pages", "Lead capture", "Offers"],
+    dot: "bg-[color:var(--gold-to)]",
   },
   {
     id: "automation",
     title: "Automation",
-    line: "Make follow-up happen without your team doing everything by hand.",
-    items: ["CRM workflows", "Email", "SMS", "Lead nurture", "Routing", "AI-assisted workflows"],
-    grad: ["#22375a", "#0a1624"],
+    line: "Follow up without the busywork.",
+    items: ["CRM", "Email", "SMS", "Lead routing", "Follow-up"],
+    dot: "bg-ink",
   },
   {
     id: "intelligence",
     title: "Intelligence",
-    line: "Know what's working, where you lose opportunities, and what to do next.",
-    items: ["Analytics", "Attribution", "Reporting", "Terra IQ", "Customer journey data"],
-    grad: ["#2a66ff", "#173a8f"],
+    line: "See what drives revenue.",
+    items: ["Analytics", "Attribution", "TerraIQ", "Reporting"],
+    dot: "bg-brand",
   },
 ] as const
 
-export function EngineExplorer() {
-  const [active, setActive] = useState(0)
-  const stage = ENGINE_STAGES[active]
-
+export function CapabilityGrid() {
   return (
-    <div className="grid items-start gap-10 lg:grid-cols-[1fr_1.1fr] lg:gap-14">
-      {/* Left: copy + website input, mirroring the hero infrastructure. */}
-      <div>
-        <p className="section-eyebrow">How Terramore connects growth</p>
-        <h2 className="mt-3 max-w-lg text-[1.8rem] font-bold leading-[1.1] tracking-[-0.02em] text-ink md:text-[2.5rem]">
-          See how each piece of the engine <span className="text-gold">grows your business.</span>
-        </h2>
-        <p className="mt-4 max-w-md text-[16px] leading-relaxed text-slate-600">
-          Connected strategies work together to drive revenue, and Terra IQ makes it all attributable. Pick a stage to
-          see the work inside it.
-        </p>
-        <div className="mt-7">
-          <HeroWebsiteInput />
-        </div>
-      </div>
-
-      {/* Right: stage bubbles + active-stage detail (funnel removed). */}
-      <div>
-        <div className="flex flex-wrap gap-2" role="tablist" aria-label="Growth engine stages">
-            {ENGINE_STAGES.map((item, index) => (
-              <button
-                key={item.id}
-                type="button"
-                role="tab"
-                aria-selected={active === index}
-                onClick={() => setActive(index)}
-                className={`rounded-full px-3 py-1.5 text-[13px] font-medium transition ${
-                  active === index
-                    ? "bg-brand text-white"
-                    : "bg-white text-ink/70 shadow-[0_2px_10px_rgba(15,30,46,0.06)] ring-1 ring-ink/[0.08] hover:text-ink"
-                }`}
-              >
-                {item.title}
-              </button>
-            ))}
-        </div>
-        <div key={stage.id} className="mt-5 animate-fade-in rounded-[1.5rem] border border-black/[0.06] bg-white p-6 shadow-[0_8px_30px_rgba(15,30,46,0.04)] md:p-7">
-          <h3 className="text-[1.25rem] font-semibold tracking-tight text-ink">{stage.title}</h3>
-          <p className="mt-1.5 text-[15px] leading-relaxed text-slate-600">{stage.line}</p>
-          <ul className="mt-4 space-y-2">
-            {stage.items.map((item) => (
-              <li key={item} className="flex items-center gap-2 text-[14px] font-medium text-ink/80">
-                <ArrowRight className="h-3.5 w-3.5 text-brand" strokeWidth={2} aria-hidden />
-                {item}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
+    <div>
+      <p className="section-eyebrow text-center">Capabilities</p>
+      <h2 className="mx-auto mt-3 max-w-2xl text-center text-[1.8rem] font-bold leading-[1.1] tracking-[-0.02em] text-ink md:text-[2.5rem]">
+        What we can do <span className="text-gold">across the system.</span>
+      </h2>
+      <p className="mx-auto mt-4 max-w-xl text-center text-[16px] leading-relaxed text-slate-600">
+        The work we plan, build, and run for you, inside your own accounts.
+      </p>
+      <ul className="mt-8 grid grid-cols-2 gap-3 md:mt-10 lg:grid-cols-5 lg:gap-4">
+        {CAPABILITY_GROUPS.map((group, index) => (
+          <li
+            key={group.id}
+            className={`rounded-[1.25rem] border border-black/[0.06] bg-white p-4 shadow-[0_8px_30px_rgba(15,30,46,0.04)] md:p-5 ${
+              index === CAPABILITY_GROUPS.length - 1 ? "col-span-2 lg:col-span-1" : ""
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <span aria-hidden className={`h-2 w-2 rounded-full ${group.dot}`} />
+              <h3 className="text-[16px] font-semibold tracking-tight text-ink">{group.title}</h3>
+            </div>
+            <p className="mt-1 text-[13px] leading-snug text-slate-500">{group.line}</p>
+            <ul
+              className={`mt-3 gap-y-1.5 ${
+                index === CAPABILITY_GROUPS.length - 1 ? "grid grid-cols-2 gap-x-3 lg:grid-cols-1" : "grid"
+              }`}
+            >
+              {group.items.map((item) => (
+                <li key={item} className="flex items-center gap-1.5 text-[14px] font-medium text-ink/80">
+                  <ArrowRight className="h-3.5 w-3.5 shrink-0 text-brand" strokeWidth={2} aria-hidden />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }
