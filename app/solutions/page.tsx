@@ -3,9 +3,7 @@ import Link from "next/link"
 import { SiteFooter } from "@/components/site-footer"
 import { Check } from "lucide-react"
 import { BookingFlow } from "@/components/booking-flow"
-import { BookingLink } from "@/components/booking-popup"
-import { ReportPopupLink } from "@/components/report-popup"
-import { CapabilityGrid, FunnelStory, GrowthSystemFlow, HeroEngine } from "@/components/solutions-visuals"
+import { CapabilityGrid, FunnelStory, GrowthSystemFlow, HeroEngine, HeroWebsiteInput } from "@/components/solutions-visuals"
 
 export const metadata: Metadata = {
   title: "Solutions | Terramore",
@@ -89,7 +87,7 @@ const REPORT_SIGNALS = [
 export default function SolutionsPage() {
   return (
     <div className="min-h-screen bg-cream">
-      {/* HERO — headline, copy, CTAs left; growth engine right (desktop only) */}
+      {/* HERO — headline, copy, website input left; growth engine right (desktop only) */}
       <section className="page-shell pb-14 pt-8 md:pb-20 md:pt-14">
         <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14">
           <div>
@@ -101,21 +99,9 @@ export default function SolutionsPage() {
               Terramore helps growing businesses find customers, convert more of them, and automate the follow-up —
               across advertising, content, websites, CRM, email, SMS, automation, and analytics.
             </p>
-            <div className="mt-8 flex max-w-xl flex-col gap-3 sm:flex-row sm:items-center">
-              <ReportPopupLink
-                direct
-                className="inline-flex h-12 items-center justify-center rounded-full bg-gradient-to-b from-[var(--gold-from)] to-[var(--gold-to)] px-6 text-[15px] font-semibold text-white shadow-[0_10px_24px_-12px_rgba(198,136,9,0.6)] transition hover:brightness-[0.97]"
-              >
-                See my Digital Footprint
-              </ReportPopupLink>
-              <BookingLink
-                source="solutions"
-                className="inline-flex h-12 items-center justify-center rounded-full border border-ink/15 bg-white px-6 text-[15px] font-medium text-ink hover:border-ink/30"
-              >
-                Talk about growth
-              </BookingLink>
+            <div className="mt-8">
+              <HeroWebsiteInput />
             </div>
-            <p className="mt-3 text-[14px] text-ink/50">Free written report, in your inbox in minutes.</p>
             <ul aria-label="What Terramore connects" className="mt-6 flex max-w-xl flex-wrap gap-x-2 gap-y-1.5 text-[12.5px] font-medium leading-snug text-ink/50">
               {CAPABILITY_SIGNAL.map((item, index) => (
                 <li key={item} className="inline-flex items-center">
