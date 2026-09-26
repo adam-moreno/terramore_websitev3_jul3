@@ -10,6 +10,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '',
     '/about',
     '/marketing',
+    '/industries/construction',
     '/solutions',
     '/book',
     '/resources',

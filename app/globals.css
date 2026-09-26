@@ -152,6 +152,175 @@
   animation: marketing-motion-bounce-kf 2.6s ease-in-out infinite;
 }
 
+@keyframes construction-hero-scroll-hint-kf {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.45;
+  }
+  50% {
+    transform: translateY(6px);
+    opacity: 0.9;
+  }
+}
+
+.construction-hero-scroll-hint {
+  animation: construction-hero-scroll-hint-kf 2.2s ease-in-out infinite;
+}
+
+/* Problem-phone: camera-roll vertical scroll (duplicated strip → -50%) */
+@keyframes construction-roll-scroll-kf {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-50%);
+  }
+}
+
+.construction-roll-scroll {
+  animation: construction-roll-scroll-kf 14s linear infinite;
+  will-change: transform;
+}
+
+@keyframes construction-call-ring-kf {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.7;
+  }
+  70% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+}
+
+.construction-call-ring {
+  animation: construction-call-ring-kf 1.4s ease-out infinite;
+}
+
+.construction-call-ring-delay {
+  animation: construction-call-ring-kf 1.4s ease-out 0.45s infinite;
+}
+
+@keyframes construction-vm-bar-kf {
+  0%,
+  100% {
+    transform: scaleY(0.55);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+.construction-vm-bar {
+  transform-origin: center bottom;
+  animation: construction-vm-bar-kf 0.9s ease-in-out infinite;
+}
+
+@keyframes construction-missed-pop-kf {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.construction-missed-pop {
+  animation: construction-missed-pop-kf 0.45s ease-out both;
+}
+
+@keyframes construction-search-caret-kf {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.construction-search-caret {
+  animation: construction-search-caret-kf 0.9s step-end infinite;
+}
+
+@keyframes construction-serp-row-kf {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.construction-serp-row {
+  animation: construction-serp-row-kf 0.4s ease-out both;
+}
+
+.construction-serp-row:nth-child(2) {
+  animation-delay: 0.12s;
+}
+
+.construction-serp-row:nth-child(3) {
+  animation-delay: 0.24s;
+}
+
+@keyframes construction-revenue-bar-kf {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.construction-revenue-bar {
+  transform-origin: left center;
+  animation: construction-revenue-bar-kf 1.1s ease-out both;
+}
+
+@keyframes construction-device-card-kf {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.construction-device-card {
+  animation: construction-device-card-kf 0.45s ease-out both;
+}
+
+@keyframes construction-device-pulse-kf {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+.construction-device-pulse {
+  animation: construction-device-pulse-kf 1.4s ease-in-out infinite;
+}
+
 @keyframes marketing-motion-pulse-kf {
   0%,
   100% {
@@ -456,6 +625,17 @@
   .marketing-playhead,
   .marketing-motion-spin,
   .marketing-motion-bounce,
+  .construction-hero-scroll-hint,
+  .construction-roll-scroll,
+  .construction-call-ring,
+  .construction-call-ring-delay,
+  .construction-vm-bar,
+  .construction-missed-pop,
+  .construction-search-caret,
+  .construction-serp-row,
+  .construction-revenue-bar,
+  .construction-device-card,
+  .construction-device-pulse,
   .marketing-motion-pulse,
   .marketing-lang-a,
   .marketing-lang-b,
@@ -468,6 +648,25 @@
   .marketing-dragon-bob,
   .marketing-chase-run {
     animation: none;
+  }
+
+  .construction-missed-pop {
+    opacity: 1;
+    transform: none;
+  }
+
+  .construction-serp-row {
+    opacity: 1;
+    transform: none;
+  }
+
+  .construction-revenue-bar {
+    transform: none;
+  }
+
+  .construction-device-card {
+    opacity: 1;
+    transform: none;
   }
 
   .marketing-dragon-fly,

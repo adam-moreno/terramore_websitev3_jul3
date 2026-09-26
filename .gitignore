@@ -109,7 +109,8 @@ public/*
 !public/vlair/
 !public/share/
 !public/report/
-
+!public/industries/
+!public/industries/**
 # Storybook build outputs
 .out
 .storybook-out
