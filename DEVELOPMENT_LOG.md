@@ -1,6 +1,14 @@
 # Development Log - Terramore Website
 
-## 2026-09-26 (late) — /industries/construction paid-search readiness pass (local, not committed)
+## 2026-09-26 (night) — /industries/construction: capabilities bento, Proof, and Fit sections removed (local, not committed)
+
+- Removed the "Everything between doing great work and getting the next customer." section: heading, subline, and the six image tiles (content/media, search, paid, landing pages, CRM, reporting). The unused `CapabilityTile` helper went with it, and the section comments were renumbered.
+- Why: the solution phone and fixes list already cover the same capabilities in construction terms, and the Growth stages cards list the concrete services. The bento repeated both with generic marketing imagery.
+- Also removed, at the user's request: the Proof section ("Built around how construction actually gets sold.": case-study image card with Featured engagement / Challenge / What Terramore is building / Objective, plus the "Engagement in progress…" footnote) and the Fit section ("This is probably for you if…" list and the "Probably not if…" box). The `FIT` constant and the `next/image` import went with them (no other users in the file). Final CTA comment renumbered to 06.
+- The page now has no proof/case-study section. `public/industries/construction/case-study.jpg` is no longer referenced by this page but was left in place.
+- Flow now: Hero → Problem → What Terramore changes → How it works → Growth stages → Final CTA. Backgrounds still alternate: How it works (cream) → Growth stages (white) → Final CTA (page cream). No CTAs, tracking, or shared components touched.
+
+## 2026-09-26 (late) — /industries/construction paid-search readiness pass (shipped in d1f2c33)
 
 A tightening pass, not a redesign. Files: `app/industries/construction/page.tsx`, `components/industries/construction-landing.tsx`, `components/industries/construction-solution-phone.tsx`, `components/report-popup.tsx`.
 

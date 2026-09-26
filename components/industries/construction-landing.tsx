@@ -1,4 +1,3 @@
-import Image from "next/image"
 import type { ReactNode } from "react"
 import { BookingLink } from "@/components/booking-popup"
 import { ReportPopupLink } from "@/components/report-popup"
@@ -149,14 +148,6 @@ const PROCESS = [
     title: "Improve",
     body: "We watch which inquiries turn into estimates and projects, and adjust around actual performance.",
   },
-] as const
-
-const FIT = [
-  "You're a general contractor, remodeler, builder, or specialty contractor doing work worth showing.",
-  "Referrals bring in work, but you want a second, steadier source of projects.",
-  "You're growing into a new service, territory, or project type.",
-  "Marketing feels fragmented: a website here, an agency there, nothing connected.",
-  "You're willing to invest in building something that compounds.",
 ] as const
 
 function TalkCta({
@@ -363,75 +354,7 @@ export function ConstructionLanding() {
         </div>
       </section>
 
-      {/* 05 — WHAT TERRAMORE CAN IMPLEMENT (capabilities bento) */}
-      <section className="page-shell py-16 md:py-24">
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-[1.7rem] font-bold leading-[1.15] tracking-[-0.02em] text-ink md:text-[2.4rem]">
-            Everything between doing great work and getting the next customer.
-          </h2>
-          <p className="mt-4 text-[15px] leading-relaxed text-slate-600 md:text-[16px]">
-            Each piece connects, so attention turns into inquiries, estimates, and booked projects.
-          </p>
-        </div>
-
-        <div className="mx-auto mt-12 grid max-w-5xl grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:auto-rows-[13.5rem]">
-          {/* Large tile */}
-          <div className="group relative min-h-[18rem] overflow-hidden rounded-[1.5rem] sm:col-span-2 lg:col-span-2 lg:row-span-2 lg:min-h-0">
-            <Image
-              src="/marketing/services/creative.png"
-              alt="Creative wall of project and campaign concepts — illustrative of project media production"
-              width={1024}
-              height={768}
-              className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
-              sizes="(max-width: 1024px) 100vw, 66vw"
-            />
-            <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-ink via-ink/55 to-transparent" />
-            <div className="absolute bottom-5 left-5 right-5 [text-shadow:0_1px_12px_rgba(15,30,46,0.65)]">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/90">
-                Content &amp; project media
-              </p>
-              <p className="mt-2 max-w-md text-[15px] font-medium leading-snug text-white md:text-[16px]">
-                Turn active jobs and completed projects into photography, video, case studies, ads, and content that
-                prove the quality of your work.
-              </p>
-            </div>
-          </div>
-
-          <CapabilityTile
-            image="/marketing/services/strategy.png"
-            alt="Strategic planning workspace — illustrative of positioning and local visibility planning"
-            label="Search & local visibility"
-            body="Show up in Google, Maps, and reviews when homeowners look for the work you do."
-          />
-          <CapabilityTile
-            image="/marketing/services/paid.png"
-            alt="Media-buying workstation reviewing campaign performance — illustrative"
-            label="Paid acquisition"
-            body="Google Ads and paid social that reach homeowners who are ready to hire."
-          />
-          <CapabilityTile
-            image="/marketing/services/landing.png"
-            alt="Landing page shown on desktop and mobile — illustrative"
-            label="Website & landing pages"
-            body="Project and service pages that turn research into estimate requests."
-          />
-          <CapabilityTile
-            image="/marketing/services/email.png"
-            alt="Phone and laptop showing follow-up messages — illustrative"
-            label="CRM & follow-up"
-            body="Route calls and inquiries, respond faster, and keep follow-up out of someone's phone."
-          />
-          <CapabilityTile
-            image="/marketing/services/analytics.png"
-            alt="Analytics interface tracing paths from attention to opportunity — illustrative"
-            label="Strategy & reporting"
-            body="See which channels produce inquiries, estimates, and booked projects."
-            className="sm:col-span-2 lg:col-span-1"
-          />
-        </div>
-      </section>
-
-      {/* 06 — GROWTH STAGES */}
+      {/* 05 — GROWTH STAGES */}
       <section className="bg-white py-16 md:py-24">
         <div className="page-shell">
           <div className="mx-auto max-w-2xl text-center">
@@ -489,86 +412,7 @@ export function ConstructionLanding() {
         </div>
       </section>
 
-      {/* 07 — PROOF (engagement in progress; client identity and results pending approval) */}
-      <section className="page-shell py-16 md:py-24">
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-[1.7rem] font-bold leading-[1.15] tracking-[-0.02em] text-ink md:text-[2.4rem]">
-            Built around how construction actually gets sold.
-          </h2>
-        </div>
-
-        <div className="mx-auto mt-12 grid max-w-5xl overflow-hidden rounded-[1.75rem] border border-black/[0.06] bg-white shadow-[0_20px_50px_-28px_rgba(15,23,42,0.22)] lg:grid-cols-[1.15fr_0.85fr]">
-          <div className="relative min-h-[16rem] lg:min-h-[22rem]">
-            <Image
-              src="/industries/construction/case-study.jpg"
-              alt="Illustrative residential construction project"
-              width={1536}
-              height={1024}
-              className="absolute inset-0 h-full w-full object-cover"
-              sizes="(max-width: 1024px) 100vw, 55vw"
-            />
-          </div>
-          <div className="flex flex-col justify-center p-7 md:p-9">
-            <div className="flex flex-wrap items-center gap-2">
-              <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-ink/40">Featured engagement</p>
-              <span className="rounded-full bg-gold-from/15 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-gold-to">
-                In progress
-              </span>
-            </div>
-            <h3 className="mt-3 text-[1.35rem] font-bold tracking-tight text-ink">Construction growth system</h3>
-            <div className="mt-6 space-y-4">
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink/40">Challenge</p>
-                <p className="mt-1.5 text-[14px] leading-relaxed text-slate-600">
-                  Referral-driven business with limited digital acquisition infrastructure.
-                </p>
-              </div>
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink/40">What Terramore is building</p>
-                <p className="mt-1.5 text-[14px] leading-relaxed text-slate-600">
-                  Content system · Project documentation · Search visibility · Paid acquisition · Conversion path ·
-                  Follow-up infrastructure
-                </p>
-              </div>
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink/40">Objective</p>
-                <p className="mt-1.5 text-[14px] leading-relaxed text-slate-600">
-                  Turn existing reputation and project quality into a steady flow of qualified inquiries and estimates.
-                </p>
-              </div>
-            </div>
-            <p className="mt-6 text-[12px] leading-relaxed text-slate-400">
-              Engagement in progress. Results will be published once they&apos;re measured and approved by the client.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* 08 — WHO IT'S FOR */}
-      <section className="bg-ink py-16 text-cream md:py-20">
-        <div className="page-shell mx-auto max-w-3xl">
-          <h2 className="text-[1.7rem] font-bold leading-[1.15] tracking-[-0.02em] md:text-[2.2rem]">
-            This is probably for you if…
-          </h2>
-          <ul className="mt-8 space-y-3">
-            {FIT.map((line) => (
-              <li key={line} className="flex gap-3 text-[15px] leading-relaxed text-cream/85 md:text-[16px]">
-                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-gold-from" aria-hidden />
-                {line}
-              </li>
-            ))}
-          </ul>
-
-          <div className="mt-10 rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-5 sm:px-6">
-            <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-cream/45">Probably not if…</p>
-            <p className="mt-2 text-[15px] leading-relaxed text-cream/70">
-              You&apos;re looking for 100 cheap leads next week.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* 09 — FINAL CTA */}
+      {/* 06 — FINAL CTA */}
       <section className="page-shell py-20 text-center md:py-28">
         <h2 className="mx-auto max-w-2xl text-[1.8rem] font-bold leading-[1.12] tracking-[-0.02em] text-ink md:text-[2.6rem]">
           Let&apos;s find the biggest growth opportunity in your construction business.
@@ -589,37 +433,5 @@ export function ConstructionLanding() {
         </div>
       </section>
     </>
-  )
-}
-
-function CapabilityTile({
-  image,
-  alt,
-  label,
-  body,
-  className = "",
-}: {
-  image: string
-  alt: string
-  label: string
-  body: string
-  className?: string
-}) {
-  return (
-    <div className={`group relative h-56 overflow-hidden rounded-[1.5rem] lg:h-auto ${className}`}>
-      <Image
-        src={image}
-        alt={alt}
-        width={1024}
-        height={768}
-        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.05]"
-        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-      />
-      <div aria-hidden className="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-ink via-ink/70 to-transparent" />
-      <div className="absolute bottom-4 left-5 right-5 [text-shadow:0_1px_12px_rgba(15,30,46,0.65)]">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white">{label}</p>
-        <p className="mt-1 text-[13px] font-medium leading-snug text-white/95">{body}</p>
-      </div>
-    </div>
   )
 }
