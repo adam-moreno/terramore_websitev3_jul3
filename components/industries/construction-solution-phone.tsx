@@ -35,8 +35,8 @@ const ORDER: Scene[] = ["publish", "devices", "rank", "booked", "revenue"]
 const DEFAULT_METRO = "Los Angeles"
 
 /**
- * Solution-section phone: proof published → same household across TV / laptop /
- * phone / iPad → you rank locally → estimate booked → revenue.
+ * Solution-section phone: proof published → stay visible to the same household across
+ * TV / laptop / phone / iPad while they decide → you rank locally → estimate booked → revenue.
  * Metro names always render in full (no CSS ellipsis on place names).
  */
 export function ConstructionSolutionPhone() {
@@ -149,7 +149,7 @@ function DevicesScene({ metro, animate }: { metro: string; animate: boolean }) {
     <div className="absolute inset-0 z-10 flex flex-col bg-ink px-3 pt-3 text-cream">
       <div className="shrink-0">
         <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-gold-from">
-          Cross-device
+          Staying visible
         </p>
         <p className="mt-1.5 text-[14px] font-semibold tracking-tight leading-snug">
           One homeowner in {metro}
@@ -193,7 +193,7 @@ function DevicesScene({ metro, animate }: { metro: string; animate: boolean }) {
       </div>
 
       <p className="shrink-0 pb-7 pt-2 text-center text-[10px] font-medium leading-snug text-cream/50">
-        Tracked across every screen in {metro}.
+        Still in front of them while they decide.
       </p>
     </div>
   )
@@ -345,8 +345,8 @@ function RevenueScene({ metro }: { metro: string }) {
       </div>
 
       <p className="mt-auto pb-8 text-center text-[11px] font-medium text-cream/50">
-        Proof → screens → booked → revenue.
-        <span className="mt-0.5 block text-cream/30">Illustrative pipeline</span>
+        Proof → visibility → booked → revenue.
+        <span className="mt-0.5 block text-cream/50">Illustrative example</span>
       </p>
     </div>
   )

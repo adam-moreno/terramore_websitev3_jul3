@@ -1,5 +1,58 @@
 # Development Log - Terramore Website
 
+## 2026-09-26 (late) — /industries/construction paid-search readiness pass (local, not committed)
+
+A tightening pass, not a redesign. Files: `app/industries/construction/page.tsx`, `components/industries/construction-landing.tsx`, `components/industries/construction-solution-phone.tsx`, `components/report-popup.tsx`.
+
+- **Mobile hero CTAs were not tappable in prod.** The mobile notification overlay (`absolute inset-0 z-[15]`) sat above both hero buttons and caught every tap. Fix: `pointer-events-none` on that wrapper. The notifications are decorative and their inner layer already had it.
+- **Mobile secondary CTA styling:** the hero's `CTA_SECONDARY` + override string had conflicting utilities (`bg-white/80 text-ink` beat `bg-white/10 text-cream` in CSS order), so on mobile Let's Talk rendered as an opaque gray pill instead of the intended glass button. Now an explicit class string: glass on mobile, white outline on desktop. `CTA_SECONDARY` removed (no other users).
+- **Verification:** every `ReportPopup`/`ReportPopupLink` caller renders its popup as before in dev: homepage, /pricing, and /report (redirect mode, two questions); /solutions (direct, website prefill), /book, and /marketing (direct). No dev-overlay issues on any of them. A hydration warning seen once was caused by the in-IDE browser snapshot injecting `data-cursor-ref` before hydration; a script-driven reload shows none. TypeScript: 16 errors before and after (booking/ui files only), 0 new. Lint: one `exhaustive-deps` warning in `report-popup.tsx`, identical on HEAD.
+- **CTA hierarchy:** the Digital Footprint report is now primary (hero + final CTA) and Let's Talk is secondary. The hero capability strip became "Free report: how homeowners find, evaluate, and contact your business." The Process-section "Talk Through Your Business" CTA was removed; the one mid-page CTA left is "Build My Growth Plan".
+- **Flow:** Problem → What Terramore changes → How it works (Process moved up) → Capabilities → Growth stages → Proof → Who it's for → Final CTA.
+- **Consolidation:** the standalone Expertise section (three insights) was folded in. "Not the same as ecommerce / high-ticket trust" became the Process intro. "Speed matters" was already in fix 04, and "work is your best asset" is the hero and fix 01. The case-study strip of four generic marketing images was removed (two duplicated the bento).
+- **"One customer. Every device." → "Stay in front of serious prospects."** Homeowners research, compare bids, and return. The solution-phone scene now reads "Staying visible"; the cross-device visual stays as supporting evidence. "Tracked across every screen" became "Still in front of them while they decide". The revenue scene label reads "Illustrative example" at higher contrast.
+- **Honesty cleanups:** image alt text no longer says "placeholder — replace…". The internal-sounding "No fabricated results…" line now reads "Engagement in progress. Results will be published once they're measured and approved by the client." TODO comments removed; the client name is still pending approval.
+- **Report popup:** optional `description` prop (display only) so construction says "See how homeowners find, evaluate, and contact your business." Default copy is unchanged for /book and /solutions. "Taking you home in a moment…" now shows only in non-direct mode; direct mode never redirected, so that line was wrong there.
+- **Metadata:** title "Contractor & Construction Marketing | Terramore", a GC/remodeler/builder description, page keywords (root keywords said "ecommerce"), and explicit OG image + Twitter tags. The page `openGraph` override had been dropping the root OG image, and Twitter showed the homepage title.
+- **Not changed:** tracking, conversion events, attribution code, the report API, booking backend, and structured data. Only the sitewide `WebSite` JSON-LD exists, with no per-page pattern, so nothing was added.
+- **Attribution (by code on HEAD + browser check):** `GoogleAnalytics` in the root layout stores gclid/gbraid/wbraid/utm_* in sessionStorage `tm_report_attribution` on landing. Report path: the popup stays on the ad URL, and `ReportForm.readAttribution()` reads URL → storage and posts `attribution`. Booking path: `BookingFlow` posts `mergedAttribution()` with `source: "construction"`. Known edge (pre-existing, fixed in the uncommitted attribution-merge work): HEAD's report form overwrites storage with URL keys only when the URL has some keys.
+
+## 2026-09-26 — /industries/construction shipped (17625f5)
+
+Pushed only the construction files: the page, the `components/industries/*` phones/video/notifications, `/api/construction-locality` + `lib/construction-locality.ts`, the `public/industries/**` assets (with the `.gitignore` whitelist), the construction keyframes in `globals.css`, and the sitemap entry. The live footer already supports `tagline`/`showDualCtas`.
+
+Pre-push fix: the case-study image pointed at `/hero/verticals/vertical-construction.png`, which is git-ignored (`public/*`) and 404s on prod. I saved a compressed copy as `/industries/construction/case-study.jpg` (2.2 MB PNG → 345 KB JPG) and repointed the image. `components/hero-verticals.tsx` still references the ignored PNG; that's pre-existing and out of scope.
+
+Live checks: the page, assets, and API return 200; the API uses real Vercel geo in prod (`source: "geo"`); the sitemap lists the page. Still local only: the attribution/report Slack work and the footer Explore trim.
+
+## 2026-09-25 (late) — /solutions paid-search readability pass (shipped 5b4170d)
+
+Goal: less repetition before Google Search traffic. Service details now live only in Capabilities.
+- **Hero copy:** "Terramore helps growing businesses find customers, convert more of them, and automate what happens next. Then we show you what's actually driving revenue." The hero capability strip (`CAPABILITY_SIGNAL`) was removed. The website input stays; its font went from 15px to 16px so iOS Safari doesn't zoom on focus.
+- **Growth System (`GrowthSystemFlow`):** removed the tool/platform chips (`STAGES.chips`). Mobile stages are compact rows (number · label · note right-aligned, `py-3`); desktop keeps the five-across cards with number/label/note.
+- **Order:** the recognition block ("You probably don't need more marketing…") now comes before Capabilities, so visitors recognize their situation before seeing the service detail.
+- Verified on a production build (`next start`): no overflow at 390px, CLS 0, no page JS errors, every linked route returns 200, the hero input prefills the report popup, booking opens, and the final calendar loads. The homepage, /marketing, booking, report, and tracking files are untouched by this pass.
+
+## 2026-09-25 — /solutions P2.1 paid-search landing (shipped)
+
+Audit found P2.1 partially present (uncommitted): headline, capability signal, three-pillars removal, five capability groups, report framing, final booking were in; hero input, tabbed capabilities, missing recognition moment, duplicate proof card, and a report section that said the same thing three times were not. Only `app/solutions/page.tsx` and `components/solutions-visuals.tsx` changed and shipped.
+
+- **Hero:** briefly shipped as two plain buttons (54549c0), then reverted at the user's request (ae3d372). The hero again uses `HeroWebsiteInput`: visitors type their website first, and "See my Digital Footprint" opens the report popup with that URL prefilled. That's an easier entry than opening the popup and typing it there. The standalone "Talk about growth" button looked orphaned under the helper line, so it became an inline link finishing that sentence (cd71760): "Free written report, in your inbox in minutes. Rather talk it through? Book a call →". It's the same `BookingLink source="solutions"` popup, so attribution is unchanged.
+- **Capabilities:** tabbed `EngineExplorer` replaced by `CapabilityGrid` — all five groups visible (5 columns desktop; 2 columns mobile, Intelligence spans both). The duplicate hero input inside this section is gone.
+- **Recognition block:** "You probably don't need more marketing. You need the pieces to work together." with the five owner problems. Check icons use solid `--gold-to`; `.text-gold` is gradient text with transparent color and would hide icons.
+- **Proof:** dropped the dark "deliverable" card (duplicated the report section and repeated "every engagement starts with a written read"). Two stats + three notes. No SMB results exist in code (no Blueprint with Bob data), so none were added.
+- **Report band:** heading + one paragraph + the report's real scored categories (Discoverability, Digital experience, Trust & credibility, Conversion readiness, Technical health) + "Get my free report" → `/report`.
+- **Comparison caption** names the concrete breaks (ads, website, CRM, follow-up, reporting).
+- Mobile page height 7308 → ~6900px despite the added block. Untouched: homepage, /report, /book, booking API, gtag/GA4/Ads, attribution. Other local uncommitted work (attribution merge, report Slack, construction page, footer) intentionally NOT included in this push.
+
+## 2026-09-23 — Attribution merge + report Slack (phase 1)
+
+Report form no longer replaces `tm_report_attribution` with only the current URL. It uses `mergeAttributionRecords` in `lib/attribution.ts`, so a later `utm_source` keeps an earlier `gclid` or `gbraid`. Storage stays sessionStorage. Google tag, GA4 events, and the Ads report conversion are unchanged.
+
+The first Digital Footprint Slack alert (`lib/report/slack-report.ts`) labels channel, source, campaign, term, and click-id type from values that were actually stored. Pacific display is formatting only. `signup_date` is still the server UTC timestamp. A `report_submitted` row is written to `website.report_stage_events` when that table exists (`supabase/migrations/20260923_report_stage_events.sql`, not applied here).
+
+Checks: `node scripts/verify-attribution-merge.mjs` and `node scripts/verify-conversion-tracking.mjs` (report conversion still once, no PII).
+
 ## 2026-09-23 — `/schedule` share card (post-report booking)
 
 Dedicated OG/Twitter image for outbound calendar links: `/share/terramore-share-schedule-og.png`. Large headline: “Book a call — you're one / step away from changing your business.” Subheader (sitewide card size): “The report showed the gaps, this call closes them.” / “Free 30 minutes to discuss how we can work together.” with gold underline on Free. Metadata on `app/schedule/page.tsx`.

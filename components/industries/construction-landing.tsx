@@ -9,10 +9,10 @@ import { ConstructionSolutionPhone } from "@/components/industries/construction-
 
 const CTA_PRIMARY =
   "inline-flex h-11 items-center justify-center rounded-full bg-brand px-6 text-[15px] font-medium text-white hover:bg-brand-hover"
-const CTA_SECONDARY =
-  "inline-flex h-11 items-center justify-center rounded-full border border-ink/15 bg-white/80 px-6 text-[15px] font-medium text-ink hover:border-ink/30 hover:bg-white"
+const REPORT_POPUP_DESCRIPTION =
+  "See how homeowners find, evaluate, and contact your business. Your details below — the report lands in your inbox."
 
-/** Equal beats matching the solution phone: publish → devices → rank → book → revenue. */
+/** Equal beats matching the solution phone: publish → stay visible → rank → book → revenue. */
 const FIXES = [
   {
     n: "01",
@@ -22,15 +22,15 @@ const FIXES = [
   },
   {
     n: "02",
-    cue: "Screens",
-    title: "One customer. Every device.",
-    body: "Retarget the same homeowner on TV, laptop, phone, and iPad.",
+    cue: "Staying visible",
+    title: "Stay in front of serious prospects.",
+    body: "Homeowners research, compare bids, and come back. Stay visible until they request an estimate.",
   },
   {
     n: "03",
     cue: "Search",
     title: "You show up when they look.",
-    body: "Same local searches — your company at the top, not buried.",
+    body: "Show up in the local searches homeowners run before they call.",
   },
   {
     n: "04",
@@ -42,7 +42,7 @@ const FIXES = [
     n: "05",
     cue: "Revenue",
     title: "Pipeline turns into jobs.",
-    body: "Tracked opportunities compound — referrals stop being the only channel.",
+    body: "See which inquiries became estimates and jobs. Referrals stop being the only channel.",
   },
 ] as const
 
@@ -74,9 +74,9 @@ const PROBLEMS = [
   },
   {
     n: "05",
-    title: "Competitors buy attention.",
-    body: "They're buying attention. You're not.",
-    cue: "Paid media",
+    title: "Competitors show up first.",
+    body: "Homeowners call whoever they find first, not the best builder.",
+    cue: "Search & ads",
   },
 ] as const
 
@@ -132,7 +132,7 @@ const PROCESS = [
   {
     n: "01",
     title: "Diagnose",
-    body: "We look at your market, competitors, website, search visibility, customer journey, and existing marketing.",
+    body: "We look at how homeowners find, evaluate, and contact you: your market, competitors, website, reviews, and search visibility.",
   },
   {
     n: "02",
@@ -147,26 +147,16 @@ const PROCESS = [
   {
     n: "04",
     title: "Improve",
-    body: "We watch what generates opportunities and adjust around actual performance.",
+    body: "We watch which inquiries turn into estimates and projects, and adjust around actual performance.",
   },
 ] as const
 
-const INSIGHTS = [
-  {
-    n: "01",
-    title: "High-ticket decisions take proof.",
-    body: "Customers aren't buying a $40 product. They're trusting someone with a home, property, or substantial project.",
-  },
-  {
-    n: "02",
-    title: "Your work is your strongest marketing asset.",
-    body: "Jobsite progress, finished work, customer experience, and craftsmanship should feed the marketing system continuously.",
-  },
-  {
-    n: "03",
-    title: "Speed still matters.",
-    body: "When someone requests an estimate or consultation, professional and timely follow-up matters.",
-  },
+const FIT = [
+  "You're a general contractor, remodeler, builder, or specialty contractor doing work worth showing.",
+  "Referrals bring in work, but you want a second, steadier source of projects.",
+  "You're growing into a new service, territory, or project type.",
+  "Marketing feels fragmented: a website here, an agency there, nothing connected.",
+  "You're willing to invest in building something that compounds.",
 ] as const
 
 function TalkCta({
@@ -183,6 +173,14 @@ function TalkCta({
   )
 }
 
+function FootprintCta({ children, className = CTA_PRIMARY }: { children: ReactNode; className?: string }) {
+  return (
+    <ReportPopupLink direct description={REPORT_POPUP_DESCRIPTION} className={className}>
+      {children}
+    </ReportPopupLink>
+  )
+}
+
 export function ConstructionLanding() {
   return (
     <>
@@ -196,7 +194,7 @@ export function ConstructionLanding() {
           <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/80 to-ink/35" />
         </div>
         {/* Mobile: iMessage (top) + chatbot (lower) over the full-bleed video */}
-        <div className="absolute inset-0 z-[15] lg:hidden">
+        <div className="pointer-events-none absolute inset-0 z-[15] lg:hidden">
           <ConstructionInquiryNotifications surface="mobile-hero" />
         </div>
 
@@ -209,20 +207,15 @@ export function ConstructionLanding() {
               Turn the work you&apos;re already doing into your next job.
             </h1>
             <p className="mt-4 max-w-lg text-[15px] leading-relaxed text-cream/80 sm:mt-5 sm:text-[16px] md:text-[17px] lg:text-ink/70">
-              Terramore helps contractors turn completed projects, referrals, search visibility, content, and paid
-              acquisition into a growth system that keeps working between jobs.
+              Terramore helps general contractors, remodelers, and builders turn finished projects and referrals into
+              a steady flow of inquiries, estimates, and booked work.
             </p>
             <div className="mt-6 flex flex-col items-stretch gap-3 sm:mt-8 sm:flex-row sm:items-center">
-              <TalkCta />
-              <ReportPopupLink
-                direct
-                className={`${CTA_SECONDARY} border-white/25 bg-white/10 text-cream backdrop-blur hover:border-white/40 hover:bg-white/15 lg:border-ink/15 lg:bg-white/80 lg:text-ink lg:hover:border-ink/30 lg:hover:bg-white`}
-              >
-                See Your Digital Footprint
-              </ReportPopupLink>
+              <FootprintCta>See Your Digital Footprint</FootprintCta>
+              <TalkCta className="inline-flex h-11 items-center justify-center rounded-full border border-white/25 bg-white/10 px-6 text-[15px] font-medium text-cream backdrop-blur hover:border-white/40 hover:bg-white/15 lg:border-ink/15 lg:bg-white/80 lg:text-ink lg:hover:border-ink/30 lg:hover:bg-white" />
             </div>
-            <p className="mt-4 text-[11px] font-medium uppercase tracking-[0.14em] text-cream/45 sm:mt-5 sm:text-[12px] lg:text-ink/40">
-              Strategy · Content · Search · Paid Media · Follow-Up
+            <p className="mt-4 text-[13px] leading-relaxed text-cream/60 sm:mt-5 lg:text-ink/50">
+              Free report: how homeowners find, evaluate, and contact your business.
             </p>
           </div>
 
@@ -291,13 +284,13 @@ export function ConstructionLanding() {
         </div>
       </section>
 
-      {/* 03 — HOW TERRAMORE FIXES IT
+      {/* 03 — WHAT TERRAMORE CHANGES
           Same phone language as the problem section, flipped into revenue. */}
       <section id="growth-system" className="scroll-mt-28 bg-ink py-16 text-cream md:py-24">
         <div className="page-shell">
           <div className="mx-auto max-w-2xl text-center lg:mx-0 lg:max-w-xl lg:text-left">
             <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-gold-from">
-              How Terramore fixes it
+              What Terramore changes
             </p>
             <h2 className="mt-4 text-[1.8rem] font-bold leading-[1.12] tracking-[-0.02em] md:text-[2.5rem]">
               Same phone.
@@ -334,14 +327,50 @@ export function ConstructionLanding() {
         </div>
       </section>
 
-      {/* 04 — CAPABILITIES BENTO */}
+      {/* 04 — HOW THE SYSTEM WORKS */}
+      <section className="bg-cream py-16 md:py-24">
+        <div className="page-shell grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
+          <div>
+            <div className="lg:sticky lg:top-28">
+              <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink/45">How it works</p>
+              <h2 className="mt-4 text-[1.7rem] font-bold leading-[1.15] tracking-[-0.02em] text-ink md:text-[2.3rem]">
+                You build the projects.
+                <br />
+                We build the growth system around them.
+              </h2>
+              <p className="mt-5 max-w-md text-[15px] leading-relaxed text-slate-600 md:text-[16px]">
+                Marketing a contractor isn&apos;t the same as marketing an ecommerce store. Homeowners are trusting
+                someone with a home or a major project, so the system is built around proof, staying visible while
+                they decide, and fast follow-up.
+              </p>
+            </div>
+          </div>
+
+          <ol className="relative space-y-2">
+            <span aria-hidden className="absolute bottom-8 left-[1.55rem] top-8 w-px bg-black/[0.08]" />
+            {PROCESS.map((step) => (
+              <li key={step.n} className="relative flex gap-5 rounded-2xl border border-transparent p-5 transition hover:border-black/[0.06] hover:bg-white sm:p-6">
+                <span className="relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand text-[12px] font-bold text-white">
+                  {step.n}
+                </span>
+                <div>
+                  <h3 className="text-[16px] font-semibold tracking-tight text-ink sm:text-[17px]">{step.title}</h3>
+                  <p className="mt-1.5 text-[14px] leading-relaxed text-slate-600">{step.body}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      {/* 05 — WHAT TERRAMORE CAN IMPLEMENT (capabilities bento) */}
       <section className="page-shell py-16 md:py-24">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-[1.7rem] font-bold leading-[1.15] tracking-[-0.02em] text-ink md:text-[2.4rem]">
             Everything between doing great work and getting the next customer.
           </h2>
           <p className="mt-4 text-[15px] leading-relaxed text-slate-600 md:text-[16px]">
-            Strategy, execution, and follow-up connected around the same growth objective.
+            Each piece connects, so attention turns into inquiries, estimates, and booked projects.
           </p>
         </div>
 
@@ -372,37 +401,37 @@ export function ConstructionLanding() {
             image="/marketing/services/strategy.png"
             alt="Strategic planning workspace — illustrative of positioning and local visibility planning"
             label="Search & local visibility"
-            body="Show up when customers are actively looking for the work you do."
+            body="Show up in Google, Maps, and reviews when homeowners look for the work you do."
           />
           <CapabilityTile
             image="/marketing/services/paid.png"
             alt="Media-buying workstation reviewing campaign performance — illustrative"
             label="Paid acquisition"
-            body="Reach high-intent prospects when organic reach isn't enough."
+            body="Google Ads and paid social that reach homeowners who are ready to hire."
           />
           <CapabilityTile
             image="/marketing/services/landing.png"
             alt="Landing page shown on desktop and mobile — illustrative"
             label="Website & landing pages"
-            body="Give prospects enough proof to understand your work and choose the next step."
+            body="Project and service pages that turn research into estimate requests."
           />
           <CapabilityTile
             image="/marketing/services/email.png"
             alt="Phone and laptop showing follow-up messages — illustrative"
             label="CRM & follow-up"
-            body="Route opportunities, respond faster, and keep follow-up from living in someone's phone."
+            body="Route calls and inquiries, respond faster, and keep follow-up out of someone's phone."
           />
           <CapabilityTile
             image="/marketing/services/analytics.png"
             alt="Analytics interface tracing paths from attention to opportunity — illustrative"
             label="Strategy & reporting"
-            body="Know what's generating attention, inquiries, and actual opportunities."
+            body="See which channels produce inquiries, estimates, and booked projects."
             className="sm:col-span-2 lg:col-span-1"
           />
         </div>
       </section>
 
-      {/* 05 — GROWTH STAGES */}
+      {/* 06 — GROWTH STAGES */}
       <section className="bg-white py-16 md:py-24">
         <div className="page-shell">
           <div className="mx-auto max-w-2xl text-center">
@@ -460,7 +489,7 @@ export function ConstructionLanding() {
         </div>
       </section>
 
-      {/* 06 — CASE STUDY (placeholder client identity — no fabricated results) */}
+      {/* 07 — PROOF (engagement in progress; client identity and results pending approval) */}
       <section className="page-shell py-16 md:py-24">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-[1.7rem] font-bold leading-[1.15] tracking-[-0.02em] text-ink md:text-[2.4rem]">
@@ -472,7 +501,7 @@ export function ConstructionLanding() {
           <div className="relative min-h-[16rem] lg:min-h-[22rem]">
             <Image
               src="/industries/construction/case-study.jpg"
-              alt="Construction project photography placeholder — replace with approved client project imagery"
+              alt="Illustrative residential construction project"
               width={1536}
               height={1024}
               className="absolute inset-0 h-full w-full object-cover"
@@ -481,16 +510,12 @@ export function ConstructionLanding() {
           </div>
           <div className="flex flex-col justify-center p-7 md:p-9">
             <div className="flex flex-wrap items-center gap-2">
-              {/* TODO: Replace with verified client name when approved (e.g. SAS Builds). */}
               <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-ink/40">Featured engagement</p>
               <span className="rounded-full bg-gold-from/15 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-gold-to">
                 In progress
               </span>
             </div>
-            <h3 className="mt-3 text-[1.35rem] font-bold tracking-tight text-ink">
-              {/* TODO: Client name pending verification */}
-              Construction growth system
-            </h3>
+            <h3 className="mt-3 text-[1.35rem] font-bold tracking-tight text-ink">Construction growth system</h3>
             <div className="mt-6 space-y-4">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink/40">Challenge</p>
@@ -508,103 +533,25 @@ export function ConstructionLanding() {
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink/40">Objective</p>
                 <p className="mt-1.5 text-[14px] leading-relaxed text-slate-600">
-                  Turn existing reputation and project quality into a repeatable digital growth engine.
+                  Turn existing reputation and project quality into a steady flow of qualified inquiries and estimates.
                 </p>
               </div>
             </div>
             <p className="mt-6 text-[12px] leading-relaxed text-slate-400">
-              No fabricated results. Client identity and project photography pending approval.
+              Engagement in progress. Results will be published once they&apos;re measured and approved by the client.
             </p>
           </div>
         </div>
-
-        {/* Project strip — illustrative system visuals until approved jobsite gallery exists */}
-        <div className="mx-auto mt-4 grid max-w-5xl grid-cols-2 gap-3 sm:grid-cols-4">
-          {[
-            { src: "/marketing/services/video.png", alt: "Short-form content production — illustrative placeholder" },
-            { src: "/marketing/services/landing.png", alt: "Landing page craft — illustrative placeholder" },
-            { src: "/marketing/services/strategy.png", alt: "Growth strategy workspace — illustrative placeholder" },
-            { src: "/marketing/services/automation.png", alt: "Follow-up automation — illustrative placeholder" },
-          ].map((shot) => (
-            <div key={shot.src} className="overflow-hidden rounded-2xl">
-              <Image
-                src={shot.src}
-                alt={shot.alt}
-                width={512}
-                height={384}
-                className="aspect-[4/3] h-auto w-full object-cover"
-                sizes="(max-width: 640px) 50vw, 25vw"
-              />
-            </div>
-          ))}
-        </div>
       </section>
 
-      {/* 07 — WORKING WITH TERRAMORE */}
-      <section className="bg-cream py-16 md:py-24">
-        <div className="page-shell grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
-          <div>
-            <div className="lg:sticky lg:top-28">
-              <h2 className="text-[1.7rem] font-bold leading-[1.15] tracking-[-0.02em] text-ink md:text-[2.3rem]">
-                You build the projects.
-                <br />
-                We build the growth system around them.
-              </h2>
-              <div className="mt-8">
-                <TalkCta>Talk Through Your Business</TalkCta>
-              </div>
-            </div>
-          </div>
-
-          <ol className="relative space-y-2">
-            <span aria-hidden className="absolute bottom-8 left-[1.55rem] top-8 w-px bg-black/[0.08]" />
-            {PROCESS.map((step) => (
-              <li key={step.n} className="relative flex gap-5 rounded-2xl border border-transparent p-5 transition hover:border-black/[0.06] hover:bg-white sm:p-6">
-                <span className="relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand text-[12px] font-bold text-white">
-                  {step.n}
-                </span>
-                <div>
-                  <h3 className="text-[16px] font-semibold tracking-tight text-ink sm:text-[17px]">{step.title}</h3>
-                  <p className="mt-1.5 text-[14px] leading-relaxed text-slate-600">{step.body}</p>
-                </div>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
-
-      {/* 08 — EXPERTISE */}
-      <section className="page-shell py-16 md:py-24">
-        <h2 className="mx-auto max-w-2xl text-center text-[1.7rem] font-bold leading-[1.15] tracking-[-0.02em] text-ink md:text-[2.35rem]">
-          Marketing a contractor isn&apos;t the same as marketing an ecommerce store.
-        </h2>
-        <div className="mx-auto mt-14 max-w-3xl divide-y divide-black/[0.08]">
-          {INSIGHTS.map((item) => (
-            <div key={item.n} className="grid gap-4 py-8 sm:grid-cols-[5rem_1fr] sm:gap-8">
-              <p className="font-serif text-[2.5rem] leading-none tracking-tight text-gold-to/80">{item.n}</p>
-              <div>
-                <h3 className="text-[1.2rem] font-semibold tracking-tight text-ink md:text-[1.35rem]">{item.title}</h3>
-                <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-slate-600 md:text-[16px]">{item.body}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* 09 — QUALIFICATION */}
+      {/* 08 — WHO IT'S FOR */}
       <section className="bg-ink py-16 text-cream md:py-20">
         <div className="page-shell mx-auto max-w-3xl">
           <h2 className="text-[1.7rem] font-bold leading-[1.15] tracking-[-0.02em] md:text-[2.2rem]">
             This is probably for you if…
           </h2>
           <ul className="mt-8 space-y-3">
-            {[
-              "You already do work worth showing.",
-              "Referrals generate business, but you want another acquisition channel.",
-              "You're trying to grow a service, territory, or project type.",
-              "Marketing currently feels fragmented.",
-              "You're willing to invest in building something that compounds.",
-            ].map((line) => (
+            {FIT.map((line) => (
               <li key={line} className="flex gap-3 text-[15px] leading-relaxed text-cream/85 md:text-[16px]">
                 <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-gold-from" aria-hidden />
                 {line}
@@ -621,22 +568,18 @@ export function ConstructionLanding() {
         </div>
       </section>
 
-      {/* 10 — FINAL CTA */}
+      {/* 09 — FINAL CTA */}
       <section className="page-shell py-20 text-center md:py-28">
         <h2 className="mx-auto max-w-2xl text-[1.8rem] font-bold leading-[1.12] tracking-[-0.02em] text-ink md:text-[2.6rem]">
           Let&apos;s find the biggest growth opportunity in your construction business.
         </h2>
         <p className="mx-auto mt-5 max-w-lg text-[16px] leading-relaxed text-slate-600">
-          Tell us where the business is today, where you want it to go, and what&apos;s currently getting in the way.
+          Start with a free Digital Footprint report: how homeowners find, evaluate, and contact your business. Or talk
+          it through with us directly.
         </p>
         <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <TalkCta />
-          <ReportPopupLink
-            direct
-            className="inline-flex h-11 items-center justify-center rounded-full border border-ink/15 bg-transparent px-6 text-[15px] font-medium text-ink hover:border-ink/30 hover:bg-white"
-          >
-            Get Your Digital Footprint Report
-          </ReportPopupLink>
+          <FootprintCta>Get Your Digital Footprint Report</FootprintCta>
+          <TalkCta className="inline-flex h-11 items-center justify-center rounded-full border border-ink/15 bg-transparent px-6 text-[15px] font-medium text-ink hover:border-ink/30 hover:bg-white" />
         </div>
         <p className="mt-5 text-[13px] text-slate-500">No generic pitch. We&apos;ll look at the business first.</p>
 

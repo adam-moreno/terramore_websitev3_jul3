@@ -42,6 +42,7 @@ export function ReportPopup({
   onClose,
   website,
   direct = false,
+  description,
 }: {
   open: boolean
   onClose: () => void
@@ -51,6 +52,8 @@ export function ReportPopup({
       (used on the /book ads landing page). Also stays on the page after
       success instead of redirecting home. */
   direct?: boolean
+  /** Optional header copy override (display only). */
+  description?: string
 }) {
   const router = useRouter()
   const [step, setStep] = useState(0)
@@ -147,7 +150,7 @@ export function ReportPopup({
             >
               Done
             </button>
-            <p className="mt-3 text-[13px] text-slate-400">Taking you home in a moment…</p>
+            {direct ? null : <p className="mt-3 text-[13px] text-slate-400">Taking you home in a moment…</p>}
           </div>
         ) : (
           <>
@@ -155,9 +158,10 @@ export function ReportPopup({
               <div>
                 <p className="text-[12px] font-medium uppercase tracking-[0.16em] text-ink/40">Free Digital Footprint report</p>
                 <p className="mt-2 text-[15px] leading-relaxed text-ink/75">
-                  {direct
-                    ? "Your details below — you'll find the report in your inbox."
-                    : "Two quick questions, then your details. In your inbox in minutes."}
+                  {description ??
+                    (direct
+                      ? "Your details below — you'll find the report in your inbox."
+                      : "Two quick questions, then your details. In your inbox in minutes.")}
                 </p>
               </div>
               <button type="button" onClick={onClose} className="shrink-0 text-[13px] font-medium text-slate-400 hover:text-ink">
@@ -229,12 +233,15 @@ export function ReportPopupLink({
   children,
   className = "text-[14px] font-medium text-ink/50 underline-offset-4 hover:text-ink hover:underline",
   direct = false,
+  description,
 }: {
   label?: string
   children?: ReactNode
   className?: string
   /** Skip the qualifying questions — straight to the details form. */
   direct?: boolean
+  /** Optional popup header copy override (display only). */
+  description?: string
 }) {
   const [open, setOpen] = useState(false)
 
@@ -243,7 +250,7 @@ export function ReportPopupLink({
       <button type="button" onClick={() => setOpen(true)} className={className}>
         {children ?? label}
       </button>
-      <ReportPopup open={open} onClose={() => setOpen(false)} direct={direct} />
+      <ReportPopup open={open} onClose={() => setOpen(false)} direct={direct} description={description} />
     </>
   )
 }
