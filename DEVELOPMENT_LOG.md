@@ -1,6 +1,15 @@
 # Development Log - Terramore Website
 
-## 2026-09-26 (night) — /industries/construction: capabilities bento, Proof, and Fit sections removed (local, not committed)
+## 2026-09-26 (night) — /industries/construction: 6-step 'how we work' timeline (shipped)
+
+- Section 03 "What Terramore changes" is now Terramore's real working timeline: 01 Film → 02 Portfolio → 03 Website → 04 Search (Google + ChatGPT) → 05 Advertise → 06 Follow-up. `construction-solution-phone.tsx` was rewritten to export `ConstructionSolutionTimeline` (client component): a fixed-size phone with one scene per step plus a numbered list of `<button>`s (`aria-current="step"`, visible focus ring). It auto-advances in order and loops, clicking a step jumps the phone, and it pauses on mouse hover, keyboard focus, and offscreen. Under reduced motion there's no auto-advance and step 06 shows its static booked frame. On mobile the phone stacks above the list.
+- Why sequential: each step depends on the previous one (footage → portfolio → site → search → ads → follow-up), so the order is the message. One project's footage (a whole-home rebuild in the visitor's metro, from the existing `roll/` stills + hero video) threads through every scene. The spec said "kitchen remodel", but the only footage we have is a whole-home exterior with drone aerials, so the copy matches the assets.
+- The standalone "How it works" section (`PROCESS`) and the old `FIXES` list were removed from `construction-landing.tsx` so the page doesn't have two back-to-back process sections. The revenue scene was folded into step 06 as the final frame ("Estimate booked", $124k estimated value, labeled "Illustrative example").
+- Honesty: no real logo image files (the Google "G" is an inline SVG, ChatGPT is a text label), no ratings or reviews, no client names. Search and ad scenes use the placeholder "Your Company" / yourcompany.com.
+- Verified in headless Chrome (raw CDP, dev server): clicking each step moves `aria-current` and the phone scene; auto-advance loops 06 → 01; no horizontal overflow at 375px; no page errors (only ipapi.co 429s). Lint clean; `tsc` unchanged at the 16 baseline errors, none in construction files.
+- Flow now: Hero → Problem → What Terramore changes → Growth stages → Final CTA.
+
+## 2026-09-26 (night) — /industries/construction: capabilities bento, Proof, and Fit sections removed (shipped in bb5adc9)
 
 - Removed the "Everything between doing great work and getting the next customer." section: heading, subline, and the six image tiles (content/media, search, paid, landing pages, CRM, reporting). The unused `CapabilityTile` helper went with it, and the section comments were renumbered.
 - Why: the solution phone and fixes list already cover the same capabilities in construction terms, and the Growth stages cards list the concrete services. The bento repeated both with generic marketing imagery.

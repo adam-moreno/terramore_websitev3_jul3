@@ -4,46 +4,12 @@ import { ReportPopupLink } from "@/components/report-popup"
 import { ConstructionHeroVideo } from "@/components/industries/construction-hero-video"
 import { ConstructionInquiryNotifications } from "@/components/industries/construction-inquiry-notifications"
 import { ConstructionProblemPhone } from "@/components/industries/construction-problem-phone"
-import { ConstructionSolutionPhone } from "@/components/industries/construction-solution-phone"
+import { ConstructionSolutionTimeline } from "@/components/industries/construction-solution-phone"
 
 const CTA_PRIMARY =
   "inline-flex h-11 items-center justify-center rounded-full bg-brand px-6 text-[15px] font-medium text-white hover:bg-brand-hover"
 const REPORT_POPUP_DESCRIPTION =
   "See how homeowners find, evaluate, and contact your business. Your details below — the report lands in your inbox."
-
-/** Equal beats matching the solution phone: publish → stay visible → rank → book → revenue. */
-const FIXES = [
-  {
-    n: "01",
-    cue: "Proof",
-    title: "Work leaves the phone.",
-    body: "Jobsite photos and video go live on your site, Google, and ads.",
-  },
-  {
-    n: "02",
-    cue: "Staying visible",
-    title: "Stay in front of serious prospects.",
-    body: "Homeowners research, compare bids, and come back. Stay visible until they request an estimate.",
-  },
-  {
-    n: "03",
-    cue: "Search",
-    title: "You show up when they look.",
-    body: "Show up in the local searches homeowners run before they call.",
-  },
-  {
-    n: "04",
-    cue: "Follow-up",
-    title: "Every lead gets answered.",
-    body: "Calls, forms, and texts route into a system that books estimates.",
-  },
-  {
-    n: "05",
-    cue: "Revenue",
-    title: "Pipeline turns into jobs.",
-    body: "See which inquiries became estimates and jobs. Referrals stop being the only channel.",
-  },
-] as const
 
 /** Equal structure on purpose: short cue · punchy title · one-line body. */
 const PROBLEMS = [
@@ -124,29 +90,6 @@ const STAGES = [
       "Sales pipeline reporting",
     ],
     emphasize: false,
-  },
-] as const
-
-const PROCESS = [
-  {
-    n: "01",
-    title: "Diagnose",
-    body: "We look at how homeowners find, evaluate, and contact you: your market, competitors, website, reviews, and search visibility.",
-  },
-  {
-    n: "02",
-    title: "Prioritize",
-    body: "We identify the few things most likely to move the business instead of selling every available service.",
-  },
-  {
-    n: "03",
-    title: "Build",
-    body: "Terramore coordinates content, campaigns, pages, tracking, and follow-up.",
-  },
-  {
-    n: "04",
-    title: "Improve",
-    body: "We watch which inquiries turn into estimates and projects, and adjust around actual performance.",
   },
 ] as const
 
@@ -276,7 +219,9 @@ export function ConstructionLanding() {
       </section>
 
       {/* 03 — WHAT TERRAMORE CHANGES
-          Same phone language as the problem section, flipped into revenue. */}
+          Terramore's 6-step working timeline (film → portfolio → website → search → ads → follow-up).
+          Same phone language as the problem section; one project's footage threads through every scene,
+          and the numbered list stays in sync with the phone. This is also the page's process section. */}
       <section id="growth-system" className="scroll-mt-28 bg-ink py-16 text-cream md:py-24">
         <div className="page-shell">
           <div className="mx-auto max-w-2xl text-center lg:mx-0 lg:max-w-xl lg:text-left">
@@ -288,73 +233,16 @@ export function ConstructionLanding() {
               <span className="mt-1 block text-cream/65 md:mt-2">Different ending.</span>
             </h2>
             <p className="mt-5 text-[15px] leading-relaxed text-cream/70 md:text-[16px]">
-              Terramore turns trapped proof, missed searches, and unanswered calls into a system that books
-              work — and tracks what turns into revenue.
+              Homeowners are trusting you with their home, so everything starts with real footage of your work.
+              From the first day of filming to the booked estimate, here&apos;s how we work.
             </p>
           </div>
 
-          <div className="mt-10 grid items-start gap-10 lg:mt-14 lg:grid-cols-[minmax(0,17.5rem)_1fr] lg:gap-14 xl:grid-cols-[minmax(0,19rem)_1fr]">
-            <ConstructionSolutionPhone />
-
-            <ol className="divide-y divide-white/10 border-y border-white/10">
-              {FIXES.map((item) => (
-                <li key={item.n} className="flex gap-4 py-4 sm:gap-5 sm:py-5">
-                  <p className="w-7 shrink-0 pt-0.5 text-[12px] font-semibold tabular-nums text-gold-from">
-                    {item.n}
-                  </p>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-cream/35">
-                      {item.cue}
-                    </p>
-                    <h3 className="mt-1 text-[16px] font-semibold leading-snug tracking-tight text-cream sm:text-[17px]">
-                      {item.title}
-                    </h3>
-                    <p className="mt-1 text-[14px] leading-relaxed text-cream/60">{item.body}</p>
-                  </div>
-                </li>
-              ))}
-            </ol>
-          </div>
+          <ConstructionSolutionTimeline />
         </div>
       </section>
 
-      {/* 04 — HOW THE SYSTEM WORKS */}
-      <section className="bg-cream py-16 md:py-24">
-        <div className="page-shell grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
-          <div>
-            <div className="lg:sticky lg:top-28">
-              <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink/45">How it works</p>
-              <h2 className="mt-4 text-[1.7rem] font-bold leading-[1.15] tracking-[-0.02em] text-ink md:text-[2.3rem]">
-                You build the projects.
-                <br />
-                We build the growth system around them.
-              </h2>
-              <p className="mt-5 max-w-md text-[15px] leading-relaxed text-slate-600 md:text-[16px]">
-                Marketing a contractor isn&apos;t the same as marketing an ecommerce store. Homeowners are trusting
-                someone with a home or a major project, so the system is built around proof, staying visible while
-                they decide, and fast follow-up.
-              </p>
-            </div>
-          </div>
-
-          <ol className="relative space-y-2">
-            <span aria-hidden className="absolute bottom-8 left-[1.55rem] top-8 w-px bg-black/[0.08]" />
-            {PROCESS.map((step) => (
-              <li key={step.n} className="relative flex gap-5 rounded-2xl border border-transparent p-5 transition hover:border-black/[0.06] hover:bg-white sm:p-6">
-                <span className="relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand text-[12px] font-bold text-white">
-                  {step.n}
-                </span>
-                <div>
-                  <h3 className="text-[16px] font-semibold tracking-tight text-ink sm:text-[17px]">{step.title}</h3>
-                  <p className="mt-1.5 text-[14px] leading-relaxed text-slate-600">{step.body}</p>
-                </div>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
-
-      {/* 05 — GROWTH STAGES */}
+      {/* 04 — GROWTH STAGES */}
       <section className="bg-white py-16 md:py-24">
         <div className="page-shell">
           <div className="mx-auto max-w-2xl text-center">
@@ -412,7 +300,7 @@ export function ConstructionLanding() {
         </div>
       </section>
 
-      {/* 06 — FINAL CTA */}
+      {/* 05 — FINAL CTA */}
       <section className="page-shell py-20 text-center md:py-28">
         <h2 className="mx-auto max-w-2xl text-[1.8rem] font-bold leading-[1.12] tracking-[-0.02em] text-ink md:text-[2.6rem]">
           Let&apos;s find the biggest growth opportunity in your construction business.
