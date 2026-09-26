@@ -1,5 +1,11 @@
 # Development Log - Terramore Website
 
+## 2026-09-26 — /industries/construction: timeline copy fixes (shipped)
+
+- Step 06's final frame no longer shows the illustrative "$124k" estimated project value (or its progress bar). The card now shows a booked estimate instead: "Estimate on the calendar" / "Thu · 10:00 AM" / "Site walk · Whole-home rebuild". Why: site rule is no invented performance metrics or implied measured results. The "Estimate booked" eyebrow, journey checklist, and "Illustrative example" label are unchanged. No other dollar/percent/revenue figures were in the file ("4K · 24fps" is a camera spec, "0:15" a clip length).
+- Placeholder "Your Company" / yourcompany.com → "Your Construction Co." / yourconstruction.co (website, search, ChatGPT, and ad scenes). Still an obvious stand-in for the visitor's business, not an invented client brand. The ad avatar initials stay "YC"; "Other contractor" stays as the competitor label.
+- The `.construction-revenue-bar` rules in `app/globals.css` are now unused; left in place to keep this change to one component.
+
 ## 2026-09-26 (night) — /industries/construction: 6-step 'how we work' timeline (shipped)
 
 - Section 03 "What Terramore changes" is now Terramore's real working timeline: 01 Film → 02 Portfolio → 03 Website → 04 Search (Google + ChatGPT) → 05 Advertise → 06 Follow-up. `construction-solution-phone.tsx` was rewritten to export `ConstructionSolutionTimeline` (client component): a fixed-size phone with one scene per step plus a numbered list of `<button>`s (`aria-current="step"`, visible focus ring). It auto-advances in order and loops, clicking a step jumps the phone, and it pauses on mouse hover, keyboard focus, and offscreen. Under reduced motion there's no auto-advance and step 06 shows its static booked frame. On mobile the phone stacks above the list.

@@ -442,10 +442,10 @@ function WebsiteScene({ metro }: { metro: string }) {
     <div className="absolute inset-0 z-10 flex flex-col bg-white pt-3 text-ink">
       <div className="mx-2.5 flex items-center gap-1.5 rounded-full bg-[#f1f3f4] px-2.5 py-1 text-[9px] text-ink/55">
         <LockIcon className="h-2.5 w-2.5 shrink-0" />
-        yourcompany.com/projects
+        yourconstruction.co/projects
       </div>
       <div className="flex items-center justify-between px-3 pb-2 pt-2.5">
-        <p className="text-[11px] font-bold tracking-tight">Your Company</p>
+        <p className="text-[11px] font-bold tracking-tight">Your Construction Co.</p>
         <span className="flex flex-col gap-[3px]">
           <span className="h-px w-3.5 bg-ink/60" />
           <span className="h-px w-3.5 bg-ink/60" />
@@ -517,7 +517,7 @@ function SearchScene({ metro }: { metro: string }) {
             <Image src={SHOTS.after} alt="" fill className="object-cover" sizes="40px" />
           </div>
           <div className="min-w-0">
-            <p className="text-[12px] font-semibold leading-snug text-[#1a0dab]">Your Company</p>
+            <p className="text-[12px] font-semibold leading-snug text-[#1a0dab]">Your Construction Co.</p>
             <p className="text-[9.5px] leading-snug text-ink/55">General contractor · {metro}</p>
             <p className="mt-0.5 text-[9.5px] font-semibold text-brand">Website · Directions · Call</p>
           </div>
@@ -537,7 +537,7 @@ function SearchScene({ metro }: { metro: string }) {
           Who should I call for a home rebuild in {metro}?
         </p>
         <p className="mt-1.5 text-[10px] leading-snug text-ink/75">
-          Try <span className="font-semibold text-ink">Your Company</span>. Their site walks through a {metro}{" "}
+          Try <span className="font-semibold text-ink">Your Construction Co.</span>. Their site walks through a {metro}{" "}
           whole-home rebuild on video, start to finish.
         </p>
       </div>
@@ -557,7 +557,7 @@ function AdvertiseScene({ metro, animate }: { metro: string; animate: boolean })
           YC
         </span>
         <div className="min-w-0">
-          <p className="text-[11px] font-semibold leading-none">Your Company</p>
+          <p className="text-[11px] font-semibold leading-none">Your Construction Co.</p>
           <p className="mt-0.5 text-[9px] leading-snug text-cream/50">Sponsored · {metro}</p>
         </div>
       </div>
@@ -679,11 +679,9 @@ function OutcomeScene({ metro }: { metro: string }) {
       </div>
 
       <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.06] p-3.5">
-        <p className="text-[10px] font-medium text-cream/45">Estimated project value</p>
-        <p className="mt-0.5 text-[26px] font-semibold tracking-tight tabular-nums">$124k</p>
-        <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/10">
-          <div className="construction-revenue-bar h-full w-full rounded-full bg-gradient-to-r from-gold-from to-brand" />
-        </div>
+        <p className="text-[10px] font-medium text-cream/45">Estimate on the calendar</p>
+        <p className="mt-0.5 text-[22px] font-semibold tracking-tight tabular-nums">Thu · 10:00 AM</p>
+        <p className="mt-2 text-[11px] leading-snug text-cream/70">Site walk · {PROJECT}</p>
       </div>
 
       <p className="mt-3.5 text-[10px] font-medium text-cream/45">How this homeowner got here</p>
