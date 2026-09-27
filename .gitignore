@@ -142,3 +142,8 @@ temp/
 # Turbo
 .turbo
 tmp-og/
+.env*
+!.env.example
+
+# Supabase CLI link state
+supabase/.temp/

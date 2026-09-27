@@ -1,7 +1,10 @@
 /**
  * Client-side ad attribution kept in sessionStorage for the current tab.
- * Same key and shape as report-form.tsx (`tm_report_attribution`) so the report form keeps working unchanged.
- * Click IDs and UTMs only. No PII.
+ * Key: `tm_report_attribution`. Click IDs and UTMs only. No PII.
+ *
+ * Merge rules: a new URL value replaces only the same field. A partial URL
+ * (utm_source without gclid) must not erase click IDs already stored.
+ * Storage stays sessionStorage for this tab. Not cookies. Not localStorage.
  */
 
 export const ATTR_STORAGE_KEY = "tm_report_attribution"
@@ -26,6 +29,19 @@ function pickKeys(get: (key: string) => unknown): Record<string, string> {
     if (typeof value === "string" && value.trim()) out[key] = value.trim()
   }
   return out
+}
+
+/**
+ * Existing fields stay. Incoming non-empty values replace the same field only.
+ * Empty or missing incoming fields do not erase what was already stored.
+ */
+export function mergeAttributionRecords(
+  stored: Record<string, unknown> | null | undefined,
+  incoming: Record<string, unknown> | null | undefined,
+): Record<string, string> {
+  const base = pickKeys((key) => stored?.[key])
+  const next = pickKeys((key) => incoming?.[key])
+  return { ...base, ...next }
 }
 
 /** Whatever this tab stored earlier. `{}` when nothing stored, storage blocked, or JSON is bad. */
@@ -56,7 +72,7 @@ export function readUrlAttribution(search: string = typeof window !== "undefined
  * (an earlier gclid, say) survive. Empty URL values never overwrite stored ones.
  */
 export function mergedAttribution(): Record<string, string> {
-  return { ...readStoredAttribution(), ...readUrlAttribution() }
+  return mergeAttributionRecords(readStoredAttribution(), readUrlAttribution())
 }
 
 /**
@@ -68,7 +84,8 @@ export function captureAttributionFromUrl(): void {
   try {
     const fromUrl = readUrlAttribution()
     if (Object.keys(fromUrl).length === 0) return
-    sessionStorage.setItem(ATTR_STORAGE_KEY, JSON.stringify({ ...readStoredAttribution(), ...fromUrl }))
+    const merged = mergeAttributionRecords(readStoredAttribution(), fromUrl)
+    sessionStorage.setItem(ATTR_STORAGE_KEY, JSON.stringify(merged))
   } catch {
     /* quota / private mode: ignore */
   }

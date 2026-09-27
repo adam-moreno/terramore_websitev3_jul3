@@ -17,6 +17,7 @@
 
 import { buildBookingSms, bookingSmsEnabled } from "./booking-sms"
 import { emailShell, emailButton, emailP, emailDetail, emailSignoff } from "./email-template"
+import { formatDigitalFootprintSlack, type AttributionMap } from "./report/slack-report"
 import {
   ensureContactAndVerify,
   sendTypingIndicator,
@@ -333,11 +334,15 @@ export type Lead = {
   details?: Record<string, string | null | undefined>
   rowId?: string | null
   tableUrl?: string
+  /** Server insert time (signup_date). Displayed in Pacific on the report Slack alert. */
+  submittedAt?: string | null
+  /** Whitelisted click ids and UTMs. Report Slack only. */
+  attribution?: AttributionMap | null
 }
 
 const KIND_LABEL: Record<LeadKind, string> = {
   talk: "New Talk request",
-  report: "New Digital Footprint report request",
+  report: "New Digital Footprint report",
 }
 
 function detailLines(lead: Lead): string[] {
@@ -357,7 +362,20 @@ function detailLines(lead: Lead): string[] {
 /** Tell Adam. Slack first, email copy second. Never throws. */
 export async function notifyAdminOfLead(lead: Lead): Promise<SendResult[]> {
   const title = KIND_LABEL[lead.kind]
-  const lines = detailLines(lead)
+  const lines =
+    lead.kind === "report"
+      ? formatDigitalFootprintSlack({
+          business: lead.business,
+          website: lead.website,
+          submittedAt: lead.submittedAt,
+          name: lead.name,
+          email: lead.email,
+          phone: lead.phone,
+          answers: lead.details?.Answers,
+          socials: lead.details?.Socials,
+          attribution: lead.attribution,
+        })
+      : detailLines(lead)
   const rowNote = lead.rowId ? `Supabase row ${lead.rowId}` : "Not saved to Supabase (keys missing)"
   const link = lead.tableUrl ? `<${lead.tableUrl}|Open the table in Supabase>` : rowNote
 

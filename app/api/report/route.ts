@@ -8,6 +8,7 @@ import { findDuplicateReportLead } from "@/lib/report/duplicates"
 import { ATTR_KEYS, normalizeEmail, normalizePhone, pickAttribution } from "@/lib/report/normalize-lead"
 import { runReportPipeline } from "@/lib/report/pipeline"
 import { sendReportAcceptSms } from "@/lib/report/sms"
+import { recordReportSubmitted } from "@/lib/report/stage-events"
 
 export const maxDuration = 60
 
@@ -119,6 +120,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid email format" }, { status: 400 })
     }
 
+    const submittedAt = new Date().toISOString()
+
     const [splitFirst, ...rest] = name.split(/\s+/)
     const resolvedFirst = firstName || splitFirst
     const resolvedLast = lastName || rest.join(" ") || "-"
@@ -165,7 +168,7 @@ export async function POST(request: NextRequest) {
         email_consent: true,
         signup_source: "digital_footprint_report",
         course_type: courseType || null,
-        signup_date: new Date().toISOString(),
+        signup_date: submittedAt,
         status: "active",
         ...attrColumns,
       }
@@ -189,7 +192,7 @@ export async function POST(request: NextRequest) {
           email_consent: true,
           signup_source: "digital_footprint_report",
           course_type: courseType || null,
-          signup_date: new Date().toISOString(),
+          signup_date: submittedAt,
           status: "active",
         }
         const fallback = await supabase.from("free_courses_signups").insert([legacy]).select("id").maybeSingle()
@@ -217,6 +220,7 @@ export async function POST(request: NextRequest) {
       } else if (data?.id) {
         rowId = String(data.id)
       }
+      if (rowId) await recordReportSubmitted(rowId, submittedAt)
     } else {
       console.info("Report lead (no Supabase):", {
         name,
@@ -246,6 +250,8 @@ export async function POST(request: NextRequest) {
         },
         rowId,
         tableUrl: supabaseTableUrl("free_courses_signups"),
+        submittedAt,
+        attribution,
       }
       await Promise.all([notifyAdminOfLead(lead), confirmLeadToUser(lead)])
       await sendReportAcceptSms({ email, name, phone: phone || null })

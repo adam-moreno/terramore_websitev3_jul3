@@ -7,52 +7,14 @@ import {
   trackReportSubmissionError,
   trackReportSubmissionSuccess,
 } from "@/lib/analytics"
+import { captureAttributionFromUrl, mergedAttribution } from "@/lib/attribution"
 
 export type ReportAnswers = Record<string, string>
 
-const ATTR_STORAGE_KEY = "tm_report_attribution"
-const ATTR_KEYS = [
-  "utm_source",
-  "utm_medium",
-  "utm_campaign",
-  "utm_content",
-  "utm_term",
-  "gclid",
-  "gbraid",
-  "wbraid",
-  "fbclid",
-  "ttclid",
-] as const
-
+/** Merge URL params onto stored attribution, then return the merged set. Never replaces the whole object. */
 function readAttribution(): Record<string, string> {
-  if (typeof window === "undefined") return {}
-  const params = new URLSearchParams(window.location.search)
-  const fromUrl: Record<string, string> = {}
-  for (const key of ATTR_KEYS) {
-    const value = params.get(key)?.trim()
-    if (value) fromUrl[key] = value
-  }
-  if (Object.keys(fromUrl).length > 0) {
-    try {
-      sessionStorage.setItem(ATTR_STORAGE_KEY, JSON.stringify(fromUrl))
-    } catch {
-      /* ignore quota / private mode */
-    }
-    return fromUrl
-  }
-  try {
-    const raw = sessionStorage.getItem(ATTR_STORAGE_KEY)
-    if (!raw) return {}
-    const parsed = JSON.parse(raw) as Record<string, unknown>
-    const out: Record<string, string> = {}
-    for (const key of ATTR_KEYS) {
-      const value = parsed[key]
-      if (typeof value === "string" && value.trim()) out[key] = value.trim()
-    }
-    return out
-  } catch {
-    return {}
-  }
+  captureAttributionFromUrl()
+  return mergedAttribution()
 }
 
 export function ReportForm({
