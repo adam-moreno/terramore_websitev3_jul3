@@ -9,15 +9,12 @@ import { Logo } from "@/components/logo"
 import { useDoNotSellPopup } from "@/hooks/use-do-not-sell-popup"
 import { DASHBOARD_LOGIN_URL } from "@/lib/dashboard"
 
-/* Same Explore set used sitewide — Marketing / Solutions / Integrations /
-   Pricing / Free report / Start here. No Company column. */
+/* Explore matches header nav (Marketing / Solutions / How we work).
+   Talk with us + Log in stay as CTAs. Legal links stay below. */
 const EXPLORE = [
   { href: "/marketing", label: "Marketing" },
   { href: "/solutions", label: "Solutions" },
-  { href: "/integrations", label: "Integrations" },
-  { href: "/pricing", label: "Pricing" },
-  { href: "/report", label: "Free report" },
-  { href: "/resources", label: "Start here" },
+  { href: "/book", label: "How we work" },
 ]
 
 const LEGAL = [
