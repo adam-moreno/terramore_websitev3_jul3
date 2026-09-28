@@ -2,8 +2,8 @@ import type {
   CatalogSnapshot,
   DirectoryProfile,
   Fact,
-  LocationSnapshot,
   PageSnapshot,
+  PlacesLookup,
   Provenance,
   ScoreBreakdown,
   ScoreFactor,
@@ -47,7 +47,6 @@ export function buildFacts(input: {
   pages: PageSnapshot[]
   technical: TechnicalSnapshot
   directories: DirectoryProfile[]
-  location: LocationSnapshot
   catalog: CatalogSnapshot
   platform: string | null
   pixels: string[]
@@ -81,21 +80,6 @@ export function buildFacts(input: {
       input.directories.filter((d) => d.found).map((d) => d.platform).join(", ") || null,
       input.directories.some((d) => d.found),
       prov(homeUrl, "directory_link", "Links extracted from pages checked"),
-    ),
-    fact(
-      "places_found",
-      "Google Places listing",
-      input.location.found,
-      input.location.checked,
-      prov(input.location.mapsUrl, "places", input.location.note),
-      input.location.checked ? undefined : "Places not checked",
-    ),
-    fact(
-      "places_rating",
-      "Places rating",
-      input.location.rating,
-      input.location.rating != null,
-      prov(input.location.mapsUrl, "places", `${input.location.rating ?? "n/a"} from ${input.location.reviewCount ?? 0} reviews`),
     ),
     fact(
       "catalog",
@@ -182,7 +166,7 @@ function scoreDigitalExperience(home: PageSnapshot | undefined, pages: PageSnaps
 function scoreDiscoverability(
   technical: TechnicalSnapshot,
   directories: DirectoryProfile[],
-  location: LocationSnapshot,
+  places: PlacesLookup,
   home: PageSnapshot | undefined,
 ): ScoreFactor {
   if (!home) {
@@ -217,14 +201,8 @@ function scoreDiscoverability(
   const linked = directories.filter((d) => d.found)
   score += Math.min(20, linked.length * 4)
   evidence.push(linked.length ? `Linked profiles: ${linked.map((d) => d.platform).join(", ")}` : "Social/directory links: Not found in sources checked")
-  if (location.checked && location.found) {
-    score += 15
-    evidence.push(`Places listing found${location.rating != null ? ` (${location.rating}★ / ${location.reviewCount ?? 0})` : ""}`)
-  } else if (location.checked) {
-    evidence.push("Places listing: Not found in sources checked")
-  } else {
-    evidence.push("Places: not checked")
-  }
+  // Google Maps values affect the number only; evidence text is persisted and sent to the model, so it stays Google-free.
+  if (places.confirmed) score += 15
   // SERP unavailable — do not invent; coverage handles missing weight elsewhere via factor availability
   return {
     id: "discoverability",
@@ -235,14 +213,14 @@ function scoreDiscoverability(
     evidence,
     subfactors: [
       { id: "search_meta", label: "Search / metadata basics", score: clamp((technical.title ? 40 : 0) + (technical.description ? 40 : 0) + 20) },
-      { id: "maps", label: "Maps / Places", score: location.checked ? (location.found ? 80 : 20) : null, note: location.checked ? undefined : "Not checked" },
+      { id: "maps", label: "Maps / Places", score: places.confirmed ? 80 : null, note: places.confirmed ? undefined : "Not confirmed" },
       { id: "social", label: "Social footprint", score: clamp(linked.length * 15) },
       { id: "serp", label: "SERP ranking", score: null, note: "Not available in this report version" },
     ],
   }
 }
 
-function scoreTrust(home: PageSnapshot | undefined, pages: PageSnapshot[], location: LocationSnapshot): ScoreFactor {
+function scoreTrust(home: PageSnapshot | undefined, pages: PageSnapshot[], places: PlacesLookup): ScoreFactor {
   if (!home) {
     return {
       id: "trust",
@@ -259,17 +237,11 @@ function scoreTrust(home: PageSnapshot | undefined, pages: PageSnapshot[], locat
   const evidence: string[] = []
   score += Math.min(35, signals.length * 7)
   evidence.push(signals.length ? `Trust indicators: ${signals.join(", ")}` : "On-site trust indicators: Not found in sources checked")
-  if (location.found && location.rating != null) {
-    const reviewBoost = Math.min(25, Math.round((location.rating - 3) * 10) + Math.min(15, Math.floor((location.reviewCount || 0) / 20)))
+  if (places.confirmed && places.rating != null) {
+    const reviewBoost = Math.min(25, Math.round((places.rating - 3) * 10) + Math.min(15, Math.floor((places.reviewCount || 0) / 20)))
     score += Math.max(0, reviewBoost)
-    evidence.push(`Places reviews: ${location.rating}★ from ${location.reviewCount ?? 0} reviews`)
-  } else if (location.checked) {
-    evidence.push("Places reviews: Not found in sources checked")
   }
-  if (location.found && location.address) {
-    score += 8
-    evidence.push(`Address listed: ${location.address}`)
-  }
+  if (places.confirmed && places.hasAddress) score += 8
   return {
     id: "trust",
     label: "Trust & Credibility",
@@ -387,15 +359,16 @@ export function scoreDigitalPresence(input: {
   pages: PageSnapshot[]
   technical: TechnicalSnapshot
   directories: DirectoryProfile[]
-  location: LocationSnapshot
+  /** In-memory Places lookup. Never copy its values into factors, evidence, or subfactor notes. */
+  places: PlacesLookup
   catalog: CatalogSnapshot
   hasCheckout: boolean
 }): ScoreBreakdown {
   const home = input.pages[0]
   const factors: ScoreFactor[] = [
     scoreDigitalExperience(home, input.pages),
-    scoreDiscoverability(input.technical, input.directories, input.location, home),
-    scoreTrust(home, input.pages, input.location),
+    scoreDiscoverability(input.technical, input.directories, input.places, home),
+    scoreTrust(home, input.pages, input.places),
     scoreConversion(home, input.hasCheckout, input.catalog),
     scoreTechnical(input.technical, home),
   ]

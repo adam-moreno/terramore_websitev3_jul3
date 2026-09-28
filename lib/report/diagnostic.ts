@@ -1,6 +1,6 @@
 import { collectCatalog } from "@/lib/report/collect/catalog"
 import { collectDirectories } from "@/lib/report/collect/directories"
-import { collectLocations } from "@/lib/report/collect/locations"
+import { collectLocations, toLocationSnapshot } from "@/lib/report/collect/locations"
 import { collectCompetitors } from "@/lib/report/collect/competitors"
 import { collectMobile } from "@/lib/report/collect/mobile"
 import { collectSearch } from "@/lib/report/collect/search"
@@ -28,7 +28,9 @@ export async function collectDiagnostic(businessName: string, rawWebsite: string
   )
 
   const directories = collectDirectories(site.pageHtml)
-  const location = await collectLocations(businessName, website)
+  // Places values stay in memory for scoring; only the place ID reaches the returned bundle.
+  const places = await collectLocations(businessName, website)
+  const location = toLocationSnapshot(places)
   const catalog = await collectCatalog({
     website,
     platform: site.platform,
@@ -43,7 +45,7 @@ export async function collectDiagnostic(businessName: string, rawWebsite: string
     pages: site.pages,
     technical,
     directories,
-    location,
+    places,
     catalog,
     hasCheckout: site.hasCheckout,
   })
@@ -54,7 +56,6 @@ export async function collectDiagnostic(businessName: string, rawWebsite: string
     pages: site.pages,
     technical,
     directories,
-    location,
     catalog,
     platform: site.platform,
     pixels: site.pixels,
@@ -65,7 +66,6 @@ export async function collectDiagnostic(businessName: string, rawWebsite: string
     pages: site.pages,
     technical,
     directories,
-    location,
     catalog,
     hasCheckout: site.hasCheckout,
     competitiveAvailable: competitive.available,

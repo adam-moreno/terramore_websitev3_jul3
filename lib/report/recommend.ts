@@ -3,7 +3,6 @@ import type {
   DiagnosticBundle,
   DirectoryProfile,
   Finding,
-  LocationSnapshot,
   PageSnapshot,
   Recommendation,
   TechnicalSnapshot,
@@ -26,7 +25,6 @@ export function buildRecommendations(input: {
   pages: PageSnapshot[]
   technical: TechnicalSnapshot
   directories: DirectoryProfile[]
-  location: LocationSnapshot
   catalog: CatalogSnapshot
   hasCheckout: boolean
   competitiveAvailable: boolean
@@ -130,29 +128,6 @@ export function buildRecommendations(input: {
         }),
       )
     }
-    if (input.location.checked && !input.location.found) {
-      findings.push(
-        finding("no_places", "Location", {
-          finding: "A matching Google Places / Maps listing was not found in sources checked.",
-          evidence: input.location.note,
-          impact: "Local discovery and review trust signals may be harder for nearby customers to verify.",
-          action: "Claim or verify the Google Business Profile and ensure the website URL matches.",
-          priority: "high",
-          confidence: "medium",
-        }),
-      )
-    } else if (input.location.found && (input.location.reviewCount ?? 0) < 10) {
-      findings.push(
-        finding("few_reviews", "Trust", {
-          finding: "The Places listing has relatively few observable reviews.",
-          evidence: `Rating ${input.location.rating ?? "n/a"} from ${input.location.reviewCount ?? 0} reviews`,
-          impact: "Thin review volume can make first-time customers hesitate compared with better-evidenced alternatives.",
-          action: "Systematically request reviews from recent customers without fabricating ratings.",
-          priority: "medium",
-          confidence: "medium",
-        }),
-      )
-    }
     const trust = Array.from(new Set(input.pages.flatMap((p) => p.trustSignals)))
     if (trust.length === 0) {
       findings.push(
@@ -251,12 +226,6 @@ export function diagnosticToFactsPrompt(bundle: DiagnosticBundle): string {
   lines.push("", "Directories:")
   for (const d of bundle.directories) {
     lines.push(`- ${d.platform}: ${d.found ? d.url : nf}`)
-  }
-  lines.push("", `Location: ${bundle.location.note}`)
-  if (bundle.location.found) {
-    lines.push(
-      `  name=${bundle.location.name} address=${bundle.location.address || nf} rating=${bundle.location.rating ?? nf} reviews=${bundle.location.reviewCount ?? nf}`,
-    )
   }
   lines.push("", `Catalog: ${bundle.catalog.note}`)
   if (bundle.catalog.sampleNames.length) lines.push(`  samples: ${bundle.catalog.sampleNames.slice(0, 8).join("; ")}`)

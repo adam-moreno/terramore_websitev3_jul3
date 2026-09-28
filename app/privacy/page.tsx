@@ -22,7 +22,7 @@ export default function PrivacyPolicyPage() {
           <div className="prose prose-lg max-w-none">
             <div className="bg-gray-50 p-6 rounded-lg mb-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">PRIVACY STATEMENT</h2>
-              <p className="text-gray-600 mb-0">Last Updated February 4, 2025</p>
+              <p className="text-gray-600 mb-0">Last Updated September 28, 2026</p>
             </div>
 
             <div className="space-y-8">
@@ -193,6 +193,33 @@ export default function PrivacyPolicyPage() {
                   services you have requested, amongst other uses as further described below. We do not sell or rent
                   your personal information to third party data vendors or marketing companies. As you might expect, we
                   disclose your information when required by law.
+                </p>
+
+                <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Google Maps Platform</h3>
+                <p className="text-gray-700 leading-relaxed">
+                  When you request a Digital Footprint report, we send the business name and website you give us to
+                  Google Maps Platform to look for a matching Google Maps listing. We use the listing&apos;s details to
+                  help calculate your report&apos;s scores, and we do not keep those details. If the listing&apos;s website
+                  matches the website you gave us, we keep Google&apos;s place identifier for that listing. Google
+                  processes these requests under the{" "}
+                  <a
+                    href="https://policies.google.com/privacy"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:text-blue-800 underline"
+                  >
+                    Google Privacy Policy
+                  </a>
+                  . Use of Google Maps features and content is subject to the{" "}
+                  <a
+                    href="https://maps.google.com/help/terms_maps/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:text-blue-800 underline"
+                  >
+                    Google Maps/Google Earth Additional Terms of Service
+                  </a>
+                  .
                 </p>
 
                 <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Affiliates</h3>

@@ -63,6 +63,7 @@ Truth rules (critical):
 - If something is missing, write exactly: Not found in sources checked
 - Never say "This business does not have X." Say it was not found in sources checked.
 - Rephrase the provided Top recommendations; do not reorder priorities or invent new top actions.
+- Google Maps and Google Business Profile listings, ratings, reviews, review counts, and addresses are not part of your input. Do not mention them, estimate them, or say they were not found.
 
 Output. Return one JSON object only:
 {
@@ -265,6 +266,23 @@ export async function writeReport(input: {
   const { collectDiagnostic } = await import("@/lib/report/diagnostic")
   const diagnostic = await collectDiagnostic(input.businessName, input.website)
   return writeReportFromDiagnostic(diagnostic)
+}
+
+/** The JSON stored on free_courses_signups.report_json. Version 3: diagnostic.location holds the place ID only. */
+export function buildReportJson(report: ReportContent) {
+  return {
+    version: 3,
+    overallScore: report.overallScore,
+    evidenceCoverage: report.evidenceCoverage,
+    scoreFactors: report.scoreFactors,
+    recommendations: report.recommendations,
+    evidenceAppendix: report.evidenceAppendix,
+    competitiveNote: report.competitiveNote,
+    disclaimers: report.disclaimers,
+    diagnostic: report.diagnostic,
+    model: report.model,
+    readAt: report.diagnostic.readAt,
+  }
 }
 
 export function reportToText(report: ReportContent): string {

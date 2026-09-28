@@ -25,9 +25,7 @@ async function main() {
         coverage: diagnostic.scores.evidenceCoverage,
         pages: diagnostic.pages.map((p) => p.url),
         directories: diagnostic.directories.filter((d) => d.found).map((d) => d.platform),
-        location: diagnostic.location.found
-          ? { name: diagnostic.location.name, rating: diagnostic.location.rating, reviews: diagnostic.location.reviewCount }
-          : diagnostic.location.note,
+        location: { placeId: diagnostic.location.placeId, note: diagnostic.location.note },
         catalog: {
           kind: diagnostic.catalog.kind,
           available: diagnostic.catalog.available,

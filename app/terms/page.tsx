@@ -79,6 +79,9 @@ export default function TermsPage() {
                 <a href="#section-6" className="text-blue-600 hover:text-blue-800">
                   6. DISCLAIMER – YOUR BUSINESS&apos;S INDIVIDUAL RESULTS WILL VARY
                 </a>
+                <a href="#google-maps" className="text-blue-600 hover:text-blue-800">
+                  GOOGLE MAPS
+                </a>
                 <a href="#section-25" className="text-blue-600 hover:text-blue-800">
                   25. CONTACTING US
                 </a>
@@ -183,6 +186,32 @@ export default function TermsPage() {
                   </div>
                 </div>
               </div>
+            </section>
+
+            <section id="google-maps" className="mb-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">GOOGLE MAPS</h2>
+              <p className="text-gray-700 leading-relaxed">
+                Some Services, including the Digital Footprint report, use Google Maps features and content. Use of
+                Google Maps features and content is subject to the then-current versions of the{" "}
+                <a
+                  href="https://maps.google.com/help/terms_maps/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800 underline"
+                >
+                  Google Maps/Google Earth Additional Terms of Service
+                </a>{" "}
+                and the{" "}
+                <a
+                  href="https://policies.google.com/privacy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800 underline"
+                >
+                  Google Privacy Policy
+                </a>
+                .
+              </p>
             </section>
 
             {/* Contact Information */}

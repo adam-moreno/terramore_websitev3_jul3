@@ -5,7 +5,7 @@ import { ADMIN_EMAIL, REPLY_TO, emailProvider, postSlack, sendEmail } from "@/li
 import { collectDiagnostic } from "@/lib/report/diagnostic"
 import { renderReportPdf } from "@/lib/report/pdf"
 import { sendReportDeliveredSms } from "@/lib/report/sms"
-import { modelProvider, reportToText, writeReportFromDiagnostic } from "@/lib/report/write"
+import { buildReportJson, modelProvider, reportToText, writeReportFromDiagnostic } from "@/lib/report/write"
 
 export type ReportRequest = {
   name: string
@@ -149,19 +149,7 @@ export async function runReportPipeline(request: ReportRequest): Promise<Pipelin
       attachments: [{ filename: safeFilename(subjectName), content: pdf, contentType: "application/pdf" }],
     })
 
-    const reportJson = {
-      version: 2,
-      overallScore: report.overallScore,
-      evidenceCoverage: report.evidenceCoverage,
-      scoreFactors: report.scoreFactors,
-      recommendations: report.recommendations,
-      evidenceAppendix: report.evidenceAppendix,
-      competitiveNote: report.competitiveNote,
-      disclaimers: report.disclaimers,
-      diagnostic,
-      model: report.model,
-      readAt: diagnostic.readAt,
-    }
+    const reportJson = buildReportJson(report)
 
     if (!emailResult.ok) {
       await saveReportState(request.email, "failed", {

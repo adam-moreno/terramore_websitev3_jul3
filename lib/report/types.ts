@@ -122,15 +122,24 @@ export type TechnicalSnapshot = {
   note: string
 }
 
-export type LocationSnapshot = {
+/**
+ * Google Places result held in memory for one report run.
+ * Never persist it, render it, or send it to the model. Only `placeId` may be stored (via LocationSnapshot).
+ */
+export type PlacesLookup = {
   checked: boolean
-  found: boolean
-  name: string | null
-  address: string | null
+  /** True only when the listing's website host matches the lead's website host. */
+  confirmed: boolean
+  placeId: string | null
   rating: number | null
   reviewCount: number | null
-  hasHours: boolean
-  mapsUrl: string | null
+  hasAddress: boolean
+}
+
+/** Persisted location record. Holds the Google place ID only, and only for a domain-confirmed match. */
+export type LocationSnapshot = {
+  checked: boolean
+  placeId: string | null
   note: string
 }
 

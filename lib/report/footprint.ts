@@ -1,8 +1,7 @@
 /**
  * Reads the public footprint of a business. No paid APIs are required.
  * Everything here is a fact we observed, or "not found". The model is told to use only this.
- *
- * Optional: GOOGLE_PLACES_API_KEY adds one Places Text Search call (rating, review count, hours).
+ * Google Places lives in lib/report/collect/locations.ts and must never feed model prompts.
  */
 
 export type Footprint = {
@@ -28,17 +27,6 @@ export type Footprint = {
     prices: string[]
     excerpt: string
     fetchedAt: string
-  }
-  maps: {
-    checked: boolean
-    found: boolean
-    name: string | null
-    rating: number | null
-    reviewCount: number | null
-    address: string | null
-    openNow: boolean | null
-    hasHours: boolean
-    mapsUrl: string | null
   }
   adLibraries: {
     metaAdLibraryUrl: string | null
@@ -226,62 +214,9 @@ async function readSite(website: string | null): Promise<Footprint["site"]> {
   }
 }
 
-async function readMaps(businessName: string, website: string | null): Promise<Footprint["maps"]> {
-  const key = process.env.GOOGLE_PLACES_API_KEY
-  const empty: Footprint["maps"] = {
-    checked: false,
-    found: false,
-    name: null,
-    rating: null,
-    reviewCount: null,
-    address: null,
-    openNow: null,
-    hasHours: false,
-    mapsUrl: null,
-  }
-  const query = businessName || (website ? new URL(website).hostname.replace(/^www\./, "") : "")
-  if (!key || !query) return empty
-
-  try {
-    const response = await fetch("https://places.googleapis.com/v1/places:searchText", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Goog-Api-Key": key,
-        "X-Goog-FieldMask":
-          "places.displayName,places.rating,places.userRatingCount,places.formattedAddress,places.regularOpeningHours,places.currentOpeningHours.openNow,places.googleMapsUri,places.websiteUri",
-      },
-      body: JSON.stringify({ textQuery: query, maxResultCount: 3 }),
-    })
-    if (!response.ok) {
-      console.warn("[footprint] Places lookup failed:", response.status)
-      return { ...empty, checked: true }
-    }
-    const data = (await response.json()) as { places?: Array<Record<string, any>> }
-    const places = data.places || []
-    const host = website ? new URL(website).hostname.replace(/^www\./, "") : null
-    const place = places.find((p) => host && typeof p.websiteUri === "string" && p.websiteUri.includes(host)) || places[0]
-    if (!place) return { ...empty, checked: true }
-    return {
-      checked: true,
-      found: true,
-      name: place.displayName?.text || null,
-      rating: typeof place.rating === "number" ? place.rating : null,
-      reviewCount: typeof place.userRatingCount === "number" ? place.userRatingCount : null,
-      address: place.formattedAddress || null,
-      openNow: typeof place.currentOpeningHours?.openNow === "boolean" ? place.currentOpeningHours.openNow : null,
-      hasHours: Boolean(place.regularOpeningHours),
-      mapsUrl: place.googleMapsUri || null,
-    }
-  } catch (error) {
-    console.warn("[footprint] Places lookup error:", error)
-    return { ...empty, checked: true }
-  }
-}
-
 export async function readFootprint(businessName: string, rawWebsite: string | null | undefined): Promise<Footprint> {
   const website = normalizeWebsite(rawWebsite)
-  const [site, maps] = await Promise.all([readSite(website), readMaps(businessName, website)])
+  const site = await readSite(website)
 
   const host = website ? new URL(website).hostname.replace(/^www\./, "") : null
   const queryName = businessName || host
@@ -289,7 +224,6 @@ export async function readFootprint(businessName: string, rawWebsite: string | n
   return {
     input: { businessName, website },
     site,
-    maps,
     adLibraries: {
       metaAdLibraryUrl: queryName
         ? `https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=US&q=${encodeURIComponent(queryName)}`
@@ -303,7 +237,6 @@ export async function readFootprint(businessName: string, rawWebsite: string | n
 /** Compact, human readable facts for the model prompt. Only observed values; misses say "not found". */
 export function footprintToFacts(fp: Footprint): string {
   const s = fp.site
-  const m = fp.maps
   const nf = "not found"
   const yesNo = (v: boolean) => (v ? "yes" : "no")
   const lines = [
@@ -325,9 +258,6 @@ export function footprintToFacts(fp: Footprint): string {
     `Prices seen on the home page: ${s.prices.length ? s.prices.join(", ") : nf}`,
     `Contact email on the site: ${s.contact.emails.join(", ") || nf}`,
     `Phone on the site: ${s.contact.phones.join(", ") || nf}`,
-    `Google Maps listing: ${!m.checked ? "not checked (no Places key)" : m.found ? `found as "${m.name}"` : nf}`,
-    m.found ? `Maps rating: ${m.rating ?? nf} from ${m.reviewCount ?? 0} reviews` : "",
-    m.found ? `Maps address: ${m.address || nf}; hours listed: ${yesNo(m.hasHours)}` : "",
     `Ad libraries: not read automatically`,
     "",
     "Home page text (first part):",
