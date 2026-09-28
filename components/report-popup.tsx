@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState, type ReactNode } from "react"
 import { createPortal } from "react-dom"
 import { ReportForm, type ReportAnswers } from "@/components/report-form"
+import { GROWTH_WORKSPACE_URL } from "@/lib/growth-workspace"
 
 const QUESTIONS = [
   {
@@ -56,6 +57,8 @@ export function ReportPopup({
   description?: string
 }) {
   const router = useRouter()
+  /** The report flow only; the /book landing (direct) keeps its booking focus. */
+  const workspaceUrl = direct ? null : GROWTH_WORKSPACE_URL
   const [step, setStep] = useState(0)
   const [answers, setAnswers] = useState<ReportAnswers>({})
   const [picked, setPicked] = useState<string | null>(null)
@@ -95,13 +98,13 @@ export function ReportPopup({
   }, [open, router])
 
   useEffect(() => {
-    if (!success || direct) return
+    if (!success || direct || workspaceUrl) return
     const id = window.setTimeout(() => {
       closeRef.current()
       router.push("/")
     }, SUCCESS_REDIRECT_MS)
     return () => window.clearTimeout(id)
-  }, [success, router, direct])
+  }, [success, router, direct, workspaceUrl])
 
   useEffect(() => {
     if (picked === null) return
@@ -143,14 +146,39 @@ export function ReportPopup({
             <p className="mt-3 text-[15px] leading-relaxed text-ink/70">
               We&apos;re preparing it now. In your inbox in minutes.
             </p>
-            <button
-              type="button"
-              onClick={goHome}
-              className="mt-7 inline-flex h-11 w-full items-center justify-center rounded-full bg-brand text-[15px] font-medium text-white hover:bg-brand-hover"
-            >
-              Done
-            </button>
-            {direct ? null : <p className="mt-3 text-[13px] text-slate-400">Taking you home in a moment…</p>}
+            {workspaceUrl ? (
+              <>
+                <div className="mt-6 rounded-2xl bg-cream px-5 py-5 text-left">
+                  <p className="text-[15px] leading-relaxed text-ink/80">
+                    We&apos;ve mapped what customers can see. Add a few business numbers to see what happens after they contact you.
+                  </p>
+                  <a
+                    href={workspaceUrl}
+                    className="mt-4 inline-flex h-11 w-full items-center justify-center rounded-full bg-brand text-[15px] font-medium text-white hover:bg-brand-hover"
+                  >
+                    Open My Growth Workspace
+                  </a>
+                </div>
+                <button
+                  type="button"
+                  onClick={goHome}
+                  className="mt-3 inline-flex h-11 w-full items-center justify-center rounded-full text-[15px] font-medium text-ink/60 hover:text-ink"
+                >
+                  Done
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={goHome}
+                  className="mt-7 inline-flex h-11 w-full items-center justify-center rounded-full bg-brand text-[15px] font-medium text-white hover:bg-brand-hover"
+                >
+                  Done
+                </button>
+                {direct ? null : <p className="mt-3 text-[13px] text-slate-400">Taking you home in a moment…</p>}
+              </>
+            )}
           </div>
         ) : (
           <>
