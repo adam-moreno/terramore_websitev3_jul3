@@ -29,7 +29,7 @@ const PROOF_STATS = [
   },
   {
     tint: "from-gold-from/[0.14] to-gold-from/[0.03]",
-    accent: "text-gold",
+    accent: "text-ink",
     stat: "Fortune 500",
     label: "Advertisers whose TV and streaming campaigns were measured at Samba TV",
   },
@@ -44,7 +44,7 @@ const PROOF_NOTES = [
   },
   {
     eyebrow: "Built to leave you stronger",
-    eyebrowColor: "text-gold",
+    eyebrowColor: "text-ink",
     body: "Every engagement starts with a written read of the business and ends with a roadmap you keep — whether we stay on or not. Specialists in ads, email, and build join when the scope needs them.",
     source: "How Terramore runs",
   },
@@ -82,7 +82,7 @@ export default function SolutionsPage() {
           <div>
             <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-brand">Revenue Growth System</p>
             <h1 className="mt-4 max-w-2xl text-[2.15rem] font-bold leading-[1.12] tracking-[-0.02em] text-ink sm:text-5xl md:text-[3.15rem]">
-              Marketing that connects all the way to <span className="text-gold">revenue.</span>
+              Marketing that connects all the way to revenue.
             </h1>
             <p className="mt-5 max-w-xl text-[17px] leading-relaxed text-slate-600 md:text-[18px]">
               Terramore helps growing businesses find customers, convert more of them, and automate what happens next.
@@ -92,7 +92,7 @@ export default function SolutionsPage() {
               <HeroWebsiteInput />
             </div>
           </div>
-          {/* Decorative clock ring is desktop-only. */}
+          {/* Growth system ring is desktop-only. */}
           <div className="hidden lg:block">
             <HeroEngine />
           </div>
@@ -120,7 +120,7 @@ export default function SolutionsPage() {
         <div className="grid gap-6 rounded-[1.75rem] border border-black/[0.06] bg-white p-6 shadow-[0_8px_30px_rgba(15,30,46,0.04)] md:grid-cols-[0.9fr_1.1fr] md:items-center md:gap-10 md:p-10">
           <h2 className="text-[1.5rem] font-bold leading-[1.15] tracking-[-0.02em] text-ink md:text-[2rem]">
             You probably don&apos;t need more marketing.{" "}
-            <span className="text-gold">You need the pieces to work together.</span>
+            You need the pieces to work together.
           </h2>
           <ul className="space-y-3">
             {RECOGNIZABLE_PROBLEMS.map((problem) => (
@@ -144,7 +144,7 @@ export default function SolutionsPage() {
       <section className="page-shell pb-14 md:pb-20">
         <p className="section-eyebrow text-center">Proof, not promises</p>
         <h2 className="mx-auto mt-3 max-w-2xl text-center text-[1.8rem] font-bold leading-[1.1] tracking-[-0.02em] text-ink md:text-[2.5rem]">
-          The experience behind <span className="text-gold">the system.</span>
+          The experience behind the system.
         </h2>
         <div className="mt-8 grid grid-cols-2 gap-3 md:mt-10 md:gap-4">
           {PROOF_STATS.map((card) => (
@@ -207,7 +207,7 @@ export default function SolutionsPage() {
       <section className="page-shell pb-16 md:pb-24">
         <p className="section-eyebrow text-center">Pick a time</p>
         <h2 className="mx-auto mt-3 max-w-2xl text-center text-[1.8rem] font-bold leading-[1.1] tracking-[-0.02em] text-ink md:text-[2.5rem]">
-          Grab 30 minutes <span className="text-gold">this week.</span>
+          Grab 30 minutes this week.
         </h2>
         <p className="mx-auto mt-4 max-w-xl text-center text-[16px] leading-relaxed text-slate-600">
           Free call. Bring the growth problem; we&apos;ll say what we would do first.

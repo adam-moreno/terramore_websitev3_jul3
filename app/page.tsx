@@ -8,7 +8,6 @@ import { ReportBand } from "@/components/report-band"
 import { ReviewCarousel } from "@/components/review-carousel"
 import { SecurityBand } from "@/components/security-band"
 import { SiteFooter } from "@/components/site-footer"
-import { G2Rating } from "@/components/g2-rating"
 import { HeroAnalytics } from "@/components/hero-analytics"
 import { HeroFloatingLogos } from "@/components/hero-floating-logos"
 import { HeroLogoMobius } from "@/components/hero-logo-mobius"
@@ -52,9 +51,9 @@ export default function TerramoreHomepage() {
                   more
                 </span>
                 <br />
-                from the <span className="text-gold">business</span>
+                from the business
                 <br />
-                <span className="text-gold">you already built.</span>
+                you already built.
               </h1>
               {/* Mobile: full hero-copy width so line 2 stays one line (3 forced breaks). */}
               <p className="mx-auto mt-5 max-w-none text-center text-[16px] font-medium leading-[1.4] text-ink sm:max-w-[26rem] md:mt-8 md:max-w-[626px] md:text-[20px] md:leading-[30px]">
@@ -77,15 +76,12 @@ export default function TerramoreHomepage() {
                   source="homepage"
                   className="inline-flex h-11 items-center justify-center rounded-full bg-brand px-6 text-[16px] font-medium text-white hover:bg-brand-hover md:h-10 md:px-4"
                 />
-                <div className="mt-2.5 flex flex-col items-center gap-1 text-center text-[13px] font-medium text-ink/45">
+                <div className="mt-2.5 flex flex-col items-center gap-1 text-center text-[13px] font-medium text-ink/70">
                   <p>Free 30-minute call.</p>
-                  <ReportPopupLink className="text-[13px] font-medium text-ink/45 underline-offset-4 hover:text-ink">
+                  <ReportPopupLink className="text-[13px] font-medium text-ink/70 underline-offset-4 hover:text-ink">
                     <span className="md:hidden">Or tap for a free Digital Footprint report</span>
                     <span className="hidden md:inline">Or click here for a Digital Footprint report</span>
                   </ReportPopupLink>
-                </div>
-                <div className="mt-2.5">
-                  <G2Rating rating="4.5" />
                 </div>
               </div>
             </div>

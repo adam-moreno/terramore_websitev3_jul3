@@ -94,7 +94,7 @@ export default async function BookPage({
         <div className="mx-auto max-w-3xl text-center">
           <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-brand">Let&apos;s talk</p>
           <h1 className="mt-4 text-[2.2rem] font-bold leading-[1.08] tracking-[-0.02em] text-ink sm:text-5xl md:text-[3.2rem]">
-            Let&apos;s figure out what&apos;s actually holding <span className="text-gold">your growth back.</span>
+            Let&apos;s figure out what&apos;s actually holding your growth back.
           </h1>
           <p className="mx-auto mt-5 max-w-xl text-[17px] leading-relaxed text-slate-600 md:text-[18px]">
             A 30-minute working session to look at your business, your current marketing system, and where we see the
@@ -176,7 +176,7 @@ export default async function BookPage({
       <section className="page-shell pb-14 md:pb-20">
         <Reveal className="mx-auto max-w-3xl text-center">
           <h2 className="text-[1.9rem] font-bold leading-[1.12] tracking-[-0.02em] text-ink md:text-[2.6rem]">
-            Build a growth system around <span className="text-gold">the business you&apos;ve already built.</span>
+            Build a growth system around the business you&apos;ve already built.
           </h2>
           <p className="mt-5 text-[16.5px] leading-relaxed text-slate-600 md:text-[17.5px]">
             Growth gets harder when every channel, campaign, and follow-up lives in a separate box. Terramore connects
@@ -314,7 +314,7 @@ export default async function BookPage({
               <Logo size="md" animate={false} on="light" />
             </div>
             <h2 className="mt-8 text-[1.9rem] font-bold leading-[1.12] tracking-[-0.02em] text-ink md:text-[2.5rem]">
-              Ready to build a stronger <span className="text-gold">growth system?</span>
+              Ready to build a stronger growth system?
             </h2>
             <p className="mt-4 text-[16.5px] leading-relaxed text-slate-700">
               Let&apos;s talk about where your business is today and where you want to take it.

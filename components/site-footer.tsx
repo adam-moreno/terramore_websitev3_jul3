@@ -51,17 +51,6 @@ export function SiteFooter({
         <div aria-hidden className="absolute inset-0 bg-ink/70" />
         <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-ink/30 via-transparent to-ink/60" />
 
-        <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="marketing-dragon-fly absolute top-[24%] left-0">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/marketing/footer-dragon.png" alt="" className="marketing-dragon-bob h-16 w-auto opacity-90 md:h-24" />
-          </div>
-          <div className="marketing-chase-run absolute bottom-1 left-0">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/marketing/footer-chase.png" alt="" className="h-14 w-auto opacity-90 md:h-20" />
-          </div>
-        </div>
-
         <div className="page-shell relative pb-10 pt-20 md:pt-28">
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="text-[2rem] font-medium leading-[1.15] tracking-[-0.02em] text-white md:text-[3rem]">

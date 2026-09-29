@@ -1,8 +1,9 @@
 "use client"
 
 import Image from "next/image"
-import { useEffect, useRef, useState, type CSSProperties, type FocusEvent, type PointerEvent } from "react"
-import { resolveVisitorLocality } from "@/lib/construction-locality"
+import { useEffect, useRef, useState, type CSSProperties, type FocusEvent, type PointerEvent, type ReactNode } from "react"
+import { MotionToggle } from "@/components/motion-toggle"
+import { useOnScreenAndVisible, usePrefersReducedMotion } from "@/hooks/use-autoplay"
 
 type SceneId = "film" | "portfolio" | "website" | "search" | "advertise" | "followup" | "outcome"
 
@@ -63,7 +64,6 @@ const STEPS: readonly Step[] = [
   },
 ]
 
-const DEFAULT_METRO = "Los Angeles"
 const PROJECT = "Whole-home rebuild"
 const VIDEO_SRC = "/industries/construction/hero-portrait.mp4?v=0921"
 const POSTER_SRC = "/industries/construction/hero-poster.jpg?v=0921"
@@ -93,17 +93,18 @@ function sceneIndexAt(step: Step, elapsed: number) {
 
 /**
  * Solution section: Terramore's 6-step working timeline, one phone scene per step.
- * One whole-home rebuild in the visitor's metro flows through every scene:
- * filmed → portfolio → website → Google / ChatGPT → ads → follow-up → booked (illustrative).
- * The phone auto-advances and loops; the numbered list highlights the active step and
- * jumps the phone when clicked. Auto-advance pauses on mouse hover, keyboard focus, and
- * offscreen. Reduced motion: no auto-advance, step 06 shows its static booked outcome.
- * Metro names always render in full (no CSS ellipsis on place names).
+ * One whole-home rebuild flows through every scene (illustrative):
+ * filmed → portfolio → website → Google / ChatGPT → ads → follow-up → booked.
+ * Sequence: the phone plays through the steps once while on screen, then holds the booked outcome.
+ * Pause / Play controls it; it also holds on mouse hover and keyboard focus. The numbered list jumps
+ * the phone when clicked. Reduced motion: no auto-advance, step 06 shows its static booked outcome.
+ * No visitor location is looked up; copy says "near me" / "local".
  */
 export function ConstructionSolutionTimeline() {
   const [position, setPosition] = useState({ step: 0, scene: 0 })
-  const [reduceMotion, setReduceMotion] = useState(false)
-  const [metro, setMetro] = useState(DEFAULT_METRO)
+  const [userPaused, setUserPaused] = useState(false)
+  const [ended, setEnded] = useState(false)
+  const reduceMotion = usePrefersReducedMotion()
 
   const rootRef = useRef<HTMLDivElement>(null)
   const barRef = useRef<HTMLSpanElement>(null)
@@ -111,50 +112,28 @@ export function ConstructionSolutionTimeline() {
   const elapsedRef = useRef(0)
   const hoveredRef = useRef(false)
   const focusedRef = useRef(false)
-  const visibleRef = useRef(true)
+  const onScreen = useOnScreenAndVisible(rootRef)
+  const running = !reduceMotion && onScreen && !userPaused && !ended
 
   useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)")
-    const sync = () => setReduceMotion(mq.matches)
-    sync()
-    mq.addEventListener("change", sync)
-    return () => mq.removeEventListener("change", sync)
-  }, [])
-
-  useEffect(() => {
-    let cancelled = false
-    ;(async () => {
-      const locality = await resolveVisitorLocality()
-      if (!cancelled && locality.metro) setMetro(locality.metro)
-    })()
-    return () => {
-      cancelled = true
-    }
-  }, [])
-
-  useEffect(() => {
-    const el = rootRef.current
-    if (!el) return
-    const observer = new IntersectionObserver(([entry]) => {
-      visibleRef.current = entry?.isIntersecting ?? true
-    })
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [])
-
-  useEffect(() => {
-    if (reduceMotion) return
+    if (!running) return
     let raf = 0
     let last = performance.now()
     const tick = (now: number) => {
       // Clamp so a backgrounded tab doesn't skip steps on return.
       const dt = Math.min(now - last, 100)
       last = now
-      if (!hoveredRef.current && !focusedRef.current && visibleRef.current) {
+      if (!hoveredRef.current && !focusedRef.current) {
         elapsedRef.current += dt
         const step = STEPS[stepRef.current]!
         if (elapsedRef.current >= stepDuration(step)) {
-          stepRef.current = (stepRef.current + 1) % STEPS.length
+          if (stepRef.current === STEPS.length - 1) {
+            elapsedRef.current = stepDuration(step)
+            if (barRef.current) barRef.current.style.transform = "scaleX(1)"
+            setEnded(true)
+            return
+          }
+          stepRef.current += 1
           elapsedRef.current = 0
           setPosition({ step: stepRef.current, scene: 0 })
         } else {
@@ -170,7 +149,17 @@ export function ConstructionSolutionTimeline() {
     }
     raf = window.requestAnimationFrame(tick)
     return () => window.cancelAnimationFrame(raf)
-  }, [reduceMotion])
+  }, [running])
+
+  const toggle = () => {
+    if (ended) {
+      setEnded(false)
+      setUserPaused(false)
+      jumpTo(0)
+    } else {
+      setUserPaused((p) => !p)
+    }
+  }
 
   const jumpTo = (index: number) => {
     const step = STEPS[index]!
@@ -204,7 +193,11 @@ export function ConstructionSolutionTimeline() {
       onFocus={onFocus}
       onBlur={onBlur}
     >
-      <SolutionPhone scene={scene} metro={metro} animate={!reduceMotion} />
+      <SolutionPhone scene={scene} animate={!reduceMotion} playing={running}>
+        {reduceMotion ? null : (
+          <MotionToggle paused={userPaused || ended} onToggle={toggle} label="project timeline" tone="dark" />
+        )}
+      </SolutionPhone>
 
       <ol className="divide-y divide-white/10 border-y border-white/10">
         {STEPS.map((step, i) => {
@@ -271,43 +264,68 @@ export function ConstructionSolutionTimeline() {
   )
 }
 
-function SolutionPhone({ scene, metro, animate }: { scene: SceneId; metro: string; animate: boolean }) {
+function SolutionPhone({
+  scene,
+  animate,
+  playing,
+  children,
+}: {
+  scene: SceneId
+  animate: boolean
+  playing: boolean
+  children?: ReactNode
+}) {
   return (
-    <div aria-hidden className="mx-auto w-full max-w-[17.5rem] lg:mx-0 lg:max-w-none">
+    <div className="mx-auto w-full max-w-[17.5rem] lg:mx-0 lg:max-w-none">
       <div
+        aria-hidden
         className="relative mx-auto aspect-[9/17] w-full max-w-[15.5rem] overflow-hidden rounded-[1.75rem] bg-ink shadow-[0_28px_60px_-28px_rgba(15,30,46,0.55)] ring-1 ring-white/15"
         data-solution-scene={scene}
       >
         <Image src={SHOTS.after} alt="" fill className="object-cover opacity-35 blur-[2px]" sizes="160px" />
         <div className="absolute inset-0 bg-ink/50" />
 
-        {scene === "film" && <FilmScene metro={metro} animate={animate} />}
-        {scene === "portfolio" && <PortfolioScene metro={metro} />}
-        {scene === "website" && <WebsiteScene metro={metro} />}
-        {scene === "search" && <SearchScene metro={metro} />}
-        {scene === "advertise" && <AdvertiseScene metro={metro} animate={animate} />}
-        {scene === "followup" && <FollowUpScene metro={metro} animate={animate} />}
-        {scene === "outcome" && <OutcomeScene metro={metro} />}
+        {scene === "film" && <FilmScene animate={animate} playing={playing} />}
+        {scene === "portfolio" && <PortfolioScene />}
+        {scene === "website" && <WebsiteScene />}
+        {scene === "search" && <SearchScene />}
+        {scene === "advertise" && <AdvertiseScene animate={animate} playing={playing} />}
+        {scene === "followup" && <FollowUpScene animate={animate} />}
+        {scene === "outcome" && <OutcomeScene />}
 
         <div className="pointer-events-none absolute inset-x-0 bottom-2 z-30 flex justify-center">
           <span className="h-[3px] w-24 rounded-full bg-cream/35" />
         </div>
       </div>
+      <div className="mx-auto mt-4 flex max-w-[15.5rem] items-center justify-center gap-3">
+        <p className="text-[12px] font-medium text-cream/70">Illustrative example</p>
+        {children}
+      </div>
     </div>
   )
 }
 
-function ProjectFootage({ animate, sizes }: { animate: boolean; sizes: string }) {
+/** Project footage plays only while the timeline is running; paused, ended, or reduced motion shows the poster frame. */
+function ProjectFootage({ animate, playing, sizes }: { animate: boolean; playing: boolean; sizes: string }) {
+  const videoRef = useRef<HTMLVideoElement>(null)
+
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+    if (playing) video.play().catch(() => {})
+    else video.pause()
+  }, [playing])
+
   if (!animate) return <Image src={POSTER_SRC} alt="" fill className="object-cover" sizes={sizes} />
   return (
     <video
+      ref={videoRef}
       className="absolute inset-0 h-full w-full object-cover"
       src={VIDEO_SRC}
       poster={POSTER_SRC}
       muted
       loop
       playsInline
-      autoPlay
       preload="metadata"
     />
   )
@@ -319,34 +337,22 @@ const FILM_CLIPS = [
   { src: SHOTS.detail, label: "Details" },
 ] as const
 
-function FilmScene({ metro, animate }: { metro: string; animate: boolean }) {
-  const [seconds, setSeconds] = useState(12)
-
-  useEffect(() => {
-    if (!animate) return
-    const id = window.setInterval(() => setSeconds((s) => s + 1), 1000)
-    return () => window.clearInterval(id)
-  }, [animate])
-
-  const clock = `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`
-
+function FilmScene({ animate, playing }: { animate: boolean; playing: boolean }) {
   return (
     <div className="absolute inset-0 z-10 bg-ink text-cream">
-      <ProjectFootage animate={animate} sizes="248px" />
+      <ProjectFootage animate={animate} playing={playing} sizes="248px" />
       <div className="absolute inset-0 bg-gradient-to-b from-ink/70 via-ink/10 to-ink/80" />
 
       <div className="absolute inset-x-0 top-0 px-3.5 pt-3">
         <div className="flex items-center justify-between text-[10px] font-semibold">
           <span className="flex items-center gap-1.5 rounded bg-ink/60 px-1.5 py-0.5 tabular-nums">
-            <span className={`h-1.5 w-1.5 rounded-full bg-red-500 ${animate ? "construction-device-pulse" : ""}`} />
-            REC {clock}
+            <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
+            REC 00:12
           </span>
           <span className="rounded bg-ink/60 px-1.5 py-0.5 text-cream/75">4K · 24fps</span>
         </div>
         <p className="mt-2.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-gold-from">Day 1 · On site</p>
-        <p className="mt-0.5 text-[13px] font-semibold leading-snug tracking-tight">
-          {PROJECT} · {metro}
-        </p>
+        <p className="mt-0.5 text-[13px] font-semibold leading-snug tracking-tight">{PROJECT}</p>
       </div>
 
       <div className="absolute inset-x-5 bottom-[9.5rem] top-[6.5rem]">
@@ -383,7 +389,7 @@ function FilmScene({ metro, animate }: { metro: string; animate: boolean }) {
   )
 }
 
-function PortfolioScene({ metro }: { metro: string }) {
+function PortfolioScene() {
   const gallery = [SHOTS.aerial, SHOTS.afterAlt, SHOTS.duringAlt, SHOTS.detail]
   return (
     <div className="absolute inset-0 z-10 flex flex-col bg-ink px-3 pt-3 text-cream">
@@ -392,7 +398,7 @@ function PortfolioScene({ metro }: { metro: string }) {
         <span className="text-emerald-300/90">Edited</span>
       </div>
       <p className="mt-1.5 text-[14px] font-semibold leading-snug tracking-tight">{PROJECT}</p>
-      <p className="mt-0.5 text-[11px] leading-snug text-cream/50">{metro}</p>
+      <p className="mt-0.5 text-[11px] leading-snug text-cream/50">Local project</p>
 
       <div className="construction-device-card relative mt-2.5 grid grid-cols-2 gap-0.5 overflow-hidden rounded-xl ring-1 ring-white/15">
         <div className="relative aspect-[3/5]">
@@ -437,7 +443,7 @@ function PortfolioScene({ metro }: { metro: string }) {
   )
 }
 
-function WebsiteScene({ metro }: { metro: string }) {
+function WebsiteScene() {
   return (
     <div className="absolute inset-0 z-10 flex flex-col bg-white pt-3 text-ink">
       <div className="mx-2.5 flex items-center gap-1.5 rounded-full bg-[#f1f3f4] px-2.5 py-1 text-[9px] text-ink/55">
@@ -467,9 +473,7 @@ function WebsiteScene({ metro }: { metro: string }) {
 
       <div className="px-3 pt-2.5">
         <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-brand">Featured project</p>
-        <p className="mt-0.5 text-[14px] font-semibold leading-snug tracking-tight">
-          {PROJECT} in {metro}
-        </p>
+        <p className="mt-0.5 text-[14px] font-semibold leading-snug tracking-tight">{PROJECT}</p>
         <p className="mt-1 text-[10px] leading-snug text-ink/55">Filmed start to finish: the process and the finished home.</p>
         <div className="mt-2 grid grid-cols-3 gap-1">
           {[SHOTS.during, SHOTS.detail, SHOTS.afterAlt].map((src) => (
@@ -489,7 +493,7 @@ function WebsiteScene({ metro }: { metro: string }) {
   )
 }
 
-function SearchScene({ metro }: { metro: string }) {
+function SearchScene() {
   return (
     <div className="absolute inset-0 z-10 flex flex-col bg-white pt-3 text-ink">
       <div className="flex items-start gap-2 border-b border-ink/[0.08] px-2.5 pb-2">
@@ -508,7 +512,6 @@ function SearchScene({ metro }: { metro: string }) {
         <span className="absolute left-[50%] top-2 flex h-5 w-5 items-center justify-center rounded-full bg-brand text-[9px] font-bold text-white ring-2 ring-white">
           1
         </span>
-        <span className="absolute bottom-1 left-1.5 text-[8px] font-medium text-ink/45">{metro}</span>
       </div>
 
       <div className="space-y-1.5 px-3 pt-2">
@@ -518,7 +521,7 @@ function SearchScene({ metro }: { metro: string }) {
           </div>
           <div className="min-w-0">
             <p className="text-[12px] font-semibold leading-snug text-[#1a0dab]">Your Construction Co.</p>
-            <p className="text-[9.5px] leading-snug text-ink/55">General contractor · {metro}</p>
+            <p className="text-[9.5px] leading-snug text-ink/55">General contractor · Nearby</p>
             <p className="mt-0.5 text-[9.5px] font-semibold text-brand">Website · Directions · Call</p>
           </div>
         </div>
@@ -534,10 +537,10 @@ function SearchScene({ metro }: { metro: string }) {
       >
         <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-ink/45">ChatGPT</p>
         <p className="ml-auto mt-1.5 w-fit max-w-[88%] rounded-2xl bg-white px-2.5 py-1.5 text-[10px] leading-snug text-ink/80 shadow-sm">
-          Who should I call for a home rebuild in {metro}?
+          Who should I call for a home rebuild near me?
         </p>
         <p className="mt-1.5 text-[10px] leading-snug text-ink/75">
-          Try <span className="font-semibold text-ink">Your Construction Co.</span>. Their site walks through a {metro}{" "}
+          Try <span className="font-semibold text-ink">Your Construction Co.</span>. Their site walks through a local
           whole-home rebuild on video, start to finish.
         </p>
       </div>
@@ -549,7 +552,7 @@ function SearchScene({ metro }: { metro: string }) {
   )
 }
 
-function AdvertiseScene({ metro, animate }: { metro: string; animate: boolean }) {
+function AdvertiseScene({ animate, playing }: { animate: boolean; playing: boolean }) {
   return (
     <div className="absolute inset-0 z-10 flex flex-col bg-ink pt-3 text-cream">
       <div className="flex items-center gap-2 px-3">
@@ -558,15 +561,15 @@ function AdvertiseScene({ metro, animate }: { metro: string; animate: boolean })
         </span>
         <div className="min-w-0">
           <p className="text-[11px] font-semibold leading-none">Your Construction Co.</p>
-          <p className="mt-0.5 text-[9px] leading-snug text-cream/50">Sponsored · {metro}</p>
+          <p className="mt-0.5 text-[9px] leading-snug text-cream/50">Sponsored</p>
         </div>
       </div>
       <p className="mt-2 px-3 text-[10.5px] leading-snug text-cream/85">
-        Watch a {metro} whole-home rebuild, start to finish.
+        Watch a local whole-home rebuild, start to finish.
       </p>
 
       <div className="construction-device-card relative mt-2 aspect-square w-full overflow-hidden">
-        <ProjectFootage animate={animate} sizes="248px" />
+        <ProjectFootage animate={animate} playing={playing} sizes="248px" />
         <span className="absolute bottom-2 right-2 rounded bg-ink/70 px-1.5 py-0.5 text-[8px] font-semibold tabular-nums text-cream">
           0:15
         </span>
@@ -583,13 +586,13 @@ function AdvertiseScene({ metro, animate }: { metro: string; animate: boolean })
   )
 }
 
-function FollowUpScene({ metro, animate }: { metro: string; animate: boolean }) {
+function FollowUpScene({ animate }: { animate: boolean }) {
   const notifications = [
     {
       app: "Website",
       time: "now",
       title: "New estimate request",
-      body: `${PROJECT} · ${metro}`,
+      body: PROJECT,
       icon: <span className="text-[10px] font-bold">W</span>,
       iconClass: "bg-brand text-white",
     },
@@ -605,7 +608,7 @@ function FollowUpScene({ metro, animate }: { metro: string; animate: boolean }) 
       app: "Slack · #new-leads",
       time: "now",
       title: "New lead for your estimator",
-      body: `${PROJECT}, ${metro}. Auto-reply sent.`,
+      body: `${PROJECT}. Auto-reply sent.`,
       icon: <span className="text-[12px] font-bold">#</span>,
       iconClass: "bg-[#4A154B] text-white",
     },
@@ -668,14 +671,12 @@ const JOURNEY = [
   "Estimate booked · Thu 10 AM",
 ] as const
 
-function OutcomeScene({ metro }: { metro: string }) {
+function OutcomeScene() {
   return (
     <div className="absolute inset-0 z-10 flex flex-col bg-ink px-3.5 pt-8 text-cream">
       <div className="text-center">
         <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-gold-from">Estimate booked</p>
-        <p className="mt-1.5 text-[13px] leading-snug text-cream/60">
-          {PROJECT} · {metro}
-        </p>
+        <p className="mt-1.5 text-[13px] leading-snug text-cream/60">{PROJECT}</p>
       </div>
 
       <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.06] p-3.5">
@@ -698,7 +699,6 @@ function OutcomeScene({ metro }: { metro: string }) {
 
       <p className="mt-auto pb-8 text-center text-[11px] font-medium text-cream/50">
         Filmed → found → booked.
-        <span className="mt-0.5 block text-cream/50">Illustrative example</span>
       </p>
     </div>
   )

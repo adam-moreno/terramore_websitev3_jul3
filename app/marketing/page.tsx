@@ -245,7 +245,7 @@ export default function MarketingPage() {
       <section className="page-shell pb-14 md:pb-20">
         <p className="section-eyebrow text-center">The data is clear</p>
         <h2 className="mx-auto mt-3 max-w-2xl text-center text-[1.8rem] font-bold leading-[1.12] tracking-[-0.02em] text-ink md:text-[2.5rem]">
-          Terramore is <span className="font-serif italic text-gold">your shortcut</span> to revenue.
+          Terramore is <span className="font-serif italic">your shortcut</span> to revenue.
         </h2>
         <p className="mx-auto mt-4 max-w-xl text-center text-[16px] leading-relaxed text-slate-600">
           As an extension of your team, we run every stage of the growth system — strategy through revenue — and
@@ -260,7 +260,7 @@ export default function MarketingPage() {
       <section className="page-shell pb-14 md:pb-20">
         <p className="section-eyebrow text-center">Creative that keeps up</p>
         <h2 className="mx-auto mt-3 max-w-2xl text-center text-[1.8rem] font-bold leading-[1.12] tracking-[-0.02em] text-ink md:text-[2.5rem]">
-          From big concepts <span className="text-gold">to finished assets.</span>
+          From big concepts to finished assets.
         </h2>
         <p className="mx-auto mt-4 max-w-xl text-center text-[16px] leading-relaxed text-slate-600">
           The creative muscle to keep your campaigns fresh and on-brand, across every channel.

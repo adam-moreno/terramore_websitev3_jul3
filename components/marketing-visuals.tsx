@@ -13,6 +13,8 @@
 import Image from "next/image"
 import { useEffect, useRef, useState } from "react"
 import { BookingLink } from "@/components/booking-popup"
+import { MotionToggle } from "@/components/motion-toggle"
+import { useOnScreenAndVisible, usePrefersReducedMotion } from "@/hooks/use-autoplay"
 import { ArrowUpRight, Bell, CreditCard, TrendingUp } from "lucide-react"
 
 const PAYMENTS = [
@@ -81,7 +83,7 @@ export function MarketingHeroVisual() {
               <div className="mt-2 rounded-xl bg-cream p-3">
                 <div className="flex items-center justify-between">
                   <p className="text-[10px] font-medium text-ink/60">Sales today</p>
-                  <TrendingUp className="h-3 w-3 text-gold" strokeWidth={2.5} />
+                  <TrendingUp className="h-3 w-3 text-gold-to" strokeWidth={2.5} />
                 </div>
                 <p className="mt-0.5 text-[17px] font-bold tracking-tight text-ink">$3,420</p>
                 <p className="text-[9px] text-ink/45">12 orders · avg $285</p>
@@ -119,8 +121,9 @@ export function MarketingHeroVisual() {
 
 /* ------------------------------------------------------------------ */
 /* ServiceCarousel: infinite marquee of service tiles with a small     */
-/* visual example each. Auto-scrolls, eases to a crawl on hover, and   */
-/* becomes a plain swipeable rail under prefers-reduced-motion.        */
+/* visual example each. Auto-scrolls, eases to a crawl on hover, has a */
+/* Pause control, stops off screen, and becomes a plain swipeable rail */
+/* under prefers-reduced-motion.                                       */
 /* ------------------------------------------------------------------ */
 
 const SERVICES = [
@@ -148,19 +151,20 @@ function ServiceThumb({ id, label }: { id: (typeof SERVICES)[number]["id"]; labe
 }
 
 export function ServiceCarousel() {
+  const rootRef = useRef<HTMLDivElement>(null)
   const trackRef = useRef<HTMLDivElement>(null)
   const hovering = useRef(false)
-  const [reducedMotion, setReducedMotion] = useState(false)
+  const offsetRef = useRef(0)
+  const reducedMotion = usePrefersReducedMotion()
+  const onScreen = useOnScreenAndVisible(rootRef)
+  const [paused, setPaused] = useState(false)
+  const running = onScreen && !paused && !reducedMotion
 
+  // Orientation: a slow scroll through the services. The frame loop only runs while on screen and unpaused (VR-48, VR-51).
   useEffect(() => {
-    if (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setReducedMotion(true)
-      return
-    }
     const track = trackRef.current
-    if (!track) return
+    if (!running || !track) return
 
-    let offset = 0
     let speed = 0.55 // px per frame at 60fps
     let frame = 0
     let last = performance.now()
@@ -171,15 +175,15 @@ export function ServiceCarousel() {
       // Ease toward crawl on hover, back to cruise off it.
       const target = hovering.current ? 0.08 : 0.55
       speed += (target - speed) * 0.06
-      offset += speed * (delta / 16.7)
+      offsetRef.current += speed * (delta / 16.7)
       const half = track.scrollWidth / 2
-      if (half > 0 && offset >= half) offset -= half
-      track.style.transform = `translateX(${-offset}px)`
+      if (half > 0 && offsetRef.current >= half) offsetRef.current -= half
+      track.style.transform = `translateX(${-offsetRef.current}px)`
       frame = requestAnimationFrame(step)
     }
     frame = requestAnimationFrame(step)
     return () => cancelAnimationFrame(frame)
-  }, [])
+  }, [running])
 
   /* Horizontal tiles: text leads, photo is a small square accent on the right. */
   const tiles = (keyPrefix: string, hidden: boolean) =>
@@ -201,27 +205,32 @@ export function ServiceCarousel() {
 
   if (reducedMotion) {
     return (
-      <div className="overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div ref={rootRef} className="overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <ul className="flex gap-3 px-1">{tiles("static", false)}</ul>
       </div>
     )
   }
 
   return (
-    <div
-      className="overflow-hidden"
-      onMouseEnter={() => {
-        hovering.current = true
-      }}
-      onMouseLeave={() => {
-        hovering.current = false
-      }}
-    >
-      <div ref={trackRef} className="w-max will-change-transform">
-        <ul className="flex gap-3 pr-3">
-          {tiles("a", false)}
-          {tiles("b", true)}
-        </ul>
+    <div ref={rootRef}>
+      <div
+        className="overflow-hidden"
+        onMouseEnter={() => {
+          hovering.current = true
+        }}
+        onMouseLeave={() => {
+          hovering.current = false
+        }}
+      >
+        <div ref={trackRef} className="w-max will-change-transform">
+          <ul className="flex gap-3 pr-3">
+            {tiles("a", false)}
+            {tiles("b", true)}
+          </ul>
+        </div>
+      </div>
+      <div className="mt-4 flex justify-center">
+        <MotionToggle paused={paused} onToggle={() => setPaused((p) => !p)} label="services list" />
       </div>
     </div>
   )
@@ -243,12 +252,10 @@ const STATS = [
 /* ------------------------------------------------------------------ */
 /* CreativeTilesGrid: the creative showcase — photographic service     */
 /* tiles, each its own visual world (different environment, palette,   */
-/* subject, and motion). Layout: 3-col bento on desktop (two 2x2,      */
-/* three 1x2 talls, four 1x1 = a perfectly filled 3x6 grid), uniform   */
-/* stacked tiles on mobile. Motion is a small library of editorial     */
-/* behaviors (slow push, lateral pan) assigned per service; hover      */
-/* shifts the crop slightly and lifts the caption. All motion stops    */
-/* under prefers-reduced-motion.                                       */
+/* subject). Layout: 3-col bento on desktop (two 2x2, three 1x2 talls, */
+/* four 1x1 = a perfectly filled 3x6 grid), uniform stacked tiles on   */
+/* mobile. Photos hold still; hover shifts the crop slightly and lifts */
+/* the caption (motion-safe only).                                     */
 /* ------------------------------------------------------------------ */
 
 const CREATIVE_TILES = [
@@ -259,7 +266,6 @@ const CREATIVE_TILES = [
     image: "/marketing/services/creative.png",
     alt: "A wall of colorful ad concept variations being pinned up in a bright studio",
     span: "lg:col-span-2 lg:row-span-2 lg:col-start-1 lg:row-start-1",
-    motion: "marketing-showcase-pan",
     position: "object-center",
   },
   {
@@ -269,7 +275,6 @@ const CREATIVE_TILES = [
     image: "/marketing/services/video.png",
     alt: "A vertical video being recorded and edited in a bright creator studio",
     span: "lg:row-span-2 lg:col-start-3 lg:row-start-1",
-    motion: "marketing-showcase-push",
     position: "object-[30%_center]",
   },
   {
@@ -279,7 +284,6 @@ const CREATIVE_TILES = [
     image: "/marketing/services/automation.png",
     alt: "A dark workflow interface routing a lead through qualification and follow-up",
     span: "lg:row-span-2 lg:col-start-1 lg:row-start-3",
-    motion: "marketing-showcase-push",
     position: "object-center",
   },
   {
@@ -289,7 +293,6 @@ const CREATIVE_TILES = [
     image: "/marketing/services/strategy.png",
     alt: "A top-down strategic planning workspace with journey diagrams and notes",
     span: "lg:col-start-2 lg:row-start-3",
-    motion: "marketing-showcase-push",
     position: "object-center",
   },
   {
@@ -299,7 +302,6 @@ const CREATIVE_TILES = [
     image: "/marketing/services/campaigns.png",
     alt: "A campaign operations console with audiences, ad groups, and statuses",
     span: "lg:col-start-3 lg:row-start-3",
-    motion: "marketing-showcase-pan",
     position: "object-[20%_center]",
   },
   {
@@ -309,7 +311,6 @@ const CREATIVE_TILES = [
     image: "/marketing/services/analytics.png",
     alt: "A dark analytics interface tracing conversion paths from ads to revenue",
     span: "lg:col-span-2 lg:row-span-2 lg:col-start-2 lg:row-start-4",
-    motion: "marketing-showcase-push",
     position: "object-center",
   },
   {
@@ -319,7 +320,6 @@ const CREATIVE_TILES = [
     image: "/marketing/services/email.png",
     alt: "A phone with a text thread beside a laptop showing an email sequence, on a warm desk",
     span: "lg:row-span-2 lg:col-start-1 lg:row-start-5",
-    motion: "marketing-showcase-push",
     position: "object-[35%_center]",
   },
   {
@@ -329,7 +329,6 @@ const CREATIVE_TILES = [
     image: "/marketing/services/paid.png",
     alt: "A media-buying workstation reviewing spend and performance",
     span: "lg:col-start-2 lg:row-start-6",
-    motion: "marketing-showcase-push",
     position: "object-[center_30%]",
   },
   {
@@ -339,7 +338,6 @@ const CREATIVE_TILES = [
     image: "/marketing/services/landing.png",
     alt: "A clean landing page shown on desktop and mobile side by side",
     span: "lg:col-start-3 lg:row-start-6",
-    motion: "marketing-showcase-pan",
     position: "object-center",
   },
 ] as const
@@ -354,14 +352,14 @@ export function CreativeTilesGrid() {
             key={tile.id}
             className={`group relative h-56 overflow-hidden rounded-[1.5rem] shadow-[0_12px_40px_rgba(15,30,46,0.1)] lg:h-auto ${tile.span}`}
           >
-            {/* Photograph is the subject; motion is a slow editorial push or pan. */}
+            {/* Photograph is the subject; it holds still (no looping push or pan). */}
             <Image
               src={tile.image}
               alt={tile.alt}
               width={1024}
               height={768}
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              className={`absolute inset-0 h-full w-full object-cover ${tile.position} ${tile.motion} transition-transform duration-700 group-hover:scale-[1.05]`}
+              className={`absolute inset-0 h-full w-full object-cover ${tile.position} motion-safe:transition-transform motion-safe:duration-700 motion-safe:group-hover:scale-[1.05]`}
             />
             {/* Stronger bottom scrim + text shadow so captions stay readable on busy photos. */}
             <div aria-hidden className="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-ink via-ink/70 to-transparent" />
@@ -436,7 +434,7 @@ export function CollaborationSteps() {
         <div className="lg:sticky lg:top-28">
           <p className="section-eyebrow">How we work together</p>
           <h2 className="mt-3 text-[1.8rem] font-bold leading-[1.12] tracking-[-0.02em] text-ink md:text-[2.4rem]">
-            A partner in the work, <span className="text-gold">start to finish.</span>
+            A partner in the work, start to finish.
           </h2>
           <p className="mt-4 max-w-md text-[16px] leading-relaxed text-slate-600">
             Content, advertising, campaigns, web design — every engagement follows the same tight loop, so you always

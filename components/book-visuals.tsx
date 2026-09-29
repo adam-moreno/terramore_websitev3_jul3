@@ -13,6 +13,8 @@
 import Image from "next/image"
 import { useEffect, useRef, useState, type ReactNode } from "react"
 import { BookingLink } from "@/components/booking-popup"
+import { MotionToggle } from "@/components/motion-toggle"
+import { useOnScreenAndVisible, usePrefersReducedMotion } from "@/hooks/use-autoplay"
 
 /* ------------------------------------------------------------------ */
 /* Shared: reveal-once-on-scroll wrapper.                              */
@@ -50,7 +52,7 @@ export function Reveal({ children, className = "", delay = 0 }: { children: Reac
   return (
     <div
       ref={ref}
-      className={`transition-all duration-700 ease-out ${shown ? "translate-y-0 opacity-100" : "translate-y-5 opacity-0"} ${className}`}
+      className={`transition-[transform,opacity] duration-700 ease-out motion-reduce:transition-none ${shown ? "translate-y-0 opacity-100" : "translate-y-5 opacity-0"} ${className}`}
       style={{ transitionDelay: `${delay}ms` }}
     >
       {children}
@@ -180,7 +182,7 @@ function Panel({ children, className = "" }: { children: ReactNode; className?: 
 function Status({ children, tone = "brand" }: { children: ReactNode; tone?: "brand" | "gold" | "muted" }) {
   const tones = {
     brand: "bg-brand/10 text-brand",
-    gold: "bg-gold-from/20 text-gold",
+    gold: "bg-gold-from/20 text-ink",
     muted: "bg-ink/[0.06] text-ink/55",
   } as const
   return <span className={`inline-block rounded-md px-1.5 py-0.5 font-mono text-[9px] font-semibold ${tones[tone]}`}>{children}</span>
@@ -509,15 +511,16 @@ function DeckCardArt({ id }: { id: string }) {
 }
 
 export function HeroSystemDeck() {
+  const rootRef = useRef<HTMLDivElement>(null)
   const [stage, setStage] = useState(0)
   const [prev, setPrev] = useState<number | null>(null)
-  const [paused, setPaused] = useState(false)
-  const [reduced, setReduced] = useState(false)
+  const [held, setHeld] = useState(false)
+  const [userPaused, setUserPaused] = useState(false)
+  const reduced = usePrefersReducedMotion()
+  const onScreen = useOnScreenAndVisible(rootRef)
+  const paused = held || userPaused || !onScreen
 
-  useEffect(() => {
-    setReduced(window.matchMedia("(prefers-reduced-motion: reduce)").matches)
-  }, [])
-
+  // Sequence: walks the growth stages in order. Holds on hover or focus, stops off screen, and has a Pause control (VR-43, VR-48).
   useEffect(() => {
     if (paused || reduced) return
     const timer = window.setInterval(() => {
@@ -537,9 +540,14 @@ export function HeroSystemDeck() {
 
   return (
     <div
+      ref={rootRef}
       className="overflow-hidden rounded-[2rem] bg-gradient-to-b from-white via-cream to-gold-from/25 shadow-[0_24px_70px_rgba(15,30,46,0.12)]"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
+      onMouseEnter={() => setHeld(true)}
+      onMouseLeave={() => setHeld(false)}
+      onFocus={() => setHeld(true)}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setHeld(false)
+      }}
     >
       {/* Mobile: rotating stage carousel so the active header is always readable.
           Desktop keeps the full stage strip. */}
@@ -587,7 +595,7 @@ export function HeroSystemDeck() {
               aria-label={`Show ${s.label}`}
               aria-current={i === stage ? "step" : undefined}
               onClick={() => goTo(i)}
-              className={`h-1.5 rounded-full transition-all ${i === stage ? "w-5 bg-brand" : "w-1.5 bg-ink/20"}`}
+              className={`h-1.5 rounded-full transition-colors ${i === stage ? "w-5 bg-brand" : "w-1.5 bg-ink/20"}`}
             />
           ))}
         </div>
@@ -637,7 +645,7 @@ export function HeroSystemDeck() {
             <div
               key={s.id}
               aria-hidden={!isActive}
-              className={`absolute inset-x-4 top-0 bottom-14 transition-all duration-[850ms] ease-[cubic-bezier(0.22,1,0.36,1)] sm:inset-x-0 sm:bottom-10 ${
+              className={`absolute inset-x-4 top-0 bottom-14 transition-[transform,opacity] duration-[850ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none sm:inset-x-0 sm:bottom-10 ${
                 isActive
                   ? "z-20 translate-y-0 rotate-0 scale-100 opacity-100"
                   : isLeaving
@@ -673,7 +681,7 @@ export function HeroSystemDeck() {
                               <span
                                 className={`rounded-md px-1.5 py-0.5 font-mono text-[9px] font-semibold ${
                                   pop.deltaTone === "gold"
-                                    ? "bg-gold-from/20 text-gold"
+                                    ? "bg-gold-from/20 text-ink"
                                     : pop.deltaTone === "muted"
                                       ? "bg-ink/[0.06] text-ink/55"
                                       : "bg-brand/10 text-brand"
@@ -700,6 +708,12 @@ export function HeroSystemDeck() {
             </div>
           )
         })}
+      </div>
+      <div className="flex items-center justify-center gap-4 px-4 pb-6">
+        <p className="text-[12px] font-medium text-ink/70">Illustrative example</p>
+        {reduced ? null : (
+          <MotionToggle paused={userPaused} onToggle={() => setUserPaused((p) => !p)} label="growth stages" />
+        )}
       </div>
     </div>
   )
@@ -849,7 +863,8 @@ type ShowcaseTile = {
 type ShowcaseStage = {
   id: string
   label: string
-  persona: { image: string; name: string; role: string; quote: string }
+  /* Only a real person gets a photo; team voices show the Terramore monogram (VR-29). */
+  persona: { image?: string; name: string; role: string; quote: string }
   tiles: ShowcaseTile[]
 }
 
@@ -889,9 +904,8 @@ const SHOWCASE_STAGES: ShowcaseStage[] = [
     id: "stage-convert",
     label: "Turn attention into booked work",
     persona: {
-      image: "/founder/team-sales.png",
-      name: "Client growth",
-      role: "Head of Sales, Terramore",
+      name: "Terramore",
+      role: "On lead follow-up",
       quote: "Speed wins deals. When a lead comes in, the follow-up is already moving — before your competitor calls back.",
     },
     tiles: [
@@ -919,9 +933,8 @@ const SHOWCASE_STAGES: ShowcaseStage[] = [
     id: "stage-measure",
     label: "Know what's actually working",
     persona: {
-      image: "/founder/team-product.png",
-      name: "Terra IQ",
-      role: "Head of Product, Terramore",
+      name: "Terramore",
+      role: "On measurement",
       quote: "If you can't trace a sale back to its source, you're guessing. Terra IQ takes the guessing out.",
     },
     tiles: [
@@ -1017,7 +1030,7 @@ function ShowcaseTileCard({ tile }: { tile: ShowcaseTile }) {
               width={1024}
               height={768}
               sizes="(max-width: 1024px) 100vw, 30vw"
-              className="marketing-showcase-push absolute inset-0 h-full w-full object-cover"
+              className="absolute inset-0 h-full w-full object-cover"
             />
           </div>
           <div className="flex flex-1 flex-col p-6 pt-5">
@@ -1063,12 +1076,23 @@ function ShowcaseTileCard({ tile }: { tile: ShowcaseTile }) {
   }
 }
 
+function PersonaAvatar({ persona, size }: { persona: ShowcaseStage["persona"]; size: number }) {
+  if (persona.image) {
+    return <Image src={persona.image} alt={persona.name} width={size} height={size} className="h-full w-full object-cover object-top" />
+  }
+  return (
+    <span aria-hidden className="flex h-full w-full items-center justify-center bg-ink text-[15px] font-semibold text-white">
+      T
+    </span>
+  )
+}
+
 function PersonaCard({ persona, compact = false }: { persona: ShowcaseStage["persona"]; compact?: boolean }) {
   if (compact) {
     return (
       <div className="flex items-center gap-3">
         <div className="h-11 w-11 shrink-0 overflow-hidden rounded-full">
-          <Image src={persona.image} alt={persona.name} width={96} height={96} className="h-full w-full object-cover object-top" />
+          <PersonaAvatar persona={persona} size={96} />
         </div>
         <div>
           <p className="text-[13px] font-semibold text-ink">{persona.name}</p>
@@ -1080,7 +1104,7 @@ function PersonaCard({ persona, compact = false }: { persona: ShowcaseStage["per
   return (
     <div>
       <div className="h-20 w-20 overflow-hidden rounded-full shadow-[0_8px_24px_rgba(15,30,46,0.15)]">
-        <Image src={persona.image} alt={persona.name} width={160} height={160} className="h-full w-full object-cover object-top" />
+        <PersonaAvatar persona={persona} size={160} />
       </div>
       <p className="mt-4 text-[15px] font-semibold text-ink">{persona.name}</p>
       <p className="text-[13px] text-slate-500">{persona.role}</p>
@@ -1123,7 +1147,7 @@ export function StagedShowcase() {
                 <a
                   href={`#${s.id}`}
                   aria-current={i === active ? "true" : undefined}
-                  className={`inline-flex rounded-full px-5 py-2.5 text-[14px] font-semibold transition-all duration-300 ${
+                  className={`inline-flex rounded-full px-5 py-2.5 text-[14px] font-semibold transition-colors duration-300 ${
                     i === active
                       ? "bg-brand text-white shadow-[0_10px_30px_rgba(37,99,235,0.3)]"
                       : "text-ink/45 hover:text-ink"
@@ -1151,6 +1175,7 @@ export function StagedShowcase() {
               </div>
             ))}
           </div>
+          <p className="mt-6 text-[12px] font-medium text-ink/70">Illustrative example</p>
           {/* Spacer so the sticky block reserves room for the slide. */}
           <div aria-hidden className="h-44" />
         </div>
@@ -1162,7 +1187,10 @@ export function StagedShowcase() {
           <div key={s.id} id={s.id} className="scroll-mt-32">
             {/* Mobile-only stage header with persona chip */}
             <div className="mb-5 lg:hidden">
-              <p className="inline-flex rounded-full bg-brand px-4 py-2 text-[13px] font-semibold text-white">{s.label}</p>
+              <div className="flex flex-wrap items-center gap-3">
+                <p className="inline-flex rounded-full bg-brand px-4 py-2 text-[13px] font-semibold text-white">{s.label}</p>
+                <p className="text-[12px] font-medium text-ink/70">Illustrative example</p>
+              </div>
               <div className="mt-4">
                 <PersonaCard persona={s.persona} compact />
               </div>
@@ -1281,7 +1309,7 @@ export function ConnectedChain() {
             />
           ) : null}
           <span
-            className={`rounded-full border px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] transition-all duration-500 sm:px-4 sm:text-[12px] ${
+            className={`rounded-full border px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] transition-[color,background-color,border-color,opacity] duration-500 sm:px-4 sm:text-[12px] ${
               shown ? "border-ink/15 bg-white text-ink opacity-100" : "border-transparent bg-white/50 text-ink/30 opacity-0"
             }`}
             style={{ transitionDelay: `${i * 180 + 90}ms` }}

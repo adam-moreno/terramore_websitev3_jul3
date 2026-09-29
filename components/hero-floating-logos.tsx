@@ -1,12 +1,9 @@
-"use client"
-
-import { useEffect, useState } from "react"
 import { INTEGRATION_LOGOS } from "@/lib/integrations"
 
-// Mobile-only floating hero marks, in the spirit of lindy.ai: small, semi-transparent integration
+// Mobile-only hero marks, in the spirit of lindy.ai: small, semi-transparent integration
 // marks scattered around the edges and corners of the hero, behind the copy. They sit well away from
-// the centered text column so the headline, subline, and CTA stay fully readable, and they float only
-// subtly (and not at all when the visitor prefers reduced motion). The desktop Mobius orbit is separate.
+// the centered text column so the headline, subline, and CTA stay fully readable. They are still:
+// nothing moves behind the headline (Visual Doctrine forbidden zones). The desktop Mobius layout is separate.
 //
 // Placement rule: the copy lives in a narrow centered column, roughly the middle 40% of the width and
 // the middle third of the height. So the marks stay in the left and right side rails (any height) plus
@@ -48,22 +45,10 @@ const MARKS = MARK_SPOTS.map((spot, index) => {
     top: spot.top,
     left: spot.left,
     size: spot.size,
-    delay: `${(index % 9) * 0.55}s`,
-    dur: `${9 + (index % 6) * 1.1}s`,
   }
 })
 
 export function HeroFloatingLogos({ className = "" }: { className?: string }) {
-  const [reduce, setReduce] = useState(false)
-
-  useEffect(() => {
-    const media = window.matchMedia("(prefers-reduced-motion: reduce)")
-    const sync = () => setReduce(media.matches)
-    sync()
-    media.addEventListener("change", sync)
-    return () => media.removeEventListener("change", sync)
-  }, [])
-
   return (
     <div className={`pointer-events-none absolute inset-0 z-0 overflow-hidden ${className}`} aria-hidden>
       {MARKS.map((mark, index) => (
@@ -75,7 +60,6 @@ export function HeroFloatingLogos({ className = "" }: { className?: string }) {
             left: mark.left,
             width: mark.size,
             height: mark.size,
-            animation: reduce ? undefined : `hero-float ${mark.dur} ease-in-out ${mark.delay} infinite`,
           }}
         >
           <img

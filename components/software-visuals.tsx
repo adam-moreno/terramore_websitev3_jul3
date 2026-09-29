@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState, forwardRef, type ReactNode } from "react"
 import Link from "next/link"
 import { INTEGRATION_LOGOS } from "@/lib/integrations"
+import { MotionToggle } from "@/components/motion-toggle"
+import { useOnScreenAndVisible, usePrefersReducedMotion } from "@/hooks/use-autoplay"
 
 const TILE =
   "rounded-2xl bg-white shadow-[0_12px_28px_-18px_rgba(15,30,46,0.28)] ring-1 ring-black/[0.04]"
@@ -70,18 +72,26 @@ function BrandLogo({
   )
 }
 
+/**
+ * Steps a demo from its first frame to its last once, while the visual is on screen and the tab is visible,
+ * then holds the last frame (the complete state, and the same frame reduced motion shows). The whole run
+ * stays under 5 s so no toolkit visual loops (VR-42, VR-48). Attach the returned ref to the visual's root.
+ */
 function useCycle(length: number, ms: number, paused: boolean) {
+  const ref = useRef<HTMLDivElement>(null)
   const [index, setIndex] = useState(0)
+  const onScreen = useOnScreenAndVisible(ref)
+  const beat = Math.max(400, Math.min(ms, Math.floor(4800 / Math.max(1, length - 1))))
 
   useEffect(() => {
-    if (paused) return
-    const id = window.setInterval(() => {
-      setIndex((current) => (current + 1) % length)
-    }, ms)
-    return () => window.clearInterval(id)
-  }, [length, ms, paused])
+    if (paused || !onScreen || index >= length - 1) return
+    const id = window.setTimeout(() => {
+      setIndex((current) => Math.min(current + 1, length - 1))
+    }, beat)
+    return () => window.clearTimeout(id)
+  }, [index, length, beat, paused, onScreen])
 
-  return [index, setIndex] as const
+  return [index, setIndex, ref] as const
 }
 
 const TILE_TILTS = [-1.8, 2.2, -1.2, 1.6, -2.4, 1.1] as const
@@ -112,7 +122,7 @@ export function IntegrationTilesVisual({
             return (
               <div
                 key={logo.slug}
-                className="software-icon-tile software-icon-tile-still flex h-9 w-9 items-center justify-center md:h-10 md:w-10"
+                className="software-icon-tile flex h-9 w-9 items-center justify-center md:h-10 md:w-10"
                 style={{
                   transform: `rotate(${spot.tilt})`,
                   animationDelay: spot.delay,
@@ -286,7 +296,7 @@ function TrackHud({ rows, onDark = false }: { rows: TrackRow[]; onDark?: boolean
 
   return (
     <div className="flex items-start gap-2">
-      <span className="mt-1.5 software-pulse-dot h-1.5 w-1.5 shrink-0 rounded-full bg-brand" />
+      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand" />
       <div className="min-w-0 flex-1">
         <p className={`text-[10px] font-medium ${onDark ? "text-white/40" : "text-slate-400"}`}>What we tracked</p>
         {filled.length === 0 ? (
@@ -415,13 +425,21 @@ function settledVlair(beat: number): VlairView {
   }
 }
 
-function useVlairRecording(paused: boolean) {
+/**
+ * Sequence: one recorded visit, home → checkout → paid → email, played once and then held.
+ * Waits while paused (hover, Pause, off screen). Does not run when disabled (reduced motion).
+ */
+function useVlairRecording(paused: boolean, enabled: boolean) {
   const pausedRef = useRef(paused)
   pausedRef.current = paused
   const [view, setView] = useState<VlairView>(() => settledVlair(0))
+  const [run, setRun] = useState(0)
+  const [ended, setEnded] = useState(false)
 
   useEffect(() => {
+    if (!enabled) return
     let cancelled = false
+    setEnded(false)
 
     const sleep = async (ms: number) => {
       let left = ms
@@ -438,7 +456,7 @@ function useVlairRecording(paused: boolean) {
     }
 
     const play = async () => {
-      while (!cancelled) {
+      {
         setView({ ...settledVlair(0), snap: true, clicking: false, gaze: null })
         await sleep(500)
         if (cancelled) return
@@ -623,17 +641,17 @@ function useVlairRecording(paused: boolean) {
           cursor: { x: 72, y: 78 },
           metrics: patchMetrics(current.metrics, "Upsell", "Soft short · $68"),
         }))
-        await sleep(2800)
       }
+      if (!cancelled) setEnded(true)
     }
 
     void play()
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [enabled, run])
 
-  return view
+  return { view, ended, replay: () => setRun((current) => current + 1) }
 }
 
 function RecordCursor({
@@ -1042,9 +1060,10 @@ const CHANNEL_HOLD_MS = 4000
 
 export function ChannelValueVisual() {
   const [held, setHeld] = useState<number | null>(null)
-  const [autoIndex, setIndex] = useCycle(MONEY_BEATS.length, 4000, held !== null)
+  const reduce = usePrefersReducedMotion()
+  const [autoIndex, setIndex, cycleRef] = useCycle(MONEY_BEATS.length, 4000, held !== null || reduce)
   const holdTimer = useRef<number | null>(null)
-  const active = held ?? autoIndex
+  const active = held ?? (reduce ? MONEY_BEATS.length - 1 : autoIndex)
   const beat = MONEY_BEATS[active]
   const running = MONEY_BEATS.slice(0, active + 1).reduce((sum, item) => sum + item.add, 0)
 
@@ -1065,7 +1084,7 @@ export function ChannelValueVisual() {
   }
 
   return (
-    <Wash className="software-visual-wash-hot flex h-full flex-col p-3">
+    <Wash ref={cycleRef} className="software-visual-wash-hot flex h-full flex-col p-3">
       <p className="relative z-[4] shrink-0 px-1 text-center text-[14px] font-semibold tracking-tight text-ink">
         {beat.line}
       </p>
@@ -1173,12 +1192,26 @@ export function ChannelValueVisual() {
 }
 
 export function LeakFlowVisual() {
+  const rootRef = useRef<HTMLDivElement>(null)
   const [hovered, setHovered] = useState<number | null>(null)
-  const live = useVlairRecording(hovered !== null)
-  const view = hovered !== null ? settledVlair(hovered) : live
+  const [userPaused, setUserPaused] = useState(false)
+  const reduce = usePrefersReducedMotion()
+  const onScreen = useOnScreenAndVisible(rootRef)
+  const recording = useVlairRecording(hovered !== null || userPaused || !onScreen, !reduce)
+  const view =
+    hovered !== null ? settledVlair(hovered) : reduce ? settledVlair(SITE_BEATS.length - 1) : recording.view
+
+  const toggle = () => {
+    if (recording.ended) {
+      setUserPaused(false)
+      recording.replay()
+    } else {
+      setUserPaused((p) => !p)
+    }
+  }
 
   return (
-    <Wash className="flex flex-col bg-[#0a0a0a] p-0">
+    <Wash ref={rootRef} className="flex flex-col bg-[#0a0a0a] p-0">
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden text-white md:h-full">
         <div className="flex shrink-0 items-center gap-1.5 bg-[#141414] px-3 py-2">
           <span className="h-2 w-2 rounded-full bg-white/25" />
@@ -1210,6 +1243,15 @@ export function LeakFlowVisual() {
             <VlairRecordScreen view={view} />
           </div>
           <RecordCursor x={view.cursor.x} y={view.cursor.y} clicking={view.clicking} snap={view.snap} />
+          {reduce ? null : (
+            <MotionToggle
+              paused={userPaused || recording.ended}
+              onToggle={toggle}
+              label="checkout recording"
+              tone="dark"
+              className="absolute bottom-2 right-2 z-10"
+            />
+          )}
         </div>
         <div className="shrink-0 border-t border-white/10 bg-[#141414] px-3 py-2">
           <TrackHud rows={view.metrics} onDark />
@@ -1217,20 +1259,6 @@ export function LeakFlowVisual() {
       </div>
     </Wash>
   )
-}
-
-function usePrefersReducedMotion() {
-  const [reduce, setReduce] = useState(false)
-
-  useEffect(() => {
-    const media = window.matchMedia("(prefers-reduced-motion: reduce)")
-    const sync = () => setReduce(media.matches)
-    sync()
-    media.addEventListener("change", sync)
-    return () => media.removeEventListener("change", sync)
-  }, [])
-
-  return reduce
 }
 
 function FlowStem({ on }: { on: boolean }) {
@@ -1264,11 +1292,11 @@ const FLOW_MOVES = [
 
 export function FollowUpFlowVisual() {
   const reduce = usePrefersReducedMotion()
-  const [scene] = useCycle(5, 2000, reduce)
+  const [scene, , cycleRef] = useCycle(5, 2000, reduce)
   const step = reduce ? 4 : scene
 
   return (
-    <Wash className="flex h-full flex-col justify-between p-3 lg:p-4">
+    <Wash ref={cycleRef} className="flex h-full flex-col justify-between p-3 lg:p-4">
       <p className="sr-only">
         A new lead from Sam Reed for $2,400 reaches the owner, sales, and the VA. A deal is created, a
         follow-up is sent, and a hold is booked. Sam replies that 2:15 works. Sales sees it and the next
@@ -1279,7 +1307,7 @@ export function FollowUpFlowVisual() {
         <p className="text-[15px] font-semibold leading-snug tracking-tight text-ink lg:text-[18px]">
           One lead. Everyone knows what happens next.
         </p>
-        <span className="software-pulse-dot mt-1.5 h-2 w-2 shrink-0 rounded-full bg-brand lg:mt-2" />
+        <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-brand lg:mt-2" />
       </div>
 
       <div
@@ -1297,7 +1325,7 @@ export function FollowUpFlowVisual() {
         </div>
         <p className="shrink-0 text-[14px] font-semibold text-ink lg:text-[16px]">Example · $2,400</p>
         <span className="inline-flex shrink-0 items-center gap-1.5 text-[12px] font-semibold text-brand lg:text-[13px]">
-          <span className="software-pulse-dot h-1.5 w-1.5 rounded-full bg-brand" />
+          <span className="h-1.5 w-1.5 rounded-full bg-brand" />
           Just now
         </span>
         <SoftLogo slug="meta" name="Meta" />
@@ -1460,13 +1488,13 @@ const AUDIENCE_RESULTS = [
 
 export function AudienceIntelVisual() {
   const reduce = usePrefersReducedMotion()
-  const [walk] = useCycle(6, 1800, reduce)
+  const [walk, , cycleRef] = useCycle(6, 1800, reduce)
   const col = reduce ? 3 : Math.min(walk, 3)
   const wrapping = !reduce && walk === 0
   const bought = reduce || walk >= 3
 
   return (
-    <Wash className="flex h-full flex-col justify-start gap-1.5 p-2.5 md:justify-between md:gap-2.5 lg:gap-3 lg:p-4">
+    <Wash ref={cycleRef} className="flex h-full flex-col justify-start gap-1.5 p-2.5 md:justify-between md:gap-2.5 lg:gap-3 lg:p-4">
       <p className="sr-only">
         We watch Maya and Eli from the first ad or Instagram tap, through the site, to the city.
         When they are ready to buy, reach, leads, deals, and buys go up.
@@ -1663,12 +1691,12 @@ const BOOK_HOLDS = [
 
 export function BookingTilesVisual() {
   const reduce = usePrefersReducedMotion()
-  const [beat] = useCycle(6, 1200, reduce)
+  const [beat, , cycleRef] = useCycle(6, 1200, reduce)
   const step = reduce ? 5 : beat
   const filled = BOOK_HOLDS.filter((hold) => hold.at <= step)
 
   return (
-    <Wash className="flex h-full flex-col justify-between p-3 lg:p-4">
+    <Wash ref={cycleRef} className="flex h-full flex-col justify-between p-3 lg:p-4">
       <div className="flex items-end justify-between gap-3">
         <div>
           <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">Appointment book</p>
@@ -1732,12 +1760,12 @@ const PHONE_CHAT = [
 
 export function PhoneFlowVisual() {
   const reduce = usePrefersReducedMotion()
-  const [beat] = useCycle(6, 1300, reduce)
+  const [beat, , cycleRef] = useCycle(6, 1300, reduce)
   const step = reduce ? 5 : beat
   const status = step >= 5 ? "Booked" : step >= 2 ? "Qualifying" : step >= 1 ? "Missed" : "Incoming"
 
   return (
-    <Wash className="flex h-full flex-col justify-between p-3 lg:p-4">
+    <Wash ref={cycleRef} className="flex h-full flex-col justify-between p-3 lg:p-4">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">AI intake</p>
@@ -1759,7 +1787,7 @@ export function PhoneFlowVisual() {
       <div className={`${TILE} flex items-center gap-3 px-3 py-2.5 ${step >= 0 ? "software-node-in" : ""}`}>
         <span
           className={`flex h-10 w-10 items-center justify-center rounded-full ${
-            step === 0 ? "bg-brand text-white software-pulse-dot" : "bg-[#f3f5f8] text-ink"
+            step === 0 ? "bg-brand text-white" : "bg-[#f3f5f8] text-ink"
           }`}
         >
           <LineIcon size={18}>
@@ -1807,11 +1835,11 @@ const CALENDAR_POSTS = [
 
 export function DropFilesVisual() {
   const reduce = usePrefersReducedMotion()
-  const [beat] = useCycle(CALENDAR_POSTS.length + 1, 1500, reduce)
+  const [beat, , cycleRef] = useCycle(CALENDAR_POSTS.length + 1, 1500, reduce)
   const step = reduce ? CALENDAR_POSTS.length : beat
 
   return (
-    <Wash className="flex h-full flex-col justify-between p-3 lg:p-4">
+    <Wash ref={cycleRef} className="flex h-full flex-col justify-between p-3 lg:p-4">
       <div className="flex items-end justify-between gap-3">
         <div>
           <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">Content calendar</p>
@@ -1868,11 +1896,11 @@ const CONSULTS = [
 
 export function ConsultCalendarVisual() {
   const reduce = usePrefersReducedMotion()
-  const [beat] = useCycle(CONSULTS.length + 1, 1400, reduce)
+  const [beat, , cycleRef] = useCycle(CONSULTS.length + 1, 1400, reduce)
   const step = reduce ? CONSULTS.length : beat
 
   return (
-    <Wash className="flex h-full flex-col justify-between p-3 lg:p-4">
+    <Wash ref={cycleRef} className="flex h-full flex-col justify-between p-3 lg:p-4">
       <div className="flex items-end justify-between gap-3">
         <div>
           <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">Partner calendar</p>
@@ -1924,11 +1952,11 @@ const REFILL_NOTES = [
 
 export function RefillSequenceVisual() {
   const reduce = usePrefersReducedMotion()
-  const [beat] = useCycle(REFILL_NOTES.length + 1, 1400, reduce)
+  const [beat, , cycleRef] = useCycle(REFILL_NOTES.length + 1, 1400, reduce)
   const step = reduce ? REFILL_NOTES.length : beat
 
   return (
-    <Wash className="flex h-full flex-col justify-center p-4">
+    <Wash ref={cycleRef} className="flex h-full flex-col justify-center p-4">
       <p className="mb-3 text-[11px] font-medium uppercase tracking-wide text-slate-400">Email sequence</p>
       {/* Phones: the three notes stack as rows. From md up they sit side by side with arrows. */}
       <div className="flex w-full flex-col items-stretch gap-2 md:flex-row">
@@ -1978,11 +2006,11 @@ const FIND_PLACES = [
 
 export function DiscoverabilityVisual() {
   const reduce = usePrefersReducedMotion()
-  const [lit] = useCycle(FIND_PLACES.length + 1, 1400, reduce)
+  const [lit, , cycleRef] = useCycle(FIND_PLACES.length + 1, 1400, reduce)
   const shown = reduce ? FIND_PLACES.length : lit
 
   return (
-    <Wash className="flex h-full flex-col justify-center p-3 lg:p-4">
+    <Wash ref={cycleRef} className="flex h-full flex-col justify-center p-3 lg:p-4">
       <p className="sr-only">
         The business shows up in ChatGPT answers, Google Search, and Google Maps, plus the store and
         listing sites people already open.

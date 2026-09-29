@@ -3,8 +3,8 @@
 import { useEffect, useRef } from "react"
 import { INTEGRATION_LOGOS } from "@/lib/integrations"
 
-const LOOP_SECONDS = 42
-
+// Marks rest at even spacing along the path, in every motion setting: nothing moves behind the headline
+// (Visual Doctrine forbidden zones), and there is no collapsed reduced-motion state.
 // A figure eight that uses the whole track box: the two lobes reach the box edges, and the
 // crossing sits at the center of the headline. The mask hole hides the marks while they pass
 // behind the type, so the visible part of the orbit is the outer curve of each lobe.
@@ -79,7 +79,7 @@ export function HeroLogoMobius() {
             <span
               key={logo.slug}
               className="hero-mobius-logo"
-              style={{ animationDelay: `${(-index * LOOP_SECONDS) / INTEGRATION_LOGOS.length}s` }}
+              style={{ offsetDistance: `${(index / INTEGRATION_LOGOS.length) * 100}%` }}
             >
               <img src={`https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/${logo.slug}.svg`} alt="" />
             </span>

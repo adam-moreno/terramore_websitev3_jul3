@@ -72,7 +72,7 @@ function StageItem({ stage, index }: { stage: (typeof STAGES)[number]; index: nu
         className={`solutions-node-tease flex flex-1 items-baseline gap-3 rounded-2xl bg-white/[0.06] px-4 py-3 ring-1 ring-white/10 lg:block lg:p-4 ${on ? "solutions-node-on" : ""}`}
         style={{ transitionDelay: `${(index % 3) * 120}ms` }}
       >
-        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-gold">{`0${index + 1}`}</p>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-gold-from">{`0${index + 1}`}</p>
         <p className="text-[17px] font-semibold tracking-tight text-cream lg:mt-1">{stage.label}</p>
         <p className="ml-auto text-[13px] text-cream/55 lg:ml-0 lg:text-[12px]">{stage.note}</p>
       </div>
@@ -104,10 +104,6 @@ export function GrowthSystemFlow() {
         ))}
       </ol>
 
-      {/* Flowing pulse line under the stages, desktop only. Pure decoration. */}
-      <div aria-hidden className="mt-6 hidden h-px overflow-hidden rounded-full bg-white/10 lg:block">
-        <div className="solutions-pulse h-full w-1/4 rounded-full bg-gradient-to-r from-transparent via-brand to-transparent" />
-      </div>
     </div>
   )
 }
@@ -266,17 +262,24 @@ export function FunnelStory() {
           {/* Center divider — at the exact middle of the viewBox. */}
           <line x1={FCX} y1="36" x2={FCX} y2="304" stroke="var(--ink)" strokeOpacity="0.3" strokeWidth="1.5" />
 
-          {/* Connected side: data flows continuously down through every stage. */}
-          <g className="solutions-flow-dot">
+          {/* Connected side: data flows down through every stage, once, when the funnel is revealed. */}
+          <g className={on ? "solutions-flow-on" : undefined}>
             {/* Connector stems in the gaps between layers. */}
             {[108, 170, 232].map((y) => (
               <path key={y} d={`M 390 ${y - 6} L 390 ${y + 6}`} stroke="var(--brand)" strokeWidth="2" strokeOpacity="0.6" />
             ))}
             {[0, 1, 2].map((dot) => (
-              <circle key={dot} r="4" fill="#ffffff" stroke="var(--brand)" strokeWidth="1.5">
-                <animateMotion dur="3.6s" begin={`${dot * 1.2}s`} repeatCount="indefinite" path="M 390 54 L 390 296" />
-                <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.85;1" dur="3.6s" begin={`${dot * 1.2}s`} repeatCount="indefinite" />
-              </circle>
+              <circle
+                key={dot}
+                className="solutions-flow-circle"
+                cx="390"
+                cy="54"
+                r="4"
+                fill="#ffffff"
+                stroke="var(--brand)"
+                strokeWidth="1.5"
+                style={{ animationDelay: `${dot * 0.6}s` }}
+              />
             ))}
           </g>
 
@@ -288,7 +291,6 @@ export function FunnelStory() {
               stroke="var(--brand)"
               strokeWidth="2"
               strokeDasharray="6 6"
-              className="solutions-dash-flow"
             />
             <polygon points="490,34 505,29 500,42" fill="var(--brand)" />
             <text x="690" y="190" fontWeight="600" fill="var(--brand)" transform="rotate(90 690 190)" textAnchor="middle" className="solutions-funnel-loop-label">
@@ -463,7 +465,7 @@ export function HeroWebsiteInput() {
           type="submit"
           disabled={!website.trim()}
           title={!website.trim() ? "Enter your business website first" : undefined}
-          className="inline-flex h-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-b from-[var(--gold-from)] to-[var(--gold-to)] px-6 text-[15px] font-semibold text-white shadow-[0_10px_24px_-12px_rgba(198,136,9,0.6)] transition hover:brightness-[0.97] disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex h-12 shrink-0 items-center justify-center rounded-full bg-brand px-6 text-[15px] font-semibold text-white transition-colors hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-60"
         >
           See my Digital Footprint
         </button>
@@ -538,20 +540,6 @@ const PILLS = [
 ] as const
 
 export function HeroEngine({ compact = false }: { compact?: boolean }) {
-  // Real-time clock hands. Angles are computed once on mount (client only, so
-  // no hydration mismatch); from there CSS animations with negative delays
-  // keep every hand moving continuously — the second hand sweeps like an
-  // automatic watch instead of ticking.
-  const [clock, setClock] = useState<{ s: number; m: number; h: number } | null>(null)
-
-  useEffect(() => {
-    const now = new Date()
-    const s = now.getSeconds() + now.getMilliseconds() / 1000
-    const m = now.getMinutes() * 60 + s
-    const h = (now.getHours() % 12) * 3600 + m
-    setClock({ s, m, h })
-  }, [])
-
   return (
     <div
       className={`relative mx-auto aspect-square w-full ${compact ? "max-w-[15rem]" : "max-w-[26rem]"}`}
@@ -572,47 +560,6 @@ export function HeroEngine({ compact = false }: { compact?: boolean }) {
           strokeDasharray="1 20"
         />
 
-        {/* Working clock, drawn behind the stage segments. Hands emerge from
-            under the center hub; the second hand's tip reaches past the ring. */}
-        {clock && (
-          <g aria-hidden>
-            {/* Hour hand: 12h period = 43200s. */}
-            <g
-              className="solutions-clock-hand"
-              style={{
-                animationDuration: "43200s",
-                animationDelay: `${-clock.h}s`,
-                transform: `rotate(${(clock.h / 43200) * 360}deg)`,
-              }}
-            >
-              <line x1="200" y1="200" x2="200" y2="90" stroke="var(--ink)" strokeOpacity="0.28" strokeWidth="5" strokeLinecap="round" />
-            </g>
-            {/* Minute hand: 60min period = 3600s. */}
-            <g
-              className="solutions-clock-hand"
-              style={{
-                animationDuration: "3600s",
-                animationDelay: `${-clock.m}s`,
-                transform: `rotate(${(clock.m / 3600) * 360}deg)`,
-              }}
-            >
-              <line x1="200" y1="200" x2="200" y2="66" stroke="var(--ink)" strokeOpacity="0.32" strokeWidth="3" strokeLinecap="round" />
-            </g>
-            {/* Second hand: continuous 60s sweep, with a counterweight tail. */}
-            <g
-              className="solutions-clock-hand"
-              style={{
-                animationDuration: "60s",
-                animationDelay: `${-clock.s}s`,
-                transform: `rotate(${(clock.s / 60) * 360}deg)`,
-              }}
-            >
-              <line x1="200" y1="226" x2="200" y2="38" stroke="var(--gold-to)" strokeOpacity="0.75" strokeWidth="1.5" strokeLinecap="round" />
-              <circle cx="200" cy="44" r="3" fill="var(--gold-to)" fillOpacity="0.75" />
-            </g>
-          </g>
-        )}
-
         {/* Flat-cut donut segments. Butt caps keep the geometry crisp. */}
         {RING.map((segment) => (
           <path key={segment.id} d={segment.d} fill="none" stroke={segment.color} strokeWidth="24" strokeLinecap="butt" />
@@ -622,7 +569,7 @@ export function HeroEngine({ compact = false }: { compact?: boolean }) {
         {NODES.map((node) => (
           <g key={`${node.cx}-${node.cy}`}>
             <circle cx={node.cx} cy={node.cy} r="8" fill="#ffffff" stroke="var(--brand)" strokeWidth="1.5" />
-            <circle className="solutions-node-pulse" cx={node.cx} cy={node.cy} r="3" fill="var(--brand)" />
+            <circle cx={node.cx} cy={node.cy} r="3" fill="var(--brand)" />
           </g>
         ))}
 
@@ -637,13 +584,6 @@ export function HeroEngine({ compact = false }: { compact?: boolean }) {
           strokeWidth="1"
           strokeDasharray="4 6"
         />
-
-        {/* Orbiting data dots on the outer track — signal moving through the system. */}
-        <g className="solutions-orbit">
-          <circle cx="200" cy="28" r="5" fill="var(--brand)" />
-          <circle cx="200" cy="24" r="9" fill="var(--brand)" fillOpacity="0.15" />
-          <circle cx="200" cy="372" r="4" fill="var(--gold-to)" />
-        </g>
       </svg>
 
       {/* Static center hub. */}
@@ -718,7 +658,7 @@ export function CapabilityGrid() {
     <div>
       <p className="section-eyebrow text-center">Capabilities</p>
       <h2 className="mx-auto mt-3 max-w-2xl text-center text-[1.8rem] font-bold leading-[1.1] tracking-[-0.02em] text-ink md:text-[2.5rem]">
-        What we can do <span className="text-gold">across the system.</span>
+        What we can do across the system.
       </h2>
       <p className="mx-auto mt-4 max-w-xl text-center text-[16px] leading-relaxed text-slate-600">
         The work we plan, build, and run for you, inside your own accounts.

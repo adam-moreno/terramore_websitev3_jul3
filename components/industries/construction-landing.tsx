@@ -2,7 +2,6 @@ import type { ReactNode } from "react"
 import { BookingLink } from "@/components/booking-popup"
 import { ReportPopupLink } from "@/components/report-popup"
 import { ConstructionHeroVideo } from "@/components/industries/construction-hero-video"
-import { ConstructionInquiryNotifications } from "@/components/industries/construction-inquiry-notifications"
 import { ConstructionProblemPhone } from "@/components/industries/construction-problem-phone"
 import { ConstructionSolutionTimeline } from "@/components/industries/construction-solution-phone"
 
@@ -123,13 +122,9 @@ export function ConstructionLanding() {
           Desktop: split — copy left, portrait video in the right frame. */}
       <section className="relative -mt-24 min-h-[100svh] overflow-hidden lg:mt-0 lg:min-h-0 lg:pb-16 lg:pt-6">
         {/* Mobile / tablet background video */}
-        <div className="absolute inset-0 lg:hidden" aria-hidden>
+        <div className="absolute inset-0 lg:hidden">
           <ConstructionHeroVideo variant="background" />
-          <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/80 to-ink/35" />
-        </div>
-        {/* Mobile: iMessage (top) + chatbot (lower) over the full-bleed video */}
-        <div className="pointer-events-none absolute inset-0 z-[15] lg:hidden">
-          <ConstructionInquiryNotifications surface="mobile-hero" />
+          <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-ink via-ink/80 to-ink/35" />
         </div>
 
         <div className="page-shell relative z-10 flex min-h-[100svh] flex-col justify-end gap-4 pb-6 pt-20 lg:min-h-0 lg:grid lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-14 lg:pb-0 lg:pt-0">
@@ -157,8 +152,6 @@ export function ConstructionLanding() {
           <div className="relative hidden lg:block">
             <div className="relative aspect-[3/4] max-h-[36rem] overflow-hidden rounded-[1.75rem] shadow-[0_24px_60px_-24px_rgba(15,30,46,0.35)]">
               <ConstructionHeroVideo variant="panel" />
-              {/* v1 iMessage (top) + v2 Slack (bottom) on the video tile */}
-              <ConstructionInquiryNotifications surface="desktop-panel" />
             </div>
           </div>
 
@@ -314,11 +307,6 @@ export function ConstructionLanding() {
           <TalkCta className="inline-flex h-11 items-center justify-center rounded-full border border-ink/15 bg-transparent px-6 text-[15px] font-medium text-ink hover:border-ink/30 hover:bg-white" />
         </div>
         <p className="mt-5 text-[13px] text-slate-500">No generic pitch. We&apos;ll look at the business first.</p>
-
-        {/* Page-bottom: same iOS banner cycle */}
-        <div className="relative mx-auto mt-12 h-[2.85rem] w-full max-w-[21.5rem]">
-          <ConstructionInquiryNotifications surface="page-bottom" />
-        </div>
       </section>
     </>
   )

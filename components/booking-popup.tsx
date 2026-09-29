@@ -44,12 +44,12 @@ export function BookingPopup({
       <div className="relative z-10 max-h-[calc(100vh-2rem)] w-full max-w-2xl overflow-y-auto rounded-[1.75rem] bg-white shadow-[0_24px_60px_-20px_rgba(15,30,46,0.45)]">
         <div className="flex items-start justify-between gap-3 px-7 pt-7 md:px-9 md:pt-9">
           <div>
-            <p className="text-[12px] font-medium uppercase tracking-[0.16em] text-ink/40">Book a call</p>
+            <p className="text-[12px] font-medium uppercase tracking-[0.16em] text-ink/70">Book a call</p>
             <p className="mt-2 text-[15px] leading-relaxed text-ink/75">
               Free 30 minutes. A few questions, then a time that works — invite in your inbox.
             </p>
           </div>
-          <button type="button" onClick={onClose} className="shrink-0 text-[13px] font-medium text-slate-400 hover:text-ink">
+          <button type="button" onClick={onClose} className="shrink-0 text-[13px] font-medium text-ink/70 hover:text-ink">
             Close
           </button>
         </div>

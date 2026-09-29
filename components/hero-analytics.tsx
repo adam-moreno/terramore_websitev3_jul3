@@ -25,22 +25,9 @@ import {
   type LucideIcon,
 } from "lucide-react"
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react"
+import { useOnScreenAndVisible, usePrefersReducedMotion } from "@/hooks/use-autoplay"
 
-function usePrefersReducedMotion() {
-  const [reduce, setReduce] = useState(false)
-
-  useEffect(() => {
-    const media = window.matchMedia("(prefers-reduced-motion: reduce)")
-    const sync = () => setReduce(media.matches)
-    sync()
-    media.addEventListener("change", sync)
-    return () => media.removeEventListener("change", sync)
-  }, [])
-
-  return reduce
-}
-
-type Person = { name: string; role: string; photo: string; team?: boolean }
+type Person = { name: string; role: string; team?: boolean }
 type DriveFile = { name: string; kind: "folder" | "video" | "doc" }
 type EmailTile = { name: string; subject: string; tone: string }
 type GanttRow = { name: string; start: number; span: number; state: "done" | "now" | "next" }
@@ -65,7 +52,6 @@ type Channel = {
   label: string
   icon: LucideIcon
   members: number
-  client: Person
   messages: Message[]
 }
 
@@ -73,127 +59,36 @@ function mention(name: string) {
   return <span className="slack-mention">@{name}</span>
 }
 
-function SlackFace({ src, name, className }: { src: string; name: string; className: string }) {
-  const [failed, setFailed] = useState(false)
-  if (failed) {
-    const initials = name
-      .split(" ")
-      .map((part) => part[0])
-      .slice(0, 2)
-      .join("")
-    return (
-      <span className={`${className} flex items-center justify-center bg-slate-200 text-[10px] font-semibold text-slate-600`}>
-        {initials}
-      </span>
-    )
-  }
-  return <img src={src} alt={name} className={className} onError={() => setFailed(true)} />
+function SlackAvatar({ person, className }: { person: Person; className: string }) {
+  const initials = person.name
+    .split(" ")
+    .map((part) => part[0])
+    .slice(0, 2)
+    .join("")
+  const tone = person.team ? "bg-ink text-white" : "bg-slate-200 text-slate-600"
+  return (
+    <span aria-hidden className={`${className} flex items-center justify-center text-[11px] font-semibold ${tone}`}>
+      {initials}
+    </span>
+  )
 }
 
-const ADAM: Person = {
-  name: "Adam Moreno",
-  role: "Founder, Terramore",
-  photo: "/founder/adam-moreno-cartoon.png?v=2",
-  team: true,
+// Illustrative only: senders are roles, not people. No invented names, titles or faces (VR-29, VR-30).
+const TERRAMORE: Person = { name: "Terramore", role: "Your Terramore team", team: true }
+
+function client(name: string, business: string): Person {
+  return { name, role: `Client · ${business}` }
 }
 
-const RILEY: Person = {
-  name: "Riley Cho",
-  role: "Account Manager, Terramore",
-  photo: "/founder/riley-cho-cartoon.png?v=3",
-  team: true,
-}
-
-const NOAH: Person = {
-  name: "Noah Patel",
-  role: "Automation Expert, Terramore",
-  photo: "/founder/noah-patel-cartoon.png?v=3",
-  team: true,
-}
-
-const SOFIA: Person = {
-  name: "Sofia Ramirez",
-  role: "Lead Web Developer, Terramore",
-  photo: "/founder/sofia-ramirez-cartoon.png?v=3",
-  team: true,
-}
-
-const MARCUS: Person = {
-  name: "Marcus Bell",
-  role: "Head of Sales, Terramore",
-  photo: "/founder/marcus-bell-cartoon.png?v=3",
-  team: true,
-}
-
-const ELENA: Person = {
-  name: "Elena Park",
-  role: "Lifecycle Lead, Terramore",
-  photo: "/founder/elena-voss-cartoon.png?v=3",
-  team: true,
-}
-
-const CHRIS: Person = {
-  name: "Chris Okonkwo",
-  role: "Growth Strategist, Terramore",
-  photo: "/founder/chris-okonkwo-cartoon.png?v=3",
-  team: true,
-}
-
-const BLAKE: Person = {
-  name: "Blake Harrow",
-  role: "Producer, Terramore",
-  photo: "/founder/jordan-blake-cartoon.png?v=3",
-  team: true,
-}
-
-const AVA: Person = {
-  name: "Ava Lindstrom",
-  role: "Account Manager, Terramore",
-  photo: "/founder/ava-lindstrom-cartoon.png?v=3",
-  team: true,
-}
-
-const NIA: Person = { name: "Nia Brooks", role: "Founder, Loom & Line", photo: "/founder/nia-brooks-headshot.png" }
-const CALEB: Person = {
-  name: "Caleb Voss",
-  role: "Owner, Hale Athletics",
-  photo: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=96&h=96&q=80",
-}
-const FARAH: Person = {
-  name: "Farah Nadir",
-  role: "Ops, Northwind HVAC",
-  photo: "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=96&h=96&q=80",
-}
-const DIEGO: Person = {
-  name: "Diego Marquez",
-  role: "CMO, Ortega Studio",
-  photo: "https://images.unsplash.com/photo-1506277886164-e25aa3f4ef7f?auto=format&fit=crop&w=96&h=96&q=80",
-}
-const HELEN: Person = {
-  name: "Helen Zhou",
-  role: "Managing Partner, Whitfield & Co.",
-  photo: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=96&h=96&q=80",
-}
-const IMANI: Person = {
-  name: "Imani Cole",
-  role: "Founder, Solis Skin",
-  photo: "https://images.unsplash.com/photo-1589156280159-27698a70f80e?auto=format&fit=crop&w=96&h=96&q=80",
-}
-const ARJUN: Person = {
-  name: "Arjun Mehta",
-  role: "CEO, Northbeam Labs",
-  photo: "https://images.unsplash.com/photo-1615109390621-47e2d4edc5c0?auto=format&fit=crop&w=96&h=96&q=80",
-}
-const SABLE: Person = {
-  name: "Sable Quinn",
-  role: "Creator, Sable Makes",
-  photo: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=96&h=96&q=80",
-}
-const DESHAWN: Person = {
-  name: "DeShawn Carter",
-  role: "Owner, Ruiz Build",
-  photo: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=96&h=96&q=80",
-}
+const STORE_OWNER = client("Store owner", "e-commerce brand")
+const GYM_OWNER = client("Gym owner", "fitness studio")
+const OFFICE_MANAGER = client("Office manager", "HVAC company")
+const BRAND_OWNER = client("Brand owner", "apparel label")
+const MANAGING_PARTNER = client("Managing partner", "professional firm")
+const BRAND_FOUNDER = client("Founder", "skincare brand")
+const STARTUP_CEO = client("CEO", "tech startup")
+const CREATOR = client("Creator", "online course")
+const CONTRACTOR = client("Owner", "construction company")
 
 // Three shapes on purpose so the channels do not read like one template:
 // e-commerce is a question with a result card, fitness is a proactive update with a checklist,
@@ -204,15 +99,14 @@ const CHANNELS: Channel[] = [
     label: "e-commerce",
     icon: ShoppingBag,
     members: 14,
-    client: NIA,
     messages: [
       {
-        from: NIA,
+        from: STORE_OWNER,
         time: "8:47 AM",
         text: <>{mention("Terramore")} can the cart and shipping emails be live before Friday&apos;s drop?</>,
       },
       {
-        from: ADAM,
+        from: TERRAMORE,
         time: "8:49 AM",
         text: "Yes. Three flows are live in Klaviyo. Test sends are in your inbox.",
         attachment: {
@@ -231,10 +125,9 @@ const CHANNELS: Channel[] = [
     label: "fitness",
     icon: Dumbbell,
     members: 9,
-    client: CALEB,
     messages: [
       {
-        from: RILEY,
+        from: TERRAMORE,
         time: "7:12 AM",
         text: "Shoot day plan for Thursday. Nothing needed from you.",
         attachment: {
@@ -249,7 +142,7 @@ const CHANNELS: Channel[] = [
         },
       },
       {
-        from: CALEB,
+        from: GYM_OWNER,
         time: "7:20 AM",
         text: "Great. I will be there at 9.",
       },
@@ -260,15 +153,14 @@ const CHANNELS: Channel[] = [
     label: "home-services",
     icon: House,
     members: 11,
-    client: FARAH,
     messages: [
       {
-        from: FARAH,
+        from: OFFICE_MANAGER,
         time: "6:04 AM",
         text: "Did the after-5 text go out last night?",
       },
       {
-        from: NOAH,
+        from: TERRAMORE,
         time: "6:07 AM",
         text: "It did. Here is the log.",
         attachment: {
@@ -282,7 +174,7 @@ const CHANNELS: Channel[] = [
         },
       },
       {
-        from: FARAH,
+        from: OFFICE_MANAGER,
         time: "6:09 AM",
         text: "Perfect. Leave it on.",
       },
@@ -293,20 +185,19 @@ const CHANNELS: Channel[] = [
     label: "apparel",
     icon: Shirt,
     members: 16,
-    client: DIEGO,
     messages: [
       {
-        from: DIEGO,
+        from: BRAND_OWNER,
         time: "9:21 AM",
         text: "Can you rebuild the site so the lookbook actually sells?",
       },
       {
-        from: SOFIA,
+        from: TERRAMORE,
         time: "9:24 AM",
         text: "The lookbook pages are in Drive. We put them on the site this week.",
         attachment: {
           kind: "drive",
-          folder: "Ortega Studio SS26",
+          folder: "Lookbook SS26",
           files: [
             { name: "lookbook.pdf", kind: "doc" },
             { name: "hero-cut-03.mp4", kind: "video" },
@@ -321,15 +212,14 @@ const CHANNELS: Channel[] = [
     label: "professional",
     icon: Briefcase,
     members: 8,
-    client: HELEN,
     messages: [
       {
-        from: HELEN,
+        from: MANAGING_PARTNER,
         time: "10:05 AM",
         text: <>{mention("Terramore")} can you build us a 90-day growth plan?</>,
       },
       {
-        from: MARCUS,
+        from: TERRAMORE,
         time: "10:08 AM",
         text: "Here is the 90 day chart. Week 4 is open. Next is the close path.",
         attachment: {
@@ -351,15 +241,14 @@ const CHANNELS: Channel[] = [
     label: "skincare",
     icon: Sparkles,
     members: 12,
-    client: IMANI,
     messages: [
       {
-        from: IMANI,
+        from: BRAND_FOUNDER,
         time: "11:16 AM",
         text: "People buy once. Can you get them to refill?",
       },
       {
-        from: ELENA,
+        from: TERRAMORE,
         time: "11:19 AM",
         text: "We set welcome, day 28 refill, and VIP restock in Klaviyo.",
         attachment: {
@@ -378,15 +267,14 @@ const CHANNELS: Channel[] = [
     label: "tech",
     icon: Cpu,
     members: 10,
-    client: ARJUN,
     messages: [
       {
-        from: ARJUN,
+        from: STARTUP_CEO,
         time: "2:03 PM",
         text: "Demos sit overnight. Can you book them the same day?",
       },
       {
-        from: CHRIS,
+        from: TERRAMORE,
         time: "2:06 PM",
         text: "Same day now. A new request gets a text and a hold on the calendar.",
         attachment: {
@@ -402,22 +290,21 @@ const CHANNELS: Channel[] = [
     label: "creators",
     icon: Clapperboard,
     members: 7,
-    client: SABLE,
     messages: [
       {
-        from: SABLE,
+        from: CREATOR,
         time: "4:40 PM",
         text: <>{mention("Terramore")} can you film and edit the course launch?</>,
       },
       {
-        from: BLAKE,
+        from: TERRAMORE,
         time: "4:43 PM",
         text: "We film Friday in South Beach, then cut and post the launch.",
         attachment: {
           kind: "shoot",
           place: "South Beach, Miami",
           when: "Fri, Oct 10 at 8:00 AM",
-          crew: "1 camera person, 2 models, Sable on camera",
+          crew: "1 camera person, 2 models, owner on camera",
         },
       },
     ],
@@ -427,20 +314,19 @@ const CHANNELS: Channel[] = [
     label: "construction",
     icon: HardHat,
     members: 13,
-    client: DESHAWN,
     messages: [
       {
-        from: DESHAWN,
+        from: CONTRACTOR,
         time: "5:11 AM",
         text: "Estimates go out and die. Can you chase them?",
       },
       {
-        from: AVA,
+        from: TERRAMORE,
         time: "5:14 AM",
         text: "Every estimate gets the same packet and a follow-up text. Files are in Drive.",
         attachment: {
           kind: "drive",
-          folder: "Ruiz Build estimates",
+          folder: "Estimates",
           files: [
             { name: "estimate.pdf", kind: "doc" },
             { name: "scope.pdf", kind: "doc" },
@@ -461,11 +347,11 @@ const EMAIL_TONES: Record<string, string> = {
   violet: "bg-violet-50",
 }
 
-const HOLD_FIRST_MS = 1000
-const TYPING_MS = 800
-const MESSAGE_MS = 1000
-const ASSET_MS = 800
-const HOLD_END_MS = 2200
+// One pass per channel, under 5 s for the longest channel (VR-47): 600 + (600 + 700 + 500) + (600 + 700) = 4.3 s.
+const HOLD_FIRST_MS = 600
+const TYPING_MS = 600
+const MESSAGE_MS = 700
+const ASSET_MS = 500
 const SWIPE_THRESHOLD = 48
 
 function FileIcon({ kind }: { kind: DriveFile["kind"] }) {
@@ -652,11 +538,7 @@ function SlackMessage({ message, phase }: { message: Message; phase: number }) {
 
   return (
     <div className="flex gap-3">
-      <SlackFace
-        src={message.from.photo}
-        name={message.from.name}
-        className="mt-0.5 h-8 w-8 shrink-0 rounded-lg object-cover object-top"
-      />
+      <SlackAvatar person={message.from} className="mt-0.5 h-8 w-8 shrink-0 rounded-lg" />
       <div className="min-w-0 flex-1">
         <p className="text-[13px] font-semibold text-slate-900">
           {message.from.name}
@@ -704,7 +586,6 @@ export function HeroAnalytics() {
   const [active, setActive] = useState(CHANNELS[0].id)
   const channel = CHANNELS.find((item) => item.id === active) ?? CHANNELS[0]
   const activeIndex = CHANNELS.findIndex((item) => item.id === channel.id)
-  const extraMembers = Math.max(channel.members - 4, 0)
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   const paneRef = useRef<HTMLDivElement>(null)
@@ -741,21 +622,29 @@ export function HeroAnalytics() {
     }
   }, [])
 
+  const rootRef = useRef<HTMLDivElement>(null)
   const reduce = usePrefersReducedMotion()
-  const [cursor, setCursor] = useState<RevealCursor>(() =>
-    reduce ? finalReveal(channel.messages) : { index: 0, phase: 2 }
-  )
+  const onScreen = useOnScreenAndVisible(rootRef, 0.5)
+  const playedRef = useRef<string | null>(null)
+  // Starts on the finished conversation so it reads without JavaScript or motion.
+  const [cursor, setCursor] = useState<RevealCursor>(() => finalReveal(CHANNELS[0].messages))
 
   useEffect(() => {
     setMenuOpen(false)
-    if (reduce) {
-      setCursor(finalReveal(channel.messages))
+  }, [active])
+
+  // Sequence: plays the active channel once when it is on screen, then rests on the full conversation.
+  useEffect(() => {
+    const messages = channel.messages
+    if (reduce || playedRef.current === active) {
+      setCursor(finalReveal(messages))
       return
     }
+    if (!onScreen) return
 
+    playedRef.current = active
     let cancelled = false
     let timer: number | undefined
-    const messages = channel.messages
 
     const wait = (ms: number) =>
       new Promise<void>((resolve) => {
@@ -763,31 +652,24 @@ export function HeroAnalytics() {
       })
 
     const play = async () => {
-      while (!cancelled) {
-        setCursor({ index: 0, phase: 2 })
-        await wait(HOLD_FIRST_MS)
+      setCursor({ index: 0, phase: 2 })
+      await wait(HOLD_FIRST_MS)
+      if (cancelled) return
+
+      for (let i = 1; i < messages.length; i++) {
+        setCursor({ index: i, phase: 0 })
+        await wait(TYPING_MS)
         if (cancelled) return
 
-        for (let i = 1; i < messages.length; i++) {
-          setCursor({ index: i, phase: 0 })
-          await wait(TYPING_MS)
-          if (cancelled) return
+        setCursor({ index: i, phase: 1 })
+        await wait(MESSAGE_MS)
+        if (cancelled) return
 
-          setCursor({ index: i, phase: 1 })
-          await wait(MESSAGE_MS)
+        setCursor({ index: i, phase: 2 })
+        if (messages[i].attachment) {
+          await wait(ASSET_MS)
           if (cancelled) return
-
-          if (messages[i].attachment) {
-            setCursor({ index: i, phase: 2 })
-            await wait(ASSET_MS)
-            if (cancelled) return
-          } else {
-            setCursor({ index: i, phase: 2 })
-          }
         }
-
-        await wait(HOLD_END_MS)
-        if (cancelled) return
       }
     }
 
@@ -795,8 +677,9 @@ export function HeroAnalytics() {
     return () => {
       cancelled = true
       if (timer !== undefined) window.clearTimeout(timer)
+      setCursor(finalReveal(messages))
     }
-  }, [active, reduce])
+  }, [active, reduce, onScreen, channel.messages])
 
   useEffect(() => {
     if (!menuOpen) return
@@ -877,7 +760,7 @@ export function HeroAnalytics() {
   const showNext = activeIndex < CHANNELS.length - 1
 
   return (
-    <div className="relative mx-auto w-full min-w-0 max-w-full" data-hero-analytics>
+    <div ref={rootRef} className="relative mx-auto w-full min-w-0 max-w-full" data-hero-analytics>
       <div className="card-radius max-w-full overflow-hidden border border-black/[0.06] bg-white shadow-[0_30px_80px_-32px_rgba(15,23,42,0.22)] md:rounded-[28px]">
         {/* Mobile height follows the tallest conversation (measured once); desktop stays a fixed frame. */}
         <div className="grid grid-cols-[minmax(0,1fr)] md:h-[36rem] md:grid-cols-[200px_minmax(0,1fr)]">
@@ -954,22 +837,9 @@ export function HeroAnalytics() {
                   </div>
                 ) : null}
               </div>
-              <div className="flex shrink-0 items-center gap-2">
-                <span className="text-[11px] font-normal text-slate-400 md:hidden">{channel.members}</span>
-                <div className="flex -space-x-1.5">
-                  {CHANNELS.slice(0, 4).map((item) => (
-                    <SlackFace
-                      key={item.id}
-                      src={item.client.photo}
-                      name={item.client.name}
-                      className="h-6 w-6 rounded-full border-2 border-white object-cover"
-                    />
-                  ))}
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-white bg-slate-100 text-[9px] font-semibold text-slate-500">
-                    +{extraMembers}
-                  </span>
-                </div>
-              </div>
+              <p className="shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-[12px] font-medium text-slate-700">
+                Illustrative example
+              </p>
             </div>
 
             <div
@@ -1050,7 +920,7 @@ export function HeroAnalytics() {
                   aria-label={`Show #${item.label}`}
                   aria-current={item.id === active ? "true" : undefined}
                   onClick={() => setActive(item.id)}
-                  className={`h-1.5 rounded-full transition-all ${
+                  className={`h-1.5 rounded-full transition-colors ${
                     item.id === active ? "w-4 bg-brand" : "w-1.5 bg-slate-300"
                   }`}
                 />

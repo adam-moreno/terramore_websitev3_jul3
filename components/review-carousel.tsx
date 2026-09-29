@@ -1,3 +1,9 @@
+"use client"
+
+import { useRef, useState } from "react"
+import { MotionToggle } from "@/components/motion-toggle"
+import { useOnScreenAndVisible, usePrefersReducedMotion } from "@/hooks/use-autoplay"
+
 const JOBS = [
   {
     industry: "Pilates studio",
@@ -52,16 +58,23 @@ function JobCard({ job }: { job: (typeof JOBS)[number] }) {
 }
 
 export function ReviewCarousel() {
+  const rowRef = useRef<HTMLDivElement>(null)
+  const reduce = usePrefersReducedMotion()
+  const onScreen = useOnScreenAndVisible(rowRef)
+  const [paused, setPaused] = useState(false)
+  const running = onScreen && !paused
+
   return (
     <section className="overflow-hidden py-20 md:py-24">
       <div className="page-shell text-center">
-        <p className="text-[13px] font-medium uppercase tracking-[0.16em] text-ink/40">Jobs we already know</p>
+        <p className="text-[13px] font-medium uppercase tracking-[0.16em] text-ink/70">Jobs we already know</p>
         <h2 className="mt-3 text-[2.15rem] font-semibold tracking-[-0.03em] text-ink md:text-[3rem]">
           The kinds of businesses we help.
         </h2>
       </div>
-      <div className="mt-10 overflow-hidden">
-        <div className="review-marquee flex w-max gap-4">
+      <div ref={rowRef} className="mt-10 overflow-hidden">
+        {/* Orientation: a slow scroll through the industries; pausable, paused off screen, still under reduced motion. */}
+        <div className="review-marquee flex w-max gap-4" style={running ? undefined : { animationPlayState: "paused" }}>
           {JOBS.map((job) => (
             <JobCard key={job.industry} job={job} />
           ))}
@@ -72,6 +85,11 @@ export function ReviewCarousel() {
           ))}
         </div>
       </div>
+      {reduce ? null : (
+        <div className="page-shell mt-6 flex justify-center">
+          <MotionToggle paused={paused} onToggle={() => setPaused((p) => !p)} label="industry list" />
+        </div>
+      )}
     </section>
   )
 }

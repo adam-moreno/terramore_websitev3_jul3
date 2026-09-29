@@ -141,7 +141,7 @@ export function ReportPopup({
       <div className="relative z-10 max-h-[90vh] w-full max-w-md overflow-y-auto rounded-[1.75rem] bg-white shadow-[0_24px_60px_-20px_rgba(15,30,46,0.45)]">
         {success ? (
           <div className="px-7 py-8 text-center md:px-9 md:py-10">
-            <p className="text-[12px] font-medium uppercase tracking-[0.16em] text-ink/40">Digital Footprint report</p>
+            <p className="text-[12px] font-medium uppercase tracking-[0.16em] text-ink/70">Digital Footprint report</p>
             <p className="mt-3 text-[1.35rem] font-semibold tracking-tight text-ink">Your report is on the way.</p>
             <p className="mt-3 text-[15px] leading-relaxed text-ink/70">
               We&apos;re preparing it now. In your inbox in minutes.
@@ -184,7 +184,7 @@ export function ReportPopup({
           <>
             <div className="flex items-start justify-between gap-3 px-7 pt-7 md:px-9 md:pt-9">
               <div>
-                <p className="text-[12px] font-medium uppercase tracking-[0.16em] text-ink/40">Free Digital Footprint report</p>
+                <p className="text-[12px] font-medium uppercase tracking-[0.16em] text-ink/70">Free Digital Footprint report</p>
                 <p className="mt-2 text-[15px] leading-relaxed text-ink/75">
                   {description ??
                     (direct
@@ -192,7 +192,7 @@ export function ReportPopup({
                       : "Two quick questions, then your details. In your inbox in minutes.")}
                 </p>
               </div>
-              <button type="button" onClick={onClose} className="shrink-0 text-[13px] font-medium text-slate-400 hover:text-ink">
+              <button type="button" onClick={onClose} className="shrink-0 text-[13px] font-medium text-ink/70 hover:text-ink">
                 Close
               </button>
             </div>

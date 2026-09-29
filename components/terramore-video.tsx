@@ -111,7 +111,7 @@ export const TerramoreVideo: React.FC<TerramoreVideoProps> = ({
           <div className="text-3xl md:text-5xl font-bold text-white mb-6 drop-shadow-lg">
             Welcome to
           </div>
-          <div className="text-4xl md:text-6xl font-black bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent drop-shadow-lg">
+          <div className="text-4xl md:text-6xl font-black text-white drop-shadow-lg">
             TERRAMORE.IO
           </div>
         </div>

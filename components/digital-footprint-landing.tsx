@@ -2,10 +2,12 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { BookingLink } from "@/components/booking-popup"
+import { MotionToggle } from "@/components/motion-toggle"
 import { ReportPopup } from "@/components/report-popup"
 import { CHAPTERS } from "@/lib/report/chapters"
+import { useOnScreenAndVisible, usePrefersReducedMotion } from "@/hooks/use-autoplay"
 
 const PDF_PAGES = [
   { src: "/report/pdf-cover.png", alt: "Sample report page: Where you show up" },
@@ -50,64 +52,78 @@ function trackCta() {
 }
 
 function PdfStack() {
+  const rootRef = useRef<HTMLDivElement>(null)
   const [active, setActive] = useState(0)
+  const [paused, setPaused] = useState(false)
+  const reduce = usePrefersReducedMotion()
+  const onScreen = useOnScreenAndVisible(rootRef)
+  const rotating = onScreen && !paused && !reduce
 
+  // Sequence: shows what the report contains, one sample page at a time. Pausable; still under reduced motion.
   useEffect(() => {
+    if (!rotating) return
     const id = window.setInterval(() => {
       setActive((current) => (current + 1) % PDF_PAGES.length)
     }, ROTATE_MS)
     return () => window.clearInterval(id)
-  }, [])
+  }, [rotating])
 
   const order = [0, 1, 2].map((i) => (active + i) % PDF_PAGES.length)
 
   return (
-    <div className="relative mx-auto h-[20rem] w-full max-w-[18rem] sm:h-[24rem] sm:max-w-[22rem] md:h-[30rem] md:max-w-[26rem]">
-      {order.map((pageIndex, depth) => {
-        const page = PDF_PAGES[pageIndex]
-        const isFront = depth === 2
-        const transforms = [
-          "translate(-14%, 8%) rotate(-8deg) scale(0.92)",
-          "translate(14%, 10%) rotate(7deg) scale(0.92)",
-          "translate(0%, 0%) rotate(-1.5deg) scale(1)",
-        ]
-        return (
-          <div
-            key={`${page.src}-${depth}`}
-            className={`absolute inset-x-[8%] top-0 aspect-[3/4] overflow-hidden rounded-xl border border-black/[0.08] bg-white shadow-[0_24px_60px_-28px_rgba(15,23,42,0.45)] transition-all duration-700 ease-out ${
-              isFront ? "z-30 opacity-100" : "z-10 opacity-95"
-            }`}
-            style={{
-              transform: transforms[depth],
-              zIndex: isFront ? 30 : 10 + depth,
-            }}
-            aria-hidden={!isFront}
-          >
-            <Image
-              src={page.src}
-              alt={isFront ? page.alt : ""}
-              fill
-              className="object-cover object-top"
-              sizes="(max-width: 768px) 80vw, 420px"
-              priority={depth === 2}
+    <div ref={rootRef}>
+      <div className="relative mx-auto h-[20rem] w-full max-w-[18rem] sm:h-[24rem] sm:max-w-[22rem] md:h-[30rem] md:max-w-[26rem]">
+        {order.map((pageIndex, depth) => {
+          const page = PDF_PAGES[pageIndex]
+          const isFront = depth === 2
+          const transforms = [
+            "translate(-14%, 8%) rotate(-8deg) scale(0.92)",
+            "translate(14%, 10%) rotate(7deg) scale(0.92)",
+            "translate(0%, 0%) rotate(-1.5deg) scale(1)",
+          ]
+          return (
+            <div
+              key={`${page.src}-${depth}`}
+              className={`absolute inset-x-[8%] top-0 aspect-[3/4] overflow-hidden rounded-xl border border-black/[0.08] bg-white shadow-[0_24px_60px_-28px_rgba(15,23,42,0.45)] transition-[transform,opacity] duration-700 ease-out motion-reduce:transition-none ${
+                isFront ? "z-30 opacity-100" : "z-10 opacity-95"
+              }`}
+              style={{
+                transform: transforms[depth],
+                zIndex: isFront ? 30 : 10 + depth,
+              }}
+              aria-hidden={!isFront}
+            >
+              <Image
+                src={page.src}
+                alt={isFront ? page.alt : ""}
+                fill
+                className="object-cover object-top"
+                sizes="(max-width: 768px) 80vw, 420px"
+                priority={depth === 2}
+              />
+            </div>
+          )
+        })}
+        <div className="absolute -bottom-1 left-1/2 z-40 flex -translate-x-1/2 gap-1.5">
+          {PDF_PAGES.map((page, index) => (
+            <button
+              key={page.src}
+              type="button"
+              aria-label={`Show sample page ${index + 1}`}
+              aria-current={index === active ? "true" : undefined}
+              onClick={() => setActive(index)}
+              className={`h-1.5 rounded-full transition-colors ${
+                index === active ? "w-4 bg-brand" : "w-1.5 bg-ink/20"
+              }`}
             />
-          </div>
-        )
-      })}
-      <div className="absolute -bottom-1 left-1/2 z-40 flex -translate-x-1/2 gap-1.5">
-        {PDF_PAGES.map((page, index) => (
-          <button
-            key={page.src}
-            type="button"
-            aria-label={`Show sample page ${index + 1}`}
-            aria-current={index === active ? "true" : undefined}
-            onClick={() => setActive(index)}
-            className={`h-1.5 rounded-full transition-all ${
-              index === active ? "w-4 bg-brand" : "w-1.5 bg-ink/20"
-            }`}
-          />
-        ))}
+          ))}
+        </div>
       </div>
+      {reduce ? null : (
+        <div className="mt-6 flex justify-center lg:justify-start">
+          <MotionToggle paused={paused} onToggle={() => setPaused((p) => !p)} label="sample pages" />
+        </div>
+      )}
     </div>
   )
 }
@@ -135,7 +151,7 @@ export function DigitalFootprintLanding() {
               </p>
               <h1 className="mt-3 text-[2.2rem] font-bold leading-[1.08] tracking-[-0.02em] text-ink sm:text-5xl md:text-[3.1rem] md:leading-[1.05]">
                 See what a potential customer sees{" "}
-                <span className="text-gold">before they call you.</span>
+                before they call you.
               </h1>
               <p className="mx-auto mt-4 max-w-[24rem] text-[16px] font-medium leading-[1.4] text-ink/75 sm:max-w-lg lg:mx-0 md:text-[18px]">
                 We review your website, Google presence, socials, reviews, and ads — then show what’s working, what’s
@@ -154,15 +170,12 @@ export function DigitalFootprintLanding() {
                 <p className="max-w-sm text-[13px] font-medium text-ink/55 lg:max-w-none">
                   About a minute to request. In your inbox in minutes.
                 </p>
-                <p className="text-[13px] font-semibold text-ink/65">
-                  Requested by thousands of business owners
-                </p>
               </div>
             </div>
 
             <div className="pb-4 md:pb-0">
               <PdfStack />
-              <p className="mt-7 text-center text-[12px] text-ink/40 lg:text-left">
+              <p className="mt-4 text-center text-[12px] text-ink/70 lg:text-left">
                 Illustrative pages — your report reads your business.
               </p>
             </div>
@@ -253,9 +266,6 @@ export function DigitalFootprintLanding() {
           >
             Get my free Digital Footprint report
           </button>
-          <p className="mt-4 text-[13px] font-medium text-cream/50">
-            Requested by thousands of business owners
-          </p>
           <BookingLink
             label="Or talk through a report with us"
             source="report"

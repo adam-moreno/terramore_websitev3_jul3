@@ -56,7 +56,7 @@ export function StickyShowcase({
       <div className="page-shell">
         <div className="mx-auto max-w-[560px] text-center">
           <h2 className="section-title text-ink md:text-[2.5rem] md:leading-normal md:tracking-[-0.04em]">
-            {title} <span className="text-gold">{accent}</span>
+            {title} {accent}
           </h2>
           <p className="section-lede mx-auto mt-4 max-w-md text-ink/70 md:text-[15px] md:leading-relaxed">{subtitle}</p>
         </div>

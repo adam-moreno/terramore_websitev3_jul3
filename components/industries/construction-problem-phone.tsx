@@ -1,8 +1,9 @@
 "use client"
 
 import Image from "next/image"
-import { useEffect, useState } from "react"
-import { resolveVisitorLocality } from "@/lib/construction-locality"
+import { useEffect, useRef, useState } from "react"
+import { MotionToggle } from "@/components/motion-toggle"
+import { useOnScreenAndVisible, usePrefersReducedMotion } from "@/hooks/use-autoplay"
 
 type Scene = "roll" | "search" | "serp" | "ringing" | "voicemail" | "missed"
 
@@ -29,54 +30,50 @@ const SCENE_MS: Record<Scene, number> = {
 
 const ORDER: Scene[] = ["roll", "search", "serp", "ringing", "voicemail", "missed"]
 
-const DEFAULT_METRO = "Los Angeles"
+const QUERY = "complete home rebuild near me"
 
 /**
- * Problem-section phone story:
- * scrolling jobsite camera roll → geo Google search → competitor SERP →
+ * Problem-section phone story (illustrative):
+ * scrolling jobsite camera roll → local Google search → competitor SERP →
  * ringing → voicemail → Missed Call ×5.
+ * Sequence: plays through once while on screen and stops on the missed calls; Pause / Play controls it.
+ * Reduced motion: holds the competitor results, no scene changes. No visitor location is looked up.
  */
 export function ConstructionProblemPhone() {
+  const rootRef = useRef<HTMLDivElement>(null)
   const [scene, setScene] = useState<Scene>("roll")
-  const [reduceMotion, setReduceMotion] = useState(false)
-  const [metro, setMetro] = useState(DEFAULT_METRO)
+  const [userPaused, setUserPaused] = useState(false)
+  const reduceMotion = usePrefersReducedMotion()
+  const onScreen = useOnScreenAndVisible(rootRef)
+  const ended = scene === ORDER[ORDER.length - 1]
+  const running = !reduceMotion && onScreen && !userPaused && !ended
+  const animate = !reduceMotion && !userPaused && onScreen
 
   useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)")
-    const sync = () => setReduceMotion(mq.matches)
-    sync()
-    mq.addEventListener("change", sync)
-    return () => mq.removeEventListener("change", sync)
-  }, [])
+    if (reduceMotion) setScene("serp")
+  }, [reduceMotion])
 
   useEffect(() => {
-    let cancelled = false
-    ;(async () => {
-      const locality = await resolveVisitorLocality()
-      if (!cancelled && locality.metro) setMetro(locality.metro)
-    })()
-    return () => {
-      cancelled = true
-    }
-  }, [])
-
-  useEffect(() => {
-    if (reduceMotion) {
-      setScene("serp")
-      return
-    }
+    if (!running) return
     const t = window.setTimeout(() => {
-      const i = ORDER.indexOf(scene)
-      setScene(ORDER[(i + 1) % ORDER.length]!)
+      setScene(ORDER[ORDER.indexOf(scene) + 1] ?? scene)
     }, SCENE_MS[scene])
     return () => window.clearTimeout(t)
-  }, [scene, reduceMotion])
+  }, [scene, running])
 
-  const query = `complete home rebuild in ${metro}`
+  const toggle = () => {
+    if (ended) {
+      setScene(ORDER[0]!)
+      setUserPaused(false)
+    } else {
+      setUserPaused((p) => !p)
+    }
+  }
 
   return (
-    <div className="mx-auto w-full max-w-[17.5rem] lg:mx-0 lg:max-w-none">
+    <div ref={rootRef} className="mx-auto w-full max-w-[17.5rem] lg:mx-0 lg:max-w-none">
       <div
+        aria-hidden
         className="relative mx-auto aspect-[9/17] w-full max-w-[15.5rem] overflow-hidden rounded-[1.75rem] bg-ink shadow-[0_28px_60px_-28px_rgba(15,30,46,0.55)] ring-1 ring-black/20"
         data-problem-scene={scene}
       >
@@ -90,13 +87,11 @@ export function ConstructionProblemPhone() {
         />
         <div aria-hidden className="absolute inset-0 bg-ink/55" />
 
-        {scene === "roll" && <CameraRollScene animate={!reduceMotion} />}
-        {scene === "search" && (
-          <GoogleSearchScene query={query} animate={!reduceMotion} />
-        )}
-        {scene === "serp" && <GoogleSerpScene query={query} metro={metro} />}
-        {scene === "ringing" && <RingingScene />}
-        {scene === "voicemail" && <VoicemailScene />}
+        {scene === "roll" && <CameraRollScene animate={animate} />}
+        {scene === "search" && <GoogleSearchScene query={QUERY} animate={animate} />}
+        {scene === "serp" && <GoogleSerpScene query={QUERY} />}
+        {scene === "ringing" && <RingingScene animate={animate} />}
+        {scene === "voicemail" && <VoicemailScene animate={animate} />}
         {scene === "missed" && <MissedCallsScene />}
 
         <div
@@ -105,6 +100,12 @@ export function ConstructionProblemPhone() {
         >
           <span className="h-[3px] w-24 rounded-full bg-cream/35" />
         </div>
+      </div>
+      <div className="mx-auto mt-4 flex max-w-[15.5rem] items-center justify-center gap-3">
+        <p className="text-[12px] font-medium text-ink/70">Illustrative example</p>
+        {reduceMotion ? null : (
+          <MotionToggle paused={userPaused || ended} onToggle={toggle} label="phone story" />
+        )}
       </div>
     </div>
   )
@@ -208,35 +209,30 @@ function GoogleSearchScene({ query, animate }: { query: string; animate: boolean
       </div>
 
       <p className="mt-auto px-4 pb-8 text-center text-[10px] font-medium leading-snug text-ink/40">
-        Someone in {query.split(" in ").pop()} is looking right now.
+        Someone nearby is looking right now.
       </p>
     </div>
   )
 }
 
 function searchSuggestions(query: string): string[] {
-  const metro = query.split(" in ").pop() ?? "your area"
-  return [
-    query,
-    `home renovation contractor ${metro}`,
-    `best general contractor ${metro}`,
-  ]
+  return [query, "home renovation contractor near me", "best general contractor near me"]
 }
 
-function GoogleSerpScene({ query, metro }: { query: string; metro: string }) {
+function GoogleSerpScene({ query }: { query: string }) {
   const results = [
     {
       rank: "Ad",
       title: "Your Competitor",
-      url: `yourcompetitor.com · ${metro}`,
-      blurb: `Full home rebuilds in ${metro}. Free estimates. Book this week.`,
+      url: "yourcompetitor.com",
+      blurb: "Full home rebuilds near you. Free estimates. Book this week.",
       accent: true,
     },
     {
       rank: "1",
       title: "Competitor #2",
       url: `competitor2.com · rebuilds`,
-      blurb: `Whole-home renovation · ${metro} · 200+ projects shown online.`,
+      blurb: "Whole-home renovation · 200+ projects shown online.",
       accent: false,
     },
     {
@@ -288,13 +284,13 @@ function GoogleSerpScene({ query, metro }: { query: string; metro: string }) {
       </div>
 
       <p className="px-3 pb-7 text-center text-[10px] font-medium leading-snug text-ink/40">
-        They searched {metro}. They found everyone but you.
+        They searched nearby. They found everyone but you.
       </p>
     </div>
   )
 }
 
-function RingingScene() {
+function RingingScene({ animate }: { animate: boolean }) {
   return (
     <div className="absolute inset-0 z-10 flex flex-col items-center justify-between px-5 pb-10 pt-14 text-cream">
       <div className="text-center">
@@ -304,11 +300,11 @@ function RingingScene() {
         <div className="relative mx-auto mt-6 flex h-16 w-16 items-center justify-center">
           <span
             aria-hidden
-            className="construction-call-ring absolute inset-0 rounded-full bg-brand/30"
+            className={`${animate ? "construction-call-ring" : ""} absolute inset-0 rounded-full bg-brand/30`}
           />
           <span
             aria-hidden
-            className="construction-call-ring-delay absolute inset-[-6px] rounded-full bg-brand/15"
+            className={`${animate ? "construction-call-ring-delay" : ""} absolute inset-[-6px] rounded-full bg-brand/15`}
           />
           <span className="relative flex h-14 w-14 items-center justify-center rounded-full bg-cream/15 text-[22px] font-semibold ring-1 ring-cream/25 backdrop-blur-sm">
             ?
@@ -337,7 +333,7 @@ function RingingScene() {
   )
 }
 
-function VoicemailScene() {
+function VoicemailScene({ animate }: { animate: boolean }) {
   return (
     <div className="absolute inset-0 z-10 flex flex-col items-center justify-center px-6 text-center text-cream">
       <div className="flex h-14 w-14 items-center justify-center rounded-full bg-cream/10 ring-1 ring-cream/20">
@@ -354,7 +350,7 @@ function VoicemailScene() {
         {[4, 9, 6, 12, 7, 10, 5, 11, 8, 6, 9, 4].map((h, i) => (
           <span
             key={i}
-            className="construction-vm-bar w-[3px] rounded-full bg-gold-from/80"
+            className={`${animate ? "construction-vm-bar" : ""} w-[3px] rounded-full bg-gold-from/80`}
             style={{ height: h, animationDelay: `${i * 0.08}s` }}
           />
         ))}

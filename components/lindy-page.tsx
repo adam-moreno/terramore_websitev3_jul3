@@ -25,7 +25,7 @@ export function LindyPage({
         <div className="mx-auto max-w-3xl">
           <h1 className="text-[2.35rem] font-bold leading-[1.1] tracking-[-0.04em] text-ink sm:text-5xl md:text-[3.4rem]">
             {title}{" "}
-            {accent ? <span className="text-gold">{accent}</span> : null}
+            {accent}
           </h1>
           <p className="mx-auto mt-5 max-w-xl text-base font-medium leading-relaxed text-ink/80 sm:text-lg">
             {subtitle}

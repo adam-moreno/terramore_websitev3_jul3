@@ -33,7 +33,7 @@ export function ReportBand() {
           </div>
 
           <div className="card-pad hidden flex-col md:p-8 lg:flex">
-            <p className="text-[12px] font-medium uppercase tracking-[0.14em] text-ink/40">Inside the report</p>
+            <p className="text-[12px] font-medium uppercase tracking-[0.14em] text-ink/70">Inside the report</p>
             <div className="mt-4 space-y-2">
               {CHAPTERS.map((item) => (
                 <div key={item.n} className="rounded-2xl px-4 py-3">

@@ -32,7 +32,7 @@ export function ScheduleFab() {
       <BookingLink
         source="floating_cta"
         aria-label="Schedule"
-        className={`inline-flex items-center justify-center rounded-full bg-brand text-white shadow-lg transition-all duration-300 hover:bg-brand-hover hover:shadow-xl ${
+        className={`inline-flex items-center justify-center rounded-full bg-brand text-white shadow-lg transition-colors hover:bg-brand-hover hover:shadow-xl ${
           inHero ? "h-9 gap-1.5 px-3.5" : "h-9 w-9"
         }`}
       >
