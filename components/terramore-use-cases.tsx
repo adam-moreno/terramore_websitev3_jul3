@@ -139,6 +139,7 @@ export function TerramoreUseCases({ showIntro = true }: { showIntro?: boolean })
             <div className="relative min-h-[240px] overflow-hidden rounded-[16px] bg-[#eef3fb] md:min-h-[360px] md:rounded-none">{job.visual}</div>
           </div>
           <div className="card-pad flex flex-col justify-center md:p-8">
+            <p className="mb-3 w-fit rounded-full bg-slate-100 px-2.5 py-1 text-[12px] font-medium text-slate-700">Illustrative example</p>
             <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">{job.label}</p>
             <h3 className="mt-2 text-[1.5rem] font-semibold leading-[1.15] tracking-tight text-ink md:text-[1.45rem] md:leading-normal">{job.headline}</h3>
             <p className="mt-2 text-[16px] leading-[1.5] text-ink/70 md:text-[15px] md:leading-relaxed">{job.copy}</p>

@@ -139,6 +139,7 @@ export function FunnelStory() {
 
   return (
     <div ref={ref} className="rounded-[1.75rem] border border-black/[0.06] bg-white p-6 shadow-[0_8px_30px_rgba(15,30,46,0.04)] md:p-10">
+      <p className="mx-auto mb-4 w-fit rounded-full bg-slate-100 px-2.5 py-1 text-[12px] font-medium text-slate-700">Illustrative example</p>
       <div className="mx-auto max-w-2xl">
         <svg viewBox="0 0 700 320" className="w-full" role="img" aria-label="A marketing funnel split in two: disconnected channels leak on the left, while the connected Terramore funnel on the right moves visibility to traffic, leads, and sales with a feedback loop">
           <defs>

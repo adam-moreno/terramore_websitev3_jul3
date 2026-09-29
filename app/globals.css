@@ -184,29 +184,6 @@
   will-change: transform;
 }
 
-@keyframes construction-call-ring-kf {
-  0% {
-    transform: scale(0.85);
-    opacity: 0.7;
-  }
-  70% {
-    transform: scale(1.35);
-    opacity: 0;
-  }
-  100% {
-    transform: scale(1.35);
-    opacity: 0;
-  }
-}
-
-.construction-call-ring {
-  animation: construction-call-ring-kf 1.4s ease-out infinite;
-}
-
-.construction-call-ring-delay {
-  animation: construction-call-ring-kf 1.4s ease-out 0.45s infinite;
-}
-
 @keyframes construction-vm-bar-kf {
   0%,
   100% {
@@ -534,8 +511,6 @@
   .marketing-motion-bounce,
   .construction-hero-scroll-hint,
   .construction-roll-scroll,
-  .construction-call-ring,
-  .construction-call-ring-delay,
   .construction-vm-bar,
   .construction-missed-pop,
   .construction-search-caret,

@@ -178,7 +178,7 @@ export function ConstructionLanding() {
       </section>
 
       {/* 02 — PROBLEM RECOGNITION
-          Phone story: scrolling raw jobsite camera roll → ringing → voicemail → Missed Call ×5.
+          Phone story: scrolling raw jobsite camera roll → ringing → voicemail → calm "5 calls went to voicemail" card.
           List beside it stays equal structure (cue · title · one-line body). */}
       <section id="construction-problem" className="page-shell scroll-mt-24 pb-16 pt-8 md:pb-24 md:pt-12">
         <div className="mx-auto max-w-2xl text-center lg:mx-0 lg:max-w-xl lg:text-left">
@@ -197,7 +197,7 @@ export function ConstructionLanding() {
           <ol className="divide-y divide-ink/10 border-y border-ink/10">
             {PROBLEMS.map((item) => (
               <li key={item.n} className="flex gap-4 py-4 sm:gap-5 sm:py-5">
-                <p className="w-7 shrink-0 pt-0.5 text-[12px] font-semibold tabular-nums text-gold-to">{item.n}</p>
+                <p className="w-7 shrink-0 pt-0.5 text-[12px] font-semibold tabular-nums text-ink/70">{item.n}</p>
                 <div className="min-w-0 flex-1">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink/35">{item.cue}</p>
                   <h3 className="mt-1 text-[16px] font-semibold leading-snug tracking-tight text-ink sm:text-[17px]">

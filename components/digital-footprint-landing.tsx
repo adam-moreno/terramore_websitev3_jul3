@@ -197,7 +197,7 @@ export function DigitalFootprintLanding() {
                 key={step.n}
                 className="rounded-[1.5rem] border border-black/[0.06] bg-cream px-6 py-7 md:rounded-none md:border-0 md:bg-transparent md:px-0 md:py-0"
               >
-                <p className="text-[13px] font-medium text-gold-to">{step.n}</p>
+                <p className="text-[13px] font-medium text-ink/70">{step.n}</p>
                 <p className="mt-2 inline-flex rounded-full bg-brand/10 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-brand">
                   {step.time}
                 </p>

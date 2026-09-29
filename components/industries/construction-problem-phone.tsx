@@ -35,7 +35,7 @@ const QUERY = "complete home rebuild near me"
 /**
  * Problem-section phone story (illustrative):
  * scrolling jobsite camera roll → local Google search → competitor SERP →
- * ringing → voicemail → Missed Call ×5.
+ * ringing → voicemail → "5 calls went to voicemail" (calm, neutral).
  * Sequence: plays through once while on screen and stops on the missed calls; Pause / Play controls it.
  * Reduced motion: holds the competitor results, no scene changes. No visitor location is looked up.
  */
@@ -90,7 +90,7 @@ export function ConstructionProblemPhone() {
         {scene === "roll" && <CameraRollScene animate={animate} />}
         {scene === "search" && <GoogleSearchScene query={QUERY} animate={animate} />}
         {scene === "serp" && <GoogleSerpScene query={QUERY} />}
-        {scene === "ringing" && <RingingScene animate={animate} />}
+        {scene === "ringing" && <RingingScene />}
         {scene === "voicemail" && <VoicemailScene animate={animate} />}
         {scene === "missed" && <MissedCallsScene />}
 
@@ -102,7 +102,7 @@ export function ConstructionProblemPhone() {
         </div>
       </div>
       <div className="mx-auto mt-4 flex max-w-[15.5rem] items-center justify-center gap-3">
-        <p className="text-[12px] font-medium text-ink/70">Illustrative example</p>
+        <p className="rounded-full bg-slate-100 px-2.5 py-1 text-[12px] font-medium text-slate-700">Illustrative example</p>
         {reduceMotion ? null : (
           <MotionToggle paused={userPaused || ended} onToggle={toggle} label="phone story" />
         )}
@@ -290,7 +290,7 @@ function GoogleSerpScene({ query }: { query: string }) {
   )
 }
 
-function RingingScene({ animate }: { animate: boolean }) {
+function RingingScene() {
   return (
     <div className="absolute inset-0 z-10 flex flex-col items-center justify-between px-5 pb-10 pt-14 text-cream">
       <div className="text-center">
@@ -298,26 +298,19 @@ function RingingScene({ animate }: { animate: boolean }) {
           Incoming call
         </p>
         <div className="relative mx-auto mt-6 flex h-16 w-16 items-center justify-center">
-          <span
-            aria-hidden
-            className={`${animate ? "construction-call-ring" : ""} absolute inset-0 rounded-full bg-brand/30`}
-          />
-          <span
-            aria-hidden
-            className={`${animate ? "construction-call-ring-delay" : ""} absolute inset-[-6px] rounded-full bg-brand/15`}
-          />
+          <span aria-hidden className="absolute inset-[-6px] rounded-full bg-cream/10" />
           <span className="relative flex h-14 w-14 items-center justify-center rounded-full bg-cream/15 text-[22px] font-semibold ring-1 ring-cream/25 backdrop-blur-sm">
             ?
           </span>
         </div>
         <p className="mt-5 text-[20px] font-semibold tracking-tight">Unknown</p>
         <p className="mt-1 text-[13px] text-cream/55">mobile · estimate request</p>
-        <p className="mt-3 text-[12px] font-medium text-gold-from">Ringing…</p>
+        <p className="mt-3 text-[12px] font-medium text-cream/70">Ringing…</p>
       </div>
 
       <div className="flex w-full items-end justify-between px-2">
         <div className="flex flex-col items-center gap-2">
-          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-red-500/90 text-cream shadow-lg">
+          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-cream/20 text-cream shadow-lg ring-1 ring-cream/25">
             <PhoneIcon end />
           </span>
           <span className="text-[10px] text-cream/55">Decline</span>
@@ -360,56 +353,30 @@ function VoicemailScene({ animate }: { animate: boolean }) {
   )
 }
 
+/** Calm ending (VR-16, VR-40): neutral colors, no alarm badge, one plain summary card. */
 function MissedCallsScene() {
   return (
     <div className="absolute inset-0 z-10 flex flex-col bg-ink/80 px-3.5 pt-10 text-cream backdrop-blur-md">
       <div className="text-center">
-        <p className="text-[11px] font-medium text-cream/50">Tuesday</p>
+        <p className="text-[11px] font-medium text-cream/70">Tuesday</p>
         <p className="mt-0.5 text-[42px] font-light leading-none tracking-tight tabular-nums">9:41</p>
       </div>
 
-      <div className="mt-8 space-y-2">
-        <div className="construction-missed-pop rounded-[14px] bg-[rgba(255,255,255,0.92)] px-3 py-2.5 text-ink shadow-[0_8px_24px_-12px_rgba(15,30,46,0.45)]">
-          <div className="flex items-start gap-2.5">
-            <span className="relative mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-[9px] bg-emerald-500 text-white">
-              <PhoneIcon className="h-4 w-4" />
-              <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white ring-2 ring-white">
-                5
-              </span>
-            </span>
-            <div className="min-w-0 flex-1 pt-0.5">
-              <div className="flex items-baseline justify-between gap-2">
-                <p className="text-[12px] font-semibold leading-none">Phone</p>
-                <p className="text-[10px] text-ink/40">now</p>
-              </div>
-              <p className="mt-1 text-[13px] font-semibold leading-snug tracking-tight">
-                Missed Call ×5
-              </p>
-              <p className="mt-0.5 text-[11px] leading-snug text-ink/55">
-                Unknown · estimate requests — none answered
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="rounded-[14px] bg-[rgba(255,255,255,0.72)] px-3 py-2 text-ink/80">
-          <div className="flex items-start gap-2.5">
-            <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-[9px] bg-violet-500 text-white">
-              <VoicemailIcon className="h-4 w-4" />
-            </span>
-            <div className="min-w-0 flex-1 pt-0.5">
-              <div className="flex items-baseline justify-between gap-2">
-                <p className="text-[12px] font-semibold leading-none">Phone</p>
-                <p className="text-[10px] text-ink/35">2m ago</p>
-              </div>
-              <p className="mt-1 text-[12px] font-medium leading-snug">1 New Voicemail</p>
-            </div>
+      <div className="construction-missed-pop mt-8 rounded-[14px] bg-[rgba(255,255,255,0.92)] px-3 py-3 text-ink shadow-[0_8px_24px_-12px_rgba(15,30,46,0.45)]">
+        <div className="flex items-start gap-2.5">
+          <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-[9px] bg-slate-200 text-slate-700">
+            <VoicemailIcon className="h-4 w-4" />
+          </span>
+          <div className="min-w-0 flex-1 pt-0.5">
+            <p className="text-[12px] font-semibold leading-none text-slate-700">Phone</p>
+            <p className="mt-1.5 text-[13px] font-semibold leading-snug tracking-tight">5 calls went to voicemail</p>
+            <p className="mt-0.5 text-[11px] leading-snug text-slate-600">Estimate requests. None called back yet.</p>
           </div>
         </div>
       </div>
 
-      <p className="mt-auto pb-8 text-center text-[11px] font-medium text-cream/45">
-        Leads calling. Nobody picking up.
+      <p className="mt-auto pb-8 text-center text-[11px] font-medium text-cream/70">
+        Leads called. Nobody picked up.
       </p>
     </div>
   )

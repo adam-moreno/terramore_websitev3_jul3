@@ -710,7 +710,7 @@ export function HeroSystemDeck() {
         })}
       </div>
       <div className="flex items-center justify-center gap-4 px-4 pb-6">
-        <p className="text-[12px] font-medium text-ink/70">Illustrative example</p>
+        <p className="rounded-full bg-slate-100 px-2.5 py-1 text-[12px] font-medium text-slate-700">Illustrative example</p>
         {reduced ? null : (
           <MotionToggle paused={userPaused} onToggle={() => setUserPaused((p) => !p)} label="growth stages" />
         )}
@@ -1175,7 +1175,7 @@ export function StagedShowcase() {
               </div>
             ))}
           </div>
-          <p className="mt-6 text-[12px] font-medium text-ink/70">Illustrative example</p>
+          <p className="mt-6 w-fit rounded-full bg-slate-100 px-2.5 py-1 text-[12px] font-medium text-slate-700">Illustrative example</p>
           {/* Spacer so the sticky block reserves room for the slide. */}
           <div aria-hidden className="h-44" />
         </div>
@@ -1189,7 +1189,7 @@ export function StagedShowcase() {
             <div className="mb-5 lg:hidden">
               <div className="flex flex-wrap items-center gap-3">
                 <p className="inline-flex rounded-full bg-brand px-4 py-2 text-[13px] font-semibold text-white">{s.label}</p>
-                <p className="text-[12px] font-medium text-ink/70">Illustrative example</p>
+                <p className="rounded-full bg-slate-100 px-2.5 py-1 text-[12px] font-medium text-slate-700">Illustrative example</p>
               </div>
               <div className="mt-4">
                 <PersonaCard persona={s.persona} compact />
@@ -1249,7 +1249,8 @@ export function TerraIQTile() {
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <p className="text-[13px] font-bold uppercase tracking-[0.14em] text-white/80">Sample Business Co.</p>
-              <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40">Monthly snapshot · illustrative</p>
+              <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-white/70">Monthly snapshot</p>
+              <p className="mt-2 w-fit rounded-full bg-white/10 px-2.5 py-1 text-[12px] font-medium text-cream">Illustrative example</p>
             </div>
             <div className="rounded-lg border border-gold-from/60 px-3 py-1.5">
               <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-gold-from">Revenue attributed</p>

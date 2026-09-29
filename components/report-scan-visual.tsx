@@ -49,9 +49,12 @@ export function ReportScanVisual() {
 
   return (
     <div className="flex h-full flex-col">
-      <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-cream/50">
-        What is in your free report
-      </p>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-cream/70">
+          What is in your free report
+        </p>
+        <p className="rounded-full bg-white/10 px-2.5 py-1 text-[12px] font-medium text-cream">Illustrative example</p>
+      </div>
       <p className="mt-1.5 text-[15px] font-medium leading-snug text-cream/70">
         Four chapters. Swipe through what you&apos;ll get.
       </p>
@@ -77,7 +80,7 @@ export function ReportScanVisual() {
               </h3>
               <p
                 className={`mt-3 text-[1.25rem] font-semibold tabular-nums leading-none ${
-                  warn ? "text-[#ffb59e]/80" : "text-gold/85"
+                  warn ? "text-[#ffb59e]/80" : "text-gold-from"
                 }`}
               >
                 {chapter.stat}
@@ -101,7 +104,7 @@ export function ReportScanVisual() {
               aria-pressed={on}
               aria-label={`Show chapter ${item.n}`}
               onClick={() => scrollTo(index)}
-              className={`h-1.5 rounded-full transition-all ${
+              className={`h-1.5 rounded-full transition-colors ${
                 on ? "w-6 bg-cream" : "w-1.5 bg-cream/30 hover:bg-cream/50"
               }`}
             />

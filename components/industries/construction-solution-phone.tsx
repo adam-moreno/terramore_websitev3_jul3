@@ -298,7 +298,7 @@ function SolutionPhone({
         </div>
       </div>
       <div className="mx-auto mt-4 flex max-w-[15.5rem] items-center justify-center gap-3">
-        <p className="text-[12px] font-medium text-cream/70">Illustrative example</p>
+        <p className="rounded-full bg-white/10 px-2.5 py-1 text-[12px] font-medium text-cream">Illustrative example</p>
         {children}
       </div>
     </div>
@@ -346,7 +346,7 @@ function FilmScene({ animate, playing }: { animate: boolean; playing: boolean })
       <div className="absolute inset-x-0 top-0 px-3.5 pt-3">
         <div className="flex items-center justify-between text-[10px] font-semibold">
           <span className="flex items-center gap-1.5 rounded bg-ink/60 px-1.5 py-0.5 tabular-nums">
-            <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
+            <span className="h-1.5 w-1.5 rounded-full bg-cream" />
             REC 00:12
           </span>
           <span className="rounded bg-ink/60 px-1.5 py-0.5 text-cream/75">4K · 24fps</span>
@@ -618,7 +618,7 @@ function FollowUpScene({ animate }: { animate: boolean }) {
       title: "Estimate booked",
       body: "Thu 10:00 AM · on-site walkthrough",
       icon: <span className="text-[8px] font-bold uppercase leading-none">Thu</span>,
-      iconClass: "bg-white text-red-500 ring-1 ring-ink/10",
+      iconClass: "bg-white text-ink ring-1 ring-ink/10",
     },
   ]
 

@@ -76,7 +76,7 @@ export function StickyShowcase({
                     active === index ? "opacity-100" : "lg:opacity-35"
                   }`}
                 >
-                  <p className="text-[13px] font-medium text-gold-to">{String(index + 1).padStart(2, "0")}</p>
+                  <p className="text-[13px] font-medium text-ink/70">{String(index + 1).padStart(2, "0")}</p>
                   <h3 className="mt-3 whitespace-nowrap text-[1.5rem] font-semibold leading-[1.15] tracking-tight text-ink md:text-[1.75rem] md:leading-normal">
                     {item.title}
                   </h3>
@@ -87,14 +87,15 @@ export function StickyShowcase({
                       <Visual />
                     </div>
                   </div>
+                  <p className="mt-3 w-fit rounded-full bg-slate-100 px-2.5 py-1 text-[12px] font-medium text-slate-700 lg:hidden">Illustrative example</p>
                 </li>
               )
             })}
           </ol>
 
           <div className="relative hidden lg:block">
-            <div className="sticky top-24 flex h-[calc(100vh-8rem)] items-center">
-              <div className="aspect-[5/4] max-h-[calc(100vh-10rem)] w-full overflow-hidden rounded-[28px] border border-black/[0.06] bg-white shadow-[0_20px_50px_-28px_rgba(15,23,42,0.28)]">
+            <div className="sticky top-24 flex h-[calc(100vh-8rem)] flex-col items-center justify-center gap-3">
+              <div className="aspect-[5/4] max-h-[calc(100vh-11rem)] w-full overflow-hidden rounded-[28px] border border-black/[0.06] bg-white shadow-[0_20px_50px_-28px_rgba(15,23,42,0.28)]">
                 <div className="relative h-full">
                   {items.map((item, index) => {
                     const Visual = item.visual
@@ -112,6 +113,7 @@ export function StickyShowcase({
                   })}
                 </div>
               </div>
+              <p className="w-fit rounded-full bg-slate-100 px-2.5 py-1 text-[12px] font-medium text-slate-700">Illustrative example</p>
             </div>
           </div>
         </div>

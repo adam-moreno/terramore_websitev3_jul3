@@ -207,6 +207,7 @@ export function ServiceCarousel() {
     return (
       <div ref={rootRef} className="overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <ul className="flex gap-3 px-1">{tiles("static", false)}</ul>
+        <p className="mt-4 w-fit rounded-full bg-slate-100 px-2.5 py-1 text-[12px] font-medium text-slate-700">Illustrative example</p>
       </div>
     )
   }
@@ -229,7 +230,8 @@ export function ServiceCarousel() {
           </ul>
         </div>
       </div>
-      <div className="mt-4 flex justify-center">
+      <div className="mt-4 flex items-center justify-center gap-3">
+        <p className="rounded-full bg-slate-100 px-2.5 py-1 text-[12px] font-medium text-slate-700">Illustrative example</p>
         <MotionToggle paused={paused} onToggle={() => setPaused((p) => !p)} label="services list" />
       </div>
     </div>
@@ -344,6 +346,8 @@ const CREATIVE_TILES = [
 
 export function CreativeTilesGrid() {
   return (
+    <div>
+    <p className="mb-4 w-fit rounded-full bg-slate-100 px-2.5 py-1 text-[12px] font-medium text-slate-700">Illustrative example</p>
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:auto-rows-[11.5rem]">
       {CREATIVE_TILES.map((tile) => {
         const big = tile.span.includes("col-span-2")
@@ -374,6 +378,7 @@ export function CreativeTilesGrid() {
           </div>
         )
       })}
+    </div>
     </div>
   )
 }

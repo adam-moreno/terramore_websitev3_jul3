@@ -193,14 +193,16 @@ const MONEY_BEATS = [
   },
 ] as const
 
-function Face({ src, name, size = 48 }: { src: string; name: string; size?: number }) {
+/** Sample people are roles, never invented names or stock faces (VR-29, VR-30). */
+function RoleAvatar({ role, size = 48 }: { role: string; size?: number }) {
   return (
-    <img
-      src={src}
-      alt={name}
-      className="shrink-0 rounded-full object-cover ring-1 ring-black/5"
-      style={{ width: size, height: size }}
-    />
+    <span
+      aria-hidden
+      className="flex shrink-0 items-center justify-center rounded-full bg-slate-200 font-semibold text-slate-600 ring-2 ring-white"
+      style={{ width: size, height: size, fontSize: Math.round(size * 0.38) }}
+    >
+      {role.charAt(0)}
+    </span>
   )
 }
 
@@ -385,13 +387,13 @@ function settledVlair(beat: number): VlairView {
       snap: true,
       gaze: null,
       press: null,
-      form: { name: "Jordan Lee", card: "4242 ···· ···· 4242" },
+      form: { name: "New customer", card: "4242 ···· ···· 4242" },
       metrics: [
         { label: "Page", value: "Product" },
         { label: "Scroll", value: "64%" },
         { label: "Products", value: "Sculpt Seamless\nSoft short" },
         { label: "Cart", value: "Sculpt Seamless · $128" },
-        { label: "User", value: "Jordan Lee" },
+        { label: "User", value: "New customer" },
         { label: "Card", value: "Visa ···· 4242" },
         { label: "Checkout", value: "Ready" },
       ],
@@ -407,13 +409,13 @@ function settledVlair(beat: number): VlairView {
     snap: true,
     gaze: null,
     press: null,
-    form: { name: "Jordan Lee", card: "4242 ···· ···· 4242" },
+    form: { name: "New customer", card: "4242 ···· ···· 4242" },
     metrics: [
       { label: "Page", value: "Product" },
       { label: "Scroll", value: "64%" },
       { label: "Products", value: "Sculpt Seamless\nSoft short" },
       { label: "Cart", value: "Sculpt Seamless · $128" },
-      { label: "User", value: "Jordan Lee" },
+      { label: "User", value: "New customer" },
       { label: "Card", value: "Visa ···· 4242" },
       { label: "Checkout", value: "Ready" },
       { label: "Paid", value: "Stripe · $128" },
@@ -567,20 +569,20 @@ function useVlairRecording(paused: boolean, enabled: boolean) {
         if (cancelled) return
         setView((current) => ({
           ...current,
-          form: { name: "Jordan Lee", card: "" },
+          form: { name: "New customer", card: "" },
           cursor: { x: 50, y: 50 },
         }))
         await sleep(700)
         if (cancelled) return
         setView((current) => ({
           ...current,
-          metrics: patchMetrics(current.metrics, "User", "Jordan Lee"),
+          metrics: patchMetrics(current.metrics, "User", "New customer"),
         }))
         await sleep(1200)
         if (cancelled) return
         setView((current) => ({
           ...current,
-          form: { name: "Jordan Lee", card: "4242 ···· ···· 4242" },
+          form: { name: "New customer", card: "4242 ···· ···· 4242" },
           cursor: PAY_CURSOR,
           metrics: patchMetrics(current.metrics, "Card", "Visa ···· 4242"),
         }))
@@ -855,7 +857,7 @@ function VlairRecordScreen({ view }: { view: VlairView }) {
               First-time buyer
             </p>
             <span className="ml-auto shrink-0 text-[10px] font-medium text-slate-400">
-              Jordan Lee
+              New customer
             </span>
           </div>
           <div className="mt-1.5 flex items-center gap-2 rounded-lg bg-[#f7f8fa] p-1.5">
@@ -885,10 +887,10 @@ function ChannelDetail({ beat }: { beat: number }) {
     return (
       <div className={`${TILE} software-story-arrive flex h-full flex-col overflow-hidden p-2.5`}>
         <div className="flex items-center gap-2.5">
-          <Face src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=96&h=96&q=80" name="Devon Hart" size={48} />
+          <RoleAvatar role="Visitor" size={48} />
           <div className="min-w-0">
             <p className="text-[12px] font-semibold text-brand">New visit</p>
-            <p className="text-[15px] font-semibold tracking-tight text-ink">Devon Hart</p>
+            <p className="text-[15px] font-semibold tracking-tight text-ink">Site visitor</p>
             <p className="text-[12px] text-slate-500">Just now</p>
           </div>
         </div>
@@ -965,14 +967,14 @@ function ChannelDetail({ beat }: { beat: number }) {
     return (
       <div className={`${TILE} software-story-pop flex h-full flex-col overflow-hidden p-2.5`}>
         <div className="flex items-center gap-2">
-          <Face src="https://images.unsplash.com/photo-1607746882042-944635dfe10e?auto=format&fit=crop&w=96&h=96&q=80" name="Renee Okoye" size={40} />
+          <RoleAvatar role="Past customer" size={40} />
           <div className="min-w-0">
             <p className="text-[11px] font-semibold text-brand">Quiet 6 weeks</p>
-            <p className="truncate text-[14px] font-semibold tracking-tight text-ink">Renee Okoye</p>
+            <p className="truncate text-[14px] font-semibold tracking-tight text-ink">Past customer</p>
             <p className="text-[11px] text-slate-500">Last buy Jan 12</p>
           </div>
         </div>
-        <p className="mt-2 text-[12px] leading-snug text-ink/70">One text. She booked.</p>
+        <p className="mt-2 text-[12px] leading-snug text-ink/70">One text. They booked.</p>
         <div className="mt-2 min-h-0 flex-1 space-y-1.5 overflow-hidden">
           <div className="flex items-start gap-2 rounded-xl bg-[#f7f8fa] p-2">
             <div className="software-icon-tile mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center">
@@ -1298,8 +1300,8 @@ export function FollowUpFlowVisual() {
   return (
     <Wash ref={cycleRef} className="flex h-full flex-col justify-between p-3 lg:p-4">
       <p className="sr-only">
-        A new lead from Sam Reed for $2,400 reaches the owner, sales, and the VA. A deal is created, a
-        follow-up is sent, and a hold is booked. Sam replies that 2:15 works. Sales sees it and the next
+        A new $2,400 website lead reaches the owner, sales, and the VA. A deal is created, a
+        follow-up is sent, and a hold is booked. The lead replies that 2:15 works. Sales sees it and the next
         action starts.
       </p>
 
@@ -1320,7 +1322,7 @@ export function FollowUpFlowVisual() {
             New lead
           </p>
           <p className="truncate text-[18px] font-semibold tracking-tight text-ink lg:text-[22px]">
-            Sam Reed
+            Website inquiry
           </p>
         </div>
         <p className="shrink-0 text-[14px] font-semibold text-ink lg:text-[16px]">Example · $2,400</p>
@@ -1428,8 +1430,7 @@ const AUDIENCE_STAGES = ["Notice you", "On the site", "The city", "Ready"] as co
 
 const AUDIENCE_USERS = [
   {
-    name: "Maya Chen",
-    photo: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&w=160&h=160&q=80",
+    name: "Shop owner",
     facts: [
       "Clicked a Meta ad",
       "Browsed products",
@@ -1438,8 +1439,7 @@ const AUDIENCE_USERS = [
     ],
   },
   {
-    name: "Eli Ward",
-    photo: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=160&h=160&q=80",
+    name: "Gym owner",
     facts: [
       "Opened the Instagram",
       "Stayed on the site",
@@ -1448,36 +1448,6 @@ const AUDIENCE_USERS = [
     ],
   },
 ] as const
-
-function AudienceFace({ src, name, size = 32 }: { src: string; name: string; size?: number }) {
-  const [failed, setFailed] = useState(false)
-  const initials = name
-    .split(" ")
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-
-  if (failed) {
-    return (
-      <span
-        className="flex shrink-0 items-center justify-center rounded-full bg-[#eef3fb] text-[11px] font-semibold text-brand ring-2 ring-white"
-        style={{ width: size, height: size }}
-      >
-        {initials}
-      </span>
-    )
-  }
-
-  return (
-    <img
-      src={src}
-      alt={name}
-      onError={() => setFailed(true)}
-      className="shrink-0 rounded-full object-cover object-top ring-2 ring-white"
-      style={{ width: size, height: size }}
-    />
-  )
-}
 
 const AUDIENCE_RESULTS = [
   { title: "Reach", before: 36, after: 92, color: "#2a66ff", slug: "meta", logoName: "Meta" },
@@ -1496,7 +1466,7 @@ export function AudienceIntelVisual() {
   return (
     <Wash ref={cycleRef} className="flex h-full flex-col justify-start gap-1.5 p-2.5 md:justify-between md:gap-2.5 lg:gap-3 lg:p-4">
       <p className="sr-only">
-        We watch Maya and Eli from the first ad or Instagram tap, through the site, to the city.
+        We watch two example buyers, a shop owner and a gym owner, from the first ad or Instagram tap, through the site, to the city.
         When they are ready to buy, reach, leads, deals, and buys go up.
       </p>
 
@@ -1522,7 +1492,7 @@ export function AudienceIntelVisual() {
             style={{ left: `${col * 25 + 12.5}%` }}
           >
             {AUDIENCE_USERS.map((person) => (
-              <AudienceFace key={person.name} src={person.photo} name={person.name} size={32} />
+              <RoleAvatar key={person.name} role={person.name} size={32} />
             ))}
           </div>
         </div>
@@ -1679,14 +1649,14 @@ export function CheckoutFlowVisual() {
 const BOOK_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"] as const
 const BOOK_TIMES = ["8:00", "9:30", "11:00", "2:00"] as const
 const BOOK_HOLDS = [
-  { day: 0, time: 0, name: "Priya", at: 1 },
-  { day: 1, time: 1, name: "Maya", at: 2 },
-  { day: 2, time: 0, name: "Eli", at: 2 },
-  { day: 3, time: 2, name: "Chris", at: 3 },
-  { day: 4, time: 1, name: "Lena", at: 3 },
-  { day: 0, time: 3, name: "Jonah", at: 4 },
-  { day: 2, time: 2, name: "Amina", at: 4 },
-  { day: 4, time: 3, name: "Diego", at: 5 },
+  { day: 0, time: 0, name: "Consult", at: 1 },
+  { day: 1, time: 1, name: "Estimate", at: 2 },
+  { day: 2, time: 0, name: "Intro", at: 2 },
+  { day: 3, time: 2, name: "Consult", at: 3 },
+  { day: 4, time: 1, name: "Fitting", at: 3 },
+  { day: 0, time: 3, name: "Estimate", at: 4 },
+  { day: 2, time: 2, name: "Intro", at: 4 },
+  { day: 4, time: 3, name: "Consult", at: 5 },
 ] as const
 
 export function BookingTilesVisual() {
@@ -1752,9 +1722,9 @@ export function BookingTilesVisual() {
 }
 
 const PHONE_CHAT = [
-  { from: "Maya", text: "Need someone this week. Kitchen leak.", side: "in" },
+  { from: "Caller", text: "Need someone this week. Kitchen leak.", side: "in" },
   { from: "Assistant", text: "Got it. 1–2 sinks, and is water still running?", side: "ai" },
-  { from: "Maya", text: "One sink. Water is off. Tuesday works.", side: "in" },
+  { from: "Caller", text: "One sink. Water is off. Tuesday works.", side: "in" },
   { from: "Assistant", text: "Qualified. Tuesday 8am is held.", side: "ai" },
 ] as const
 
@@ -1776,7 +1746,7 @@ export function PhoneFlowVisual() {
             status === "Booked"
               ? "bg-brand text-white"
               : status === "Qualifying"
-                ? "bg-[#fff1d6] text-gold-to"
+                ? "bg-[#fff1d6] text-ink"
                 : "bg-white text-slate-500"
           }`}
         >
@@ -1795,7 +1765,7 @@ export function PhoneFlowVisual() {
           </LineIcon>
         </span>
         <div className="min-w-0">
-          <p className="text-[13px] font-semibold text-ink">Maya Chen</p>
+          <p className="text-[13px] font-semibold text-ink">New caller</p>
           <p className="text-[12px] text-slate-500">
             {step === 0 ? "Incoming · 5:12 pm" : "Missed · 5:12 pm"}
           </p>
@@ -1889,9 +1859,9 @@ export function DropFilesVisual() {
 
 const CONSULT_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"] as const
 const CONSULTS = [
-  { day: 1, name: "Northshore", time: "9:00", state: "Booked", at: 1 },
-  { day: 2, name: "Harbor Law", time: "11:30", state: "Qualified", at: 2 },
-  { day: 3, name: "Elm Clinic", time: "2:15", state: "Hold", at: 3 },
+  { day: 1, name: "Home services", time: "9:00", state: "Booked", at: 1 },
+  { day: 2, name: "Law firm", time: "11:30", state: "Qualified", at: 2 },
+  { day: 3, name: "Clinic", time: "2:15", state: "Hold", at: 3 },
 ] as const
 
 export function ConsultCalendarVisual() {
@@ -1924,7 +1894,7 @@ export function ConsultCalendarVisual() {
                       hold.state === "Booked"
                         ? "bg-brand text-white"
                         : hold.state === "Qualified"
-                          ? "bg-[#fff1d6] text-gold-to"
+                          ? "bg-[#fff1d6] text-ink"
                           : "bg-white text-slate-600 ring-1 ring-black/5"
                     }`}
                   >
