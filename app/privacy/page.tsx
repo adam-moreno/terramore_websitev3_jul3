@@ -278,7 +278,7 @@ export default function PrivacyPolicyPage() {
                   <strong>Emails:</strong> If you consented to receive direct marketing from Terramore.io, LLC, we
                   provide you with the opportunity to opt out of our marketing communications or change your preferences
                   by following a link in the footer of all non-transactional email messages from us or by emailing us at
-                  contact@terramore.io.
+                  admin@terramore.io.
                 </p>
               </section>
 
@@ -313,7 +313,7 @@ export default function PrivacyPolicyPage() {
                   statement is used to allow us to fulfill our CCPA obligations and explain your CCPA rights.
                 </p>
                 <p className="text-gray-700 leading-relaxed">
-                  To exercise your rights under California law, contact us at contact@terramore.io. We may ask you to
+                  To exercise your rights under California law, contact us at admin@terramore.io. We may ask you to
                   fill out a request form. The CCPA only allows us to act on your request if we can verify your identity
                   or your authority to make the request so you will also need to follow our instructions for identity
                   verification.
@@ -346,7 +346,7 @@ export default function PrivacyPolicyPage() {
                   <p className="text-gray-700 mb-2">Terramore.io, LLC</p>
                   <p className="text-gray-700 mb-2">2108 N ST STE N</p>
                   <p className="text-gray-700 mb-2">SACRAMENTO, CA 95816</p>
-                  <p className="text-gray-700">Email: contact@terramore.io</p>
+                  <p className="text-gray-700">Email: admin@terramore.io</p>
                 </div>
                 <p className="text-gray-600 text-sm mt-6">Terramore.io, owned and operated by Adam Moreno, © 2026</p>
               </section>

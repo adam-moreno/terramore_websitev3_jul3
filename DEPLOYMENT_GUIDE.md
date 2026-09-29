@@ -64,14 +64,14 @@ SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
    - Homepage
    - Course signups
    - Partner application form
-   - CCPA popup
+   - Footer "Privacy Choices" dialog
    - All navigation links
 
 ## Step 6: Post-Deployment Checklist
 - [ ] Verify all pages load correctly
 - [ ] Test email signup forms
 - [ ] Test partner application form
-- [ ] Verify CCPA popup functionality
+- [ ] Verify the footer "Privacy Choices" dialog (`components/do-not-sell-popup.tsx`): it is a manual route only. The button opens an email to the monitored admin@terramore.io mailbox (subject "Privacy request"), the address can be copied, and a link goes to /privacy. There is no form, nothing is stored or sent by the site, and no confirmation is promised.
 - [ ] Check mobile responsiveness
 - [ ] Test all internal links
 - [ ] Verify Supabase connections

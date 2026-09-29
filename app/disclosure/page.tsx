@@ -127,7 +127,7 @@ export default function DisclosurePage() {
                   </p>
                   <p className="text-gray-700 mb-2">2108 N ST STE N</p>
                   <p className="text-gray-700 mb-2">SACRAMENTO, CA 95816</p>
-                  <p className="text-gray-700">Email: contact@terramore.io</p>
+                  <p className="text-gray-700">Email: admin@terramore.io</p>
                 </div>
               </section>
             </div>

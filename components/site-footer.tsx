@@ -123,7 +123,7 @@ export function SiteFooter({
                     onClick={openPopup}
                     className="text-[12px] text-white/50 underline-offset-4 transition hover:text-white"
                   >
-                    Do not sell my information
+                    Privacy Choices
                   </button>
                 </li>
               </ul>
@@ -183,7 +183,7 @@ export function SiteFooter({
             ))}
             <li>
               <button type="button" onClick={openPopup} className="text-[13px] text-slate-500 hover:text-ink">
-                Do not sell my information
+                Privacy Choices
               </button>
             </li>
           </ul>
