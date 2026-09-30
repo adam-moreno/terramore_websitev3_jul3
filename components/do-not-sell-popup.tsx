@@ -81,7 +81,7 @@ export function DoNotSellPopup({ isOpen, onClose }: DoNotSellPopupProps) {
 
           <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl bg-cream px-5 py-4">
             <div className="min-w-0">
-              <p className="text-[12px] font-medium uppercase tracking-[0.16em] text-ink/40">Email address</p>
+              <p className="text-[12px] font-medium uppercase tracking-[0.16em] text-ink/70">Email address</p>
               <p className="mt-1 select-all break-all text-[15px] font-medium text-ink">{PRIVACY_EMAIL}</p>
             </div>
             <button

@@ -94,14 +94,14 @@ export function SiteFooter({
             <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
               <div>
                 <Logo size="md" animate={false} on="dark" />
-                <p className="mt-3 text-[12px] text-white/50">
+                <p className="mt-3 text-[12px] text-white/70">
                   &copy; {new Date().getFullYear()} Terramore.io. All rights reserved.
                 </p>
               </div>
               <ul className="flex flex-wrap items-center gap-x-5 gap-y-2">
                 {LEGAL.map((item) => (
                   <li key={item.href}>
-                    <Link href={item.href} className="text-[12px] text-white/50 underline-offset-4 transition hover:text-white">
+                    <Link href={item.href} className="text-[12px] text-white/70 underline-offset-4 transition hover:text-white">
                       {item.label}
                     </Link>
                   </li>
@@ -110,14 +110,14 @@ export function SiteFooter({
                   <button
                     type="button"
                     onClick={openPopup}
-                    className="text-[12px] text-white/50 underline-offset-4 transition hover:text-white"
+                    className="text-[12px] text-white/70 underline-offset-4 transition hover:text-white"
                   >
                     Privacy Choices
                   </button>
                 </li>
               </ul>
             </div>
-            <p className="mt-6 max-w-4xl text-[11px] leading-relaxed text-white/40">
+            <p className="mt-6 max-w-4xl text-[11px] leading-relaxed text-white/65">
               Results mentioned on this website are not typical and are not a guarantee of your success. Individual
               results vary. Terramore.io is owned and operated by Adam Moreno.
             </p>
@@ -138,7 +138,7 @@ export function SiteFooter({
             {showDualCtas ? <DualCtas className="mt-6" /> : null}
           </div>
           <div>
-            <p className="text-[12px] font-medium uppercase tracking-[0.14em] text-ink/40">Explore</p>
+            <p className="text-[12px] font-medium uppercase tracking-[0.14em] text-ink/70">Explore</p>
             <ul className="mt-3 grid grid-cols-2 gap-x-6 gap-y-2">
               {EXPLORE.map((item) => (
                 <li key={item.href}>
@@ -176,7 +176,7 @@ export function SiteFooter({
               </button>
             </li>
           </ul>
-          <p className="mt-4 max-w-4xl text-[12px] leading-relaxed text-slate-400">
+          <p className="mt-4 max-w-4xl text-[12px] leading-relaxed text-slate-500">
             Results mentioned on this website are not typical and are not a guarantee of your success. Individual
             results vary. Terramore.io is owned and operated by Adam Moreno. Copyright &copy;{" "}
             {new Date().getFullYear()} Terramore.io. All rights reserved.

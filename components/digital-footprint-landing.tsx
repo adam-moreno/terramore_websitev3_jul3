@@ -166,8 +166,8 @@ export function DigitalFootprintLanding() {
                 >
                   Get my free Digital Footprint report
                 </button>
-                <p className="text-[13px] font-medium text-ink/45">Free · No login · No call required</p>
-                <p className="max-w-sm text-[13px] font-medium text-ink/55 lg:max-w-none">
+                <p className="text-[13px] font-medium text-ink/70">Free · No login · No call required</p>
+                <p className="max-w-sm text-[13px] font-medium text-ink/70 lg:max-w-none">
                   About a minute to request. In your inbox in minutes.
                 </p>
               </div>
@@ -218,7 +218,7 @@ export function DigitalFootprintLanding() {
           >
             Get my free Digital Footprint report
           </button>
-          <p className="mt-3 text-[13px] font-medium text-ink/55">
+          <p className="mt-3 text-[13px] font-medium text-ink/70">
             In your inbox in minutes.
           </p>
         </div>
@@ -239,7 +239,7 @@ export function DigitalFootprintLanding() {
                 className="rounded-[1.5rem] border border-black/[0.06] bg-white px-6 py-6 shadow-[0_16px_40px_-28px_rgba(15,23,42,0.2)]"
               >
                 <div className="flex items-baseline gap-3">
-                  <span className="text-[12px] font-semibold text-ink/35">{item.n}</span>
+                  <span className="text-[12px] font-semibold text-ink/70">{item.n}</span>
                   <span className="text-[16px] font-semibold text-ink">{item.title}</span>
                 </div>
                 <p className="mt-2 text-[14px] leading-relaxed text-ink/70">{item.body}</p>

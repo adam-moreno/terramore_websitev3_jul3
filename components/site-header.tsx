@@ -91,7 +91,7 @@ export function SiteHeader() {
               className="flex flex-col items-end px-3 py-1 text-[13px] font-medium text-slate-600 hover:text-slate-900"
             >
               <span>Log in</span>
-              <span className="text-[10px] font-normal text-slate-400">Current clients</span>
+              <span className="text-[10px] font-normal text-slate-500">Current clients</span>
             </a>
             <BookingLink
               label="Let's talk"
@@ -141,7 +141,7 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
           <div className="page-shell flex h-14 items-center justify-between md:h-16">
             <Logo size="sm" animate={false} on="light" />
             <div className="flex items-center gap-3">
-              <a href={DASHBOARD_LOGIN_URL} className="text-[13px] font-medium text-ink/55 hover:text-ink">
+              <a href={DASHBOARD_LOGIN_URL} className="text-[13px] font-medium text-ink/70 hover:text-ink">
                 Log in
               </a>
               <BookingLink

@@ -47,7 +47,7 @@ export default function AboutPage() {
   return (
     <div className="min-h-screen bg-cream">
       <section className="page-shell pb-8 pt-8 md:pt-12">
-        <p className="text-[13px] font-medium uppercase tracking-[0.16em] text-ink/40">About Terramore</p>
+        <p className="text-[13px] font-medium uppercase tracking-[0.16em] text-ink/70">About Terramore</p>
         <h1 className="mt-3 max-w-4xl text-[2.6rem] font-semibold leading-[1.05] tracking-[-0.03em] text-ink md:text-[4.4rem]">
           Big brands pay a team to find out why people do not buy. Now you can have one.
         </h1>
@@ -59,7 +59,7 @@ export default function AboutPage() {
       </section>
 
       <section className="page-shell py-10 md:py-14">
-        <h2 className="text-[13px] font-medium uppercase tracking-[0.16em] text-ink/40">What that means for you</h2>
+        <h2 className="text-[13px] font-medium uppercase tracking-[0.16em] text-ink/70">What that means for you</h2>
         <div className="mt-5 grid gap-5 md:grid-cols-3">
           {FOR_OWNERS.map((item) => (
             <div key={item.title} className="rounded-[1.5rem] bg-white p-7 shadow-[0_8px_30px_rgba(15,30,46,0.04)]">
@@ -82,7 +82,7 @@ export default function AboutPage() {
             className="h-52 w-44 rounded-[1.75rem] object-cover object-top shadow-[0_8px_30px_rgba(15,30,46,0.08)] md:h-64 md:w-56"
           />
           <div className="max-w-2xl space-y-5 text-[1.05rem] leading-relaxed text-ink/75">
-            <p className="text-[13px] font-medium uppercase tracking-[0.16em] text-ink/40">Adam Moreno, founder</p>
+            <p className="text-[13px] font-medium uppercase tracking-[0.16em] text-ink/70">Adam Moreno, founder</p>
             <p>
               Adam spent more than ten years in market research and advertising technology. First reading what people
               watch and buy. Then building the software that targets ads and measures whether they worked, and setting

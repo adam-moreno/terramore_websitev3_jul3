@@ -123,7 +123,7 @@ export default async function BookPage({
 
       {/* TRUST TILES — mixed tile band with the free report callout */}
       <section className="page-shell py-12 md:py-16">
-        <p className="text-center text-[12px] font-semibold uppercase tracking-[0.2em] text-ink/40">
+        <p className="text-center text-[12px] font-semibold uppercase tracking-[0.2em] text-ink/70">
           Built for business owners who are ready to grow
         </p>
         <div className="mx-auto mt-8 grid max-w-5xl gap-4 lg:grid-cols-3">

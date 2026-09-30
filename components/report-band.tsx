@@ -38,7 +38,7 @@ export function ReportBand() {
               {CHAPTERS.map((item) => (
                 <div key={item.n} className="rounded-2xl px-4 py-3">
                   <div className="flex items-baseline gap-3">
-                    <span className="text-[12px] font-semibold text-ink/35">{item.n}</span>
+                    <span className="text-[12px] font-semibold text-ink/70">{item.n}</span>
                     <span className="text-[15px] font-semibold text-ink">{item.title}</span>
                   </div>
                   <p className="mt-1.5 pl-8 text-[13px] leading-relaxed text-ink/70">{item.body}</p>

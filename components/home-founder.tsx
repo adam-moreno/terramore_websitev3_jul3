@@ -15,7 +15,7 @@ export function HomeFounder() {
           className="h-44 w-36 rounded-[1.5rem] object-cover object-top shadow-[0_8px_30px_rgba(15,30,46,0.08)] md:h-56 md:w-48"
         />
         <div className="max-w-2xl">
-          <p className="text-[13px] font-medium uppercase tracking-[0.16em] text-ink/40">Founder</p>
+          <p className="text-[13px] font-medium uppercase tracking-[0.16em] text-ink/70">Founder</p>
           <h2 className="section-title mt-3 text-ink md:text-[2.75rem] md:font-semibold md:leading-normal md:tracking-[-0.03em]">
             Adam Moreno
           </h2>

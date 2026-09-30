@@ -129,7 +129,7 @@ export function ConstructionLanding() {
 
         <div className="page-shell relative z-10 flex min-h-[100svh] flex-col justify-end gap-4 pb-6 pt-20 lg:min-h-0 lg:grid lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-14 lg:pb-0 lg:pt-0">
           <div className="text-cream lg:text-ink">
-            <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-cream/60 lg:text-ink/50">
+            <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-cream/60 lg:text-ink/70">
               Marketing for construction companies
             </p>
             <h1 className="mt-3 max-w-xl text-[2.05rem] font-bold leading-[1.08] tracking-[-0.02em] sm:mt-4 sm:text-[2.6rem] md:text-[3.1rem]">
@@ -143,7 +143,7 @@ export function ConstructionLanding() {
               <FootprintCta>See Your Digital Footprint</FootprintCta>
               <TalkCta className="inline-flex h-11 items-center justify-center rounded-full border border-white/25 bg-white/10 px-6 text-[15px] font-medium text-cream backdrop-blur hover:border-white/40 hover:bg-white/15 lg:border-ink/15 lg:bg-white/80 lg:text-ink lg:hover:border-ink/30 lg:hover:bg-white" />
             </div>
-            <p className="mt-4 text-[13px] leading-relaxed text-cream/60 sm:mt-5 lg:text-ink/50">
+            <p className="mt-4 text-[13px] leading-relaxed text-cream/60 sm:mt-5 lg:text-ink/70">
               Free report: how homeowners find, evaluate, and contact your business.
             </p>
           </div>
@@ -199,7 +199,7 @@ export function ConstructionLanding() {
               <li key={item.n} className="flex gap-4 py-4 sm:gap-5 sm:py-5">
                 <p className="w-7 shrink-0 pt-0.5 text-[12px] font-semibold tabular-nums text-ink/70">{item.n}</p>
                 <div className="min-w-0 flex-1">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink/35">{item.cue}</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink/70">{item.cue}</p>
                   <h3 className="mt-1 text-[16px] font-semibold leading-snug tracking-tight text-ink sm:text-[17px]">
                     {item.title}
                   </h3>
@@ -258,7 +258,7 @@ export function ConstructionLanding() {
               >
                 <p
                   className={`text-[11px] font-semibold uppercase tracking-[0.14em] ${
-                    stage.emphasize ? "text-gold-from" : "text-ink/45"
+                    stage.emphasize ? "text-gold-from" : "text-ink/70"
                   }`}
                 >
                   {stage.label}

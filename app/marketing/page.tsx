@@ -311,7 +311,7 @@ export default function MarketingPage() {
               <div className="flex flex-1 flex-col p-5">
                 <h3 className="text-[16px] font-semibold leading-snug tracking-tight text-ink">{article.title}</h3>
                 <p className="mt-2 text-[14px] leading-relaxed text-slate-600">{article.excerpt}</p>
-                <p className="mt-auto pt-4 text-[12px] font-medium text-ink/40">{article.readTime}</p>
+                <p className="mt-auto pt-4 text-[12px] font-medium text-ink/70">{article.readTime}</p>
               </div>
             </Link>
           ))}
