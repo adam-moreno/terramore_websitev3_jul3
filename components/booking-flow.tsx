@@ -1,8 +1,9 @@
 "use client"
 
-import { FormEvent, useCallback, useEffect, useMemo, useState } from "react"
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { trackMeetingBooked } from "@/lib/analytics"
+import { trackFunnelEvent, trackMeetingBooked } from "@/lib/analytics"
+import { BOOKING_STEPS, fieldList, type BookingEntry, type BookingField } from "@/lib/funnel-taxonomy"
 import { mergedAttribution } from "@/lib/attribution"
 import { browserTimeZone, formatLongDay, formatTime, formatWhen, groupSlotsByDay, tzLabel } from "@/lib/booking-format"
 import { buildIcs, googleCalendarUrl, outlookCalendarUrl } from "@/lib/ics"
@@ -251,6 +252,7 @@ export function BookingFlow({
   compact = false,
   source,
   startAtSchedule = false,
+  entry = "inline",
 }: {
   mode?: "book" | "pick"
   /** "pick" mode: called with the chosen start; the caller reschedules. */
@@ -260,6 +262,8 @@ export function BookingFlow({
   source?: string
   /** Skip the qualifier steps and open on the calendar. Details are still collected before confirming. */
   startAtSchedule?: boolean
+  /** Popup or on-page flow, for the V2A booking_* events. */
+  entry?: BookingEntry
 }) {
   const isPick = mode === "pick"
   const skipQualifiers = startAtSchedule && !isPick
@@ -290,6 +294,8 @@ export function BookingFlow({
   const [busy, setBusy] = useState(false)
   const [done, setDone] = useState<BookingResult | null>(null)
   const [advancing, setAdvancing] = useState(false)
+  /** A failed booking POST also shows the fallback; that is a booking error, not an availability error. */
+  const loadErrorFromBooking = useRef(false)
 
   useEffect(() => {
     setTz(browserTimeZone())
@@ -298,6 +304,7 @@ export function BookingFlow({
   const load = useCallback(async () => {
     setSlots(null)
     setLoadError(null)
+    loadErrorFromBooking.current = false
     const from = new Date()
     const to = new Date(from.getTime() + DAYS_AHEAD * 86_400_000)
     try {
@@ -320,6 +327,61 @@ export function BookingFlow({
     void load()
   }, [load])
 
+  // V2A booking funnel (book mode only; rescheduling is not acquisition). Step names follow BOOK_STEPS positions.
+  const measured = !isPick
+  const flow = skipQualifiers ? "schedule_first" : "qualify"
+  const funnelSource = () => source || sourceFromPath(window.location.pathname)
+  const startedRef = useRef(false)
+  const reachedRef = useRef(new Set<number>([step]))
+  const reportedRef = useRef(new Set<string>())
+
+  const markStarted = () => {
+    if (!measured || startedRef.current) return
+    startedRef.current = true
+    trackFunnelEvent("booking_start", { source: funnelSource(), entry, flow })
+  }
+
+  const bookingError = (reason: "validation" | "slot_taken" | "backend" | "network", fields?: BookingField[]) => {
+    if (!measured) return
+    const params: Record<string, string> = { reason, step: BOOKING_STEPS[detailsStep], source: funnelSource(), entry }
+    if (fields?.length) params.fields = fieldList(fields)
+    trackFunnelEvent("booking_error", params)
+  }
+
+  useEffect(() => {
+    if (!measured || reachedRef.current.has(step)) return
+    reachedRef.current.add(step)
+    trackFunnelEvent("booking_progress", { step: BOOKING_STEPS[step], step_index: step, source: funnelSource(), entry })
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once per step reached per mount
+  }, [step])
+
+  // Calendar problems count only once the visitor needs the calendar (the on-page flows load it on mount).
+  const calendarNeeded = isPick || step >= QUALIFIER_COUNT
+  let calendarProblem: "availability" | "no_slots" | null = null
+  if (calendarNeeded && !done) {
+    if (loadError && !loadErrorFromBooking.current) calendarProblem = "availability"
+    else if (slots !== null && slots.length === 0) calendarProblem = "no_slots"
+  }
+  useEffect(() => {
+    if (!measured || !calendarProblem || reportedRef.current.has(calendarProblem)) return
+    reportedRef.current.add(calendarProblem)
+    trackFunnelEvent("booking_error", { reason: calendarProblem, step: "schedule", source: funnelSource(), entry })
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once per problem per mount
+  }, [calendarProblem])
+
+  const invalidRef = useRef<BookingField[]>([])
+  const noteInvalid = (target: EventTarget) => {
+    if (!(target instanceof HTMLInputElement) || !target.dataset.field) return
+    const field = (target.dataset.field === "email" && target.validity.typeMismatch ? "email_format" : target.dataset.field) as BookingField
+    if (invalidRef.current.length === 0) {
+      window.setTimeout(() => {
+        bookingError("validation", invalidRef.current)
+        invalidRef.current = []
+      }, 0)
+    }
+    invalidRef.current.push(field)
+  }
+
   const days = useMemo(() => (slots ? groupSlotsByDay(slots, tz) : []), [slots, tz])
   const availableKeys = useMemo(() => new Set(days.map((d) => d.key)), [days])
   const day = days.find((d) => d.key === dayKey) || null
@@ -327,6 +389,7 @@ export function BookingFlow({
 
   const answerAndAdvance = (nextStep: number, apply: () => void) => {
     if (advancing) return
+    markStarted()
     setError("")
     apply()
     setAdvancing(true)
@@ -338,12 +401,14 @@ export function BookingFlow({
 
   /** Stay on the schedule step; times appear beside the calendar. */
   const chooseDay = (key: string) => {
+    markStarted()
     setDayKey(key)
     setSlot(null)
     setError("")
   }
 
   const chooseSlot = async (iso: string) => {
+    markStarted()
     setSlot(iso)
     setError("")
     if (isPick && onPick) {
@@ -368,10 +433,12 @@ export function BookingFlow({
       return
     }
     if (!name.trim() || !email.trim()) {
+      bookingError("validation", [...(name.trim() ? [] : ["name" as const]), ...(email.trim() ? [] : ["email" as const])])
       setError("We need a name and an email to send the invite.")
       return
     }
     if (!isUsablePhone(phone)) {
+      bookingError("validation", ["phone_invalid"])
       setError("We need a phone number in case you miss the video call.")
       return
     }
@@ -406,6 +473,7 @@ export function BookingFlow({
       })
       const data = (await response.json().catch(() => ({}))) as Partial<BookingResult> & { error?: string }
       if (response.status === 409) {
+        bookingError("slot_taken")
         setError("That time was just taken. Pick another.")
         await load()
         setStep(scheduleStep)
@@ -413,6 +481,8 @@ export function BookingFlow({
       }
       const bookingId = typeof data.id === "string" ? data.id.trim() : ""
       if (!response.ok || !bookingId || !data.startIso || !data.manageUrl) {
+        bookingError("backend")
+        loadErrorFromBooking.current = true
         setLoadError(loadErrorMessage(response.status, data.error))
         return
       }
@@ -427,6 +497,8 @@ export function BookingFlow({
       })
       setDone(data as BookingResult)
     } catch {
+      bookingError("network")
+      loadErrorFromBooking.current = true
       setLoadError("Booking is warming up.")
     } finally {
       setBusy(false)
@@ -589,7 +661,7 @@ export function BookingFlow({
       ) : null}
 
       {!isPick && step === detailsStep && slot ? (
-        <form key="details" onSubmit={submit} className={stepPane} aria-busy={busy}>
+        <form key="details" onSubmit={submit} onInvalidCapture={(event) => noteInvalid(event.target)} className={stepPane} aria-busy={busy}>
           <p className="text-[1.35rem] font-bold tracking-tight text-ink">Your details</p>
           <p className="mt-1 text-[14px] text-slate-500">{formatWhen(slot, tz)}. The invite goes to this email.</p>
 
@@ -598,6 +670,7 @@ export function BookingFlow({
               <span className={detailsLabel}>Full name</span>
               <input
                 required
+                data-field="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="First and last name"
@@ -610,6 +683,7 @@ export function BookingFlow({
               <input
                 required
                 type="email"
+                data-field="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@company.com"
@@ -622,6 +696,7 @@ export function BookingFlow({
               <input
                 required
                 type="tel"
+                data-field="phone"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="(555) 123-4567"

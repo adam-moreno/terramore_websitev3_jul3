@@ -1,13 +1,15 @@
 "use client"
 
-import { FormEvent, useEffect, useState } from "react"
+import { FormEvent, useEffect, useRef, useState } from "react"
 import { BookingLink } from "@/components/booking-popup"
 import {
   trackEvent,
+  trackFunnelEvent,
   trackReportSubmissionError,
   trackReportSubmissionSuccess,
 } from "@/lib/analytics"
 import { captureAttributionFromUrl, mergedAttribution } from "@/lib/attribution"
+import { fieldList, type ReportEntry, type ReportField } from "@/lib/funnel-taxonomy"
 
 export type ReportAnswers = Record<string, string>
 
@@ -24,6 +26,7 @@ export function ReportForm({
   answers,
   plain = false,
   initialWebsite,
+  entry = "popup_questions",
 }: {
   className?: string
   onCancel?: () => void
@@ -33,6 +36,8 @@ export function ReportForm({
   plain?: boolean
   /** Optional prefill (e.g. the /solutions website input). Does not change submit or tracking behavior. */
   initialWebsite?: string
+  /** How the popup opened, for the V2A report_progress / report_validation_error events. */
+  entry?: ReportEntry
 }) {
   const [firstName, setFirstName] = useState("")
   const [lastName, setLastName] = useState("")
@@ -56,6 +61,34 @@ export function ReportForm({
     trackEvent("form_start", { form_id: "digital_footprint_report" })
   }, [started])
 
+  // With the qualifying questions, the first answer was the start; the direct form starts at first focus.
+  useEffect(() => {
+    if (started && entry === "popup_direct") trackFunnelEvent("report_progress", { step: "started", entry })
+  }, [started, entry])
+
+  const requiredCompleteRef = useRef(false)
+  const requiredComplete = Boolean(firstName.trim() && lastName.trim() && email.trim() && website.trim() && consent)
+  useEffect(() => {
+    if (!requiredComplete || requiredCompleteRef.current) return
+    requiredCompleteRef.current = true
+    trackFunnelEvent("report_progress", { step: "required_complete", entry })
+  }, [requiredComplete, entry])
+
+  // The browser blocks submit on empty required fields and bad email format before handleSubmit runs; each
+  // invalid control fires `invalid` in the same task, so collect them and send one event per attempt.
+  const invalidRef = useRef<ReportField[]>([])
+  const noteInvalid = (target: EventTarget) => {
+    if (!(target instanceof HTMLInputElement) || !target.dataset.field) return
+    const field = (target.dataset.field === "email" && target.validity.typeMismatch ? "email_format" : target.dataset.field) as ReportField
+    if (invalidRef.current.length === 0) {
+      window.setTimeout(() => {
+        trackFunnelEvent("report_validation_error", { fields: fieldList(invalidRef.current), entry })
+        invalidRef.current = []
+      }, 0)
+    }
+    invalidRef.current.push(field)
+  }
+
   const markStarted = () => {
     if (!started) setStarted(true)
   }
@@ -66,10 +99,18 @@ export function ReportForm({
     setAlreadyRequested(false)
 
     if (!firstName.trim() || !lastName.trim() || !email.trim() || !website.trim() || !consent) {
+      const missing: ReportField[] = []
+      if (!firstName.trim()) missing.push("first_name")
+      if (!lastName.trim()) missing.push("last_name")
+      if (!email.trim()) missing.push("email")
+      if (!website.trim()) missing.push("website")
+      if (!consent) missing.push("consent")
+      trackFunnelEvent("report_validation_error", { fields: fieldList(missing), entry })
       setError("First name, last name, email, website, and consent are required.")
       return
     }
 
+    trackFunnelEvent("report_progress", { step: "submit_attempt", entry })
     setBusy(true)
     try {
       const attribution = readAttribution()
@@ -119,6 +160,7 @@ export function ReportForm({
     <form
       onSubmit={handleSubmit}
       onFocusCapture={markStarted}
+      onInvalidCapture={(event) => noteInvalid(event.target)}
       className={`space-y-4 ${
         plain ? "" : "rounded-[1.75rem] bg-white p-7 shadow-[0_8px_30px_rgba(15,30,46,0.04)] md:p-9"
       } ${className}`}
@@ -140,6 +182,7 @@ export function ReportForm({
         <span className="text-[13px] font-medium text-ink">Business website</span>
         <input
           required
+          data-field="website"
           value={website}
           onChange={(event) => setWebsite(event.target.value)}
           placeholder="https://"
@@ -174,6 +217,7 @@ export function ReportForm({
           <span className="text-[13px] font-medium text-ink">First name</span>
           <input
             required
+            data-field="first_name"
             value={firstName}
             onChange={(event) => setFirstName(event.target.value)}
             className="mt-1.5 h-11 w-full rounded-full border border-ink/10 bg-cream px-4 text-[15px] text-ink outline-none focus:border-brand"
@@ -184,6 +228,7 @@ export function ReportForm({
           <span className="text-[13px] font-medium text-ink">Last name</span>
           <input
             required
+            data-field="last_name"
             value={lastName}
             onChange={(event) => setLastName(event.target.value)}
             className="mt-1.5 h-11 w-full rounded-full border border-ink/10 bg-cream px-4 text-[15px] text-ink outline-none focus:border-brand"
@@ -196,6 +241,7 @@ export function ReportForm({
         <input
           required
           type="email"
+          data-field="email"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           className="mt-1.5 h-11 w-full rounded-full border border-ink/10 bg-cream px-4 text-[15px] text-ink outline-none focus:border-brand"
@@ -229,7 +275,7 @@ export function ReportForm({
           {alreadyRequested ? (
             <>
               {" "}
-              <BookingLink source="report" className="font-medium text-brand hover:text-brand-hover">
+              <BookingLink source="report" ctaId="report_duplicate_book" className="font-medium text-brand hover:text-brand-hover">
                 Talk with us
               </BookingLink>
               .

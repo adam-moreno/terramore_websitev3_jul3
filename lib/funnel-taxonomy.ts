@@ -70,8 +70,18 @@ export const REPORT_STEPS = ["started", "details_shown", "required_complete", "s
 export const BOOKING_STEPS = ["owner", "business", "stage", "schedule", "details"] as const
 export const BOOKING_ERRORS = ["validation", "slot_taken", "backend", "network", "availability", "no_slots"] as const
 
+export type ReportField = (typeof REPORT_FIELDS)[number]
+export type BookingField = (typeof BOOKING_FIELDS)[number]
+export type ReportEntry = (typeof REPORT_ENTRIES)[number]
+export type BookingEntry = (typeof BOOKING_ENTRIES)[number]
+
+/** Stable, de-duplicated field list for a validation event: "email,first_name". */
+export function fieldList<T extends string>(fields: readonly T[]): string {
+  return [...new Set(fields)].sort().join(",")
+}
+
 const oneOf = (values: readonly string[]) => (value: unknown) => typeof value === "string" && values.includes(value)
-const fieldList = (values: readonly string[]) => (value: unknown) =>
+const listOf = (values: readonly string[]) => (value: unknown) =>
   typeof value === "string" && value.length > 0 && value.split(",").every((part) => values.includes(part))
 
 /** Pathname only: no query string, no fragment, nothing that could hold an email or a token. */
@@ -90,8 +100,8 @@ const VALIDATORS = {
   report_step: oneOf(REPORT_STEPS),
   booking_step: oneOf(BOOKING_STEPS),
   step_index: (value: unknown) => typeof value === "number" && Number.isInteger(value) && value >= 0 && value <= 9,
-  report_fields: fieldList(REPORT_FIELDS),
-  booking_fields: fieldList(BOOKING_FIELDS),
+  report_fields: listOf(REPORT_FIELDS),
+  booking_fields: listOf(BOOKING_FIELDS),
   booking_reason: oneOf(BOOKING_ERRORS),
   source: isBookingSource,
   flow: oneOf(["qualify", "schedule_first"]),

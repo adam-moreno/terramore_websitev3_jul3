@@ -57,7 +57,7 @@ export function BookingPopup({
           </button>
         </div>
         <div className="px-7 pb-7 pt-5 md:px-9 md:pb-9">
-          <BookingFlow compact source={source} />
+          <BookingFlow compact source={source} entry="popup" />
         </div>
       </div>
     </div>,

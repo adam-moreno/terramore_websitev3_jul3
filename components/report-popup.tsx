@@ -5,8 +5,8 @@ import { useEffect, useRef, useState, type ReactNode } from "react"
 import { createPortal } from "react-dom"
 import { ReportForm, type ReportAnswers } from "@/components/report-form"
 import { useCtaView } from "@/hooks/use-cta-view"
-import { trackCtaClick } from "@/lib/analytics"
-import type { CtaId } from "@/lib/funnel-taxonomy"
+import { takeReportCta, trackCtaClick, trackFunnelEvent } from "@/lib/analytics"
+import type { CtaId, ReportEntry } from "@/lib/funnel-taxonomy"
 import { GROWTH_WORKSPACE_URL } from "@/lib/growth-workspace"
 
 const QUESTIONS = [
@@ -71,6 +71,26 @@ export function ReportPopup({
   closeRef.current = onClose
   const successRef = useRef(success)
   successRef.current = success
+  const entry: ReportEntry = direct ? "popup_direct" : "popup_questions"
+  const detailsShownRef = useRef(false)
+  const wasOpenRef = useRef(false)
+
+  useEffect(() => {
+    if (!open) return
+    detailsShownRef.current = false
+    const ctaId = takeReportCta()
+    trackFunnelEvent("report_view", ctaId ? { entry, cta_id: ctaId } : { entry })
+  }, [open, entry])
+
+  useEffect(() => {
+    const justOpened = open && !wasOpenRef.current
+    wasOpenRef.current = open
+    if (!open || success || detailsShownRef.current) return
+    // On reopen the first render still holds the previous step until the reset effect below lands.
+    if (!direct && (justOpened || step < QUESTIONS.length)) return
+    detailsShownRef.current = true
+    trackFunnelEvent("report_progress", { step: "details_shown", entry })
+  }, [open, success, direct, step, entry])
 
   const goHome = () => {
     closeRef.current()
@@ -124,6 +144,7 @@ export function ReportPopup({
 
   const choose = (key: string, value: string) => {
     if (picked !== null) return
+    if (step === 0) trackFunnelEvent("report_progress", { step: "started", entry })
     setAnswers((current) => ({ ...current, [key]: value }))
     setPicked(value)
   }
@@ -248,7 +269,7 @@ export function ReportPopup({
                     <p className="mt-2 text-[1.2rem] font-semibold tracking-tight text-ink">Where should the report go?</p>
                   </>
                 )}
-                <ReportForm plain className={direct ? "" : "mt-4"} answers={answers} initialWebsite={website} onSuccess={() => setSuccess(true)} />
+                <ReportForm plain className={direct ? "" : "mt-4"} answers={answers} initialWebsite={website} entry={entry} onSuccess={() => setSuccess(true)} />
               </div>
             )}
           </>
