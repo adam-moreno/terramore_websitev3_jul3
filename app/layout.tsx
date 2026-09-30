@@ -9,6 +9,7 @@ import {
   GOOGLE_ADS_ID_DEFAULT,
   GOOGLE_TAG_ID,
 } from '@/lib/analytics'
+import { googleTagBootstrap } from '@/lib/google-tag'
 
 // Vercel has the token under the misspelled name GOOGLE_SITE_VERIFICAITON; accept both so either works.
 const googleSiteVerification =
@@ -85,20 +86,12 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <head>
-        {/* Google tag (gtag.js) — current GA4 + legacy GA4 + Ads config.
-            Ads conversion event fires only after report success (see lib/analytics.ts).
+        {/* Google tag (gtag.js) — current GA4 + legacy GA4 + Ads config, loaded on the production hostnames only
+            (lib/google-tag.ts). Ads conversion event fires only after report success (see lib/analytics.ts).
             meeting_booked is GA4-only — no second Ads conversion. */}
-        <script async src={`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_TAG_ID}`}></script>
         <script
           dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', '${GA4_MEASUREMENT_ID}');
-              gtag('config', '${GA4_MEASUREMENT_ID_LEGACY}');
-              gtag('config', '${googleAdsId}');
-            `,
+            __html: googleTagBootstrap(GOOGLE_TAG_ID, [GA4_MEASUREMENT_ID, GA4_MEASUREMENT_ID_LEGACY, googleAdsId]),
           }}
         />
         <link rel="icon" type="image/png" href="https://res.cloudinary.com/dzzzkruux/image/upload/v1768374905/Screenshot_2026-01-13_at_11.10.56_PM_eqtvoj.png" />

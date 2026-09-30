@@ -13,6 +13,7 @@ import { spawnSync } from "node:child_process"
 import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs"
 import { register } from "node:module"
 import { fileURLToPath, pathToFileURL } from "node:url"
+import vm from "node:vm"
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 register(pathToFileURL(path.join(root, "scripts/resolve-ts-alias.mjs")).href)
@@ -30,6 +31,8 @@ const ANALYTICS = "lib/analytics.ts"
 const BOOKING_FLOW = "components/booking-flow.tsx"
 const REPORT_FORM = "components/report-form.tsx"
 const REPORT_POPUP = "components/report-popup.tsx"
+const GOOGLE_TAG = "lib/google-tag.ts"
+const LAYOUT = "app/layout.tsx"
 
 function walk(dir) {
   const full = path.join(root, dir)
@@ -54,7 +57,7 @@ const tmpDirs = []
 async function loadModules(mutation) {
   const dir = mkdtempSync(path.join(os.tmpdir(), "verify-funnel-"))
   tmpDirs.push(dir)
-  for (const file of [TAXONOMY, ANALYTICS]) {
+  for (const file of [TAXONOMY, ANALYTICS, GOOGLE_TAG]) {
     let src = realFiles.get(file)
     if (mutation?.module === file) {
       assert(src.includes(mutation.from), `mutation anchor still exists in ${file}: ${mutation.from.slice(0, 60)}`)
@@ -64,7 +67,21 @@ async function loadModules(mutation) {
   }
   const taxonomy = await import(pathToFileURL(path.join(dir, "funnel-taxonomy.ts")).href)
   const analytics = await import(pathToFileURL(path.join(dir, "analytics.ts")).href)
-  return { taxonomy, analytics }
+  const googleTag = await import(pathToFileURL(path.join(dir, "google-tag.ts")).href)
+  return { taxonomy, analytics, googleTag }
+}
+
+/** Runs the layout's inline Google tag bootstrap in a sandbox for one hostname; returns what it loaded and queued. */
+function runGoogleTagBootstrap(source, hostname) {
+  const appended = []
+  const sandbox = {
+    location: { hostname },
+    document: { createElement: () => ({}), head: { appendChild: (node) => appended.push(node) } },
+  }
+  sandbox.window = sandbox
+  vm.runInNewContext(source, sandbox)
+  const commands = (sandbox.dataLayer ?? []).map((args) => Array.from(args).map((v) => (Object.prototype.toString.call(v) === "[object Date]" ? "DATE" : v)))
+  return { appended, commands, gtag: sandbox.gtag, dataLayer: sandbox.dataLayer }
 }
 
 /** A fresh mocked browser: gtag records calls; console.debug is silenced. */
@@ -279,6 +296,42 @@ const RULES = [
     mutations: [
       { module: TAXONOMY, from: '? "send" : "debug"', to: '? "send" : "send"' },
       { module: ANALYTICS, from: 'if (funnelSendMode(window.location.hostname) === "send") gtag', to: 'if (funnelSendMode(window.location.hostname) !== "never") gtag' },
+    ],
+  },
+  {
+    id: "google-tag-production-only",
+    rule: "The Google tag loads and configures GA4 + Ads only on www.terramore.io / terramore.io, with the original loader URL and command order; other hosts load nothing",
+    run: ({ googleTag, files }) => {
+      const out = []
+      const source = googleTag.googleTagBootstrap("GT-5TGBVFTR", ["G-ZC5DY0ES7N", "G-BQN6VCY579", "AW-11353847408"])
+      const expected = JSON.stringify([["js", "DATE"], ["config", "G-ZC5DY0ES7N"], ["config", "G-BQN6VCY579"], ["config", "AW-11353847408"]])
+      for (const host of ["www.terramore.io", "terramore.io", "WWW.TERRAMORE.IO"]) {
+        const run = runGoogleTagBootstrap(source, host)
+        if (run.appended.length !== 1 || run.appended[0].src !== "https://www.googletagmanager.com/gtag/js?id=GT-5TGBVFTR" || run.appended[0].async !== true) {
+          out.push(`${host}: gtag.js not loaded exactly as before (${JSON.stringify(run.appended)})`)
+        }
+        if (JSON.stringify(run.commands) !== expected) out.push(`${host}: commands differ from the original bootstrap: ${JSON.stringify(run.commands)}`)
+      }
+      for (const host of ["localhost", "127.0.0.1", "terramore-website-final-f7qd77ffb-terramore-io.vercel.app", "www.terramore.io.evil.test", "staging.terramore.io", ""]) {
+        const run = runGoogleTagBootstrap(source, host)
+        if (run.appended.length !== 0) out.push(`${host || "(empty)"} loaded gtag.js`)
+        if (run.commands.length !== 0) out.push(`${host || "(empty)"} queued ${JSON.stringify(run.commands)}`)
+        if (typeof run.gtag !== "function") out.push(`${host || "(empty)"}: gtag() must still exist for the helpers`)
+        else {
+          run.gtag("event", "probe")
+          if (run.dataLayer.length !== 1) out.push(`${host || "(empty)"}: gtag() no longer queues to dataLayer`)
+        }
+      }
+      const layout = files.get(LAYOUT) ?? ""
+      if (!layout.includes("__html: googleTagBootstrap(GOOGLE_TAG_ID, [GA4_MEASUREMENT_ID, GA4_MEASUREMENT_ID_LEGACY, googleAdsId])")) out.push(`${LAYOUT} no longer uses googleTagBootstrap`)
+      for (const [file, src] of files) {
+        if (file !== GOOGLE_TAG && /googletagmanager\.com\/gtag\/js|gtag\(\s*['"]config['"]/.test(stripComments(src))) out.push(`${file} loads or configures the Google tag outside ${GOOGLE_TAG}`)
+      }
+      return out
+    },
+    mutations: [
+      { module: GOOGLE_TAG, from: ".indexOf(location.hostname.toLowerCase()) !== -1", to: ".indexOf(location.hostname.toLowerCase()) !== -2" },
+      { file: LAYOUT, from: "<head>", to: '<head>\n        <script async src="https://www.googletagmanager.com/gtag/js?id=GT-5TGBVFTR"></script>' },
     ],
   },
   {
