@@ -3,11 +3,11 @@
 import { useEffect, useRef } from "react"
 import { INTEGRATION_LOGOS } from "@/lib/integrations"
 
-// Marks rest at even spacing along the path, in every motion setting: nothing moves behind the headline
+// Marks rest along the path, in every motion setting: nothing moves behind the headline
 // (Visual Doctrine forbidden zones), and there is no collapsed reduced-motion state.
 // A figure eight that uses the whole track box: the two lobes reach the box edges, and the
-// crossing sits at the center of the headline. The mask hole hides the marks while they pass
-// behind the type, so the visible part of the orbit is the outer curve of each lobe.
+// crossing sits at the center of the headline. The mask hole hides whatever sits behind the type,
+// so the visible part of the orbit is the outer curve of each lobe.
 function infinityPath(width: number, height: number) {
   const pad = 24
   const cx = width / 2
@@ -17,6 +17,54 @@ function infinityPath(width: number, height: number) {
   const left = cx - rx * 2
   const right = cx + rx * 2
   return `M ${cx} ${cy} C ${cx} ${cy - ry} ${left} ${cy - ry} ${left} ${cy} C ${left} ${cy + ry} ${cx} ${cy + ry} ${cx} ${cy} C ${cx} ${cy - ry} ${right} ${cy - ry} ${right} ${cy} C ${right} ${cy + ry} ${cx} ${cy + ry} ${cx} ${cy}`
+}
+
+const MARK_SIZE = 40
+const MARK_GAP = 52
+const SAMPLES = 720
+// The mask is transparent to 84% of the hole ellipse and opaque at 100%; 0.97 keeps each mark above 80% mask opacity.
+const CLEAR_OF_HOLE = 0.97
+
+type Frame = {
+  originX: number
+  originY: number
+  hole: { cx: number; cy: number; rx: number; ry: number }
+  headline: { left: number; top: number; right: number; bottom: number }
+  width: number
+  height: number
+  fadeTop: number
+}
+
+// Resting spots, as offset-distance percentages, only where a whole mark is visible: outside the mask hole,
+// clear of the headline, below the top fade and inside the clipped hero. Marks are spread evenly and at least
+// MARK_GAP apart, so a narrow hero shows fewer marks (earliest in the list first, like the phone layout)
+// instead of parking some where the mask hides them.
+function restingOffsets(d: string, frame: Frame, max: number) {
+  const probe = document.createElementNS("http://www.w3.org/2000/svg", "path")
+  probe.setAttribute("d", d)
+  const total = probe.getTotalLength()
+  if (!total) return []
+  const edge = MARK_SIZE / 2
+  const { hole, headline } = frame
+  const clear: number[] = []
+  for (let i = 0; i < SAMPLES; i++) {
+    const at = (i / SAMPLES) * total
+    const point = probe.getPointAtLength(at)
+    // The negative margins on .hero-mobius-logo render each mark's center half a mark up and left of its path point.
+    const x = frame.originX + point.x - edge
+    const y = frame.originY + point.y - edge
+    const inHole = Math.hypot((x - hole.cx) / hole.rx, (y - hole.cy) / hole.ry) < CLEAR_OF_HOLE
+    const onHeadline =
+      x > headline.left - edge && x < headline.right + edge && y > headline.top - edge && y < headline.bottom + edge
+    const inFrame = x > edge && x < frame.width - edge && y > frame.fadeTop + edge && y < frame.height - edge
+    if (!inHole && !onHeadline && inFrame) clear.push(at)
+  }
+  const clearLength = (clear.length / SAMPLES) * total
+  const count = Math.min(max, Math.floor(clearLength / MARK_GAP))
+  return Array.from({ length: count }, (_, k) => {
+    const at = clear[Math.floor(((k + 0.5) * clear.length) / count)]
+    return (at / total) * 100
+  })
 }
 
 export function HeroLogoMobius() {
@@ -41,16 +89,50 @@ export function HeroLogoMobius() {
       const d = infinityPath(trackW, trackH)
       const path = `path("${d}")`
 
-      // The hole is a little smaller than the copy so marks fade out right as they pass behind the type.
-      layer.style.setProperty("--hole-cx", `${copyBox.left - sectionBox.left + copyBox.width / 2}px`)
-      layer.style.setProperty("--hole-cy", `${copyBox.top - sectionBox.top + copyBox.height / 2}px`)
-      layer.style.setProperty("--hole-rx", `${copyBox.width * 0.42}px`)
-      layer.style.setProperty("--hole-ry", `${copyBox.height * 0.46}px`)
+      // The hole is a little smaller than the copy so marks fade out right where the type starts.
+      const hole = {
+        cx: copyBox.left - sectionBox.left + copyBox.width / 2,
+        cy: copyBox.top - sectionBox.top + copyBox.height / 2,
+        rx: copyBox.width * 0.42,
+        ry: copyBox.height * 0.46,
+      }
+      layer.style.setProperty("--hole-cx", `${hole.cx}px`)
+      layer.style.setProperty("--hole-cy", `${hole.cy}px`)
+      layer.style.setProperty("--hole-rx", `${hole.rx}px`)
+      layer.style.setProperty("--hole-ry", `${hole.ry}px`)
       layer.style.setProperty("--track-w", `${trackW}px`)
       layer.style.setProperty("--track-h", `${trackH}px`)
       track.style.setProperty("--mobius-path", path)
-      track.querySelectorAll<HTMLElement>(".hero-mobius-logo").forEach((logo) => {
+
+      const logos = track.querySelectorAll<HTMLElement>(".hero-mobius-logo")
+      const headlineBox = (copy.querySelector("h1") ?? copy).getBoundingClientRect()
+      const offsets = restingOffsets(
+        d,
+        {
+          originX: hole.cx - trackW / 2,
+          originY: hole.cy - trackH / 2,
+          hole,
+          headline: {
+            left: headlineBox.left - sectionBox.left,
+            top: headlineBox.top - sectionBox.top,
+            right: headlineBox.right - sectionBox.left,
+            bottom: headlineBox.bottom - sectionBox.top,
+          },
+          width: layer.clientWidth,
+          height: Math.min(layer.clientHeight, section.clientHeight),
+          // Same 5.75rem as the .hero-logo-topfade mask in globals.css.
+          fadeTop: parseFloat(getComputedStyle(document.documentElement).fontSize) * 5.75,
+        },
+        logos.length,
+      )
+      logos.forEach((logo, index) => {
         logo.style.offsetPath = path
+        if (index < offsets.length) {
+          logo.style.offsetDistance = `${offsets[index]}%`
+          logo.style.display = ""
+        } else {
+          logo.style.display = "none"
+        }
       })
     }
 
