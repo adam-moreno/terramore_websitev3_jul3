@@ -53,8 +53,11 @@ function bookingWouldTrack(response) {
   if (response.status === 409) return false
   const bookingId = typeof response.data.id === "string" ? response.data.id.trim() : ""
   if (!response.ok || !bookingId || !response.data.startIso || !response.data.manageUrl) return false
-  return true
+  return typeof response.data.bookingRef === "string" && /^[a-f0-9]{32}$/.test(response.data.bookingRef)
 }
+
+const RAW_BOOKING_ID = "d7dfcae5-9a5c-4ae7-972f-44153255deba"
+const BOOKING_REF = "3f2a9c1e7b4d6f80a1c2e3d4b5a69788"
 
 function reportWouldTrack(response) {
   if (response.status === 409) return false
@@ -156,8 +159,21 @@ async function main() {
 
   win.calls.length = 0
   globalThis.window.location.pathname = "/book"
+  for (const rawish of [RAW_BOOKING_ID, BOOKING_REF.toUpperCase(), `${BOOKING_REF}0`, "fixture-booking-0001"]) {
+    analytics.trackMeetingBooked({
+      booking_id: rawish,
+      business_type: "Service business",
+      stage: "I've done ads",
+      source: "book",
+      page_path: "/book",
+    })
+  }
+  assert(count(win.calls, "meeting_booked") === 0, "raw booking UUID / non-ref ids fire nothing")
+  assert(!JSON.stringify(win.dataLayer).includes(RAW_BOOKING_ID), "raw booking UUID never reaches dataLayer")
+  results.push("Raw booking id rejected: OK")
+
   analytics.trackMeetingBooked({
-    booking_id: "d7dfcae5-9a5c-4ae7-972f-44153255deba",
+    booking_id: BOOKING_REF,
     business_type: "Service business",
     stage: "I've done ads",
     source: "book",
@@ -167,7 +183,7 @@ async function main() {
   assert(count(win.calls, "conversion") === 0, "booking must NOT fire Ads conversion")
   assert(count(win.calls, "generate_lead") === 0, "booking must not fire generate_lead")
   const mb = eventPayloads(win.calls, "meeting_booked")[0] || {}
-  assert(mb.booking_id === "d7dfcae5-9a5c-4ae7-972f-44153255deba", "booking_id present")
+  assert(mb.booking_id === BOOKING_REF, "booking_id is the opaque bookingRef")
   assert(mb.source === "book", "source present")
   assert(mb.page_path === "/book", "page_path present")
   for (const k of PII_KEYS) {
@@ -176,7 +192,7 @@ async function main() {
   results.push("Booking success: OK")
 
   analytics.trackMeetingBooked({
-    booking_id: "d7dfcae5-9a5c-4ae7-972f-44153255deba",
+    booking_id: BOOKING_REF,
     business_type: "Service business",
     stage: "I've done ads",
     source: "book",
@@ -197,11 +213,14 @@ async function main() {
   results.push("Blank booking_id: OK")
 
   const okBody = {
-    id: "abc-123",
+    id: RAW_BOOKING_ID,
+    bookingRef: BOOKING_REF,
     startIso: "2026-09-17T14:00:00.000Z",
     manageUrl: "https://www.terramore.io/book/manage?token=x",
   }
-  assert(bookingWouldTrack({ status: 200, ok: true, data: okBody }) === true, "200+id tracks")
+  assert(bookingWouldTrack({ status: 200, ok: true, data: okBody }) === true, "200+id+bookingRef tracks")
+  assert(bookingWouldTrack({ status: 200, ok: true, data: { ...okBody, bookingRef: undefined } }) === false, "missing bookingRef no track")
+  assert(bookingWouldTrack({ status: 200, ok: true, data: { ...okBody, bookingRef: RAW_BOOKING_ID } }) === false, "raw id as bookingRef no track")
   assert(bookingWouldTrack({ status: 409, ok: false, data: {} }) === false, "409 no track")
   assert(bookingWouldTrack({ status: 500, ok: false, data: {} }) === false, "500 no track")
   assert(bookingWouldTrack({ status: 200, ok: true, data: { ...okBody, id: 123 } }) === false, "numeric id no track")

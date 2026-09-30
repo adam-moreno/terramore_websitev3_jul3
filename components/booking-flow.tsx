@@ -10,6 +10,8 @@ import { buildIcs, googleCalendarUrl, outlookCalendarUrl } from "@/lib/ics"
 
 export type BookingResult = {
   id: string
+  /** One-way analytics reference from /api/booking (32 hex); the only booking identifier sent to GA4. */
+  bookingRef?: string
   startIso: string
   endIso: string
   meetUrl: string | null
@@ -487,9 +489,11 @@ export function BookingFlow({
         return
       }
       // Safe conversion point: server confirmed booking (ok + string id + startIso + manageUrl).
-      // 409 / !ok / missing id never reach here. trackMeetingBooked dedupes on booking_id; GA4 only (no Ads conversion).
+      // 409 / !ok / missing id never reach here. booking_id carries only the server's one-way bookingRef, never the
+      // row id; trackMeetingBooked dedupes on it; GA4 only (no Ads conversion).
+      const bookingRef = typeof data.bookingRef === "string" ? data.bookingRef : ""
       trackMeetingBooked({
-        booking_id: bookingId,
+        booking_id: bookingRef,
         business_type: businessType,
         stage: digitalStage,
         source: bookingSource,

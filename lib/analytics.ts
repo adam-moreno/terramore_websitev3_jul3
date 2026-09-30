@@ -47,6 +47,9 @@ declare global {
 const PII_PARAM_RE =
   /^(email|e[_-]?mail|phone|tel|mobile|name|first[_-]?name|last[_-]?name|full[_-]?name|company|business|website|socials?|meet[_-]?url|manage[_-]?url|manage[_-]?token|password|token|address)$/i
 
+/** Server-issued one-way analytics references (lib/analytics-ref.ts): the only ids analytics may carry. */
+const ANALYTICS_REF_RE = /^[a-f0-9]{32}$/
+
 /** Same-action dedupe for conversion-style fires (key = event:onceId). */
 const firedOnce = new Set<string>()
 
@@ -194,6 +197,7 @@ export function trackReportSubmissionError(reason: string) {
  * Booking success — GA4 only. Exact name: meeting_booked.
  * Call only after POST /api/booking returns ok + non-empty string booking id.
  * Never fire on 409 / validation / network failure. No Ads conversion. No PII.
+ * `booking_id` must be the server's one-way bookingRef (32 hex); anything else, such as the raw row UUID, is dropped.
  */
 export function trackMeetingBooked(params: {
   booking_id: string
@@ -203,7 +207,7 @@ export function trackMeetingBooked(params: {
   page_path: string
 }) {
   const bookingId = params.booking_id.trim()
-  if (!bookingId) return
+  if (!ANALYTICS_REF_RE.test(bookingId)) return
   trackEvent(
     "meeting_booked",
     {

@@ -84,6 +84,9 @@ function runGoogleTagBootstrap(source, hostname) {
   return { appended, commands, gtag: sandbox.gtag, dataLayer: sandbox.dataLayer }
 }
 
+const analyticsRefModule = await import(pathToFileURL(path.join(root, "lib/analytics-ref.ts")).href)
+const RAW_BOOKING_ID = "d7dfcae5-9a5c-4ae7-972f-44153255deba"
+
 /** A fresh mocked browser: gtag records calls; console.debug is silenced. */
 function installWindow(hostname, pathname = "/") {
   const calls = []
@@ -395,8 +398,8 @@ const RULES = [
   },
   {
     id: "meeting-booked-success-only",
-    rule: "meeting_booked fires only after the 409 and !ok/missing-id guards return, before setDone, outside catch; nowhere else",
-    run: ({ files }) => {
+    rule: "meeting_booked fires only after the 409 and !ok/missing-id guards return, before setDone, outside catch; nowhere else; booking_id is the hashed bookingRef",
+    run: ({ files, analytics }) => {
       const out = []
       for (const [file, raw] of files) {
         if (file === ANALYTICS) continue
@@ -422,11 +425,50 @@ const RULES = [
       const catchAt = src.indexOf("} catch", at)
       if (setDone < 0 || catchAt < 0 || setDone > catchAt) out.push("trackMeetingBooked is not followed by setDone inside the try")
       if (!/bookingId\s*=\s*typeof data\.id === "string" \? data\.id\.trim\(\) : ""/.test(src)) out.push("booking id is no longer the trimmed server id")
+      if (!/bookingRef\s*=\s*typeof data\.bookingRef === "string" \? data\.bookingRef : ""/.test(src)) out.push("bookingRef is no longer read from the server response")
+      if (!/\bbooking_id:\s*bookingRef\b/.test(calls[0].text)) out.push("meeting_booked booking_id is not the server bookingRef")
+      const win = installWindow("www.terramore.io", "/book")
+      const booked = (id) => analytics.trackMeetingBooked({ booking_id: id, business_type: "b", stage: "s", source: "book", page_path: "/book" })
+      booked(RAW_BOOKING_ID)
+      if (events(win, "meeting_booked").length) out.push("a raw booking UUID reached meeting_booked")
+      booked(analyticsRefModule.analyticsRef("terramore-booking", RAW_BOOKING_ID))
+      if (events(win, "meeting_booked").length !== 1) out.push("a hashed bookingRef did not send meeting_booked once")
+      if (JSON.stringify(win).includes(RAW_BOOKING_ID)) out.push("raw booking UUID reached gtag")
       return out
     },
     mutations: [
       { file: BOOKING_FLOW, from: "if (!response.ok || !bookingId || !data.startIso || !data.manageUrl) {", to: "if (!response.ok && !bookingId) {" },
       { file: "components/booking-popup.tsx", from: 'import { trackCtaClick } from "@/lib/analytics"', to: 'import { trackCtaClick } from "@/lib/analytics"\nconst x = () => trackMeetingBooked({ booking_id: "x" })' },
+      { file: BOOKING_FLOW, from: "booking_id: bookingRef,", to: "booking_id: bookingId," },
+      { module: ANALYTICS, from: "if (!ANALYTICS_REF_RE.test(bookingId)) return", to: "if (!bookingId) return" },
+    ],
+  },
+  {
+    id: "analytics-refs-one-way",
+    rule: "Report and booking analytics ids are a namespaced SHA-256 of the persisted row id: deterministic, distinct, 32 hex, never the raw id",
+    run: ({ files }) => {
+      const out = []
+      const ref = analyticsRefModule.analyticsRef
+      const other = "0b8e4c2a-5f1d-4e3b-9a7c-6d2f1e0a9b8c"
+      const a = ref("terramore-booking", RAW_BOOKING_ID)
+      if (a !== ref("terramore-booking", RAW_BOOKING_ID)) out.push("analyticsRef is not deterministic")
+      if (a === ref("terramore-booking", other)) out.push("two bookings share a ref")
+      if (a === ref("terramore-report", RAW_BOOKING_ID)) out.push("report and booking namespaces collide")
+      if (!/^[a-f0-9]{32}$/.test(a)) out.push(`ref is not 32 lowercase hex: ${a}`)
+      if (a.includes(RAW_BOOKING_ID.replace(/-/g, "").slice(0, 8))) out.push("ref leaks part of the raw id")
+      const booking = stripComments(files.get("app/api/booking/route.ts") ?? "")
+      const report = stripComments(files.get("app/api/report/route.ts") ?? "")
+      if (!booking.includes('bookingRef: analyticsRef("terramore-booking", booking.id)')) out.push("booking route does not derive bookingRef from the booking id")
+      if (!report.includes('reportRef: analyticsRef("terramore-report", rowId)')) out.push("report route does not derive reportRef from the inserted row id")
+      for (const [file, raw] of files) {
+        if (file === "lib/analytics-ref.ts") continue
+        if (/createHash\(/.test(raw) && /\b(bookingRef|reportRef)\b/.test(raw)) out.push(`${file} builds an analytics ref outside lib/analytics-ref.ts`)
+      }
+      return out
+    },
+    mutations: [
+      { file: "app/api/booking/route.ts", from: 'bookingRef: analyticsRef("terramore-booking", booking.id)', to: "bookingRef: booking.id" },
+      { file: "app/api/report/route.ts", from: 'reportRef: analyticsRef("terramore-report", rowId)', to: "reportRef: rowId" },
     ],
   },
   {

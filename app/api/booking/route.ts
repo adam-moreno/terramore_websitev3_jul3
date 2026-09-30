@@ -7,6 +7,7 @@
 
 import { NextRequest, NextResponse } from "next/server"
 import { after } from "next/server"
+import { analyticsRef } from "@/lib/analytics-ref"
 import { bookingApi, manageUrl, type BookingRecord } from "@/lib/booking-api"
 import { leadHasDigitalFootprintReport } from "@/lib/leads/has-digital-footprint"
 import { scheduleBookingReminders } from "@/lib/booking-reminders"
@@ -122,8 +123,10 @@ export async function POST(request: NextRequest) {
     })
   })
 
+  // `id` stays for the confirmation UI (calendar file uid); analytics only ever gets the one-way `bookingRef`.
   return NextResponse.json({
     id: booking.id,
+    ...(typeof booking.id === "string" && booking.id ? { bookingRef: analyticsRef("terramore-booking", booking.id) } : {}),
     startIso: booking.startIso,
     endIso: booking.endIso,
     meetUrl: booking.meetUrl,

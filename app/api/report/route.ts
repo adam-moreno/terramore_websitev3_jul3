@@ -1,6 +1,6 @@
-import { createHash } from "node:crypto"
 import { NextRequest, NextResponse } from "next/server"
 import { after } from "next/server"
+import { analyticsRef } from "@/lib/analytics-ref"
 import { getServerSupabase, isMissingColumnError, supabaseTableUrl } from "@/lib/supabase-server"
 import { confirmLeadToUser, notifyAdminOfLead } from "@/lib/notify"
 import { enrollLead } from "@/lib/nurture/enroll"
@@ -72,14 +72,6 @@ function attributionForNotify(raw: Record<string, unknown>): string {
     .map(([key, value]) => `${key}=${String(value).slice(0, 80)}`)
     .join("; ")
     .slice(0, 400)
-}
-
-/**
- * Opaque analytics reference for a saved signup (used as `transaction_id`). A one-way hash, so the browser never sees
- * the row id; Terramore can recompute it from the id to reconcile GA4/Ads counts with the table.
- */
-function reportRefFor(rowId: string): string {
-  return createHash("sha256").update(`terramore-report:${rowId}`).digest("hex").slice(0, 32)
 }
 
 function isUniqueViolation(error: { code?: string; message?: string } | null | undefined): boolean {
@@ -284,7 +276,7 @@ export async function POST(request: NextRequest) {
 
     // `saved` tells the client whether a row exists; only then does it count an ad conversion.
     return NextResponse.json(
-      rowId ? { success: true, saved: true, reportRef: reportRefFor(rowId) } : { success: true, saved: false },
+      rowId ? { success: true, saved: true, reportRef: analyticsRef("terramore-report", rowId) } : { success: true, saved: false },
       { status: 201 },
     )
   } catch (error) {
