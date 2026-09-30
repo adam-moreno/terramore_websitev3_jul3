@@ -515,12 +515,13 @@ export function HeroSystemDeck() {
   const [stage, setStage] = useState(0)
   const [prev, setPrev] = useState<number | null>(null)
   const [held, setHeld] = useState(false)
-  const [userPaused, setUserPaused] = useState(false)
+  const [userPaused, setUserPaused] = useState(true)
   const reduced = usePrefersReducedMotion()
   const onScreen = useOnScreenAndVisible(rootRef)
   const paused = held || userPaused || !onScreen
 
-  // Sequence: walks the growth stages in order. Holds on hover or focus, stops off screen, and has a Pause control (VR-43, VR-48).
+  // Sequence: walks the growth stages in order. It sits under the primary CTA, so it advances only after Play;
+  // it holds on hover or focus and stops off screen (VR-47, VR-48).
   useEffect(() => {
     if (paused || reduced) return
     const timer = window.setInterval(() => {

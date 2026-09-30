@@ -12,8 +12,9 @@ const POSTER_SRC = "/industries/construction/hero-poster.jpg?v=0921"
  * Portrait construction hero media.
  * Mobile: full-bleed background behind copy.
  * Desktop: fills the right-hand media frame (object-cover crops sides).
- * Atmosphere: real jobsite footage sets the scene. It loops, so it has a Pause control and stops
- * off screen or in a hidden tab (VR-47, VR-48). Reduced motion: poster still only.
+ * Atmosphere: real jobsite footage sets the scene. It sits behind or beside the H1, so it starts on the
+ * poster and only plays after Play; it stops off screen or in a hidden tab (VR-47, VR-48). Reduced motion:
+ * poster still only.
  */
 export function ConstructionHeroVideo({
   variant,
@@ -24,7 +25,7 @@ export function ConstructionHeroVideo({
 }) {
   const rootRef = useRef<HTMLDivElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
-  const [paused, setPaused] = useState(false)
+  const [paused, setPaused] = useState(true)
   const reduceMotion = usePrefersReducedMotion()
   const onScreen = useOnScreenAndVisible(rootRef, 0.1)
   const playing = onScreen && !paused && !reduceMotion

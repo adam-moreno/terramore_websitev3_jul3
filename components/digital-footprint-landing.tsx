@@ -54,12 +54,13 @@ function trackCta() {
 function PdfStack() {
   const rootRef = useRef<HTMLDivElement>(null)
   const [active, setActive] = useState(0)
-  const [paused, setPaused] = useState(false)
+  const [paused, setPaused] = useState(true)
   const reduce = usePrefersReducedMotion()
   const onScreen = useOnScreenAndVisible(rootRef)
   const rotating = onScreen && !paused && !reduce
 
-  // Sequence: shows what the report contains, one sample page at a time. Pausable; still under reduced motion.
+  // Sequence: shows what the report contains, one sample page at a time. It sits beside the H1, so it rotates only
+  // after Play; the dots browse pages by hand. Still under reduced motion.
   useEffect(() => {
     if (!rotating) return
     const id = window.setInterval(() => {
