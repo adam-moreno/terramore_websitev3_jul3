@@ -1,7 +1,8 @@
 /**
  * Visual Doctrine guardrails for terramore.io: the objective subset of the dashboard repo's
  * docs/visual/VERIFY_VISUAL_PLAN.md (V-02, V-03, V-10, V-11, V-14, V-15, V-19, V-20) plus the Visual V1 honesty rules
- * and the 2026-09-29 identity release constraints (hero integration marks, Slack example; VD-018, VD-014).
+ * and the 2026-09-29 identity release constraints (hero integration marks and their visible-arc placement, Slack example;
+ * VD-018, VD-014). scripts/verify-v1-release.mjs pins which of these rules the V1 release depends on.
  * Static source checks only. No network, no browser, no dependencies. Nothing here judges whether a page looks good.
  *
  * Every check first proves it fails on a deliberately broken inline sample and passes the approved pattern, then scans
@@ -378,6 +379,33 @@ const CHECKS = [
     good: [
       ["components/hero-logo-mobius.tsx", `import { INTEGRATION_LOGOS } from "@/lib/integrations"\n<img src={\`https://cdn.simpleicons.org/\${logo.slug}\`} alt="" />`],
       ["components/hero-floating-logos.tsx", `import { INTEGRATION_LOGOS } from "@/lib/integrations"\n<img\n  src={\`https://cdn.simpleicons.org/\${mark.slug}\`}\n  alt=""\n/>`],
+    ],
+  },
+  {
+    id: "hero-logos-visible-arc",
+    rule: "Release constraint 2026-09-29 (efad7a4, VD-018): desktop hero marks rest only on the visible outer curve (outside the mask hole, clear of the H1); marks with no clear spot are hidden, never parked behind the headline",
+    scope: (file) => file === "components/hero-logo-mobius.tsx",
+    run: (file, src) => {
+      const code = stripComments(src)
+      const out = []
+      const need = [
+        [/function\s+restingOffsets\s*\(/, "restingOffsets() no longer computes the visible resting spots"],
+        [/\binHole\b[^\n]*<\s*CLEAR_OF_HOLE/, "resting spots no longer exclude the mask hole (inHole < CLEAR_OF_HOLE)"],
+        [/\bonHeadline\b/, "resting spots no longer exclude the headline box"],
+        [/!inHole\s*&&\s*!onHeadline/, "resting spots no longer require both clear of the hole and clear of the headline"],
+        [/=\s*restingOffsets\s*\(/, "restingOffsets() is no longer used to place the marks"],
+        [/\.style\.display\s*=\s*["']none["']/, "marks without a visible spot are no longer hidden"],
+      ]
+      for (const [pattern, detail] of need) if (!pattern.test(code)) out.push({ line: 1, detail })
+      out.push(...matches(code, /offsetDistance\s*=\s*`\$\{\s*\(\s*index\s*\/[^`]*`/g, () => "marks spread evenly along the whole path (some sit behind the headline)"))
+      return out
+    },
+    bad: [["components/hero-logo-mobius.tsx", "logos.forEach((logo, index) => {\n  logo.style.offsetDistance = `${(index / logos.length) * 100}%`\n})"]],
+    good: [
+      [
+        "components/hero-logo-mobius.tsx",
+        `function restingOffsets(d, frame, max) {\n  const inHole = Math.hypot(a, b) < CLEAR_OF_HOLE\n  const onHeadline = x > left\n  if (!inHole && !onHeadline && inFrame) clear.push(at)\n}\nconst offsets = restingOffsets(d, frame, logos.length)\nlogos.forEach((logo, index) => { if (index < offsets.length) logo.style.offsetDistance = \`\${offsets[index]}%\`; else logo.style.display = "none" })`,
+      ],
     ],
   },
   {
