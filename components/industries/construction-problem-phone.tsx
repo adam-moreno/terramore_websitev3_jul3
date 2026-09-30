@@ -209,7 +209,7 @@ function GoogleSearchScene({ query, animate }: { query: string; animate: boolean
       </div>
 
       <p className="mt-auto px-4 pb-8 text-center text-[10px] font-medium leading-snug text-ink/40">
-        Someone nearby is looking right now.
+        Homeowners nearby search for this.
       </p>
     </div>
   )
