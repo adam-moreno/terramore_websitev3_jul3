@@ -141,13 +141,18 @@ export function ReportForm({
 
       if (!response.ok) {
         trackReportSubmissionError("server_error")
-        throw new Error("Could not save the request")
+        setError("We could not send that just now. Try again, or talk with us.")
+        setBusy(false)
+        return
       }
 
-      // Safe conversion point: POST /api/report succeeded (not 409). Fires generate_lead +
-      // report_submission_success once, plus existing Ads "Digital Footprint Report Submitted" only.
-      // No PII. Do not fire on button click or failed/duplicate responses.
-      trackReportSubmissionSuccess("report_form")
+      // Safe conversion point: the server saved the row (saved + reportRef), not just any 2xx. Fires generate_lead +
+      // report_submission_success once per reportRef, plus existing Ads "Digital Footprint Report Submitted" only.
+      // No PII. Do not fire on button click, failed/duplicate responses, or a 2xx without a saved row.
+      const data = (await response.json().catch(() => ({}))) as { saved?: unknown; reportRef?: unknown }
+      const reportRef = data.saved === true && typeof data.reportRef === "string" && /^[a-f0-9]{32}$/.test(data.reportRef) ? data.reportRef : ""
+      if (reportRef) trackReportSubmissionSuccess("report_form", reportRef)
+      else trackReportSubmissionError("not_saved")
       onSuccess?.()
     } catch {
       setError("We could not send that just now. Try again, or talk with us.")

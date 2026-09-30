@@ -59,7 +59,8 @@ function bookingWouldTrack(response) {
 function reportWouldTrack(response) {
   if (response.status === 409) return false
   if (!response.ok) return false
-  return true
+  const data = response.data || {}
+  return data.saved === true && typeof data.reportRef === "string" && /^[a-f0-9]{32}$/.test(data.reportRef)
 }
 
 const PII_KEYS = ["email", "phone", "name", "first_name", "last_name", "meet_url", "manage_url", "manage_token"]
@@ -128,10 +129,30 @@ async function main() {
   assert(count(win.calls, "conversion") === 0, "409 path: no Ads conversion")
   results.push("Report error path: OK")
 
-  assert(reportWouldTrack({ status: 201, ok: true }) === true, "201 tracks")
+  const saved = { saved: true, reportRef: "0123456789abcdef0123456789abcdef" }
+  assert(reportWouldTrack({ status: 201, ok: true, data: saved }) === true, "201 saved tracks")
+  assert(reportWouldTrack({ status: 201, ok: true, data: { success: true } }) === false, "201 without saved row no track")
+  assert(reportWouldTrack({ status: 201, ok: true, data: { success: true, saved: false } }) === false, "201 saved:false no track")
+  assert(reportWouldTrack({ status: 200, ok: true, data: {} }) === false, "2xx non-API body no track")
+  assert(reportWouldTrack({ status: 201, ok: true, data: { saved: true, reportRef: "ada@example.com" } }) === false, "non-opaque ref no track")
   assert(reportWouldTrack({ status: 409, ok: false }) === false, "409 no track")
   assert(reportWouldTrack({ status: 500, ok: false }) === false, "500 no track")
   results.push("Report gating matrix: OK")
+
+  win.calls.length = 0
+  analytics.trackReportSubmissionSuccess("report_form", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+  analytics.trackReportSubmissionSuccess("report_form", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+  analytics.trackReportSubmissionSuccess("report_form", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb")
+  assert(count(win.calls, "generate_lead") === 2, `generate_lead once per reportRef, got ${count(win.calls, "generate_lead")}`)
+  assert(count(win.calls, "conversion") === 2, `Ads conversion once per reportRef, got ${count(win.calls, "conversion")}`)
+  const refs = eventPayloads(win.calls, "conversion").map((p) => p.transaction_id)
+  assert(refs.join(",") === "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", `Ads transaction_id = reportRef, got ${refs.join(",")}`)
+  const lead = eventPayloads(win.calls, "generate_lead")[0] || {}
+  assert(
+    JSON.stringify(Object.keys(lead).sort()) === JSON.stringify(["form_id", "method", "page_path", "transaction_id"]),
+    `generate_lead keeps its params and adds only transaction_id, got ${Object.keys(lead).join(",")}`,
+  )
+  results.push("Report dedupe per signup (transaction_id): OK")
 
   win.calls.length = 0
   globalThis.window.location.pathname = "/book"

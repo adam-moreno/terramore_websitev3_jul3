@@ -506,10 +506,12 @@ const RULES = [
         if (!analytics.includes(literal)) out.push(`${ANALYTICS} lost ${literal}`)
       }
       const form = stripComments(files.get(REPORT_FORM) ?? "")
-      const success = form.indexOf('trackReportSubmissionSuccess("report_form")')
+      const success = form.indexOf('if (reportRef) trackReportSubmissionSuccess("report_form", reportRef)')
       const notOk = form.lastIndexOf("if (!response.ok) {", success)
       const conflict = form.lastIndexOf("if (response.status === 409) {", success)
+      const saved = form.lastIndexOf("data.saved === true && typeof data.reportRef === \"string\"", success)
       if (success < 0 || notOk < 0 || conflict < 0 || conflict > notOk) out.push("report success no longer follows the 409 and !ok guards")
+      if (saved < notOk) out.push("report success no longer requires the server's saved + reportRef confirmation")
       if (!form.includes('trackEvent("form_start", { form_id: "digital_footprint_report" })')) out.push("form_start changed")
       const landing = files.get("components/digital-footprint-landing.tsx") ?? ""
       for (const literal of ['gtag("event", "report_cta_click", { cta_id: "report_primary" })', 'gtag("event", "cta_click", { cta_id: "report_primary" })', 'cta_id: "report_closing_talk"']) {
@@ -518,7 +520,10 @@ const RULES = [
       if (!(files.get("components/example-report-shell.tsx") ?? "").includes('cta_id: "report_sent_talk"')) out.push("report_sent_talk select_content changed")
       return out
     },
-    mutations: [{ file: ANALYTICS, from: '"report_submission_success",', to: '"report_success",' }],
+    mutations: [
+      { file: ANALYTICS, from: '"report_submission_success",', to: '"report_success",' },
+      { file: REPORT_FORM, from: 'data.saved === true && typeof data.reportRef === "string"', to: 'typeof data.reportRef === "string"' },
+    ],
   },
 ]
 

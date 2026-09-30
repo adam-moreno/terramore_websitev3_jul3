@@ -124,14 +124,16 @@ export function trackEvent(
  * Call only after server-confirmed report success (2xx). Do not use for bookings.
  * Does not include PII. Do not add a second Ads conversion for meeting_booked.
  */
-export function trackGoogleAdsReportConversion(options?: { once?: string }) {
+export function trackGoogleAdsReportConversion(options?: { once?: string; transactionId?: string }) {
   try {
     if (options?.once) {
       const key = `ads_conversion:${options.once}`
       if (firedOnce.has(key)) return
       firedOnce.add(key)
     }
-    const payload = { send_to: googleAdsSendTo() }
+    const payload = options?.transactionId
+      ? { send_to: googleAdsSendTo(), transaction_id: options.transactionId }
+      : { send_to: googleAdsSendTo() }
     gtag("event", "conversion", payload)
     recordDevDiagnostic("conversion", { send_to: googleAdsSendTo() })
   } catch {
@@ -164,27 +166,22 @@ export function trackTikTokLead() {
 }
 
 /**
- * Report success funnel — server-confirmed submit only (response.ok, not 409).
+ * Report success funnel — server-saved submit only (201 with saved + reportRef).
  * Exact GA4 names (kept; do not invent a third report-success name):
  *   - generate_lead
  *   - report_submission_success
  * Plus Ads conversion send_to report label only. No booking Ads conversion.
+ * `reportRef` is the server's opaque signup reference: it becomes `transaction_id` and the dedupe key, so each saved
+ * signup counts once and a second real signup in the same page session still counts.
  */
-export function trackReportSubmissionSuccess(method = "report_form") {
-  const once = `report:${method}`
+export function trackReportSubmissionSuccess(method = "report_form", reportRef?: string) {
+  const once = reportRef ? `report:${reportRef}` : `report:${method}`
   const pagePath = typeof window !== "undefined" ? window.location.pathname : ""
-  // Safe metadata only — form_id / method / page_path. No name/email/phone/website.
-  trackEvent(
-    "generate_lead",
-    { form_id: "digital_footprint_report", method, page_path: pagePath },
-    { once: `${once}:generate_lead` },
-  )
-  trackEvent(
-    "report_submission_success",
-    { form_id: "digital_footprint_report", method, page_path: pagePath },
-    { once: `${once}:report_submission_success` },
-  )
-  trackGoogleAdsReportConversion({ once })
+  // Safe metadata only — form_id / method / page_path (+ opaque transaction_id). No name/email/phone/website.
+  const params = { form_id: "digital_footprint_report", method, page_path: pagePath, ...(reportRef ? { transaction_id: reportRef } : {}) }
+  trackEvent("generate_lead", params, { once: `${once}:generate_lead` })
+  trackEvent("report_submission_success", params, { once: `${once}:report_submission_success` })
+  trackGoogleAdsReportConversion({ once, transactionId: reportRef })
   trackMetaLead()
   trackTikTokLead()
 }
