@@ -60,8 +60,12 @@ const HERO_LOGO_MIN_OPACITY = new Map([
   ["components/hero-logo-mobius.tsx", 0.5],
   ["components/hero-floating-logos.tsx", 0.28],
 ])
-/** The official brand mark for an INTEGRATION_LOGOS slug. cdn.simpleicons.org serves it in the brand color. */
-const BRAND_MARK_SRC = /^https:\/\/(cdn\.jsdelivr\.net\/npm\/simple-icons@v\d+\/icons\/|cdn\.simpleicons\.org\/)\$\{(logo|mark)\.slug\}/
+/**
+ * The official brand mark for an INTEGRATION_LOGOS slug, in its brand color (cdn.simpleicons.org default).
+ * jsDelivr's simple-icons files have no fill and render black. No per-slug fallbacks: all 36 slugs served
+ * 200 image/svg+xml from cdn.simpleicons.org on 2026-09-29.
+ */
+const BRAND_MARK_SRC = /^https:\/\/cdn\.simpleicons\.org\/\$\{(logo|mark)\.slug\}$/
 /** The Slack-style example on the home page (release constraint, VD-014). */
 const SLACK_EXAMPLE = "components/hero-analytics.tsx"
 
@@ -348,7 +352,7 @@ const CHECKS = [
   },
   {
     id: "hero-logos-brand-assets",
-    rule: "Release constraint 2026-09-29 (VD-018): every hero mark is the official Simple Icons brand mark of an INTEGRATION_LOGOS entry; no placeholders or generic icon sets",
+    rule: "Release constraint 2026-09-29 (VD-018): every hero mark is the brand-colored Simple Icons mark (cdn.simpleicons.org) of an INTEGRATION_LOGOS entry; no black jsDelivr files, placeholders or generic icon sets",
     scope: (file) => HERO_LOGO_FILES.includes(file),
     run: (file, src) => {
       const code = stripComments(src)
@@ -359,19 +363,20 @@ const CHECKS = [
       const imgs = [...code.matchAll(/<img\b[^>]*?\bsrc=\{?[`"']([^`"']*)/g)]
       if (imgs.length === 0) out.push({ line: 1, detail: "no brand mark <img>" })
       for (const m of imgs) {
-        if (!BRAND_MARK_SRC.test(m[1])) out.push({ line: lineOf(code, m.index), detail: `"${m[1]}" is not a Simple Icons brand mark for the slug` })
+        if (!BRAND_MARK_SRC.test(m[1])) out.push({ line: lineOf(code, m.index), detail: `"${m[1]}" is not the brand-colored Simple Icons mark for the slug` })
       }
       out.push(...matches(code, /from\s+["'](lucide-react|@heroicons\/[\w/-]+|react-icons\/\w+|@radix-ui\/react-icons)["']/g, (m) => `generic icon set "${m[1]}" among the hero marks`))
       return out
     },
     bad: [
       ["components/hero-logo-mobius.tsx", `import { Globe } from "lucide-react"\n<span className="hero-mobius-logo"><img src={\`/placeholder/\${logo.slug}.png\`} alt="" /></span>`],
+      [
+        "components/hero-floating-logos.tsx",
+        `import { INTEGRATION_LOGOS } from "@/lib/integrations"\n<img src={\`https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/\${mark.slug}.svg\`} alt="" />`,
+      ],
     ],
     good: [
-      [
-        "components/hero-logo-mobius.tsx",
-        `import { INTEGRATION_LOGOS } from "@/lib/integrations"\n<img src={\`https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/\${logo.slug}.svg\`} alt="" />`,
-      ],
+      ["components/hero-logo-mobius.tsx", `import { INTEGRATION_LOGOS } from "@/lib/integrations"\n<img src={\`https://cdn.simpleicons.org/\${logo.slug}\`} alt="" />`],
       ["components/hero-floating-logos.tsx", `import { INTEGRATION_LOGOS } from "@/lib/integrations"\n<img\n  src={\`https://cdn.simpleicons.org/\${mark.slug}\`}\n  alt=""\n/>`],
     ],
   },

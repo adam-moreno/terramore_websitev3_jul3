@@ -63,7 +63,7 @@ export function HeroFloatingLogos({ className = "" }: { className?: string }) {
           }}
         >
           <img
-            src={`https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/${mark.slug}.svg`}
+            src={`https://cdn.simpleicons.org/${mark.slug}`}
             alt=""
             className="object-contain"
             style={{ width: mark.size * 0.5, height: mark.size * 0.5 }}
