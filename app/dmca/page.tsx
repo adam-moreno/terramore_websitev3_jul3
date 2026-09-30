@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { PlainEmail } from "@/components/plain-email"
 import { SiteFooter } from "@/components/site-footer"
 
 export const metadata: Metadata = {
@@ -135,7 +136,9 @@ export default function DMCAPage() {
                   <p className="text-gray-700 mb-2">Terramore.io, LLC</p>
                   <p className="text-gray-700 mb-2">2108 N ST STE N</p>
                   <p className="text-gray-700 mb-2">SACRAMENTO, CA 95816</p>
-                  <p className="text-gray-700">Email: dmca@terramore.io</p>
+                  <p className="text-gray-700">
+                    Email: <PlainEmail address="dmca@terramore.io" />
+                  </p>
                 </div>
                 <p className="text-gray-700 leading-relaxed mt-4">
                   <strong>Note:</strong> Please use the subject line "DMCA Notice" or "DMCA Counter-Notification" 

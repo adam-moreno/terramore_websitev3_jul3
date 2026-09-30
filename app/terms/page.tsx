@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { PlainEmail } from "@/components/plain-email"
 import { SiteFooter } from "@/components/site-footer"
 
 export const metadata: Metadata = {
@@ -221,8 +222,9 @@ export default function TermsPage() {
               <div className="bg-blue-50 p-6 rounded-lg">
                 <p className="text-gray-700 leading-relaxed mb-4">
                   We encourage our clients to contact us with questions or comments about our products and services.
-                  Please feel free to do so by sending an e-mail to support@terramore.io. If you have any questions or
-                  inquiries concerning any of the Terms, you may contact Terramore.io by e-mail at legal@terramore.io or
+                  Please feel free to do so by sending an e-mail to <PlainEmail address="support@terramore.io" />. If you have any questions or
+                  inquiries concerning any of the Terms, you may contact Terramore.io by e-mail at{" "}
+                  <PlainEmail address="legal@terramore.io" /> or
                   by regular mail at:
                 </p>
 
