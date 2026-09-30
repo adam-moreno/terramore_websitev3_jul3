@@ -5,21 +5,21 @@ import { LindyCard, LindyPage } from "@/components/lindy-page"
 export const metadata: Metadata = {
   title: "Security | Terramore",
   description:
-    "We handle customer data to CCPA and HIPAA standards. Your lists, ads, and store stay in the tools you own.",
+    "Your lists, ads, and store stay in the tools you own. We do not sell personal information.",
 }
 
 export default function SecurityPage() {
   return (
     <LindyPage
-      title="Compliant, private,"
+      title="Private"
       accent="and in your control."
-      subtitle="We handle your customer data to CCPA and HIPAA standards. Your lists, ads, and store stay in the tools you own."
+      subtitle="Your lists, ads, and store stay in the tools you own."
     >
       <section className="pb-20">
         <div className="page-shell grid gap-5 md:grid-cols-3">
           <LindyCard
-            title="CCPA and HIPAA"
-            body="We treat personal information to CCPA and HIPAA standards. Only the people on your engagement can see it. Health data is handled only when it is in scope."
+            title="Access"
+            body="Only the people on your engagement can see your customer data."
           />
           <LindyCard
             title="Private"

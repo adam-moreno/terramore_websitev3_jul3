@@ -55,7 +55,7 @@ export default function ResourcesPage() {
           />
           <LindyCard
             title="Is my customer data safe?"
-            body="CCPA and HIPAA standards. Your lists and ads stay in your accounts. We do not sell or train on your data."
+            body="Your lists and ads stay in your accounts. We do not sell or train on your data."
             href="/security"
           />
           <LindyCard

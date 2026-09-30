@@ -22,7 +22,7 @@ const FAQS = [
   },
   {
     q: "How is my data handled?",
-    a: "To CCPA and HIPAA standards. Your lists and ads stay in your accounts. We do not sell personal information and we do not train public models on your files.",
+    a: "Your lists and ads stay in your accounts. We do not sell personal information and we do not train public models on your files.",
   },
   {
     q: "Can I use the dashboard?",

@@ -12,7 +12,7 @@ Terramore serves owners with a shop, a service, or a customer list. Work starts 
 - [Free Digital Footprint report](https://www.terramore.io/report): What is in the report, how long it takes, and how we send it
 - [Sample report](https://www.terramore.io/report/example): Ecommerce and service-business sample reports (illustrative demos)
 - [About](https://www.terramore.io/about): Adam Moreno and why the work looks like a growth team
-- [Security](https://www.terramore.io/security): CCPA and HIPAA handling of client data
+- [Security](https://www.terramore.io/security): How client data stays private and in the client's control
 - [Start here](https://www.terramore.io/resources): Every page in the order owners ask about them
 
 ## Solutions

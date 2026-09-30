@@ -1,9 +1,5 @@
 const PROMISES = [
   {
-    title: "Compliant.",
-    body: "We handle your customer data to CCPA and HIPAA standards."
-  },
-  {
     title: "Private.",
     body: "Your lists and ads stay in your accounts. We never sell them or train AI on them."
   },
@@ -18,12 +14,12 @@ export function SecurityBand() {
     <section id="security" className="section-y md:pb-24 md:pt-0">
       <div className="page-shell">
         <h2 className="section-title max-w-3xl text-ink md:text-[3rem] md:font-semibold md:leading-normal md:tracking-[-0.03em]">
-          Compliant, private, and in your control.
+          Private and in your control.
         </h2>
         <p className="section-lede mt-4 max-w-2xl text-ink/70 md:text-[1.05rem] md:leading-relaxed">
-          Three separate promises, and we keep all of them.
+          Two separate promises, and we keep both.
         </p>
-        <div className="stack-gap mt-12 grid md:mt-10 md:gap-5 md:grid-cols-3">
+        <div className="stack-gap mt-12 grid md:mt-10 md:gap-5 md:grid-cols-2">
           {PROMISES.map((item) => (
             <div key={item.title} className="card-radius card-pad bg-white shadow-[0_10px_36px_-20px_rgba(15,30,46,0.28)] md:rounded-[1.75rem] md:p-9">
               <h3 className="text-[1.5rem] font-semibold leading-[1.15] tracking-tight text-ink md:text-[1.65rem] md:leading-normal">{item.title}</h3>
