@@ -70,7 +70,7 @@ export function ConstructionHeroVideo({
         onToggle={() => setPaused((p) => !p)}
         label="background video"
         tone="dark"
-        className={`absolute right-4 z-20 ${variant === "background" ? "top-24" : "bottom-4"}`}
+        className={`absolute z-20 ${variant === "background" ? "bottom-5 left-4" : "bottom-4 right-4"}`}
       />
     </div>
   )

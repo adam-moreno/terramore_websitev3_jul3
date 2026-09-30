@@ -124,12 +124,12 @@ export function ConstructionLanding() {
         {/* Mobile / tablet background video */}
         <div className="absolute inset-0 lg:hidden">
           <ConstructionHeroVideo variant="background" />
-          <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-ink via-ink/80 to-ink/35" />
+          <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-ink via-ink/80 to-ink/50" />
         </div>
 
         <div className="page-shell relative z-10 flex min-h-[100svh] flex-col justify-end gap-4 pb-6 pt-20 lg:min-h-0 lg:grid lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-14 lg:pb-0 lg:pt-0">
           <div className="text-cream lg:text-ink">
-            <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-cream/60 lg:text-ink/70">
+            <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-cream lg:text-ink/70">
               Marketing for construction companies
             </p>
             <h1 className="mt-3 max-w-xl text-[2.05rem] font-bold leading-[1.08] tracking-[-0.02em] sm:mt-4 sm:text-[2.6rem] md:text-[3.1rem]">
