@@ -162,7 +162,7 @@ export function ReportPopup({
                 <button
                   type="button"
                   onClick={goHome}
-                  className="mt-3 inline-flex h-11 w-full items-center justify-center rounded-full text-[15px] font-medium text-ink/60 hover:text-ink"
+                  className="mt-3 inline-flex h-11 w-full items-center justify-center rounded-full text-[15px] font-medium text-ink/70 hover:text-ink"
                 >
                   Done
                 </button>

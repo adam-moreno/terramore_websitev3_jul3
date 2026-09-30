@@ -104,7 +104,7 @@ export default async function BookPage({
             <BookCta />
             <ReportPopupLink
               direct
-              className="text-center text-[15px] font-medium text-ink/60 underline-offset-4 hover:text-ink hover:underline"
+              className="text-center text-[15px] font-medium text-ink/70 underline-offset-4 hover:text-ink hover:underline"
             >
               See your digital footprint
             </ReportPopupLink>

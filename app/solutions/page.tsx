@@ -153,7 +153,7 @@ export default function SolutionsPage() {
               className={`rounded-[1.5rem] border border-black/[0.06] bg-gradient-to-br ${card.tint} bg-white p-4 shadow-[0_8px_30px_rgba(15,30,46,0.04)] md:p-6`}
             >
               <p className={`whitespace-nowrap text-[1.3rem] font-bold tracking-tight md:text-[2.1rem] ${card.accent}`}>{card.stat}</p>
-              <p className="mt-1.5 text-[13px] font-medium leading-snug text-ink/60 md:text-[14px]">{card.label}</p>
+              <p className="mt-1.5 text-[13px] font-medium leading-snug text-ink/70 md:text-[14px]">{card.label}</p>
             </div>
           ))}
         </div>

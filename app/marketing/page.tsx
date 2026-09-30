@@ -181,7 +181,7 @@ export default function MarketingPage() {
       <section className="page-shell pb-14 md:pb-20">
         <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
           <div>
-            <p className="border-b border-ink/15 pb-4 text-[12px] font-semibold uppercase tracking-[0.18em] text-ink/60">
+            <p className="border-b border-ink/15 pb-4 text-[12px] font-semibold uppercase tracking-[0.18em] text-ink/70">
               Fresh campaigns fuel performance
             </p>
             <h2 className="mt-6 max-w-xl text-[1.9rem] font-bold leading-[1.12] tracking-[-0.02em] text-ink md:text-[2.6rem]">
