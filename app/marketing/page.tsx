@@ -3,6 +3,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { BookingLink } from "@/components/booking-popup"
 import { ReportPopupLink } from "@/components/report-popup"
+import type { CtaId } from "@/lib/funnel-taxonomy"
 import {
   CollaborationSteps,
   CreativeCtaCard,
@@ -25,10 +26,11 @@ export const metadata: Metadata = {
   },
 }
 
-function TalkButton({ className = "" }: { className?: string }) {
+function TalkButton({ className = "", ctaId }: { className?: string; ctaId?: CtaId }) {
   return (
     <BookingLink
       source="marketing"
+      ctaId={ctaId}
       className={`inline-flex h-11 w-full items-center justify-center rounded-full bg-brand px-6 text-[16px] font-medium text-white hover:bg-brand-hover sm:w-auto ${className}`}
     >
       Book a demo
@@ -151,9 +153,10 @@ export default function MarketingPage() {
               built, launched, and measured by one connected system.
             </p>
             <div className="mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-              <TalkButton />
+              <TalkButton ctaId="marketing_hero_book" />
               <ReportPopupLink
                 direct
+                ctaId="marketing_hero_report"
                 className="text-center text-[15px] font-medium text-white/80 underline-offset-4 hover:text-white hover:underline sm:text-left"
               >
                 Or get a free Digital Footprint report

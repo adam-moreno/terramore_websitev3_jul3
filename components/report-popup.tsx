@@ -4,6 +4,9 @@ import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState, type ReactNode } from "react"
 import { createPortal } from "react-dom"
 import { ReportForm, type ReportAnswers } from "@/components/report-form"
+import { useCtaView } from "@/hooks/use-cta-view"
+import { trackCtaClick } from "@/lib/analytics"
+import type { CtaId } from "@/lib/funnel-taxonomy"
 import { GROWTH_WORKSPACE_URL } from "@/lib/growth-workspace"
 
 const QUESTIONS = [
@@ -262,6 +265,7 @@ export function ReportPopupLink({
   className = "text-[14px] font-medium text-ink/50 underline-offset-4 hover:text-ink hover:underline",
   direct = false,
   description,
+  ctaId,
 }: {
   label?: string
   children?: ReactNode
@@ -270,12 +274,23 @@ export function ReportPopupLink({
   direct?: boolean
   /** Optional popup header copy override (display only). */
   description?: string
+  /** Approved CTA id (lib/funnel-taxonomy.ts) for primary_cta_click / primary_cta_view. Optional. */
+  ctaId?: CtaId
 }) {
   const [open, setOpen] = useState(false)
+  const viewRef = useCtaView<HTMLButtonElement>(ctaId)
 
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} className={className}>
+      <button
+        ref={viewRef}
+        type="button"
+        onClick={() => {
+          if (ctaId) trackCtaClick(ctaId)
+          setOpen(true)
+        }}
+        className={className}
+      >
         {children ?? label}
       </button>
       <ReportPopup open={open} onClose={() => setOpen(false)} direct={direct} description={description} />

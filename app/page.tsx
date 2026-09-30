@@ -74,11 +74,12 @@ export default function TerramoreHomepage() {
                 <BookingLink
                   label="Let's talk"
                   source="homepage"
+                  ctaId="home_hero_book"
                   className="inline-flex h-11 items-center justify-center rounded-full bg-brand px-6 text-[16px] font-medium text-white hover:bg-brand-hover md:h-10 md:px-4"
                 />
                 <div className="mt-2.5 flex flex-col items-center gap-1 text-center text-[13px] font-medium text-ink/70">
                   <p>Free 30-minute call.</p>
-                  <ReportPopupLink className="text-[13px] font-medium text-ink/70 underline-offset-4 hover:text-ink">
+                  <ReportPopupLink ctaId="home_hero_report" className="text-[13px] font-medium text-ink/70 underline-offset-4 hover:text-ink">
                     <span className="md:hidden">Or tap for a free Digital Footprint report</span>
                     <span className="hidden md:inline">Or click here for a Digital Footprint report</span>
                   </ReportPopupLink>

@@ -31,6 +31,7 @@ export function ScheduleFab() {
     <div className="fixed bottom-[calc(0.75rem+env(safe-area-inset-bottom))] right-3 z-[70] sm:right-4">
       <BookingLink
         source="floating_cta"
+        ctaId="floating_book"
         aria-label="Schedule"
         className={`inline-flex items-center justify-center rounded-full bg-brand text-white shadow-lg transition-colors hover:bg-brand-hover hover:shadow-xl ${
           inHero ? "h-9 gap-1.5 px-3.5" : "h-9 w-9"

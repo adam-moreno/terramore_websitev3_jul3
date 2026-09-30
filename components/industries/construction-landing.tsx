@@ -1,6 +1,7 @@
 import type { ReactNode } from "react"
 import { BookingLink } from "@/components/booking-popup"
 import { ReportPopupLink } from "@/components/report-popup"
+import type { CtaId } from "@/lib/funnel-taxonomy"
 import { ConstructionHeroVideo } from "@/components/industries/construction-hero-video"
 import { ConstructionProblemPhone } from "@/components/industries/construction-problem-phone"
 import { ConstructionSolutionTimeline } from "@/components/industries/construction-solution-phone"
@@ -95,20 +96,22 @@ const STAGES = [
 function TalkCta({
   children = "Let's Talk",
   className = CTA_PRIMARY,
+  ctaId,
 }: {
   children?: ReactNode
   className?: string
+  ctaId?: CtaId
 }) {
   return (
-    <BookingLink source="construction" className={className}>
+    <BookingLink source="construction" ctaId={ctaId} className={className}>
       {children}
     </BookingLink>
   )
 }
 
-function FootprintCta({ children, className = CTA_PRIMARY }: { children: ReactNode; className?: string }) {
+function FootprintCta({ children, className = CTA_PRIMARY, ctaId }: { children: ReactNode; className?: string; ctaId?: CtaId }) {
   return (
-    <ReportPopupLink direct description={REPORT_POPUP_DESCRIPTION} className={className}>
+    <ReportPopupLink direct description={REPORT_POPUP_DESCRIPTION} className={className} ctaId={ctaId}>
       {children}
     </ReportPopupLink>
   )
@@ -140,8 +143,8 @@ export function ConstructionLanding() {
               a steady flow of inquiries, estimates, and booked work.
             </p>
             <div className="mt-6 flex flex-col items-stretch gap-3 sm:mt-8 sm:flex-row sm:items-center">
-              <FootprintCta>See Your Digital Footprint</FootprintCta>
-              <TalkCta className="inline-flex h-11 items-center justify-center rounded-full border border-white/25 bg-white/10 px-6 text-[15px] font-medium text-cream backdrop-blur hover:border-white/40 hover:bg-white/15 lg:border-ink/15 lg:bg-white/80 lg:text-ink lg:hover:border-ink/30 lg:hover:bg-white" />
+              <FootprintCta ctaId="construction_hero_report">See Your Digital Footprint</FootprintCta>
+              <TalkCta ctaId="construction_hero_book" className="inline-flex h-11 items-center justify-center rounded-full border border-white/25 bg-white/10 px-6 text-[15px] font-medium text-cream backdrop-blur hover:border-white/40 hover:bg-white/15 lg:border-ink/15 lg:bg-white/80 lg:text-ink lg:hover:border-ink/30 lg:hover:bg-white" />
             </div>
             <p className="mt-4 text-[13px] leading-relaxed text-cream/60 sm:mt-5 lg:text-ink/70">
               Free report: how homeowners find, evaluate, and contact your business.

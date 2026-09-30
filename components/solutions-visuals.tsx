@@ -19,6 +19,8 @@ import { useEffect, useRef, useState, type FormEvent } from "react"
 import { ArrowDown, ArrowRight, BarChart3, Target, Workflow } from "lucide-react"
 import { BookingLink } from "@/components/booking-popup"
 import { ReportPopup } from "@/components/report-popup"
+import { useCtaView } from "@/hooks/use-cta-view"
+import { trackCtaClick } from "@/lib/analytics"
 
 /* ------------------------------------------------------------------ */
 /* Growth system flow                                                  */
@@ -441,10 +443,12 @@ export function PillarsShowcase() {
 export function HeroWebsiteInput() {
   const [website, setWebsite] = useState("")
   const [open, setOpen] = useState(false)
+  const submitRef = useCtaView<HTMLButtonElement>("solutions_hero_report")
 
   const submit = (event: FormEvent) => {
     event.preventDefault()
     if (!website.trim()) return
+    trackCtaClick("solutions_hero_report")
     setOpen(true)
   }
 
@@ -463,6 +467,7 @@ export function HeroWebsiteInput() {
           />
         </label>
         <button
+          ref={submitRef}
           type="submit"
           disabled={!website.trim()}
           title={!website.trim() ? "Enter your business website first" : undefined}
@@ -475,6 +480,7 @@ export function HeroWebsiteInput() {
         Free written report, in your inbox in minutes. Rather talk it through?{" "}
         <BookingLink
           source="solutions"
+          ctaId="solutions_hero_book"
           className="whitespace-nowrap font-medium text-brand underline-offset-4 hover:text-brand-hover hover:underline"
         >
           Book a call →

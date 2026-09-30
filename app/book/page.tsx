@@ -3,6 +3,7 @@ import Image from "next/image"
 import { ConnectedChain, HeroSystemDeck, Reveal, StagedShowcase, TerraIQTile } from "@/components/book-visuals"
 import { BookingLink } from "@/components/booking-popup"
 import { ReportPopupLink } from "@/components/report-popup"
+import type { CtaId } from "@/lib/funnel-taxonomy"
 import { BookingFlow } from "@/components/booking-flow"
 import { Logo } from "@/components/logo"
 import { SiteFooter } from "@/components/site-footer"
@@ -57,10 +58,11 @@ const CAPABILITIES = [
 
 /* Opens the booking popup (qualifying questionnaire + calendar) in place —
    CTAs never jump the visitor around the page. */
-function BookCta({ className = "" }: { className?: string }) {
+function BookCta({ className = "", ctaId }: { className?: string; ctaId?: CtaId }) {
   return (
     <BookingLink
       source="book"
+      ctaId={ctaId}
       className={`inline-flex h-12 w-full items-center justify-center rounded-full bg-brand px-7 text-[16px] font-medium text-white transition hover:bg-brand-hover sm:w-auto ${className}`}
     >
       Book a 30-minute conversation
@@ -101,9 +103,10 @@ export default async function BookPage({
             biggest opportunities to grow.
           </p>
           <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
-            <BookCta />
+            <BookCta ctaId="book_hero_book" />
             <ReportPopupLink
               direct
+              ctaId="book_hero_report"
               className="text-center text-[15px] font-medium text-ink/70 underline-offset-4 hover:text-ink hover:underline"
             >
               See your digital footprint

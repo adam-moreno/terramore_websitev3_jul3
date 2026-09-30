@@ -32,10 +32,11 @@ export function LindyPage({
           </p>
           <BookingLink
             label={ctaLabel}
+            ctaId="infopage_hero_book"
             className="mt-8 inline-flex h-10 items-center rounded-full bg-brand px-4 text-[16px] font-medium text-white hover:bg-brand-hover"
           />
           <div className="mt-6">
-            <ReportPopupLink />
+            <ReportPopupLink ctaId="infopage_hero_report" />
           </div>
         </div>
         </div>

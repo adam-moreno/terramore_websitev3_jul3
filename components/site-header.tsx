@@ -63,6 +63,7 @@ export function SiteHeader() {
             <BookingLink
               label="Let's talk"
               source="header"
+              ctaId="header_book"
               className="shrink-0 rounded-lg bg-brand px-2.5 py-1.5 text-[12px] font-medium text-white hover:bg-brand-hover"
             />
             <button
@@ -96,6 +97,7 @@ export function SiteHeader() {
             <BookingLink
               label="Let's talk"
               source="header"
+              ctaId="header_book"
               className="rounded-full bg-brand px-4 py-2 text-[13px] font-medium text-white hover:bg-brand-hover"
             />
           </div>
@@ -147,6 +149,7 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
               <BookingLink
                 label="Let's talk"
                 source="report"
+                ctaId="report_header_book"
                 className="inline-flex h-9 items-center justify-center rounded-full bg-brand px-4 text-[14px] font-medium text-white hover:bg-brand-hover"
               />
             </div>

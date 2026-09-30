@@ -6,7 +6,12 @@
  * - Booking: `meeting_booked` (GA4 only — no Google Ads conversion path)
  *
  * No PII in event params. Helpers never throw if gtag is unavailable.
+ *
+ * V2A funnel events (primary_cta_view/click, report_*, booking_*) go through trackFunnelEvent only: names and
+ * parameter values from lib/funnel-taxonomy.ts, sent to GA4 from the production hostname only, logged locally elsewhere.
  */
+
+import { CTA_IDS, funnelSendMode, sanitizeFunnelParams, type CtaId, type FunnelEventName, type FunnelParams } from "./funnel-taxonomy"
 
 /**
  * Canonical Google tag bootstrap ID for gtag/js loader only.
@@ -34,6 +39,8 @@ declare global {
       last: { event: string; params?: Record<string, string | number | boolean>; at: number } | null
       events: Array<{ event: string; params?: Record<string, string | number | boolean>; at: number }>
     }
+    /** Funnel events that were not sent because the hostname is not production (previews, localhost, tests). */
+    __tmFunnelDebug?: Array<{ event: string; params: FunnelParams; at: number }>
   }
 }
 
@@ -211,4 +218,70 @@ export function trackMeetingBooked(params: {
     },
     { once: bookingId },
   )
+}
+
+/* ---------------------------------------------------------------- V2A funnel events */
+
+let funnelPageView = 0
+let pendingReportCta: CtaId | null = null
+
+/** Called on every route change. CTA views dedupe per page view; a back/forward-cache restore is not a new page view. */
+export function beginFunnelPageView() {
+  funnelPageView += 1
+}
+
+function recordFunnelDebug(event: string, params: FunnelParams) {
+  const bag = window.__tmFunnelDebug ?? []
+  bag.push({ event, params, at: Date.now() })
+  window.__tmFunnelDebug = bag.slice(-100)
+  console.debug(`[funnel] ${event} (not sent: ${window.location.hostname} is not production)`, params)
+}
+
+/**
+ * The one entry point for V2A funnel events. Unknown events and any parameter or value outside the taxonomy are
+ * dropped. `page_path` defaults to the current pathname. Pass `once` to fire at most once per key per page session.
+ * Returns true when the event was sent (production) or logged (anywhere else).
+ */
+export function trackFunnelEvent(event: FunnelEventName, params: FunnelParams = {}, options?: { once?: string }): boolean {
+  try {
+    if (typeof window === "undefined") return false
+    const safe = sanitizeFunnelParams(event, { page_path: window.location.pathname, ...params })
+    if (!safe) return false
+    if (options?.once) {
+      const key = `funnel:${event}:${options.once}`
+      if (firedOnce.has(key)) return false
+      firedOnce.add(key)
+    }
+    if (funnelSendMode(window.location.hostname) === "send") gtag("event", event, safe)
+    else recordFunnelDebug(event, safe)
+    return true
+  } catch {
+    return false
+  }
+}
+
+/** A click on an approved CTA. Once per click; remembers report CTAs so the report popup can say what opened it. */
+export function trackCtaClick(ctaId: CtaId) {
+  const spec = CTA_IDS[ctaId]
+  if (!spec) return
+  if (spec.destination === "report") pendingReportCta = ctaId
+  trackFunnelEvent("primary_cta_click", { cta_id: ctaId, destination: spec.destination, placement: spec.placement })
+}
+
+/** An approved CTA was seen (see hooks/use-cta-view.ts). Once per CTA per page view. */
+export function trackCtaView(ctaId: CtaId): boolean {
+  const spec = CTA_IDS[ctaId]
+  if (!spec?.view) return false
+  return trackFunnelEvent(
+    "primary_cta_view",
+    { cta_id: ctaId, destination: spec.destination, placement: spec.placement },
+    { once: `${funnelPageView}:${ctaId}` },
+  )
+}
+
+/** The report CTA clicked just before the report popup opened, if any. Cleared on read. */
+export function takeReportCta(): CtaId | null {
+  const ctaId = pendingReportCta
+  pendingReportCta = null
+  return ctaId
 }

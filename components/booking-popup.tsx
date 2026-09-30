@@ -3,6 +3,9 @@
 import { useEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 import { BookingFlow } from "@/components/booking-flow"
+import { useCtaView } from "@/hooks/use-cta-view"
+import { trackCtaClick } from "@/lib/analytics"
+import type { CtaId } from "@/lib/funnel-taxonomy"
 
 /** Modal booking flow. Same shell as ReportPopup: portal, z-[100], Escape and backdrop close, scroll lock. */
 export function BookingPopup({
@@ -68,6 +71,7 @@ export function BookingLink({
   children,
   onClick,
   source,
+  ctaId,
   "aria-label": ariaLabel,
 }: {
   label?: string
@@ -77,17 +81,22 @@ export function BookingLink({
   onClick?: () => void
   /** Entry point tag: report | homepage | header | floating_cta | book. Optional. */
   source?: string
+  /** Approved CTA id (lib/funnel-taxonomy.ts) for primary_cta_click / primary_cta_view. Optional. */
+  ctaId?: CtaId
   "aria-label"?: string
 }) {
   const [open, setOpen] = useState(false)
+  const viewRef = useCtaView<HTMLButtonElement>(ctaId)
 
   return (
     <>
       <button
+        ref={viewRef}
         type="button"
         aria-label={ariaLabel}
         onClick={() => {
           onClick?.()
+          if (ctaId) trackCtaClick(ctaId)
           setOpen(true)
         }}
         className={className}

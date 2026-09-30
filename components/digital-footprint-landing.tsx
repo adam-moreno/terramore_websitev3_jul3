@@ -8,6 +8,9 @@ import { MotionToggle } from "@/components/motion-toggle"
 import { ReportPopup } from "@/components/report-popup"
 import { CHAPTERS } from "@/lib/report/chapters"
 import { useOnScreenAndVisible, usePrefersReducedMotion } from "@/hooks/use-autoplay"
+import { useCtaView } from "@/hooks/use-cta-view"
+import { trackCtaClick } from "@/lib/analytics"
+import type { CtaId } from "@/lib/funnel-taxonomy"
 
 const PDF_PAGES = [
   { src: "/report/pdf-cover.png", alt: "Sample report page: Where you show up" },
@@ -131,9 +134,13 @@ function PdfStack() {
 
 export function DigitalFootprintLanding() {
   const [open, setOpen] = useState(false)
+  const heroCtaRef = useCtaView<HTMLButtonElement>("report_hero_report")
+  const midCtaRef = useCtaView<HTMLButtonElement>("report_mid_report")
+  const closingCtaRef = useCtaView<HTMLButtonElement>("report_closing_report")
 
-  const openForm = () => {
+  const openForm = (ctaId: CtaId) => {
     trackCta()
+    trackCtaClick(ctaId)
     setOpen(true)
   }
 
@@ -161,8 +168,9 @@ export function DigitalFootprintLanding() {
 
               <div className="mt-7 flex flex-col items-center gap-2.5 lg:items-start">
                 <button
+                  ref={heroCtaRef}
                   type="button"
-                  onClick={openForm}
+                  onClick={() => openForm("report_hero_report")}
                   className="inline-flex h-12 items-center justify-center rounded-full bg-brand px-7 text-[16px] font-medium text-white hover:bg-brand-hover"
                 >
                   Get my free Digital Footprint report
@@ -213,8 +221,9 @@ export function DigitalFootprintLanding() {
       <section className="border-t border-black/[0.04] bg-white py-12 md:py-16">
         <div className="page-shell flex flex-col items-center text-center">
           <button
+            ref={midCtaRef}
             type="button"
-            onClick={openForm}
+            onClick={() => openForm("report_mid_report")}
             className="inline-flex h-12 items-center justify-center rounded-full bg-brand px-7 text-[16px] font-medium text-white hover:bg-brand-hover"
           >
             Get my free Digital Footprint report
@@ -261,8 +270,9 @@ export function DigitalFootprintLanding() {
             through the priorities with you.
           </p>
           <button
+            ref={closingCtaRef}
             type="button"
-            onClick={openForm}
+            onClick={() => openForm("report_closing_report")}
             className="mt-8 inline-flex h-12 items-center justify-center rounded-full bg-brand px-7 text-[16px] font-medium text-white hover:bg-brand-hover"
           >
             Get my free Digital Footprint report
@@ -270,6 +280,7 @@ export function DigitalFootprintLanding() {
           <BookingLink
             label="Or talk through a report with us"
             source="report"
+            ctaId="report_closing_book"
             onClick={() => {
               if (typeof window === "undefined") return
               const gtag = (window as Window & { gtag?: (...args: unknown[]) => void }).gtag

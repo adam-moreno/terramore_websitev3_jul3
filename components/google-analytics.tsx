@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import { useEffect } from 'react'
+import { beginFunnelPageView } from '@/lib/analytics'
 import { captureAttributionFromUrl } from '@/lib/attribution'
 
 /**
@@ -16,6 +17,7 @@ export function GoogleAnalytics() {
     // Keep gclid/UTMs for this tab on any landing page (not only when the report form opens),
     // so a later booking from a clean URL still carries the ad context.
     captureAttributionFromUrl()
+    beginFunnelPageView()
   }, [pathname])
 
   return null
