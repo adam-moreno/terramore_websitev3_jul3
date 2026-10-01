@@ -10,7 +10,7 @@ import { SecurityBand } from "@/components/security-band"
 import { SiteFooter } from "@/components/site-footer"
 import { HeroAnalytics } from "@/components/hero-analytics"
 import { HeroFloatingLogos } from "@/components/hero-floating-logos"
-import { HeroLogoMobius } from "@/components/hero-logo-mobius"
+import { HeroLogoOrbit } from "@/components/hero-logo-mobius"
 import { TerramoreToolkit } from "@/components/terramore-toolkit"
 import { TerramoreUseCases } from "@/components/terramore-use-cases"
 
@@ -26,9 +26,7 @@ export default function TerramoreHomepage() {
     <div className="min-h-screen bg-cream">
       <section className="relative isolate overflow-hidden bg-cream pt-36 pb-0 md:pt-32 md:pb-0">
         {/* The orbit only runs from md up. On phones it floated over the headline, so the marks move to a slim row under the CTA. */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-0 hidden h-[100svh] overflow-hidden md:block">
-          <HeroLogoMobius />
-        </div>
+        <HeroLogoOrbit />
 
         {/* Phones: floating integration marks scattered around the hero edges, behind the copy. */}
         <HeroFloatingLogos className="md:hidden" />

@@ -1,10 +1,12 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
+import { MotionToggle } from "@/components/motion-toggle"
+import { useOnScreenAndVisible, usePrefersReducedMotion } from "@/hooks/use-autoplay"
 import { INTEGRATION_LOGOS } from "@/lib/integrations"
 
-// Marks rest along the path, in every motion setting: nothing moves behind the headline
-// (Visual Doctrine forbidden zones), and there is no collapsed reduced-motion state.
+// The marks travel the figure eight and fade through the mask hole as they cross behind the headline.
+// Under reduced motion they rest, still, on the visible outer curve instead (Visual Doctrine forbidden zones).
 // A figure eight that uses the whole track box: the two lobes reach the box edges, and the
 // crossing sits at the center of the headline. The mask hole hides whatever sits behind the type,
 // so the visible part of the orbit is the outer curve of each lobe.
@@ -19,6 +21,7 @@ function infinityPath(width: number, height: number) {
   return `M ${cx} ${cy} C ${cx} ${cy - ry} ${left} ${cy - ry} ${left} ${cy} C ${left} ${cy + ry} ${cx} ${cy + ry} ${cx} ${cy} C ${cx} ${cy - ry} ${right} ${cy - ry} ${right} ${cy} C ${right} ${cy + ry} ${cx} ${cy + ry} ${cx} ${cy}`
 }
 
+const LOOP_SECONDS = 42
 const MARK_SIZE = 40
 const MARK_GAP = 52
 const SAMPLES = 720
@@ -67,7 +70,11 @@ function restingOffsets(d: string, frame: Frame, max: number) {
   })
 }
 
-export function HeroLogoMobius() {
+/**
+ * moving: the marks travel (CSS animation); otherwise they rest on the visible arc.
+ * running: false holds the travel where it is (user pause, hero off screen, tab hidden).
+ */
+export function HeroLogoMobius({ moving = false, running = false }: { moving?: boolean; running?: boolean }) {
   const layerRef = useRef<HTMLDivElement>(null)
   const trackRef = useRef<HTMLDivElement>(null)
 
@@ -105,6 +112,15 @@ export function HeroLogoMobius() {
       track.style.setProperty("--mobius-path", path)
 
       const logos = track.querySelectorAll<HTMLElement>(".hero-mobius-logo")
+      if (moving) {
+        // Every mark travels the whole loop; the animation sets offset-distance, so nothing is parked.
+        logos.forEach((logo) => {
+          logo.style.offsetPath = path
+          logo.style.display = ""
+        })
+        return
+      }
+
       const headlineBox = (copy.querySelector("h1") ?? copy).getBoundingClientRect()
       const offsets = restingOffsets(
         d,
@@ -147,7 +163,7 @@ export function HeroLogoMobius() {
       observer.disconnect()
       window.removeEventListener("resize", update)
     }
-  }, [])
+  }, [moving])
 
   return (
     <div
@@ -156,12 +172,19 @@ export function HeroLogoMobius() {
       aria-hidden
     >
       <div className="hero-logo-topfade absolute inset-0">
-        <div ref={trackRef} className="hero-mobius-track">
+        <div
+          ref={trackRef}
+          className="hero-mobius-track"
+          data-motion={moving ? (running ? "running" : "paused") : undefined}
+        >
           {INTEGRATION_LOGOS.map((logo, index) => (
             <span
               key={logo.slug}
               className="hero-mobius-logo"
-              style={{ offsetDistance: `${(index / INTEGRATION_LOGOS.length) * 100}%` }}
+              style={{
+                offsetDistance: `${(index / INTEGRATION_LOGOS.length) * 100}%`,
+                animationDelay: `${(-index * LOOP_SECONDS) / INTEGRATION_LOGOS.length}s`,
+              }}
             >
               <img src={`https://cdn.simpleicons.org/${logo.slug}`} alt="" />
             </span>
@@ -169,5 +192,33 @@ export function HeroLogoMobius() {
         </div>
       </div>
     </div>
+  )
+}
+
+/** Desktop hero orbit with its pause control (VR-47: the loop runs longer than 5 s). Phones use HeroFloatingLogos. */
+export function HeroLogoOrbit() {
+  const reduce = usePrefersReducedMotion()
+  const [paused, setPaused] = useState(false)
+  const frameRef = useRef<HTMLDivElement>(null)
+  const visible = useOnScreenAndVisible(frameRef, 0)
+  const moving = !reduce
+
+  return (
+    <>
+      <div
+        ref={frameRef}
+        className="pointer-events-none absolute inset-x-0 top-0 z-0 hidden h-[100svh] overflow-hidden md:block"
+      >
+        <HeroLogoMobius moving={moving} running={moving && visible && !paused} />
+      </div>
+      {moving ? (
+        <MotionToggle
+          paused={paused}
+          onToggle={() => setPaused((value) => !value)}
+          label="logo orbit"
+          className="absolute right-6 top-28 z-30 hidden md:inline-flex"
+        />
+      ) : null}
+    </>
   )
 }

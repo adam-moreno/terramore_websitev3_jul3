@@ -25,6 +25,7 @@ import {
   type LucideIcon,
 } from "lucide-react"
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react"
+import { MotionToggle } from "@/components/motion-toggle"
 import { useOnScreenAndVisible, usePrefersReducedMotion } from "@/hooks/use-autoplay"
 
 type Person = { name: string; role: string; photo?: string; team?: boolean }
@@ -392,11 +393,12 @@ const EMAIL_TONES: Record<string, string> = {
   violet: "bg-violet-50",
 }
 
-// One pass per channel, under 5 s for the longest channel (VR-47): 600 + (600 + 700 + 500) + (600 + 700) = 4.3 s.
-const HOLD_FIRST_MS = 600
-const TYPING_MS = 600
-const MESSAGE_MS = 700
-const ASSET_MS = 500
+// The pre-V1 pacing. The longest channel loops every 7.6 s, so the conversation has a pause control (VR-47).
+const HOLD_FIRST_MS = 1000
+const TYPING_MS = 800
+const MESSAGE_MS = 1000
+const ASSET_MS = 800
+const HOLD_END_MS = 2200
 const SWIPE_THRESHOLD = 48
 
 function FileIcon({ kind }: { kind: DriveFile["kind"] }) {
@@ -671,7 +673,7 @@ export function HeroAnalytics() {
   const rootRef = useRef<HTMLDivElement>(null)
   const reduce = usePrefersReducedMotion()
   const onScreen = useOnScreenAndVisible(rootRef, 0.5)
-  const playedRef = useRef<string | null>(null)
+  const [paused, setPaused] = useState(false)
   // Starts on the finished conversation so it reads without JavaScript or motion.
   const [cursor, setCursor] = useState<RevealCursor>(() => finalReveal(CHANNELS[0].messages))
 
@@ -679,16 +681,15 @@ export function HeroAnalytics() {
     setMenuOpen(false)
   }, [active])
 
-  // Sequence: plays the active channel once when it is on screen, then rests on the full conversation.
+  // Sequence: replays the active channel while it is on screen. Paused, off screen or under reduced motion
+  // it rests on the full conversation; Play starts the channel over.
   useEffect(() => {
     const messages = channel.messages
-    if (reduce || playedRef.current === active) {
+    if (reduce || paused || !onScreen) {
       setCursor(finalReveal(messages))
       return
     }
-    if (!onScreen) return
 
-    playedRef.current = active
     let cancelled = false
     let timer: number | undefined
 
@@ -698,24 +699,28 @@ export function HeroAnalytics() {
       })
 
     const play = async () => {
-      setCursor({ index: 0, phase: 2 })
-      await wait(HOLD_FIRST_MS)
-      if (cancelled) return
-
-      for (let i = 1; i < messages.length; i++) {
-        setCursor({ index: i, phase: 0 })
-        await wait(TYPING_MS)
+      while (!cancelled) {
+        setCursor({ index: 0, phase: 2 })
+        await wait(HOLD_FIRST_MS)
         if (cancelled) return
 
-        setCursor({ index: i, phase: 1 })
-        await wait(MESSAGE_MS)
-        if (cancelled) return
-
-        setCursor({ index: i, phase: 2 })
-        if (messages[i].attachment) {
-          await wait(ASSET_MS)
+        for (let i = 1; i < messages.length; i++) {
+          setCursor({ index: i, phase: 0 })
+          await wait(TYPING_MS)
           if (cancelled) return
+
+          setCursor({ index: i, phase: 1 })
+          await wait(MESSAGE_MS)
+          if (cancelled) return
+
+          setCursor({ index: i, phase: 2 })
+          if (messages[i].attachment) {
+            await wait(ASSET_MS)
+            if (cancelled) return
+          }
         }
+
+        await wait(HOLD_END_MS)
       }
     }
 
@@ -725,7 +730,7 @@ export function HeroAnalytics() {
       if (timer !== undefined) window.clearTimeout(timer)
       setCursor(finalReveal(messages))
     }
-  }, [active, reduce, onScreen, channel.messages])
+  }, [active, reduce, paused, onScreen, channel.messages])
 
   useEffect(() => {
     if (!menuOpen) return
@@ -987,6 +992,14 @@ export function HeroAnalytics() {
 
             <div className="flex min-h-11 shrink-0 items-center justify-between gap-3 border-t border-black/[0.04] bg-white px-4 py-1.5 md:px-6">
               <p className="text-[12px] leading-snug text-slate-500">{EXAMPLE_DISCLOSURE}</p>
+              {reduce ? null : (
+                <MotionToggle
+                  paused={paused}
+                  onToggle={() => setPaused((value) => !value)}
+                  label="conversation"
+                  className="shrink-0"
+                />
+              )}
             </div>
           </div>
         </div>
