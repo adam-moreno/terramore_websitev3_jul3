@@ -15,9 +15,9 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 /** V1 guarantee -> verify-visual rule ids that enforce it. */
 const V1_GUARANTEES = [
   ["Hero marks are brand-colored cdn.simpleicons.org marks", ["hero-logos-brand-assets", "hero-logos-not-desaturated"]],
-  ["Desktop hero marks rest only on the visible curve (efad7a4)", ["hero-logos-visible-arc"]],
-  ["Slack example: initials avatars, no photos", ["slack-example-identity"]],
-  ['"Illustrative example" label stays on simulations', ["simulation-labelled", "slack-example-identity"]],
+  ["Still hero marks rest only on the visible curve (efad7a4); the moving orbit stops under reduced motion and can be paused", ["hero-logos-visible-arc", "autoplay-has-control"]],
+  ["Slack example: provenance-recorded portraits only, no founder likeness, readable in-card Example disclosure", ["slack-example-identity", "no-fictional-people-assets"]],
+  ['Simulations say they are examples ("Illustrative example", "Example workflow", "Example conversation")', ["simulation-labelled", "slack-example-identity"]],
   ["No fake G2 / rating proof", ["no-unsourced-rating"]],
   ['No "thousands" / unsourced counts', ["no-unsourced-counts"]],
   ["No live-inquiry or fake activity", ["no-fake-live-activity"]],

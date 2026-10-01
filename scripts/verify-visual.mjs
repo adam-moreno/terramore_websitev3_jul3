@@ -2,7 +2,8 @@
  * Visual Doctrine guardrails for terramore.io: the objective subset of the dashboard repo's
  * docs/visual/VERIFY_VISUAL_PLAN.md (V-02, V-03, V-10, V-11, V-14, V-15, V-19, V-20) plus the Visual V1 honesty rules
  * and the 2026-09-29 identity release constraints (hero integration marks and their visible-arc placement, Slack example;
- * VD-018, VD-014). scripts/verify-v1-release.mjs pins which of these rules the V1 release depends on.
+ * VD-018, VD-014), as amended by the visual restoration (moving orbit, disclosed example people).
+ * scripts/verify-v1-release.mjs pins which of these rules the V1 release depends on.
  * Static source checks only. No network, no browser, no dependencies. Nothing here judges whether a page looks good.
  *
  * Every check first proves it fails on a deliberately broken inline sample and passes the approved pattern, then scans
@@ -49,9 +50,7 @@ const SIMULATIONS = [
 ]
 
 /** Reviewed motion that runs once and ends within 5 s, so VR-47 needs no control. */
-const FINITE_MOTION = new Map([
-  ["components/hero-analytics.tsx", "typing dots show for 600 ms per message; each channel plays once in 4.3 s"],
-])
+const FINITE_MOTION = new Map()
 
 /** Hero integration marks: desktop orbit and phone field (release constraint, VD-018). */
 const HERO_LOGO_FILES = ["components/hero-logo-mobius.tsx", "components/hero-floating-logos.tsx"]
@@ -67,8 +66,33 @@ const HERO_LOGO_MIN_OPACITY = new Map([
  * 200 image/svg+xml from cdn.simpleicons.org on 2026-09-29.
  */
 const BRAND_MARK_SRC = /^https:\/\/cdn\.simpleicons\.org\/\$\{(logo|mark)\.slug\}$/
-/** The Slack-style example on the home page (release constraint, VD-014). */
+/** The Slack-style example on the home page (release constraint, VD-014 as amended by the visual restoration). */
 const SLACK_EXAMPLE = "components/hero-analytics.tsx"
+/**
+ * Example portraits the Slack example may show, each with recorded provenance (visual-restoration provenance table):
+ * the cartoons and Nia's headshot are C2PA-signed generated images of no real person (7eabb56); the unsplash-* crops are
+ * Unsplash License stock photos given fictional names. A new file needs a provenance entry first.
+ */
+const EXAMPLE_PEOPLE_DIR = "public/examples/people/"
+const EXAMPLE_PEOPLE_ASSETS = new Set(
+  [
+    "ava-lindstrom-cartoon.png",
+    "chris-okonkwo-cartoon.png",
+    "elena-voss-cartoon.png",
+    "jordan-blake-cartoon.png",
+    "marcus-bell-cartoon.png",
+    "nia-brooks-headshot.png",
+    "noah-patel-cartoon.png",
+    "riley-cho-cartoon.png",
+    "sofia-ramirez-cartoon.png",
+    "unsplash-1492562080023-ab3db95bfbce.jpg",
+    "unsplash-1506277886164-e25aa3f4ef7f.jpg",
+    "unsplash-1506794778202-cad84cf45f1d.jpg",
+    "unsplash-1517841905240-472988babdf9.jpg",
+    "unsplash-1524504388940-b1c1722653e1.jpg",
+    "unsplash-1544717305-2782549b5136.jpg",
+  ].map((name) => EXAMPLE_PEOPLE_DIR + name)
+)
 
 /* ---------------------------------------------------------------- source helpers */
 
@@ -282,29 +306,37 @@ const CHECKS = [
     id: "simulation-labelled",
     rule: "V-15 / VR-29: example workflows and mock people say so inside the component (MV-01)",
     scope: (file) => SIMULATIONS.includes(file),
-    run: (file, src) => (/Illustrative example|Example workflow/.test(stripComments(src)) ? [] : [{ line: 1, detail: "simulation without an in-component label" }]),
+    run: (file, src) =>
+      /Illustrative example|Example workflow|Example conversation/.test(stripComments(src)) ? [] : [{ line: 1, detail: "simulation without an in-component label" }],
     bad: [["components/hero-analytics.tsx", `<div>#e-commerce · 14 members</div>`]],
     good: [["components/hero-analytics.tsx", `<p className="rounded-full bg-slate-100 text-slate-700">Illustrative example</p>`]],
   },
   {
     id: "no-fictional-people-assets",
-    rule: "V-19 / VR-30: no shipped faces or names of people who do not exist (MV-01, MV-18)",
+    rule: "V-19 / VR-30: no shipped faces or names of people who do not exist, except the provenance-recorded portraits inside the disclosed Slack example (MV-01, MV-18, VD-014 amended)",
     scope: (file) => isPublicAsset(file) || isCode(file),
     run: (file, src) => {
       if (isPublicAsset(file)) {
         if (file.startsWith("public/reviews/")) return [{ line: 1, detail: "fictional reviewer asset" }]
         if (file.startsWith("public/founder/") && !REAL_PEOPLE_ASSETS.has(file)) return [{ line: 1, detail: "person asset that is not the founder" }]
+        if (file.startsWith(EXAMPLE_PEOPLE_DIR) && !EXAMPLE_PEOPLE_ASSETS.has(file)) return [{ line: 1, detail: "example portrait with no provenance entry" }]
         return []
       }
-      return matches(stripComments(src), /\/(?:founder|reviews)\/(?!adam-moreno-(?:headshot|cartoon)\.png)[\w.-]+\.(?:png|jpe?g|webp)/g, (m) => `"${m[0]}"`)
+      const code = stripComments(src)
+      const out = matches(code, /\/(?:founder|reviews)\/(?!adam-moreno-(?:headshot|cartoon)\.png)[\w.-]+\.(?:png|jpe?g|webp)/g, (m) => `"${m[0]}"`)
+      if (file !== SLACK_EXAMPLE) out.push(...matches(code, /\/examples\/people\b/g, () => "example portraits outside the disclosed Slack example"))
+      return out
     },
     bad: [
       ["public/reviews/review-maya.png", ""],
-      ["components/__fixture__.tsx", `const NIA = { name: "Nia Brooks", photo: "/founder/nia-brooks-headshot.png" }`],
+      ["public/examples/people/new-face.png", ""],
+      ["components/__fixture__.tsx", `const NIA = { name: "Nia Brooks", photo: "/founder/nia-brooks-headshot.png" }\n<img src="/examples/people/nia-brooks-headshot.png" alt="" />`],
     ],
     good: [
       ["public/founder/adam-moreno-headshot.png", ""],
+      ["public/examples/people/nia-brooks-headshot.png", ""],
       ["components/__fixture__.tsx", `<Image src="/founder/adam-moreno-headshot.png" alt="Adam Moreno" />`],
+      [SLACK_EXAMPLE, `const PEOPLE = "/examples/people"`],
     ],
   },
   {
@@ -383,7 +415,7 @@ const CHECKS = [
   },
   {
     id: "hero-logos-visible-arc",
-    rule: "Release constraint 2026-09-29 (efad7a4, VD-018): desktop hero marks rest only on the visible outer curve (outside the mask hole, clear of the H1); marks with no clear spot are hidden, never parked behind the headline",
+    rule: "Release constraint 2026-09-29 (efad7a4, VD-018), restored motion: still desktop hero marks rest only on the visible outer curve (outside the mask hole, clear of the H1), and marks with no clear spot are hidden. Travelling marks cross behind the headline only in passing: the orbit stops under reduced motion and has a Pause control",
     scope: (file) => file === "components/hero-logo-mobius.tsx",
     run: (file, src) => {
       const code = stripComments(src)
@@ -395,36 +427,69 @@ const CHECKS = [
         [/!inHole\s*&&\s*!onHeadline/, "resting spots no longer require both clear of the hole and clear of the headline"],
         [/=\s*restingOffsets\s*\(/, "restingOffsets() is no longer used to place the marks"],
         [/\.style\.display\s*=\s*["']none["']/, "marks without a visible spot are no longer hidden"],
+        [/\bmoving\s*=\s*!reduce\b/, "the orbit no longer stops under reduced motion (moving = !reduce)"],
+        [/<MotionToggle\b/, "the moving orbit has no Pause control"],
       ]
       for (const [pattern, detail] of need) if (!pattern.test(code)) out.push({ line: 1, detail })
       out.push(...matches(code, /offsetDistance\s*=\s*`\$\{\s*\(\s*index\s*\/[^`]*`/g, () => "marks spread evenly along the whole path (some sit behind the headline)"))
       return out
     },
-    bad: [["components/hero-logo-mobius.tsx", "logos.forEach((logo, index) => {\n  logo.style.offsetDistance = `${(index / logos.length) * 100}%`\n})"]],
+    bad: [
+      [
+        "components/hero-logo-mobius.tsx",
+        "const moving = true\nlogos.forEach((logo, index) => {\n  logo.style.offsetDistance = `${(index / logos.length) * 100}%`\n})",
+      ],
+    ],
     good: [
       [
         "components/hero-logo-mobius.tsx",
-        `function restingOffsets(d, frame, max) {\n  const inHole = Math.hypot(a, b) < CLEAR_OF_HOLE\n  const onHeadline = x > left\n  if (!inHole && !onHeadline && inFrame) clear.push(at)\n}\nconst offsets = restingOffsets(d, frame, logos.length)\nlogos.forEach((logo, index) => { if (index < offsets.length) logo.style.offsetDistance = \`\${offsets[index]}%\`; else logo.style.display = "none" })`,
+        `function restingOffsets(d, frame, max) {\n  const inHole = Math.hypot(a, b) < CLEAR_OF_HOLE\n  const onHeadline = x > left\n  if (!inHole && !onHeadline && inFrame) clear.push(at)\n}\nconst offsets = restingOffsets(d, frame, logos.length)\nlogos.forEach((logo, index) => { if (index < offsets.length) logo.style.offsetDistance = \`\${offsets[index]}%\`; else logo.style.display = "none" })\nconst moving = !reduce\n<MotionToggle paused={paused} onToggle={toggle} label="logo orbit" />`,
       ],
     ],
   },
   {
     id: "slack-example-identity",
-    rule: "Release constraint 2026-09-29 (VD-014): the Slack example keeps role initials avatars and its visible Illustrative example label, and shows no person photos",
+    rule: "VD-014 as amended by the visual restoration: the Slack example may show named example people with provenance-recorded, self-hosted portraits (initials when there is none), and the card itself says, readably, that it is an example conversation with no real clients or staff. No founder likeness, no hotlinked photos, no sales-handoff role",
     scope: (file) => file === SLACK_EXAMPLE,
     run: (file, src) => {
       const code = stripComments(src)
       const out = []
-      if (!/<SlackAvatar\b/.test(code) || !/\{initials\}/.test(code)) out.push({ line: 1, detail: "senders no longer show the initials avatar (SlackAvatar)" })
-      if (!/>\s*Illustrative example\s*</.test(code)) out.push({ line: 1, detail: 'no visible "Illustrative example" label' })
-      out.push(...matches(code, /<img\b|<Image\b|\bphoto\s*[:=]|unsplash|\/founder\/|\.(?:png|jpe?g|webp|avif)\b/g, (m) => `"${m[0]}": no person photos in the Slack example`))
+      if (!/<SlackAvatar\b/.test(code) || !/\{initials\}/.test(code)) out.push({ line: 1, detail: "senders no longer fall back to the initials avatar (SlackAvatar)" })
+      const disclosure = code.match(/const EXAMPLE_DISCLOSURE\s*=\s*"([^"]*)"/)
+      if (!disclosure || !/^Example conversation\b/.test(disclosure[1]) || !/\bnot real\b/.test(disclosure[1])) {
+        out.push({ line: 1, detail: 'the disclosure no longer starts "Example conversation" and says the people are not real' })
+      }
+      const shown = [...code.matchAll(/<p\b([^>]*)>\s*\{EXAMPLE_DISCLOSURE\}\s*<\/p>/g)]
+      const readable = shown.some(([, attrs]) => {
+        const cls = attrs.match(/className="([^"]*)"/)?.[1] ?? ""
+        return (
+          !/aria-hidden/.test(attrs) &&
+          /(^|\s)text-slate-(500|600|700|800|900)(\s|$)/.test(cls) &&
+          !/(^|\s)(hidden|sr-only|invisible|opacity-[\w[\].]+|text-\[(?:[0-9]|1[01])px\])(\s|$)/.test(cls)
+        )
+      })
+      if (!readable) out.push({ line: 1, detail: "the disclosure is not rendered as visible, readable text (slate-500 or darker, 12px or more, not hidden)" })
+      if (/\.(?:png|jpe?g|webp|avif)\b/.test(code) && !/const PEOPLE\s*=\s*"\/examples\/people"/.test(code)) {
+        out.push({ line: 1, detail: "portraits no longer come from /examples/people" })
+      }
+      for (const m of code.matchAll(/["'`]([\w-]+\.(?:png|jpe?g|webp|avif))["'`]/g)) {
+        if (!EXAMPLE_PEOPLE_ASSETS.has(EXAMPLE_PEOPLE_DIR + m[1])) out.push({ line: lineOf(code, m.index), detail: `"${m[1]}" has no provenance entry` })
+      }
+      out.push(
+        ...matches(code, /<Image\b|unsplash\.com|https?:\/\/|\/founder\/|adam-moreno|Head of Sales|>\s*Illustrative example\s*</g, (m) => `"${m[0].trim()}" in the Slack example`)
+      )
       return out
     },
-    bad: [[SLACK_EXAMPLE, `const NIA = { name: "Nia Brooks", photo: "https://images.unsplash.com/photo-1" }\n<img src={message.from.photo} alt={message.from.name} />`]],
+    bad: [
+      [
+        SLACK_EXAMPLE,
+        `const NIA = { name: "Nia Brooks", photo: "https://images.unsplash.com/photo-1" }\nconst ADAM = { photo: "/founder/adam-moreno-cartoon.png", role: "Head of Sales" }\n<img src={message.from.photo} alt={message.from.name} />\n<p className="rounded-full bg-slate-100 text-slate-700">Illustrative example</p>`,
+      ],
+    ],
     good: [
       [
         SLACK_EXAMPLE,
-        `function SlackAvatar({ person }) { const initials = person.name.slice(0, 2); return <span aria-hidden>{initials}</span> }\n<SlackAvatar person={message.from} />\n<p className="rounded-full bg-slate-100 text-slate-700">\n  Illustrative example\n</p>`,
+        `const PEOPLE = "/examples/people"\nconst NIA = client("Nia Brooks", "Founder, e-commerce brand", "nia-brooks-headshot.png")\nconst EXAMPLE_DISCLOSURE = "Example conversation · not real clients or staff"\nfunction SlackAvatar({ person }) { if (person.photo) return <img src={person.photo} alt="" />; const initials = person.name.slice(0, 2); return <span aria-hidden>{initials}</span> }\n<SlackAvatar person={message.from} />\n<p className="text-[12px] leading-snug text-slate-500">{EXAMPLE_DISCLOSURE}</p>`,
       ],
     ],
   },
