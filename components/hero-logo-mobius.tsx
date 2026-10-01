@@ -97,11 +97,13 @@ export function HeroLogoMobius({ moving = false, running = false }: { moving?: b
       const path = `path("${d}")`
 
       // The hole is a little smaller than the copy so marks fade out right where the type starts.
+      // Travelling marks cross the top corners of the headline, so the hole is 10% taller while they move:
+      // measured over a full loop at 1440 and 1280, no visible mark then overlaps a letter.
       const hole = {
         cx: copyBox.left - sectionBox.left + copyBox.width / 2,
         cy: copyBox.top - sectionBox.top + copyBox.height / 2,
         rx: copyBox.width * 0.42,
-        ry: copyBox.height * 0.46,
+        ry: copyBox.height * (moving ? 0.506 : 0.46),
       }
       layer.style.setProperty("--hole-cx", `${hole.cx}px`)
       layer.style.setProperty("--hole-cy", `${hole.cy}px`)

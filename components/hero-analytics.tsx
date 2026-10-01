@@ -594,9 +594,9 @@ function SlackMessage({ message, phase }: { message: Message; phase: number }) {
               team
             </span>
           ) : null}{" "}
-          <span className="font-normal text-slate-400">{message.time}</span>
+          <span className="font-normal text-slate-500">{message.time}</span>
         </p>
-        <p className="hidden text-[11px] text-slate-400 md:block">{message.from.role}</p>
+        <p className="hidden text-[11px] text-slate-500 md:block">{message.from.role}</p>
         {showText ? (
           <p className="mt-1 text-[14px] leading-relaxed text-slate-700">{message.text}</p>
         ) : (
@@ -990,14 +990,15 @@ export function HeroAnalytics() {
               ))}
             </div>
 
-            <div className="flex min-h-11 shrink-0 items-center justify-between gap-3 border-t border-black/[0.04] bg-white px-4 py-1.5 md:px-6">
+            {/* Phones: the control sits left, clear of the fixed Schedule button at the bottom right. */}
+            <div className="flex min-h-11 shrink-0 items-center gap-3 border-t border-black/[0.04] bg-white px-4 py-1.5 md:justify-between md:px-6">
               <p className="text-[12px] leading-snug text-slate-500">{EXAMPLE_DISCLOSURE}</p>
               {reduce ? null : (
                 <MotionToggle
                   paused={paused}
                   onToggle={() => setPaused((value) => !value)}
                   label="conversation"
-                  className="shrink-0"
+                  className="order-first shrink-0 md:order-none"
                 />
               )}
             </div>
