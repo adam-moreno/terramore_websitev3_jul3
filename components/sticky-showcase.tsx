@@ -56,7 +56,7 @@ export function StickyShowcase({
       <div className="page-shell">
         <div className="mx-auto max-w-[560px] text-center">
           <h2 className="section-title text-ink md:text-[2.5rem] md:leading-normal md:tracking-[-0.04em]">
-            {title} {accent}
+            {title} <span className="text-gold-ink">{accent}</span>
           </h2>
           <p className="section-lede mx-auto mt-4 max-w-md text-ink/70 md:text-[15px] md:leading-relaxed">{subtitle}</p>
         </div>
@@ -76,7 +76,7 @@ export function StickyShowcase({
                     active === index ? "opacity-100" : "lg:opacity-35"
                   }`}
                 >
-                  <p className="text-[13px] font-medium text-ink/70">{String(index + 1).padStart(2, "0")}</p>
+                  <p className="text-[13px] font-medium text-gold-ink">{String(index + 1).padStart(2, "0")}</p>
                   <h3 className="mt-3 text-[1.5rem] md:whitespace-nowrap font-semibold leading-[1.15] tracking-tight text-ink md:text-[1.75rem] md:leading-normal">
                     {item.title}
                   </h3>

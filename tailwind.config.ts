@@ -22,6 +22,8 @@ const config: Config = {
   			gold: {
   				from: '#f7b844',
   				to: '#c68809',
+  				// Gold for text on light surfaces: 5.0:1 on cream, 5.2:1 on white, 4.7:1 on #fff1d6.
+  				ink: '#946200',
   			},
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',

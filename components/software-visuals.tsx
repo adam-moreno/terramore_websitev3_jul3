@@ -1746,7 +1746,7 @@ export function PhoneFlowVisual() {
             status === "Booked"
               ? "bg-brand text-white"
               : status === "Qualifying"
-                ? "bg-[#fff1d6] text-ink"
+                ? "bg-[#fff1d6] text-gold-ink"
                 : "bg-white text-slate-500"
           }`}
         >

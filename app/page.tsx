@@ -51,9 +51,9 @@ export default function TerramoreHomepage() {
                   more
                 </span>
                 <br />
-                from the business
+                from the <span className="text-gold-ink">business</span>
                 <br />
-                you already built.
+                <span className="text-gold-ink">you already built.</span>
               </h1>
               {/* Mobile: full hero-copy width so line 2 stays one line (3 forced breaks). */}
               <p className="mx-auto mt-5 max-w-none text-center text-[16px] font-medium leading-[1.4] text-ink sm:max-w-[26rem] md:mt-8 md:max-w-[626px] md:text-[20px] md:leading-[30px]">

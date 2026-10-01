@@ -100,7 +100,7 @@ export function TerramoreUseCases({ showIntro = true }: { showIntro?: boolean })
           <>
         <p className="section-eyebrow text-center">Use cases</p>
         <h2 className="section-title mx-auto mt-3 max-w-[640px] text-center text-ink md:text-[2.5rem] md:leading-normal md:tracking-[-0.04em]">
-          Pick a job. We have done it before.
+          Pick a job. <span className="text-gold-ink">We have done it before.</span>
         </h2>
         <p className="section-lede mx-auto mt-4 max-w-md text-center text-ink/70 md:text-[15px] md:leading-relaxed">
           These are the first things founders ask us to take.
