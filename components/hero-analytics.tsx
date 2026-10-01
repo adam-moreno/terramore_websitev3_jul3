@@ -27,7 +27,7 @@ import {
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react"
 import { useOnScreenAndVisible, usePrefersReducedMotion } from "@/hooks/use-autoplay"
 
-type Person = { name: string; role: string; team?: boolean }
+type Person = { name: string; role: string; photo?: string; team?: boolean }
 type DriveFile = { name: string; kind: "folder" | "video" | "doc" }
 type EmailTile = { name: string; subject: string; tone: string }
 type GanttRow = { name: string; start: number; span: number; state: "done" | "now" | "next" }
@@ -52,6 +52,7 @@ type Channel = {
   label: string
   icon: LucideIcon
   members: number
+  client: Person
   messages: Message[]
 }
 
@@ -59,7 +60,25 @@ function mention(name: string) {
   return <span className="slack-mention">@{name}</span>
 }
 
+/** Photo when there is one; initials when there is none or it fails to load, so a row is never blank. */
 function SlackAvatar({ person, className }: { person: Person; className: string }) {
+  const [failed, setFailed] = useState(false)
+  if (person.photo && !failed) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={person.photo}
+        alt=""
+        aria-hidden
+        width={32}
+        height={32}
+        loading="lazy"
+        decoding="async"
+        className={`${className} object-cover object-top`}
+        onError={() => setFailed(true)}
+      />
+    )
+  }
   const initials = person.name
     .split(" ")
     .map((part) => part[0])
@@ -73,22 +92,39 @@ function SlackAvatar({ person, className }: { person: Person; className: string 
   )
 }
 
-// Illustrative only: senders are roles, not people. No invented names, titles or faces (VR-29, VR-30).
-const TERRAMORE: Person = { name: "Terramore", role: "Your Terramore team", team: true }
+// Example conversation: every person here is fictional and the card says so (EXAMPLE_DISCLOSURE).
+// Team portraits and the e-commerce founder are AI illustrations (C2PA: Grok Imagine); the other client
+// photos are Unsplash stock models. Businesses are described by type, never by an invented company name.
+const PEOPLE = "/examples/people"
 
-function client(name: string, business: string): Person {
-  return { name, role: `Client · ${business}` }
+function teammate(name: string, role: string, photo: string): Person {
+  return { name, role: `${role}, Terramore`, photo: `${PEOPLE}/${photo}`, team: true }
 }
 
-const STORE_OWNER = client("Store owner", "e-commerce brand")
-const GYM_OWNER = client("Gym owner", "fitness studio")
-const OFFICE_MANAGER = client("Office manager", "HVAC company")
-const BRAND_OWNER = client("Brand owner", "apparel label")
-const MANAGING_PARTNER = client("Managing partner", "professional firm")
-const BRAND_FOUNDER = client("Founder", "skincare brand")
-const STARTUP_CEO = client("CEO", "tech startup")
-const CREATOR = client("Creator", "online course")
-const CONTRACTOR = client("Owner", "construction company")
+function client(name: string, role: string, photo?: string): Person {
+  return { name, role, photo: photo ? `${PEOPLE}/${photo}` : undefined }
+}
+
+const RILEY = teammate("Riley Cho", "Account Manager", "riley-cho-cartoon.png")
+const NOAH = teammate("Noah Patel", "Automation Expert", "noah-patel-cartoon.png")
+const SOFIA = teammate("Sofia Ramirez", "Lead Web Developer", "sofia-ramirez-cartoon.png")
+const MARCUS = teammate("Marcus Bell", "Strategy Lead", "marcus-bell-cartoon.png")
+const ELENA = teammate("Elena Park", "Lifecycle Lead", "elena-voss-cartoon.png")
+const CHRIS = teammate("Chris Okonkwo", "Growth Strategist", "chris-okonkwo-cartoon.png")
+const BLAKE = teammate("Blake Harrow", "Producer", "jordan-blake-cartoon.png")
+const AVA = teammate("Ava Lindstrom", "Account Manager", "ava-lindstrom-cartoon.png")
+
+const NIA = client("Nia Brooks", "Founder, e-commerce brand", "nia-brooks-headshot.png")
+const CALEB = client("Caleb Voss", "Owner, fitness studio", "unsplash-1492562080023-ab3db95bfbce.jpg")
+const FARAH = client("Farah Nadir", "Operations, HVAC company", "unsplash-1544717305-2782549b5136.jpg")
+const DIEGO = client("Diego Marquez", "CMO, apparel label", "unsplash-1506277886164-e25aa3f4ef7f.jpg")
+const HELEN = client("Helen Zhou", "Managing Partner, professional firm", "unsplash-1517841905240-472988babdf9.jpg")
+const IMANI = client("Imani Cole", "Founder, skincare brand")
+const ARJUN = client("Arjun Mehta", "CEO, tech startup")
+const SABLE = client("Sable Quinn", "Creator, online course", "unsplash-1524504388940-b1c1722653e1.jpg")
+const DESHAWN = client("DeShawn Carter", "Owner, construction company", "unsplash-1506794778202-cad84cf45f1d.jpg")
+
+const EXAMPLE_DISCLOSURE = "Example conversation · not real clients or staff"
 
 // Three shapes on purpose so the channels do not read like one template:
 // e-commerce is a question with a result card, fitness is a proactive update with a checklist,
@@ -99,14 +135,15 @@ const CHANNELS: Channel[] = [
     label: "e-commerce",
     icon: ShoppingBag,
     members: 14,
+    client: NIA,
     messages: [
       {
-        from: STORE_OWNER,
+        from: NIA,
         time: "8:47 AM",
         text: <>{mention("Terramore")} can the cart and shipping emails be live before Friday&apos;s drop?</>,
       },
       {
-        from: TERRAMORE,
+        from: ELENA,
         time: "8:49 AM",
         text: "Yes. Three flows are live in Klaviyo. Test sends are in your inbox.",
         attachment: {
@@ -125,9 +162,10 @@ const CHANNELS: Channel[] = [
     label: "fitness",
     icon: Dumbbell,
     members: 9,
+    client: CALEB,
     messages: [
       {
-        from: TERRAMORE,
+        from: RILEY,
         time: "7:12 AM",
         text: "Shoot day plan for Thursday. Nothing needed from you.",
         attachment: {
@@ -142,7 +180,7 @@ const CHANNELS: Channel[] = [
         },
       },
       {
-        from: GYM_OWNER,
+        from: CALEB,
         time: "7:20 AM",
         text: "Great. I will be there at 9.",
       },
@@ -153,14 +191,15 @@ const CHANNELS: Channel[] = [
     label: "home-services",
     icon: House,
     members: 11,
+    client: FARAH,
     messages: [
       {
-        from: OFFICE_MANAGER,
+        from: FARAH,
         time: "6:04 AM",
         text: "Did the after-5 text go out last night?",
       },
       {
-        from: TERRAMORE,
+        from: NOAH,
         time: "6:07 AM",
         text: "It did. Here is the log.",
         attachment: {
@@ -174,7 +213,7 @@ const CHANNELS: Channel[] = [
         },
       },
       {
-        from: OFFICE_MANAGER,
+        from: FARAH,
         time: "6:09 AM",
         text: "Perfect. Leave it on.",
       },
@@ -185,14 +224,15 @@ const CHANNELS: Channel[] = [
     label: "apparel",
     icon: Shirt,
     members: 16,
+    client: DIEGO,
     messages: [
       {
-        from: BRAND_OWNER,
+        from: DIEGO,
         time: "9:21 AM",
         text: "Can you rebuild the site so the lookbook actually sells?",
       },
       {
-        from: TERRAMORE,
+        from: SOFIA,
         time: "9:24 AM",
         text: "The lookbook pages are in Drive. We put them on the site this week.",
         attachment: {
@@ -212,14 +252,15 @@ const CHANNELS: Channel[] = [
     label: "professional",
     icon: Briefcase,
     members: 8,
+    client: HELEN,
     messages: [
       {
-        from: MANAGING_PARTNER,
+        from: HELEN,
         time: "10:05 AM",
         text: <>{mention("Terramore")} can you build us a 90-day growth plan?</>,
       },
       {
-        from: TERRAMORE,
+        from: MARCUS,
         time: "10:08 AM",
         text: "Here is the 90 day chart. Week 4 is open. Next is the close path.",
         attachment: {
@@ -241,14 +282,15 @@ const CHANNELS: Channel[] = [
     label: "skincare",
     icon: Sparkles,
     members: 12,
+    client: IMANI,
     messages: [
       {
-        from: BRAND_FOUNDER,
+        from: IMANI,
         time: "11:16 AM",
         text: "People buy once. Can you get them to refill?",
       },
       {
-        from: TERRAMORE,
+        from: ELENA,
         time: "11:19 AM",
         text: "We set welcome, day 28 refill, and VIP restock in Klaviyo.",
         attachment: {
@@ -267,14 +309,15 @@ const CHANNELS: Channel[] = [
     label: "tech",
     icon: Cpu,
     members: 10,
+    client: ARJUN,
     messages: [
       {
-        from: STARTUP_CEO,
+        from: ARJUN,
         time: "2:03 PM",
         text: "Demos sit overnight. Can you book them the same day?",
       },
       {
-        from: TERRAMORE,
+        from: CHRIS,
         time: "2:06 PM",
         text: "Same day now. A new request gets a text and a hold on the calendar.",
         attachment: {
@@ -290,21 +333,22 @@ const CHANNELS: Channel[] = [
     label: "creators",
     icon: Clapperboard,
     members: 7,
+    client: SABLE,
     messages: [
       {
-        from: CREATOR,
+        from: SABLE,
         time: "4:40 PM",
         text: <>{mention("Terramore")} can you film and edit the course launch?</>,
       },
       {
-        from: TERRAMORE,
+        from: BLAKE,
         time: "4:43 PM",
         text: "We film Friday in South Beach, then cut and post the launch.",
         attachment: {
           kind: "shoot",
           place: "South Beach, Miami",
           when: "Fri, Oct 10 at 8:00 AM",
-          crew: "1 camera person, 2 models, owner on camera",
+          crew: "1 camera person, 2 models, Sable on camera",
         },
       },
     ],
@@ -314,14 +358,15 @@ const CHANNELS: Channel[] = [
     label: "construction",
     icon: HardHat,
     members: 13,
+    client: DESHAWN,
     messages: [
       {
-        from: CONTRACTOR,
+        from: DESHAWN,
         time: "5:11 AM",
         text: "Estimates go out and die. Can you chase them?",
       },
       {
-        from: TERRAMORE,
+        from: AVA,
         time: "5:14 AM",
         text: "Every estimate gets the same packet and a follow-up text. Files are in Drive.",
         attachment: {
@@ -586,6 +631,7 @@ export function HeroAnalytics() {
   const [active, setActive] = useState(CHANNELS[0].id)
   const channel = CHANNELS.find((item) => item.id === active) ?? CHANNELS[0]
   const activeIndex = CHANNELS.findIndex((item) => item.id === channel.id)
+  const extraMembers = Math.max(channel.members - 4, 0)
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   const paneRef = useRef<HTMLDivElement>(null)
@@ -837,9 +883,21 @@ export function HeroAnalytics() {
                   </div>
                 ) : null}
               </div>
-              <p className="shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-[12px] font-medium text-slate-700">
-                Illustrative example
-              </p>
+              <div className="flex shrink-0 items-center gap-2" aria-hidden>
+                <span className="text-[11px] font-normal text-slate-500 md:hidden">{channel.members}</span>
+                <div className="flex -space-x-1.5">
+                  {CHANNELS.slice(0, 4).map((item) => (
+                    <SlackAvatar
+                      key={item.id}
+                      person={item.client}
+                      className="h-6 w-6 rounded-full border-2 border-white"
+                    />
+                  ))}
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-white bg-slate-100 text-[9px] font-semibold text-slate-600">
+                    +{extraMembers}
+                  </span>
+                </div>
+              </div>
             </div>
 
             <div
@@ -925,6 +983,10 @@ export function HeroAnalytics() {
                   }`}
                 />
               ))}
+            </div>
+
+            <div className="flex min-h-11 shrink-0 items-center justify-between gap-3 border-t border-black/[0.04] bg-white px-4 py-1.5 md:px-6">
+              <p className="text-[12px] leading-snug text-slate-500">{EXAMPLE_DISCLOSURE}</p>
             </div>
           </div>
         </div>

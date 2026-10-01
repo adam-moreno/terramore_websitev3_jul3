@@ -111,6 +111,8 @@ public/*
 !public/report/
 !public/industries/
 !public/industries/**
+!public/examples/
+!public/examples/**
 # Storybook build outputs
 .out
 .storybook-out
