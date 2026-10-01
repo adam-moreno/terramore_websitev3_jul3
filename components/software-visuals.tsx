@@ -55,16 +55,22 @@ function BrandLogo({
   name,
   size = 28,
   className,
+  colored = false,
 }: {
   slug: string
   name: string
   size?: number
   className?: string
+  colored?: boolean
 }) {
   // When a className is given it owns the size, so the logo can change size across breakpoints.
   return (
     <img
-      src={`https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/${slug}.svg`}
+      src={
+        colored
+          ? `https://cdn.simpleicons.org/${slug}`
+          : `https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/${slug}.svg`
+      }
       alt={name}
       className={`object-contain ${className ?? ""}`}
       style={className ? undefined : { width: size, height: size }}
@@ -128,7 +134,7 @@ export function IntegrationTilesVisual({
                   animationDelay: spot.delay,
                 }}
               >
-                <BrandLogo slug={logo.slug} name={logo.name} className="h-4 w-4 md:h-[18px] md:w-[18px]" />
+                <BrandLogo slug={logo.slug} name={logo.name} colored className="h-4 w-4 md:h-[18px] md:w-[18px]" />
               </div>
             )
           })}

@@ -66,6 +66,9 @@ const HERO_LOGO_MIN_OPACITY = new Map([
  * 200 image/svg+xml from cdn.simpleicons.org on 2026-09-29.
  */
 const BRAND_MARK_SRC = /^https:\/\/cdn\.simpleicons\.org\/\$\{(logo|mark)\.slug\}$/
+/** The "Work inside your tools" logo field (home toolkit, step 1): the same brand-colored marks as the hero (owner, 2026-09-30). */
+const TOOLS_LOGO_FILE = "components/software-visuals.tsx"
+const TOOLS_LOGO_FIELD = /export function IntegrationTilesVisual\b[\s\S]*?(?=\n(?:export )?(?:function|const) |$)/
 /** The Slack-style example on the home page (release constraint, VD-014 as amended by the visual restoration). */
 const SLACK_EXAMPLE = "components/hero-analytics.tsx"
 /**
@@ -411,6 +414,75 @@ const CHECKS = [
     good: [
       ["components/hero-logo-mobius.tsx", `import { INTEGRATION_LOGOS } from "@/lib/integrations"\n<img src={\`https://cdn.simpleicons.org/\${logo.slug}\`} alt="" />`],
       ["components/hero-floating-logos.tsx", `import { INTEGRATION_LOGOS } from "@/lib/integrations"\n<img\n  src={\`https://cdn.simpleicons.org/\${mark.slug}\`}\n  alt=""\n/>`],
+    ],
+  },
+  {
+    id: "tools-logos-brand-colored",
+    rule: "Owner 2026-09-30 (VD-018): the \"Work inside your tools\" logo field shows every INTEGRATION_LOGOS entry as its brand-colored Simple Icons mark (cdn.simpleicons.org, via BrandLogo colored), not the black jsDelivr files the rest of the toolkit uses; no grayscale, tint, blend or filter on the tiles",
+    scope: (file) => file === TOOLS_LOGO_FILE || isCss(file),
+    run: (file, src) => {
+      if (isCss(file)) {
+        const css = src.replace(/\/\*[\s\S]*?\*\//g, blank)
+        const out = []
+        for (const m of css.matchAll(/([^{}@]+)\{([^{}]*)\}/g)) {
+          if (!/\.software-icon-tile\b/.test(m[1])) continue
+          const line = lineOf(css, m.index + m[1].length - m[1].trimStart().length)
+          for (const f of m[2].matchAll(/(?:^|[;\s])(?:-webkit-)?filter\s*:([^;]*)/g)) if (DESATURATE.test(f[1])) out.push({ line, detail: `${m[1].trim()}: filter ${f[1].trim()}` })
+          if (/blend-mode\s*:/.test(m[2])) out.push({ line, detail: `${m[1].trim()}: blend mode` })
+        }
+        return out
+      }
+      const code = stripComments(src)
+      const field = code.match(TOOLS_LOGO_FIELD)
+      if (!field) return [{ line: 1, detail: "IntegrationTilesVisual (the Work inside your tools logo field) not found" }]
+      const at = (offset) => lineOf(code, field.index + offset)
+      const body = field[0]
+      const out = []
+      if (!/\bINTEGRATION_LOGOS\.map\(/.test(body)) out.push({ line: at(0), detail: "the logo field no longer maps INTEGRATION_LOGOS" })
+      const imgs = [...body.matchAll(/<img\b[^>]*?\bsrc=\{?[`"']([^`"']*)/g)]
+      for (const m of imgs) {
+        if (!BRAND_MARK_SRC.test(m[1])) out.push({ line: at(m.index), detail: `"${m[1]}" is not the brand-colored Simple Icons mark for the slug` })
+      }
+      const logos = [...body.matchAll(/<BrandLogo\b[^>]*>/g)]
+      if (imgs.length + logos.length === 0) out.push({ line: at(0), detail: "the logo field renders no brand mark" })
+      for (const m of logos) {
+        if (!/\scolored(?=[\s/>])(?!\s*=\s*\{\s*false\s*\})/.test(m[0])) out.push({ line: at(m.index), detail: "BrandLogo without colored (black jsDelivr mark) in the logo field" })
+      }
+      if (logos.length && !/function\s+BrandLogo\b[\s\S]*?\bcolored\s*\?\s*`https:\/\/cdn\.simpleicons\.org\/\$\{slug\}`/.test(code)) {
+        out.push({ line: 1, detail: "BrandLogo colored no longer renders the cdn.simpleicons.org brand-colored mark" })
+      }
+      out.push(
+        ...matches(body, /(^|[\s"'`:])(grayscale|invert|sepia|saturate-[\w.[\]-]+|brightness-[\w.[\]-]+|hue-rotate-[\w.[\]-]+|mix-blend-[\w-]+|fill-current)(?=[\s"'`]|$)|\b(?:filter|mixBlendMode)\s*:/gm, (m) => `"${m[2] ?? m[0]}" on the tools logos`).map(
+          (f) => ({ ...f, line: f.line + at(0) - 1 })
+        )
+      )
+      return out
+    },
+    bad: [
+      [
+        "components/software-visuals.tsx",
+        `export function IntegrationTilesVisual() {\n  return INTEGRATION_LOGOS.map((logo) => (\n    <BrandLogo slug={logo.slug} name={logo.name} className="h-4 w-4" />\n  ))\n}\n\nconst MONEY_BEATS = []`,
+      ],
+      [
+        "components/software-visuals.tsx",
+        `function BrandLogo({ slug, colored }) {\n  return <img src={colored ? \`https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/\${slug}.svg\` : ""} alt="" />\n}\n\nexport function IntegrationTilesVisual() {\n  return INTEGRATION_LOGOS.map((logo) => <BrandLogo slug={logo.slug} colored />)\n}`,
+      ],
+      [
+        "components/software-visuals.tsx",
+        `export function IntegrationTilesVisual() {\n  return INTEGRATION_LOGOS.map((logo) => (\n    <img src={\`https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/\${logo.slug}.svg\`} alt={logo.name} className="grayscale" />\n  ))\n}`,
+      ],
+      ["app/globals.css", `.software-icon-tile { background: #fff; }\n.software-icon-tile img { filter: grayscale(1); }`],
+    ],
+    good: [
+      [
+        "components/software-visuals.tsx",
+        `function BrandLogo({ slug, colored = false }) {\n  return (\n    <img\n      src={\n        colored\n          ? \`https://cdn.simpleicons.org/\${slug}\`\n          : \`https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/\${slug}.svg\`\n      }\n      alt=""\n    />\n  )\n}\n\nexport function IntegrationTilesVisual() {\n  return INTEGRATION_LOGOS.map((logo) => (\n    <BrandLogo slug={logo.slug} name={logo.name} colored className="h-4 w-4 md:h-[18px] md:w-[18px]" />\n  ))\n}\n\nconst MONEY_BEATS = [<BrandLogo slug="meta" />]`,
+      ],
+      [
+        "components/software-visuals.tsx",
+        `export function IntegrationTilesVisual() {\n  return INTEGRATION_LOGOS.map((logo) => <img src={\`https://cdn.simpleicons.org/\${logo.slug}\`} alt={logo.name} />)\n}`,
+      ],
+      ["app/globals.css", `.software-icon-tile { border-radius: 18px; background: #fff; box-shadow: 0 10px 24px -16px rgba(15, 30, 46, 0.28); }`],
     ],
   },
   {
