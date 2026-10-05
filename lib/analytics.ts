@@ -3,7 +3,7 @@
  *
  * Conversion events (fire only after server-confirmed success):
  * - Report: `generate_lead` + `report_submission_success` (+ Ads `conversion` send_to report label only)
- * - Booking: `meeting_booked` (GA4 only — no Google Ads conversion path)
+ * - Booking: `meeting_booked` (GA4) + Ads `conversion` send_to the booking label ("Meeting booked") only
  *
  * No PII in event params. Helpers never throw if gtag is unavailable.
  *
@@ -98,6 +98,18 @@ export function googleAdsSendTo(): string {
   return `${googleAdsId()}/${googleAdsConversionLabel()}`
 }
 
+/** Ads conversion AW-11353847408 / tqbHCPWov5IdEPDs96Uq ("Meeting booked", created 2026-10-05). Same Ads account as the report. */
+export const GOOGLE_ADS_BOOKING_CONVERSION_LABEL_DEFAULT = "tqbHCPWov5IdEPDs96Uq"
+
+/** NEXT_PUBLIC_GOOGLE_ADS_BOOKING_CONVERSION_LABEL overrides the default; the Ads id is the report's (googleAdsId). */
+export function googleAdsBookingConversionLabel(): string {
+  return (process.env.NEXT_PUBLIC_GOOGLE_ADS_BOOKING_CONVERSION_LABEL || GOOGLE_ADS_BOOKING_CONVERSION_LABEL_DEFAULT).trim()
+}
+
+export function googleAdsBookingSendTo(): string {
+  return `${googleAdsId()}/${googleAdsBookingConversionLabel()}`
+}
+
 /**
  * Fire a GA4 (or custom) event via existing gtag/dataLayer.
  * Params must not include email/phone/name. Accidental PII keys are stripped.
@@ -124,8 +136,8 @@ export function trackEvent(
 
 /**
  * Google Ads conversion — ONLY for Digital Footprint Report Submitted.
- * Call only after server-confirmed report success (2xx). Do not use for bookings.
- * Does not include PII. Do not add a second Ads conversion for meeting_booked.
+ * Call only after server-confirmed report success (2xx). Do not use for bookings (they have their own label and
+ * helper, trackGoogleAdsBookingConversion, called only from trackMeetingBooked). Does not include PII.
  */
 export function trackGoogleAdsReportConversion(options?: { once?: string; transactionId?: string }) {
   try {
@@ -173,7 +185,7 @@ export function trackTikTokLead() {
  * Exact GA4 names (kept; do not invent a third report-success name):
  *   - generate_lead
  *   - report_submission_success
- * Plus Ads conversion send_to report label only. No booking Ads conversion.
+ * Plus Ads conversion send_to the report label only (bookings use their own label, from trackMeetingBooked).
  * `reportRef` is the server's opaque signup reference: it becomes `transaction_id` and the dedupe key, so each saved
  * signup counts once and a second real signup in the same page session still counts.
  */
@@ -194,10 +206,30 @@ export function trackReportSubmissionError(reason: string) {
 }
 
 /**
- * Booking success — GA4 only. Exact name: meeting_booked.
+ * Google Ads "Meeting booked" conversion. Only trackMeetingBooked calls this, so it fires exactly where meeting_booked
+ * does: after a server-confirmed booking. The server's one-way bookingRef is the transaction_id (Google Ads dedupes on
+ * it) and the in-page once-key. Refuses to send if the booking label equals the report label, so a misconfiguration
+ * can never inflate the report conversion. No PII.
+ */
+function trackGoogleAdsBookingConversion(bookingRef: string) {
+  try {
+    if (googleAdsBookingConversionLabel() === googleAdsConversionLabel()) return
+    const key = `ads_booking_conversion:${bookingRef}`
+    if (firedOnce.has(key)) return
+    firedOnce.add(key)
+    gtag("event", "conversion", { send_to: googleAdsBookingSendTo(), transaction_id: bookingRef })
+    recordDevDiagnostic("conversion", { send_to: googleAdsBookingSendTo() })
+  } catch {
+    // ignore
+  }
+}
+
+/**
+ * Booking success. Exact GA4 name: meeting_booked, plus the Google Ads "Meeting booked" conversion.
  * Call only after POST /api/booking returns ok + non-empty string booking id.
- * Never fire on 409 / validation / network failure. No Ads conversion. No PII.
- * `booking_id` must be the server's one-way bookingRef (32 hex); anything else, such as the raw row UUID, is dropped.
+ * Never fire on 409 / validation / network failure. No PII.
+ * `booking_id` must be the server's one-way bookingRef (32 hex); anything else, such as the raw row UUID, is dropped
+ * (and then no Ads conversion fires either).
  */
 export function trackMeetingBooked(params: {
   booking_id: string
@@ -219,6 +251,7 @@ export function trackMeetingBooked(params: {
     },
     { once: bookingId },
   )
+  trackGoogleAdsBookingConversion(bookingId)
 }
 
 /* ---------------------------------------------------------------- V2A funnel events */

@@ -1,5 +1,14 @@
 # Development Log - Terramore Website
 
+## 2026-10-05 — Google Ads "Meeting booked" conversion (branch `feat/ads-meeting-booked-conversion`, local, not deployed)
+
+**Decision (owner, 2026-10-05).** Bookings now send their own Google Ads conversion. This supersedes the earlier rule "no Ads conversion for bookings" (2026-09-16 and the controlled-beta entry below): the report and the booking are separate conversion actions in the same account, so neither inflates the other. In Ads, "Meeting booked" starts as a secondary conversion; bidding stays on "Digital Footprint Report Submitted" until there is booking volume.
+
+- **Where.** `lib/analytics.ts`: `trackGoogleAdsBookingConversion` (private), called only from `trackMeetingBooked`, after its bookingRef check. So it fires exactly where `meeting_booked` does: in `BookingFlow.submit`, after `POST /api/booking` returns ok with an id, startIso and manageUrl, never on 409, error, network failure, page load, slot choice, reschedule (`/book/manage` uses its own API and never calls it) or a revisit.
+- **What.** `gtag("event", "conversion", { send_to: "AW-11353847408/tqbHCPWov5IdEPDs96Uq", transaction_id: <bookingRef> })`. The Ads id is the report's (`googleAdsId()`); the label is `GOOGLE_ADS_BOOKING_CONVERSION_LABEL_DEFAULT`, overridable with `NEXT_PUBLIC_GOOGLE_ADS_BOOKING_CONVERSION_LABEL` (optional; no Vercel change needed). Deduped per page session on the bookingRef, and by Google Ads on `transaction_id`. If the booking label ever equals the report label, nothing is sent.
+- **Unchanged.** GA4 `meeting_booked`; the report conversion (`XnBzCIeStfgcEPDs96Uq`, its helper and firing point); booking logic and API; the dashboard.
+- **Checks.** `verify-conversion-tracking`: report keeps its label; a confirmed booking sends one conversion with the booking label and the bookingRef; repeats, raw ids and blank ids send none; a second booking counts once more; the label-collision guard holds. `verify-funnel`: rule `meeting-booked-success-only` extended (one conversion, booking label, transaction_id, no repeat, only called from `trackMeetingBooked`), 4 new mutations; 79 checks, 26 mutations caught. TypeScript unchanged (16, same set as production). Browser (local, Google hosts blocked, booking API stubbed): 29 of 29 at 1280, 390 and 320 px.
+
 ## 2026-10-05 — Controlled beta: report → Growth Workspace hand-off, booking fallbacks (branch `launch/controlled-beta`, local, not deployed)
 
 - **Hand-off.** `components/report-popup.tsx`: "Open My Growth Workspace" on every report success, direct entries included (was questions-first only); the configured `NEXT_PUBLIC_GROWTH_WORKSPACE_URL` and its `source` are used unchanged; direct entries still stay on their page after Done. Focus moves to the button on success; visible focus rings; the button wraps at 320 px.

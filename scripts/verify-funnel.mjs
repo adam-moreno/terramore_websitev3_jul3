@@ -399,7 +399,7 @@ const RULES = [
   },
   {
     id: "meeting-booked-success-only",
-    rule: "meeting_booked fires only after the 409 and !ok/missing-id guards return, before setDone, outside catch; nowhere else; booking_id is the hashed bookingRef",
+    rule: "meeting_booked and the Ads Meeting booked conversion fire only after the 409 and !ok/missing-id guards return, before setDone, outside catch; nowhere else; booking_id / transaction_id is the hashed bookingRef; once per booking",
     run: ({ files, analytics }) => {
       const out = []
       for (const [file, raw] of files) {
@@ -432,8 +432,23 @@ const RULES = [
       const booked = (id) => analytics.trackMeetingBooked({ booking_id: id, business_type: "b", stage: "s", source: "book", page_path: "/book" })
       booked(RAW_BOOKING_ID)
       if (events(win, "meeting_booked").length) out.push("a raw booking UUID reached meeting_booked")
-      booked(analyticsRefModule.analyticsRef("terramore-booking", RAW_BOOKING_ID))
+      if (events(win, "conversion").length) out.push("a raw booking UUID fired an Ads conversion")
+      const ref = analyticsRefModule.analyticsRef("terramore-booking", RAW_BOOKING_ID)
+      booked(ref)
       if (events(win, "meeting_booked").length !== 1) out.push("a hashed bookingRef did not send meeting_booked once")
+      const conversions = events(win, "conversion")
+      if (conversions.length !== 1) out.push(`a confirmed booking sent ${conversions.length} Ads conversions (expected 1)`)
+      else {
+        const payload = conversions[0][2] ?? {}
+        if (payload.send_to !== "AW-11353847408/tqbHCPWov5IdEPDs96Uq") out.push(`booking conversion send_to is ${payload.send_to} (expected the Meeting booked label)`)
+        if (payload.transaction_id !== ref) out.push("booking conversion transaction_id is not the bookingRef")
+      }
+      booked(ref)
+      if (events(win, "conversion").length !== 1) out.push("a repeated booking (revisit / re-render) fired a second Ads conversion")
+      if (analytics.googleAdsSendTo() !== "AW-11353847408/XnBzCIeStfgcEPDs96Uq") out.push("the report conversion label changed")
+      const analyticsSrc = stripComments(files.get(ANALYTICS) ?? "")
+      const helperCalls = (analyticsSrc.match(/\btrackGoogleAdsBookingConversion\(/g) ?? []).length
+      if (helperCalls !== 2) out.push(`trackGoogleAdsBookingConversion is defined and called ${helperCalls - 1} times (expected only from trackMeetingBooked)`)
       if (JSON.stringify(win).includes(RAW_BOOKING_ID)) out.push("raw booking UUID reached gtag")
       return out
     },
@@ -442,6 +457,10 @@ const RULES = [
       { file: "components/booking-popup.tsx", from: 'import { trackCtaClick } from "@/lib/analytics"', to: 'import { trackCtaClick } from "@/lib/analytics"\nconst x = () => trackMeetingBooked({ booking_id: "x" })' },
       { file: BOOKING_FLOW, from: "booking_id: bookingRef,", to: "booking_id: bookingId," },
       { module: ANALYTICS, from: "if (!ANALYTICS_REF_RE.test(bookingId)) return", to: "if (!bookingId) return" },
+      { module: ANALYTICS, from: "  trackGoogleAdsBookingConversion(bookingId)\n}", to: "}" },
+      { module: ANALYTICS, from: 'GOOGLE_ADS_BOOKING_CONVERSION_LABEL_DEFAULT = "tqbHCPWov5IdEPDs96Uq"', to: 'GOOGLE_ADS_BOOKING_CONVERSION_LABEL_DEFAULT = "XnBzCIeStfgcEPDs96Uq"' },
+      { module: ANALYTICS, from: "const key = `ads_booking_conversion:${bookingRef}`", to: "const key = `ads_booking_conversion:${bookingRef}:${Math.random()}`" },
+      { module: ANALYTICS, from: '{ send_to: googleAdsBookingSendTo(), transaction_id: bookingRef }', to: '{ send_to: googleAdsSendTo(), transaction_id: bookingRef }' },
     ],
   },
   {

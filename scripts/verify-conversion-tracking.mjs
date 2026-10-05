@@ -169,6 +169,7 @@ async function main() {
     })
   }
   assert(count(win.calls, "meeting_booked") === 0, "raw booking UUID / non-ref ids fire nothing")
+  assert(count(win.calls, "conversion") === 0, "raw booking UUID / non-ref ids fire no Ads conversion")
   assert(!JSON.stringify(win.dataLayer).includes(RAW_BOOKING_ID), "raw booking UUID never reaches dataLayer")
   results.push("Raw booking id rejected: OK")
 
@@ -180,7 +181,11 @@ async function main() {
     page_path: "/book",
   })
   assert(count(win.calls, "meeting_booked") === 1, "meeting_booked once")
-  assert(count(win.calls, "conversion") === 0, "booking must NOT fire Ads conversion")
+  assert(count(win.calls, "conversion") === 1, `booking fires the Ads conversion once, got ${count(win.calls, "conversion")}`)
+  const bookingConversion = eventPayloads(win.calls, "conversion")[0] || {}
+  assert(bookingConversion.send_to === "AW-11353847408/tqbHCPWov5IdEPDs96Uq", `booking send_to is the Meeting booked label only, got ${String(bookingConversion.send_to)}`)
+  assert(bookingConversion.transaction_id === BOOKING_REF, "booking conversion transaction_id is the bookingRef")
+  assert(!JSON.stringify(bookingConversion).includes("XnBzCIeStfgcEPDs96Uq"), "booking never uses the report label")
   assert(count(win.calls, "generate_lead") === 0, "booking must not fire generate_lead")
   const mb = eventPayloads(win.calls, "meeting_booked")[0] || {}
   assert(mb.booking_id === BOOKING_REF, "booking_id is the opaque bookingRef")
@@ -199,9 +204,24 @@ async function main() {
     page_path: "/book",
   })
   assert(count(win.calls, "meeting_booked") === 1, "meeting_booked still once after duplicate")
+  assert(count(win.calls, "conversion") === 1, "booking Ads conversion still once after a repeat (revisit / re-render)")
   results.push("Booking dedupe: OK")
 
+  // A second, different confirmed booking in the same page session counts once more.
+  const SECOND_REF = BOOKING_REF.split("").reverse().join("")
+  analytics.trackMeetingBooked({ booking_id: SECOND_REF, business_type: "x", stage: "y", source: "book", page_path: "/book" })
+  assert(count(win.calls, "conversion") === 2 && eventPayloads(win.calls, "conversion")[1]?.transaction_id === SECOND_REF, "a different booking counts once more")
+
+  // Misconfiguration guard: a booking label equal to the report label sends nothing.
+  process.env.NEXT_PUBLIC_GOOGLE_ADS_BOOKING_CONVERSION_LABEL = "XnBzCIeStfgcEPDs96Uq"
+  const THIRD_REF = "c".repeat(32)
+  analytics.trackMeetingBooked({ booking_id: THIRD_REF, business_type: "x", stage: "y", source: "book", page_path: "/book" })
+  delete process.env.NEXT_PUBLIC_GOOGLE_ADS_BOOKING_CONVERSION_LABEL
+  assert(count(win.calls, "conversion") === 2, "a booking label equal to the report label sends no conversion")
+  results.push("Booking Ads conversion: OK")
+
   const beforeEmpty = count(win.calls, "meeting_booked")
+  const conversionsBeforeEmpty = count(win.calls, "conversion")
   analytics.trackMeetingBooked({
     booking_id: "   ",
     business_type: "x",
@@ -210,6 +230,7 @@ async function main() {
     page_path: "/book",
   })
   assert(count(win.calls, "meeting_booked") === beforeEmpty, "blank booking_id fires nothing")
+  assert(count(win.calls, "conversion") === conversionsBeforeEmpty, "blank booking_id fires no Ads conversion")
   results.push("Blank booking_id: OK")
 
   const okBody = {
@@ -233,6 +254,8 @@ async function main() {
   assert(analytics.GA4_MEASUREMENT_ID_LEGACY === "G-BQN6VCY579", "legacy GA4 id")
   assert(analytics.GOOGLE_ADS_ID_DEFAULT === "AW-11353847408", "Ads id")
   assert(analytics.googleAdsSendTo() === "AW-11353847408/XnBzCIeStfgcEPDs96Uq", "report send_to")
+  assert(analytics.googleAdsBookingSendTo() === "AW-11353847408/tqbHCPWov5IdEPDs96Uq", "booking send_to")
+  assert(analytics.GOOGLE_ADS_BOOKING_CONVERSION_LABEL_DEFAULT !== analytics.GOOGLE_ADS_CONVERSION_LABEL_DEFAULT, "booking and report labels differ")
   results.push("Destination IDs: OK")
 
   const diag = globalThis.window.__tmAnalytics

@@ -530,7 +530,7 @@ export function BookingFlow({
       }
       // Safe conversion point: server confirmed booking (ok + string id + startIso + manageUrl).
       // 409 / !ok / missing id never reach here. booking_id carries only the server's one-way bookingRef, never the
-      // row id; trackMeetingBooked dedupes on it; GA4 only (no Ads conversion).
+      // row id; trackMeetingBooked dedupes on it and also sends the Ads "Meeting booked" conversion (its own label).
       const bookingRef = typeof data.bookingRef === "string" ? data.bookingRef : ""
       trackMeetingBooked({
         booking_id: bookingRef,
