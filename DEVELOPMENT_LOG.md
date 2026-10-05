@@ -1,5 +1,13 @@
 # Development Log - Terramore Website
 
+## 2026-10-05 — Controlled beta: report → Growth Workspace hand-off, booking fallbacks (branch `launch/controlled-beta`, local, not deployed)
+
+- **Hand-off.** `components/report-popup.tsx`: "Open My Growth Workspace" on every report success, direct entries included (was questions-first only); the configured `NEXT_PUBLIC_GROWTH_WORKSPACE_URL` and its `source` are used unchanged; direct entries still stay on their page after Done. Focus moves to the button on success; visible focus rings; the button wraps at 320 px.
+- **Report email.** `lib/report/pipeline.ts`: when the workspace URL is configured, the one button is "Open my Growth Workspace" (`growthWorkspaceUrlFor("report_email")` in `lib/growth-workspace.ts`), with "Use this email address when you create your account."; "Talk through my report" is a text link (`emailTextLink`). Unconfigured, the email is unchanged.
+- **Measurement.** `workspace_cta_click` (V2A taxonomy: entry, page_path). verify-funnel: required event + rule `workspace-handoff` (3 mutations). No Ads conversion for bookings: that needs its own conversion action and label (manual), and `lib/analytics.ts` still forbids reusing the report label.
+- **Booking (MK-04).** `components/booking-flow.tsx`, `manage-booking.tsx`: owner copy instead of "Calendar isn't connected in this environment yet." / "Booking is warming up."; a failed confirm says it may not have gone through; every fallback adds "Back to my Growth Workspace" (from the workspace) or "Get a free Digital Footprint report instead"; manage-booking offers "Book a time". No email shortcut; booking steps unchanged.
+- **Checks.** All `scripts/verify-*.mjs` pass (funnel 71 checks, 12 rules, 22 mutations; visual 65). `tsc` 16, the same set as production `fde9146`. Browser (local `next dev`, `/api/report` and booking stubbed in the browser, no lead/email/booking): 99 of 99 at 1280, 390, 320 px. Decisions: UX-029, UX-030 in the dashboard repo's `docs/ux/UX_DECISIONS.md`.
+
 ## 2026-09-26 — Report attribution merge, report stage events, Slack report format, footer nav (shipped)
 
 - **Attribution merge fix.** `components/report-form.tsx` no longer has its own copy of the attribution logic; it calls `captureAttributionFromUrl()` + `mergedAttribution()` from `lib/attribution.ts`. Before, a later URL carrying only some keys (e.g. `utm_source` without `gclid`) replaced the whole `tm_report_attribution` sessionStorage object and dropped the earlier click id. Now `mergeAttributionRecords()` keeps stored keys and lets non-empty URL values replace only the same key. Same storage key, same 10 keys, still sessionStorage only.
