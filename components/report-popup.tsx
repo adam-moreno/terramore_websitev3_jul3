@@ -60,8 +60,8 @@ export function ReportPopup({
   description?: string
 }) {
   const router = useRouter()
-  /** The report flow only; the /book landing (direct) keeps its booking focus. */
-  const workspaceUrl = direct ? null : GROWTH_WORKSPACE_URL
+  /** Every report entry, direct ones included, hands off to the Growth Workspace when it's configured. */
+  const workspaceUrl = GROWTH_WORKSPACE_URL
   const [step, setStep] = useState(0)
   const [answers, setAnswers] = useState<ReportAnswers>({})
   const [picked, setPicked] = useState<string | null>(null)
@@ -178,6 +178,7 @@ export function ReportPopup({
                   </p>
                   <a
                     href={workspaceUrl}
+                    onClick={() => trackFunnelEvent("workspace_cta_click", { entry })}
                     className="mt-4 inline-flex h-11 w-full items-center justify-center rounded-full bg-brand text-[15px] font-medium text-white hover:bg-brand-hover"
                   >
                     Open My Growth Workspace

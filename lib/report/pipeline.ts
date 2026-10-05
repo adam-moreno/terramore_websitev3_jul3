@@ -1,6 +1,7 @@
 import { getServerSupabase, isMissingColumnError } from "@/lib/supabase-server"
 import { SITE_URL } from "@/lib/booking-api"
-import { emailButton, emailP, emailShell, emailSignoff } from "@/lib/email-template"
+import { emailButton, emailP, emailShell, emailSignoff, emailTextLink } from "@/lib/email-template"
+import { growthWorkspaceUrlFor } from "@/lib/growth-workspace"
 import { ADMIN_EMAIL, REPLY_TO, emailProvider, postSlack, sendEmail } from "@/lib/notify"
 import { collectDiagnostic } from "@/lib/report/diagnostic"
 import { renderReportPdf } from "@/lib/report/pdf"
@@ -116,6 +117,9 @@ export async function runReportPipeline(request: ReportRequest): Promise<Pipelin
     const first = request.name.split(/\s+/)[0] || "there"
     const subjectName = report.businessName
     const scopeLine = "It only says what we could see on the public web. If a chapter is thin, reply with a link and we read it."
+    // The Growth Workspace is the next step after the report; booking stays available as a plain link.
+    const workspaceUrl = growthWorkspaceUrlFor("report_email")
+    const workspaceLine = "Your Growth Workspace picks up from this report. Use this email address when you create your account."
     // The PDF is the deliverable; the report text stays on the Supabase row, not in the email body.
     const emailResult = await sendEmail({
       to: request.email,
@@ -130,6 +134,7 @@ export async function runReportPipeline(request: ReportRequest): Promise<Pipelin
         "",
         scopeLine,
         "",
+        ...(workspaceUrl ? [workspaceLine, `Open my Growth Workspace: ${workspaceUrl}`, ""] : []),
         `Talk through my report: ${BOOK_URL}`,
         "",
         "Adam Moreno",
@@ -142,7 +147,9 @@ export async function runReportPipeline(request: ReportRequest): Promise<Pipelin
           emailP(`Hi ${first},`),
           emailP(`Your Digital Footprint report for ${subjectName} is attached as a PDF.`),
           emailP(scopeLine),
-          emailButton("Talk through my report", BOOK_URL),
+          ...(workspaceUrl
+            ? [emailP(workspaceLine), emailButton("Open my Growth Workspace", workspaceUrl), emailTextLink("Talk through my report", BOOK_URL)]
+            : [emailButton("Talk through my report", BOOK_URL)]),
           emailSignoff("Adam Moreno", "Terramore"),
         ].join(""),
       }),

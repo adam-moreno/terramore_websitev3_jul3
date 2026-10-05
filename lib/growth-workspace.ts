@@ -14,3 +14,17 @@ function readGrowthWorkspaceUrl(): string | null {
 }
 
 export const GROWTH_WORKSPACE_URL = readGrowthWorkspaceUrl()
+
+/** Where the owner arrived from, as the dashboard reads it (`ACTIVATION_SOURCES` in the Growth Workspace). */
+export type GrowthWorkspaceSource = "report_success" | "report_email"
+
+/**
+ * The configured workspace URL with `source` set for this entry point. Every other parameter in the configured URL
+ * is kept. Null when no workspace URL is configured.
+ */
+export function growthWorkspaceUrlFor(source: GrowthWorkspaceSource): string | null {
+  if (!GROWTH_WORKSPACE_URL) return null
+  const url = new URL(GROWTH_WORKSPACE_URL)
+  url.searchParams.set("source", source)
+  return url.toString()
+}

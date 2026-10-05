@@ -88,6 +88,11 @@ ${preview}
 </html>`
 }
 
+/** A plain text link in the body voice, for a secondary action beside one emailButton. */
+export function emailTextLink(label: string, href: string): string {
+  return `<p style="margin:0 0 14px 0;font-size:15px;line-height:1.6;color:${INK};"><a href="${esc(href)}" target="_blank" style="color:${BRAND};text-decoration:underline;">${esc(label)}</a></p>`
+}
+
 /** A paragraph in the card's body voice. */
 export function emailP(text: string): string {
   return `<p style="margin:0 0 14px 0;font-size:15px;line-height:1.6;color:${INK};">${esc(text)}</p>`

@@ -116,6 +116,8 @@ export const FUNNEL_EVENTS = {
   report_view: { entry: "report_entry", cta_id: "cta_id", page_path: "page_path" },
   report_progress: { step: "report_step", entry: "report_entry", page_path: "page_path" },
   report_validation_error: { fields: "report_fields", entry: "report_entry", page_path: "page_path" },
+  /** "Open My Growth Workspace" on the report success screen: the hand-off from terramore.io to TerraIQ. */
+  workspace_cta_click: { entry: "report_entry", page_path: "page_path" },
   booking_start: { source: "source", entry: "booking_entry", flow: "flow", page_path: "page_path" },
   booking_progress: {
     step: "booking_step",

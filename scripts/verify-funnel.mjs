@@ -178,6 +178,7 @@ const REQUIRED_EVENTS = [
   "booking_start",
   "booking_progress",
   "booking_error",
+  "workspace_cta_click",
 ]
 
 const RULES = [
@@ -536,6 +537,28 @@ const RULES = [
     mutations: [
       { module: ANALYTICS, from: "{ once: `${funnelPageView}:${ctaId}` },", to: "undefined," },
       { file: BOOKING_FLOW, from: "if (!measured || startedRef.current) return", to: "if (!measured) return" },
+    ],
+  },
+  {
+    id: "workspace-handoff",
+    rule: "Every report success path offers the Growth Workspace and measures the click; the report email links to it with source=report_email",
+    run: ({ files }) => {
+      const out = []
+      const popup = stripComments(files.get(REPORT_POPUP) ?? "")
+      if (!/const workspaceUrl = GROWTH_WORKSPACE_URL\b/.test(popup) || /workspaceUrl = direct/.test(popup)) out.push("the workspace link is gated by entry (direct entries lose it)")
+      const link = popup.indexOf("href={workspaceUrl}")
+      if (link < 0 || !popup.slice(link, link + 200).includes('trackFunnelEvent("workspace_cta_click", { entry })')) out.push("the workspace link doesn't fire workspace_cta_click")
+      const pipeline = stripComments(files.get("lib/report/pipeline.ts") ?? "")
+      if (!pipeline.includes('growthWorkspaceUrlFor("report_email")')) out.push("the report email doesn't link to the workspace with source=report_email")
+      if (!/emailButton\("Open my Growth Workspace", workspaceUrl\)/.test(pipeline)) out.push("the report email's workspace button is missing")
+      const helper = stripComments(files.get("lib/growth-workspace.ts") ?? "")
+      if (!helper.includes('url.searchParams.set("source", source)')) out.push("growthWorkspaceUrlFor no longer sets source")
+      return out
+    },
+    mutations: [
+      { file: REPORT_POPUP, from: "const workspaceUrl = GROWTH_WORKSPACE_URL", to: "const workspaceUrl = direct ? null : GROWTH_WORKSPACE_URL" },
+      { file: REPORT_POPUP, from: 'onClick={() => trackFunnelEvent("workspace_cta_click", { entry })}', to: "" },
+      { file: "lib/report/pipeline.ts", from: 'growthWorkspaceUrlFor("report_email")', to: "null" },
     ],
   },
   {
