@@ -259,13 +259,13 @@ export function BookingFallback({
         <button
           type="button"
           onClick={onRetry}
-          className="mt-4 inline-flex h-11 items-center rounded-full bg-brand px-5 text-[15px] font-medium text-white hover:bg-brand-hover"
+          className="mt-4 inline-flex h-11 items-center rounded-full bg-brand px-5 text-[15px] font-medium text-white hover:bg-brand-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
         >
           Try again
         </button>
       ) : null}
       <p className="mt-3">
-        <a href={next.href} className="inline-flex min-h-11 items-center text-[15px] font-medium text-ink underline underline-offset-4 hover:text-brand">
+        <a href={next.href} className="inline-flex min-h-11 items-center rounded-sm text-[15px] font-medium text-ink underline underline-offset-4 hover:text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2">
           {next.label}
         </a>
       </p>

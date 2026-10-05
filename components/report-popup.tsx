@@ -72,6 +72,8 @@ export function ReportPopup({
   const successRef = useRef(success)
   successRef.current = success
   const entry: ReportEntry = direct ? "popup_direct" : "popup_questions"
+  /** The success state's main action. Focus moves here when the report is requested, so keyboard and screen-reader users land on the next step. */
+  const successActionRef = useRef<HTMLAnchorElement & HTMLButtonElement>(null)
   const detailsShownRef = useRef(false)
   const wasOpenRef = useRef(false)
 
@@ -119,6 +121,10 @@ export function ReportPopup({
       document.body.style.overflow = ""
     }
   }, [open, router])
+
+  useEffect(() => {
+    if (success) successActionRef.current?.focus()
+  }, [success])
 
   useEffect(() => {
     if (!success || direct || workspaceUrl) return
@@ -177,9 +183,10 @@ export function ReportPopup({
                     We&apos;ve mapped what customers can see. Add a few business numbers to see what happens after they contact you.
                   </p>
                   <a
+                    ref={successActionRef}
                     href={workspaceUrl}
                     onClick={() => trackFunnelEvent("workspace_cta_click", { entry })}
-                    className="mt-4 inline-flex h-11 w-full items-center justify-center rounded-full bg-brand text-[15px] font-medium text-white hover:bg-brand-hover"
+                    className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-full bg-brand px-4 py-2 text-center text-[15px] font-medium leading-snug text-white hover:bg-brand-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
                   >
                     Open My Growth Workspace
                   </a>
@@ -187,7 +194,7 @@ export function ReportPopup({
                 <button
                   type="button"
                   onClick={goHome}
-                  className="mt-3 inline-flex h-11 w-full items-center justify-center rounded-full text-[15px] font-medium text-ink/70 hover:text-ink"
+                  className="mt-3 inline-flex h-11 w-full items-center justify-center rounded-full text-[15px] font-medium text-ink/70 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
                 >
                   Done
                 </button>
@@ -195,9 +202,10 @@ export function ReportPopup({
             ) : (
               <>
                 <button
+                  ref={successActionRef}
                   type="button"
                   onClick={goHome}
-                  className="mt-7 inline-flex h-11 w-full items-center justify-center rounded-full bg-brand text-[15px] font-medium text-white hover:bg-brand-hover"
+                  className="mt-7 inline-flex h-11 w-full items-center justify-center rounded-full bg-brand text-[15px] font-medium text-white hover:bg-brand-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
                 >
                   Done
                 </button>
