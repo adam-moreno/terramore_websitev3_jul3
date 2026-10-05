@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react"
 import { trackFunnelEvent, trackMeetingBooked } from "@/lib/analytics"
 import { BOOKING_STEPS, fieldList, type BookingEntry, type BookingField } from "@/lib/funnel-taxonomy"
 import { mergedAttribution } from "@/lib/attribution"
+import { GROWTH_WORKSPACE_URL } from "@/lib/growth-workspace"
 import { browserTimeZone, formatLongDay, formatTime, formatWhen, groupSlotsByDay, tzLabel } from "@/lib/booking-format"
 import { buildIcs, googleCalendarUrl, outlookCalendarUrl } from "@/lib/ics"
 
@@ -216,14 +217,44 @@ function MonthDayPicker({
   )
 }
 
-/** Shown whenever Terra IQ is not reachable or not configured. Never a blank state. No email shortcut. */
-export function BookingFallback({ reason, onRetry }: { reason?: string; onRetry?: () => void }) {
+/** Where to go when the calendar can't help: back to the Growth Workspace, or the report, which needs no calendar. */
+function useFallbackRoute(): { label: string; href: string } {
+  const [fromWorkspace, setFromWorkspace] = useState(false)
+  useEffect(() => {
+    // After mount, so the server and first client render agree.
+    setFromWorkspace((new URLSearchParams(window.location.search).get("source") ?? "").startsWith("growth_workspace"))
+  }, [])
+  if (fromWorkspace && GROWTH_WORKSPACE_URL) {
+    const url = new URL(GROWTH_WORKSPACE_URL)
+    url.search = ""
+    return { label: "Back to my Growth Workspace", href: url.toString() }
+  }
+  return { label: "Get a free Digital Footprint report instead", href: "/report" }
+}
+
+/**
+ * Shown whenever Terra IQ is not reachable or not configured, the calendar is empty, or a booking can't be confirmed.
+ * Never a blank state and never a dead end: Try again when it can help, plus a route that doesn't need the calendar.
+ * No email shortcut.
+ */
+export function BookingFallback({
+  reason,
+  detail,
+  onRetry,
+  route,
+}: {
+  reason?: string
+  detail?: string
+  onRetry?: () => void
+  /** Overrides the default route (Growth Workspace or report). */
+  route?: { label: string; href: string }
+}) {
+  const fallback = useFallbackRoute()
+  const next = route ?? fallback
   return (
     <div className="rounded-2xl border border-ink/10 bg-cream px-5 py-5">
-      <p className="text-[15px] font-semibold text-ink">{reason || "Booking is warming up."}</p>
-      <p className="mt-1 text-[14px] text-slate-600">
-        Try again in a moment. The calendar usually comes back quickly.
-      </p>
+      <p className="text-[15px] font-semibold text-ink">{reason || "We couldn’t load the calendar."}</p>
+      <p className="mt-1 text-[14px] text-slate-600">{detail || "Try again in a moment. The calendar usually comes back quickly."}</p>
       {onRetry ? (
         <button
           type="button"
@@ -233,16 +264,25 @@ export function BookingFallback({ reason, onRetry }: { reason?: string; onRetry?
           Try again
         </button>
       ) : null}
+      <p className="mt-3">
+        <a href={next.href} className="inline-flex min-h-11 items-center text-[15px] font-medium text-ink underline underline-offset-4 hover:text-brand">
+          {next.label}
+        </a>
+      </p>
     </div>
   )
 }
 
 function loadErrorMessage(status: number, error?: string): string {
   if (error === "not_configured" || status === 503) {
-    return "Calendar isn’t connected in this environment yet."
+    return "Online booking isn’t available right now."
   }
-  return "Booking is warming up."
+  return "We couldn’t load the calendar."
 }
+
+/** A failed confirm: the visitor must not have to guess whether the call was booked. */
+const SUBMIT_FAILED = "We couldn’t confirm your booking."
+const SUBMIT_FAILED_DETAIL = "It may not have gone through. If a confirmation email arrives, you’re booked. If not, try again."
 
 /**
  * Qualify → schedule (day + time) → details → confirm. Used by the popup, the /book page, and (in "pick"
@@ -321,7 +361,7 @@ export function BookingFlow({
       }
       setSlots(Array.isArray(data.slots) ? data.slots : [])
     } catch {
-      setLoadError("Booking is warming up.")
+      setLoadError("We couldn’t load the calendar.")
     }
   }, [])
 
@@ -503,7 +543,7 @@ export function BookingFlow({
     } catch {
       bookingError("network")
       loadErrorFromBooking.current = true
-      setLoadError("Booking is warming up.")
+      setLoadError(SUBMIT_FAILED)
     } finally {
       setBusy(false)
     }
@@ -514,7 +554,11 @@ export function BookingFlow({
   // After qualifiers (or immediately in pick mode), calendar must be ready.
   const needsCalendar = isPick || step >= QUALIFIER_COUNT
   if (needsCalendar && loadError) {
-    return <BookingFallback reason={loadError} onRetry={() => void load()} />
+    return loadError === SUBMIT_FAILED ? (
+      <BookingFallback reason={SUBMIT_FAILED} detail={SUBMIT_FAILED_DETAIL} onRetry={() => void load()} />
+    ) : (
+      <BookingFallback reason={loadError} onRetry={() => void load()} />
+    )
   }
   if (needsCalendar && slots === null) {
     return (
@@ -524,7 +568,13 @@ export function BookingFlow({
     )
   }
   if (needsCalendar && days.length === 0) {
-    return <BookingFallback reason="No open times in the next two weeks." onRetry={() => void load()} />
+    return (
+      <BookingFallback
+        reason="No open times in the next two weeks."
+        detail="New times open up often. Check again later."
+        onRetry={() => void load()}
+      />
+    )
   }
 
   const choiceGrid = compact ? "grid-cols-1" : "sm:grid-cols-2"

@@ -106,7 +106,15 @@ export function ManageBooking() {
     )
   }
 
-  if (state === "down" || !booking) return <BookingFallback />
+  if (state === "down" || !booking) {
+    return (
+      <BookingFallback
+        reason="We couldn’t load your call."
+        detail="Your booking is unchanged. Try again in a moment, or book a new time."
+        route={{ label: "Book a time", href: "/book" }}
+      />
+    )
+  }
 
   if (state === "canceled") {
     return (
