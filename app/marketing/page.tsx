@@ -128,17 +128,17 @@ export default function MarketingPage() {
         copy={
           <>
             <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-gold-ink lg:text-ink/75">
-              Marketing &amp; advertising for growing businesses
+              Software, strategy, and execution
             </p>
             <h1
               id="marketing-hero-title"
               className="mt-4 text-[2.2rem] font-bold leading-[1.08] tracking-[-0.02em] text-ink sm:text-5xl lg:text-[clamp(2.5rem,3.6vw,3.25rem)]"
             >
-              On-brand, on-time marketing designed to perform.
+              One system for marketing that grows the business.
             </h1>
             <p className="mt-5 max-w-xl text-[17px] leading-relaxed text-slate-700 md:text-[18px]">
-              Whether it&apos;s Google, Meta, TikTok, email, or your website, get the campaigns you need fast — planned,
-              built, launched, and measured by one connected system.
+              Terramore uses software to understand your business and market, builds the strategy, then creates and runs
+              the content, ads, and campaigns that move growth forward.
             </p>
             <div className="mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
               <TalkButton ctaId="marketing_hero_book" />
@@ -147,7 +147,7 @@ export default function MarketingPage() {
                 ctaId="marketing_hero_report"
                 className="inline-flex min-h-11 items-center justify-center text-[15px] font-medium text-ink underline underline-offset-4 hover:text-brand sm:justify-start"
               >
-                Or get a free Digital Footprint report
+                See your free Digital Footprint
               </ReportPopupLink>
             </div>
           </>
