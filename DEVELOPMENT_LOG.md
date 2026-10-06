@@ -1,5 +1,20 @@
 # Development Log - Terramore Website
 
+## 2026-10-06 — /marketing hero: copy-only interim replaces the routing hero (branch `hotfix/marketing-hero-copy-only`)
+
+**Decision (owner, 2026-10-06).** The routing / "mancala" hero (VD-027) is rejected. This is step A of the approved deploy order: take it off production with a copy-only hero while the approved product-led "Next Move" hero is built.
+- **Copy:**
+  - Eyebrow "Software, strategy, and execution".
+  - H1 "We find what your business needs next. Then we get it done."
+  - Supporting line "Terramore combines software, strategy, and hands-on execution to find the next growth opportunity, act on it, and measure what happens."
+- **Unchanged:** both CTAs and their ids (`marketing_hero_book`, `marketing_hero_report`) are byte-identical in the diff. Ads conversion, GA4, booking, Supabase, the dashboard and the Digital Footprint flow are untouched.
+- **Kept for rollback:** `components/marketing-hero-routing.tsx` and `public/marketing/hero-routing/` are no longer rendered but not deleted.
+- **Checks:**
+  - All 6 verifiers pass. `tsc` reports the same 16 errors as `main`.
+  - `next build` passes, with `/marketing` at 5.6 kB.
+  - Browser, local production build at 1280, 390 and 320 (25 of 25 checks): no overflow, no console errors, no `hero-routing` requests, the routing markup is absent, both CTA view events fire, and both CTA clicks fire with their ids.
+- **Rollback:** promote the previous Vercel production deployment, or revert this commit.
+
 ## 2026-10-05 — /marketing hero: "signals become an operating system" (branch `visual/marketing-hero-routing`, local, not deployed)
 
 **Decision (owner, 2026-10-05).** VD-027 in the dashboard repo's `docs/visual/VISUAL_DECISIONS.md`.

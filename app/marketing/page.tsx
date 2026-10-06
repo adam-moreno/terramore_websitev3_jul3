@@ -12,7 +12,6 @@ import {
   StatsCountUp,
 } from "@/components/marketing-visuals"
 import { SiteFooter } from "@/components/site-footer"
-import { MarketingHeroRouting } from "@/components/marketing-hero-routing"
 
 export const metadata: Metadata = {
   title: "Marketing | Terramore",
@@ -123,10 +122,11 @@ const FAQ_ITEMS = [
 export default function MarketingPage() {
   return (
     <div className="min-h-screen bg-cream">
-      {/* HERO — "signals become an operating system" (VD-027): plate + deterministic overlay, copy in HTML. */}
-      <MarketingHeroRouting
-        copy={
-          <>
+      {/* HERO — copy only (interim, 2026-10-06): the routing hero (VD-027) is withdrawn while the approved
+          product-led hero is built. MarketingHeroRouting stays in the codebase for rollback. */}
+      <section className="relative bg-cream" aria-labelledby="marketing-hero-title">
+        <div className="page-shell pb-14 pt-28 sm:pt-32 md:pb-20 lg:pb-24 lg:pt-40">
+          <div className="max-w-4xl">
             <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-gold-ink lg:text-ink/75">
               Software, strategy, and execution
             </p>
@@ -134,11 +134,12 @@ export default function MarketingPage() {
               id="marketing-hero-title"
               className="mt-4 text-[2.2rem] font-bold leading-[1.08] tracking-[-0.02em] text-ink sm:text-5xl lg:text-[clamp(2.5rem,3.6vw,3.25rem)]"
             >
-              One system for marketing that grows the business.
+              <span className="sm:block">We find what your business needs next.</span>{" "}
+              <span className="sm:block">Then we get it done.</span>
             </h1>
             <p className="mt-5 max-w-xl text-[17px] leading-relaxed text-slate-700 md:text-[18px]">
-              Terramore uses software to understand your business and market, builds the strategy, then creates and runs
-              the content, ads, and campaigns that move growth forward.
+              Terramore combines software, strategy, and hands-on execution to find the next growth opportunity, act on it,
+              and measure what happens.
             </p>
             <div className="mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
               <TalkButton ctaId="marketing_hero_book" />
@@ -150,9 +151,9 @@ export default function MarketingPage() {
                 See your free Digital Footprint
               </ReportPopupLink>
             </div>
-          </>
-        }
-      />
+          </div>
+        </div>
+      </section>
 
       {/* SERVICE CAROUSEL — the execution lanes made real: the services, on cream below the light hero. */}
       <section className="relative overflow-hidden pb-14 pt-2 md:pb-20" aria-label="What Terramore builds">
