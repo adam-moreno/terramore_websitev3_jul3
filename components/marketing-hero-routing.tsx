@@ -236,6 +236,11 @@ export function MarketingHeroRouting({ copy }: { copy: ReactNode }) {
               </g>
             ))}
           </svg>
+          {/* Desktop: the plate's floor eases into the page cream, so the hero has no hard bottom edge. */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 bottom-0 hidden h-[9%] bg-gradient-to-b from-cream/0 via-cream/70 to-cream lg:block"
+          />
           {reduce ? null : (
             <MotionToggle
               paused={state !== "playing"}
