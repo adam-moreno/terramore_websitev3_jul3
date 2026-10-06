@@ -12,6 +12,7 @@ import {
   StatsCountUp,
 } from "@/components/marketing-visuals"
 import { SiteFooter } from "@/components/site-footer"
+import { MarketingHeroRouting } from "@/components/marketing-hero-routing"
 
 export const metadata: Metadata = {
   title: "Marketing | Terramore",
@@ -122,33 +123,20 @@ const FAQ_ITEMS = [
 export default function MarketingPage() {
   return (
     <div className="min-h-screen bg-cream">
-      {/* HERO — cinematic image-led composition, copy over the calm left side */}
-      <section className="relative overflow-hidden">
-        <Image
-          src="/marketing/hero-cinematic.png"
-          alt="A campaign being produced at a creative studio desk — ad concepts, color swatches, and a vertical video edit in progress"
-          width={1600}
-          height={900}
-          priority
-          className="absolute inset-0 h-full w-full object-cover object-[78%_center]"
-          sizes="100vw"
-        />
-        {/* Heavy left scrim so type stays readable over the photo; image keeps breathing room on the right. */}
-        <div
-          aria-hidden
-          className="absolute inset-0 bg-gradient-to-r from-ink via-ink/85 to-ink/20 md:from-ink/95 md:via-ink/70 md:to-transparent"
-        />
-        <div aria-hidden className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-ink/50 to-transparent" />
-        {/* Shorter first viewport so the service rail peeks and invites the scroll. */}
-        <div className="page-shell relative flex min-h-[28rem] items-center py-16 md:min-h-[32rem] md:py-20">
-          <div className="max-w-2xl [text-shadow:0_1px_18px_rgba(15,30,46,0.45)]">
-            <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-gold-from">
+      {/* HERO — "signals become an operating system" (VD-027): plate + deterministic overlay, copy in HTML. */}
+      <MarketingHeroRouting
+        copy={
+          <>
+            <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-gold-ink lg:text-ink/75">
               Marketing &amp; advertising for growing businesses
             </p>
-            <h1 className="mt-4 text-[2.2rem] font-bold leading-[1.08] tracking-[-0.02em] text-white sm:text-5xl md:text-[3.4rem]">
+            <h1
+              id="marketing-hero-title"
+              className="mt-4 text-[2.2rem] font-bold leading-[1.08] tracking-[-0.02em] text-ink sm:text-5xl lg:text-[clamp(2.5rem,3.6vw,3.25rem)]"
+            >
               On-brand, on-time marketing designed to perform.
             </h1>
-            <p className="mt-5 max-w-xl text-[17px] leading-relaxed text-white/90 md:text-[18px]">
+            <p className="mt-5 max-w-xl text-[17px] leading-relaxed text-slate-700 md:text-[18px]">
               Whether it&apos;s Google, Meta, TikTok, email, or your website, get the campaigns you need fast — planned,
               built, launched, and measured by one connected system.
             </p>
@@ -157,25 +145,18 @@ export default function MarketingPage() {
               <ReportPopupLink
                 direct
                 ctaId="marketing_hero_report"
-                className="text-center text-[15px] font-medium text-white/80 underline-offset-4 hover:text-white hover:underline sm:text-left"
+                className="inline-flex min-h-11 items-center justify-center text-[15px] font-medium text-ink underline underline-offset-4 hover:text-brand sm:justify-start"
               >
                 Or get a free Digital Footprint report
               </ReportPopupLink>
             </div>
-          </div>
-        </div>
-      </section>
+          </>
+        }
+      />
 
-      {/* SERVICE CAROUSEL — continues the hero ink plane on desktop, then fades to cream. */}
-      <section
-        className="relative overflow-hidden bg-ink pb-14 pt-2 md:bg-transparent md:pb-20 md:pt-0"
-        aria-label="What Terramore builds"
-      >
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 hidden bg-gradient-to-b from-ink via-ink/90 to-cream md:block"
-        />
-        <div className="relative pt-4 md:pt-6">
+      {/* SERVICE CAROUSEL — the execution lanes made real: the services, on cream below the light hero. */}
+      <section className="relative overflow-hidden pb-14 pt-2 md:pb-20" aria-label="What Terramore builds">
+        <div className="relative pt-4 md:pt-8">
           <ServiceCarousel />
         </div>
       </section>

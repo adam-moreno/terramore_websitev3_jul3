@@ -1,5 +1,40 @@
 # Development Log - Terramore Website
 
+## 2026-10-05 — /marketing hero: "signals become an operating system" (branch `visual/marketing-hero-routing`, local, not deployed)
+
+**Decision (owner, 2026-10-05).** VD-027 in the dashboard repo's `docs/visual/VISUAL_DECISIONS.md`.
+- **Approved:** the hybrid direction, the retouched plate and the brass result accent `#b08a4a`.
+- **Replaces** the dark desk-and-monitor hero (`hero-cinematic.png`, no longer referenced; the file is kept).
+
+- **What it is.** `components/marketing-hero-routing.tsx`.
+  - One AI-generated, manually retouched environment plate: `public/marketing/hero-routing/plate.jpg`, 2400×1350, 96 KB, no text, UI or numbers.
+  - A deterministic SVG overlay: channels cut in from the plate's own groove fragments, a hub, three lanes (content, ads, campaigns), and one brass-rimmed result.
+  - Five plate tokens are lifted (sprite over a floor patch) and routed into the lanes, never faded.
+  - Copy, CTAs, the lane legend and the control are HTML.
+- **Behaviour.**
+  - It starts on the finished system and plays about 7 s once, only after Play, then shows Replay.
+  - It pauses off screen and in a hidden tab.
+  - Under reduced motion it shows the finished state with no control.
+  - Animation: 30 WAAPI animations, transform and opacity only. Each route is revealed by one mask sweep with a soft leading edge.
+  - The server-rendered markup is already the finished poster, so nothing jumps on hydration.
+- **Layout.**
+  - Desktop (lg+): full-bleed, 16:9 up to 760 px tall, cropped from the top beyond that. The copy sits over the plate's empty left side.
+  - Below lg: copy first, then a 4:5 crop of the plate's right edge, then the legend.
+  - The image and the SVG share one bottom-right cover rule (`object-right-bottom` / `xMaxYMax slice`), so they stay registered at every size without JavaScript.
+  - The service carousel loses the old ink continuation and sits on cream.
+- **Contrast.** Over the plate on desktop, the eyebrow uses ink at 75% (11:1 or better): gold-ink falls to 3.5:1 where the eyebrow crosses the plate's wall. It stays gold-ink on phones (5.0:1 on cream). The H1 is 15:1 and the body copy 9.8:1 or better over the plate.
+- **`components/motion-toggle.tsx`** gains `ended` (Replay), copied verbatim from `ux/hero-input-autoplay-caption` (`b0faf53`), so the two branches merge cleanly.
+- **Checks.**
+  - All 6 `scripts/verify-*.mjs` pass. `tsc` 16, the same set as production `39a7d79`.
+  - Browser, on local production builds with booking and report stubbed and Google blocked: 59 of 59 at 1280, 390 and 320. Covered:
+    - layout and overflow;
+    - CTA clicks reach the booking and report popups;
+    - the control and legend are clear of the header and the floating Schedule button;
+    - keyboard Play, Pause and Replay, off-screen and hidden-tab pause, reduced motion;
+    - 30 animations at 60 fps.
+  - LCP (median of 3, throttled), production → branch: 936 → 368 ms desktop, 5936 → 2224 ms phone.
+  - CLS 0 → 0 at both widths.
+
 ## 2026-10-05 — Google Ads "Meeting booked" conversion (branch `feat/ads-meeting-booked-conversion`, local, not deployed)
 
 **Decision (owner, 2026-10-05).** Bookings now send their own Google Ads conversion. This supersedes the earlier rule "no Ads conversion for bookings" (2026-09-16 and the controlled-beta entry below): the report and the booking are separate conversion actions in the same account, so neither inflates the other. In Ads, "Meeting booked" starts as a secondary conversion; bidding stays on "Digital Footprint Report Submitted" until there is booking volume.
