@@ -120,11 +120,3 @@ export const LEAKS: readonly { between: string; leak: string }[] = [
   { between: "Inbox → CRM", leak: "The reply goes out tomorrow, and the lead never reaches the CRM." },
   { between: "CRM → Reports", leak: "No one can say which ad or post produced the customer." },
 ]
-
-/** The operating loop after launch. */
-export const LOOP: readonly { name: string; detail: string }[] = [
-  { name: "Watch", detail: "TerraIQ shows where people drop between stages." },
-  { name: "Decide", detail: "We pick the one constraint costing you the most." },
-  { name: "Fix", detail: "Terramore builds the change: a page, a reply, a campaign." },
-  { name: "Measure", detail: "We check whether it moved, then pick the next one." },
-]

@@ -2,12 +2,12 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import Image from "next/image"
 import { BookingLink } from "@/components/booking-popup"
-import { ReportPopupLink } from "@/components/report-popup"
 import { GrowthJourney } from "@/components/marketing/growth-journey"
 import { SystemLeaks } from "@/components/marketing/system-leaks"
 import { SystemMap } from "@/components/marketing/system-map"
 import { AttractVisual, ConvertVisual, FollowUpVisual, MeasureVisual } from "@/components/marketing/stage-visuals"
-import { SystemLoop } from "@/components/marketing/system-loop"
+import { NextMoveLoop } from "@/components/marketing/next-move-loop"
+import { MarketingPrimaryAction, MarketingSecondaryAction } from "@/components/marketing/primary-action"
 import { SiteFooter } from "@/components/site-footer"
 import { STAGES, type StageId } from "@/lib/marketing-system"
 
@@ -37,8 +37,6 @@ export const metadata: Metadata = {
   },
 }
 
-const PRIMARY =
-  "inline-flex min-h-12 w-full items-center justify-center rounded-full bg-brand px-6 text-[16px] font-medium text-white transition-colors hover:bg-brand-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 sm:w-auto"
 const SECONDARY =
   "inline-flex min-h-12 w-full items-center justify-center rounded-full border border-ink/60 bg-white px-6 text-[16px] font-medium text-ink transition-colors hover:border-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 sm:w-auto"
 
@@ -132,14 +130,14 @@ export default function MarketingPage() {
     <div className="min-h-screen bg-cream">
       {/* 1 HERO: the outcome in words, the system in motion (one inquiry traced through it). */}
       <section className="relative" aria-labelledby="marketing-hero-title">
-        <div className="page-shell grid gap-10 pb-16 pt-6 sm:pt-10 md:pb-24 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] xl:items-center xl:gap-14 xl:pt-8">
+        <div className="page-shell grid gap-10 pb-16 pt-6 sm:pt-10 md:pb-24 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:items-center lg:gap-10 lg:pt-8 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] xl:gap-14">
           <div className="max-w-xl">
             <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-gold-ink">
               Marketing, built as one system
             </p>
             <h1
               id="marketing-hero-title"
-              className="mt-4 text-[2.5rem] font-bold leading-[1.04] tracking-[-0.03em] text-ink sm:text-[3.25rem] lg:text-[clamp(3rem,4.6vw,4rem)]"
+              className="mt-4 text-[2.5rem] font-bold leading-[1.04] tracking-[-0.03em] text-ink sm:text-[3.25rem] lg:text-[2.9rem] xl:text-[clamp(3rem,4.6vw,4rem)]"
             >
               Turn attention into customers.
             </h1>
@@ -147,23 +145,16 @@ export default function MarketingPage() {
               Most marketing stops at the click. Terramore builds and runs what happens next: the page, the instant
               reply, the booked call, and the numbers that show what paid off.
             </p>
-            <div className="mt-8 flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:gap-5">
-              <ReportPopupLink direct ctaId="marketing_hero_report" className={PRIMARY}>
-                Get my free Digital Footprint report
-              </ReportPopupLink>
-              <BookingLink
-                source="marketing"
-                ctaId="marketing_hero_book"
-                className="inline-flex min-h-11 items-center justify-center text-[16px] font-medium text-ink underline underline-offset-4 hover:text-brand"
+            <div className="mt-8">
+              <MarketingPrimaryAction
+                ctaId="marketing_hero_report"
+                helper="Free · No call required · In your inbox in minutes"
               >
-                Or book a 30-minute call
-              </BookingLink>
+                <MarketingSecondaryAction ctaId="marketing_hero_book" />
+              </MarketingPrimaryAction>
             </div>
-            <p className="mt-3 text-center text-[14px] text-slate-600 sm:text-left">
-              Free · No call required · In your inbox in minutes
-            </p>
           </div>
-          <div className="w-full max-w-[46rem] xl:max-w-none">
+          <div className="w-full max-w-[46rem] lg:max-w-none">
             <GrowthJourney />
           </div>
         </div>
@@ -266,7 +257,7 @@ export default function MarketingPage() {
         </div>
       </section>
 
-      {/* 8 THE LOOP: we keep running it. */}
+      {/* 8 AFTER LAUNCH: the Next Move story (VD-029), intelligence then action, for the same sample business. */}
       <section className="border-t border-ink/[0.07] py-16 md:py-24" aria-labelledby="loop-title">
         <div className="page-shell">
           <div className="max-w-2xl">
@@ -275,15 +266,16 @@ export default function MarketingPage() {
               id="loop-title"
               className="mt-3 text-[1.9rem] font-bold leading-[1.1] tracking-[-0.02em] text-ink md:text-[2.6rem]"
             >
-              Launch is where the work starts.
+              Not just a report. The next move, decided and done.
             </h2>
             <p className="mt-4 text-[17px] leading-relaxed text-slate-700">
-              Every month we read what TerraIQ shows, pick the one constraint costing you the most, fix it, and check
-              that it moved. You see the reasoning, not just a report.
+              TerraIQ reads what Terramore knows about the business, finds the constraint costing the most and
+              recommends the smallest useful fix. Terramore builds it, and the result feeds the next decision. Here is
+              month one for the sample business above: how it got its booking page.
             </p>
           </div>
-          <div className="mt-12 md:mt-20">
-            <SystemLoop />
+          <div className="mt-10 md:mt-14">
+            <NextMoveLoop />
           </div>
         </div>
       </section>
@@ -310,11 +302,8 @@ export default function MarketingPage() {
                   We review your website, Google presence, reviews and ads, then email what&apos;s working, what&apos;s
                   hurting you, and what we&apos;d fix first.
                 </p>
-                <div className="mt-6 flex flex-col gap-2 pt-1 sm:mt-auto">
-                  <ReportPopupLink direct ctaId="marketing_closing_report" className={PRIMARY}>
-                    Get my free Digital Footprint report
-                  </ReportPopupLink>
-                  <p className="text-[14px] text-slate-600">About a minute to request.</p>
+                <div className="mt-6 pt-1 sm:mt-auto">
+                  <MarketingPrimaryAction ctaId="marketing_closing_report" helper="About a minute to request." />
                 </div>
               </div>
               <div className="flex flex-col rounded-2xl border border-ink/10 bg-white p-5 sm:bg-cream sm:p-6">
@@ -322,7 +311,7 @@ export default function MarketingPage() {
                 <p className="mt-2 text-[16px] leading-relaxed text-slate-700">
                   A 30-minute call on how customers find you today, where they drop, and what we&apos;d build first.
                 </p>
-                <div className="mt-6 flex flex-col gap-2 pt-1 sm:mt-auto">
+                <div className="mt-6 flex flex-col gap-2 pt-1 sm:mt-auto sm:items-start">
                   <BookingLink source="marketing" ctaId="marketing_closing_book" className={SECONDARY}>
                     Book a 30-minute call
                   </BookingLink>

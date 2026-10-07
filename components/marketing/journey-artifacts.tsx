@@ -44,7 +44,7 @@ export function SearchAdMock() {
       <p className="text-[12px] text-slate-600">
         <span className="font-semibold text-ink">Sponsored</span> · examplereno.com
       </p>
-      <p className="mt-1 text-[15px] font-semibold leading-snug text-ink">Kitchen remodels in Sacramento</p>
+      <p className="mt-1 text-[15px] font-semibold leading-snug text-ink">Kitchen remodels in Los Angeles</p>
       <p className="mt-0.5 text-[13px] leading-snug text-slate-600">Free in-home estimate. Book online.</p>
     </div>
   )

@@ -1,5 +1,36 @@
 # Development Log - Terramore Website
 
+## 2026-10-06 (later) — /marketing second pass: Next Move in After launch, lookup-ready CTA slot, 1024 and 320 (branch `feature/marketing-growth-system`, preview only)
+
+**Owner direction (2026-10-06).** Keep the growth-system hero. Move Next Move (VD-029) into After launch. Make the hero and closing ready for the business/domain lookup, but don't build it yet. Not merged, not deployed to production. VD-030 amended in the dashboard repo.
+
+- **After launch** is now `components/marketing/next-move-loop.tsx`, replacing the static ring (`system-loop.tsx`, deleted). It reads as intelligence, then action:
+  - **TerraIQ decides:** 1 What Terramore knows (source-labelled facts), 2 What matters most (real Up next · Conversion capture), 3 Next move (real Smallest useful next step capture, plus "Why this move first").
+  - **Terramore does:** 4 Terramore executes (the booking page, Live · Terramore), 5 Result returns (measuring note; next read: Follow-up, Needs attention; back to step 1).
+  - It is month one for the same sample business: how it got the booking page the hero journey books through.
+  - Static: the hero stays the page's one demonstration.
+- **Lookup-ready action slot.** `components/marketing/primary-action.tsx`, used by the hero and the closing report path.
+  - The business lookup replaces `PrimaryControl` only.
+  - The slot is full width up to 36rem, the row wraps, and the controls stack below sm.
+  - Callers pass literal CTA ids, which verify-funnel requires. Ids are unchanged: `marketing_hero_report`, `marketing_hero_book`, `marketing_closing_report`, `marketing_closing_book`.
+  - Below 360 px the primary reads "Get my free report" (the full label broke onto two lines in the pill).
+- **1024–1279.** The hero goes side by side from lg (0.8fr / 1.2fr) with a taller board (aspect 20/19). It was stacked below xl.
+- **320 header.** The wordmark is h-5 below 360 px (was h-6, which crowded "Let's talk"). That is the only change to `components/site-header.tsx`.
+- **Sharper captures.** Re-exported from the original 2026-10-06 capture PNGs (the same session as VD-029), resize and WebP only:
+  - `revenue-path-2x.webp` (720×846, 29 KB)
+  - `gap-up-next-conversion-2x.webp` (880×689, 32 KB)
+  - `smallest-useful-next-step-2x.webp` (960×192, 9 KB)
+  The 1x copies this branch had added are removed.
+- **One sample business.** "Sacramento" and the (916) number become Los Angeles and (213) 555-0142, matching the TerraIQ fixture (Example Remodeling Co, Los Angeles).
+- **Contract copy.** `/marketing` makes no term-length claim on this branch. The conflict is elsewhere (`app/book/page.tsx:27` "Month to month"; production `/marketing` FAQ at 597fd49; the dashboard nurture's "12-month" language). It is flagged for the owner and unchanged here.
+- **Checks.**
+  - All 6 verifiers pass. `tsc` 16, the same set as main.
+  - `next build` passes, with `/marketing` at 4.05 kB.
+  - Browser 75/75 on next dev at 1280, 390 and 320. This adds the closing report CTA and its event to the earlier suite.
+  - Local production build 72/75 (the 3 misses are dev-only console capture).
+  - No overflow at 1280, 1024, 768, 390 or 320.
+  - LCP median of 5, branch vs 597fd49: mobile 756 vs 752 ms, desktop 204 vs 144 ms. CLS 0.
+
 ## 2026-10-06 — /marketing rebuilt as a growth-system page (branch `feature/marketing-growth-system`, preview only)
 
 **Why.** Production `/marketing` was a copy-only interim hero (597fd49) over an agency-style deliverables catalog: service carousel, ad-fatigue photo, two "Get ads people stop for" bands, count-up stats (VR-34), AI dashboard tiles and process steps. There was no visual, and it read as "14 services". Owner brief (2026-10-06): show that marketing is one connected system, from attention to customer. VD-030 and UX-031 are in the dashboard repo.

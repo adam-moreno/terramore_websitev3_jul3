@@ -16,7 +16,8 @@ import { JOURNEY } from "@/lib/marketing-system"
  * and pauses it off screen or in a hidden tab (VR-47, VR-48). Under reduced motion the final frame shows with no
  * control (VR-45).
  *
- * md and up: two columns of artifacts either side of a vertical bus. Phones: the same six steps as a compact log
+ * md and up: two columns of artifacts either side of a vertical bus (a taller board at lg, where the hero first goes
+ * side by side and the column is narrowest). Phones: the same six steps as a compact log
  * down a left-hand bus, one line each, except the text reply and the booking, which keep their artifacts.
  */
 
@@ -73,7 +74,7 @@ export function GrowthJourney() {
         onAnimationEnd={(e) => {
           if (e.animationName === "gs-final") setEnded(true)
         }}
-        className="gs-board relative mt-5 md:aspect-[20/17]"
+        className="gs-board relative mt-5 md:aspect-[20/17] lg:aspect-[20/19] xl:aspect-[20/17]"
       >
         {/* Replay remounts this wrapper only, so the observed board (and its pause state) stays the same node. */}
         <div key={run} className="contents">

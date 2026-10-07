@@ -38,7 +38,7 @@ export function AttractVisual() {
       <Placement channel="Google Maps" className="sm:translate-y-6">
         <p className="text-[15px] font-semibold text-ink">Example Remodeling Co</p>
         <p className="mt-0.5 flex items-center gap-1 text-[13px] text-slate-600">
-          <MapPin aria-hidden className="h-3.5 w-3.5" /> Remodeler · Sacramento
+          <MapPin aria-hidden className="h-3.5 w-3.5" /> Remodeler · Los Angeles
         </p>
         <div className="mt-2.5 flex gap-1.5">
           {["Call", "Directions", "Website"].map((label) => (
@@ -98,7 +98,7 @@ export function ConvertVisual() {
           <span className="absolute -left-9 top-0">
             <Pin n={1} />
           </span>
-          <p className="text-[19px] font-bold leading-tight text-ink">Kitchen remodels in Sacramento, done right.</p>
+          <p className="text-[19px] font-bold leading-tight text-ink">Kitchen remodels in Los Angeles, done right.</p>
           <p className="mt-1.5 text-[13px] leading-snug text-slate-600">Free in-home estimate this week.</p>
         </div>
         <div className="relative mt-4">
@@ -114,7 +114,7 @@ export function ConvertVisual() {
             <Pin n={3} />
           </span>
           <span className="flex h-10 items-center justify-center gap-1.5 rounded-full border border-ink/20 text-[13px] font-semibold text-ink">
-            <Phone aria-hidden className="h-3.5 w-3.5" /> Call (916) 555-0142
+            <Phone aria-hidden className="h-3.5 w-3.5" /> Call (213) 555-0142
           </span>
         </div>
         <div className="relative mt-4 space-y-1.5 rounded-xl bg-cream p-3">
@@ -231,10 +231,10 @@ export function MeasureVisual() {
       </div>
       <figure className="overflow-hidden rounded-2xl border border-ink/10 bg-white">
         <Image
-          src="/marketing/next-move/revenue-path.webp"
+          src="/marketing/next-move/revenue-path-2x.webp"
           alt="TerraIQ Revenue Path with sample data: 47 inquiries, 32 qualified conversations and 6 customers, with the biggest drop marked between conversations and customers."
-          width={500}
-          height={587}
+          width={720}
+          height={846}
           sizes="(max-width: 640px) 100vw, 352px"
           className="h-auto w-full"
         />
