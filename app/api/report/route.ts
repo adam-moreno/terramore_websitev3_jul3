@@ -142,7 +142,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (duplicate) {
-      console.info(`[report] already requested (${duplicate.matchedOn}) for ${email}`)
+      console.info(`[report] already requested (${duplicate.matchedOn})`)
       return NextResponse.json(
         { alreadyRequested: true, matchedOn: duplicate.matchedOn },
         { status: 409 },

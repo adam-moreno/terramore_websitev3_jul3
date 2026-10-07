@@ -1,5 +1,18 @@
 # Development Log - Terramore Website
 
+## 2026-10-07 — Hero-only scope, Scene 1 reference pack, identity-only report dedupe (branch `feature/marketing-growth-system`, local and preview only)
+
+**Owner clarification (2026-10-06):** nothing else on /marketing is being redesigned. The only visual change in scope is the right-side hero media slot, produced reference-first (REFERENCE → OBSERVE → TAG → SELECT → SPEC → BUILD → REVIEW → LOCK).
+- **Scope inventory:** `docs/hero-film/CURRENT_STATE.md`. It classifies every branch change against production 597fd49 (A lookup, B safety, C analytics, D hero media, E out-of-scope redesign) and gives a production-safe split plan. Nothing was deleted.
+- **Scene 1 reference pack:** `docs/hero-film/` holds the README, MOTION_TAXONOMY, SCENE_01_DECISION, SCENE_01_MOTION_SPEC (all PENDING), a local comparison board, per-source `source.md` and `motion-notes.md`, and the capture scripts in `docs/hero-film/capture/`.
+  - Real-time screencasts of Similarweb, HubSpot Website Grader, Ahrefs, Wappalyzer and Semrush, typing only `terramore.io`.
+  - No source reached a public result: data error, email gate, Turnstile, sign-up modal, bot check. Priority point 4 has no captured candidate.
+  - Third-party clips and stills are local-only and git-ignored (19 MB).
+- **Report dedupe** (`lib/report/duplicates.ts`): "already requested" now means the same person: email (always), phone (7 days), or the same full name plus the same website or business (7 days). Website, business name or socials alone no longer block, since the public lookup makes the website shared input.
+  - The pure matcher is `matchRecentDuplicate`. New `scripts/verify-report-dedupe.mjs` (10 checks).
+  - The route's duplicate log line no longer prints the email.
+- **Docs:** `docs/LOOKUP_OPEN_ITEMS.md` (Cloudflare rate-limit rule, Places preview key, signed-evidence reuse design, dedupe) and `docs/TERMS_COPY_CONFLICT.md` (month-to-month vs 12-month, exact copy, neutral wording; no copy changed).
+
 ## 2026-10-06 (night) — Free business lookup becomes the /marketing primary conversion (branch `feature/marketing-growth-system`, preview only)
 
 **Owner direction (2026-10-06).** The hero's primary action becomes "Your website [ … ] [Check my business]", with "Or book a 30-minute call" as the secondary. It is the new entry into the Digital Footprint, and it shows real findings before asking for an email. Not merged, not deployed to production.

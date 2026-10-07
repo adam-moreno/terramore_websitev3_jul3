@@ -149,3 +149,11 @@ tmp-og/
 
 # Supabase CLI link state
 supabase/.temp/
+
+# Hero-film motion references: third-party screen recordings and stills are
+# copyrighted and captured for internal research only. Keep them local; only
+# the text notes (source.md, motion-notes.md, docs, board HTML) are committed.
+docs/hero-film/references/**/*.mp4
+docs/hero-film/references/**/*.webm
+docs/hero-film/references/**/*.png
+docs/hero-film/references/**/*.jpg
