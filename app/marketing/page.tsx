@@ -3,38 +3,69 @@ import Link from "next/link"
 import Image from "next/image"
 import { BookingLink } from "@/components/booking-popup"
 import { ReportPopupLink } from "@/components/report-popup"
-import type { CtaId } from "@/lib/funnel-taxonomy"
-import {
-  CollaborationSteps,
-  CreativeCtaCard,
-  CreativeTilesGrid,
-  ServiceCarousel,
-  StatsCountUp,
-} from "@/components/marketing-visuals"
+import { GrowthJourney } from "@/components/marketing/growth-journey"
+import { SystemLeaks } from "@/components/marketing/system-leaks"
+import { SystemMap } from "@/components/marketing/system-map"
+import { AttractVisual, ConvertVisual, FollowUpVisual, MeasureVisual } from "@/components/marketing/stage-visuals"
+import { SystemLoop } from "@/components/marketing/system-loop"
 import { SiteFooter } from "@/components/site-footer"
+import { STAGES, type StageId } from "@/lib/marketing-system"
+
+const TITLE = "Marketing, built as one growth system | Terramore"
+const DESCRIPTION =
+  "Terramore builds and runs the whole path from ad to customer: campaigns, landing pages, instant follow-up, and TerraIQ reporting that shows which marketing turns into revenue."
 
 export const metadata: Metadata = {
-  title: "Marketing | Terramore",
-  description:
-    "Terramore builds a growth system around your business: strategy, demand, conversion, automation, and measurement. Talk first.",
+  title: TITLE,
+  description: DESCRIPTION,
   alternates: { canonical: "https://www.terramore.io/marketing" },
   openGraph: {
-    title: "Marketing | Terramore",
-    description:
-      "Strategy, ads, content, follow-up, and numbers in one growth system built around your business.",
+    title: TITLE,
+    description: DESCRIPTION,
     url: "https://www.terramore.io/marketing",
+    siteName: "Terramore.io",
+    locale: "en_US",
+    type: "website",
+    images: [
+      {
+        url: "/share/terramore-share-v2-og.png",
+        width: 1200,
+        height: 630,
+        alt: "Terramore",
+      },
+    ],
   },
 }
 
-function TalkButton({ className = "", ctaId }: { className?: string; ctaId?: CtaId }) {
+const PRIMARY =
+  "inline-flex min-h-12 w-full items-center justify-center rounded-full bg-brand px-6 text-[16px] font-medium text-white transition-colors hover:bg-brand-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 sm:w-auto"
+const SECONDARY =
+  "inline-flex min-h-12 w-full items-center justify-center rounded-full border border-ink/60 bg-white px-6 text-[16px] font-medium text-ink transition-colors hover:border-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 sm:w-auto"
+
+const stage = (id: StageId) => STAGES.find((s) => s.id === id)!
+
+/** Chapter heading for one stage: index, the job as the H2, two sentences, and what we watch. */
+function ChapterCopy({ id, split = false, children }: { id: StageId; split?: boolean; children: React.ReactNode }) {
+  const s = stage(id)
   return (
-    <BookingLink
-      source="marketing"
-      ctaId={ctaId}
-      className={`inline-flex h-11 w-full items-center justify-center rounded-full bg-brand px-6 text-[16px] font-medium text-white hover:bg-brand-hover sm:w-auto ${className}`}
-    >
-      Book a demo
-    </BookingLink>
+    <div className={split ? "lg:grid lg:grid-cols-2 lg:items-end lg:gap-16" : ""}>
+      <div>
+        <p className="flex items-center gap-3 text-[13px] font-semibold uppercase tracking-[0.18em] text-ink/70">
+          <span className="tabular-nums text-gold-ink">{s.index}</span>
+          <span aria-hidden className="h-px w-8 bg-ink/20" />
+          {s.name}
+        </p>
+        <h2 className="mt-4 max-w-xl text-[1.9rem] font-bold leading-[1.1] tracking-[-0.02em] text-ink md:text-[2.4rem]">
+          {s.job}
+        </h2>
+      </div>
+      <div>
+        <p className="mt-4 max-w-lg text-[17px] leading-relaxed text-slate-700">{children}</p>
+        <p className="mt-5 text-[15px] text-slate-600">
+          We watch: <span className="font-semibold text-ink">{s.watch}</span>
+        </p>
+      </div>
+    </div>
   )
 }
 
@@ -42,7 +73,6 @@ const RELATED_ARTICLES = [
   {
     tag: "Ad creative",
     title: "Why your best-performing ad will stop working (and what to do about it)",
-    excerpt: "Creative fatigue is measurable. Here's how to spot the drop-off early and refresh before your cost per lead climbs.",
     readTime: "6 min read",
     href: "/articles/why-your-best-ad-stops-working",
     image: "/marketing/articles/article-ad-fatigue.png",
@@ -51,7 +81,6 @@ const RELATED_ARTICLES = [
   {
     tag: "Measurement",
     title: "The three numbers every owner should check before raising ad spend",
-    excerpt: "More budget only helps if the system behind it converts. These are the numbers that tell you whether you're ready.",
     readTime: "8 min read",
     href: "/articles/three-numbers-before-raising-ad-spend",
     image: "/marketing/articles/article-metrics.png",
@@ -60,7 +89,6 @@ const RELATED_ARTICLES = [
   {
     tag: "Landing pages",
     title: "Your ads aren't the problem — your landing page is",
-    excerpt: "When clicks are cheap but sales are flat, the leak is usually after the click. A practical teardown checklist.",
     readTime: "5 min read",
     href: "/articles/your-landing-page-is-the-problem",
     image: "/marketing/articles/article-landing.png",
@@ -71,275 +99,304 @@ const RELATED_ARTICLES = [
 const FAQ_ITEMS = [
   {
     q: "What exactly does Terramore do?",
-    a: "We run the full growth system for your business: marketing strategy, ad creative, paid campaigns on Google, Meta, and TikTok, landing pages, email and SMS follow-up, short-form content, automation, and analytics. One team, one connected system — instead of juggling separate freelancers and agencies.",
+    a: "We build and run the system that turns attention into customers: campaigns on Google, Meta and TikTok, content, landing pages, instant text and email follow-up, CRM and automation, and reporting in TerraIQ that ties revenue back to its source. One team owns the whole path, so nothing falls between vendors.",
   },
   {
-    q: "How is this different from hiring an agency or a freelancer?",
-    a: "Most agencies own one slice — ads, or creative, or a website — and hand you the rest. We own the whole path from strategy to measurement, so nothing falls between vendors. And unlike a freelancer, you get a system with process, tooling, and reporting behind it, not a single person's availability.",
+    q: "How is this different from hiring an agency?",
+    a: "Most agencies own one slice, usually the ads, and stop at the click. We own what happens after it too: the page, the reply, the booking and the measurement. That's where most of the money leaks, and it's where we look first.",
   },
   {
-    q: "What does a demo look like?",
-    a: "It's a 30-minute call. We look at your current marketing together, show you how the Terramore system would map onto your business, and walk through Terra IQ — the dashboard where you'd see visits, leads, and revenue in one place. No pressure and no obligation; you'll leave with useful observations either way.",
+    q: "Do I need a big ad budget?",
+    a: "No. We size campaigns to your business. What matters is that the math works: what a customer is worth to you and what it costs to win one. We'll tell you honestly if paid ads aren't the right first move, and often the first fix is follow-up, not spend.",
   },
   {
-    q: "How fast can we launch?",
-    a: "Kickoff usually takes a focused week of strategy and setup. From there we move channel by channel — creative, pages, and follow-up — so each piece is ready before we scale spend. We'll tell you the realistic timeline for your scope on the call.",
-  },
-  {
-    q: "Do I need a big ad budget to work with you?",
-    a: "No. We size campaigns to your business. What matters is that the math works: what a customer is worth to you, what it costs to acquire one, and how quickly we can close that gap. We'll tell you honestly if paid ads aren't the right first move.",
-  },
-  {
-    q: "Who owns the ad accounts, data, and creative?",
-    a: "You do — 100%. Everything runs in accounts you own: your ad accounts, your domain, your CRM, your creative files. If we ever part ways, everything stays with you.",
+    q: "Who owns the ad accounts, data and creative?",
+    a: "You do. Everything runs in accounts you own: your ad accounts, your domain, your CRM and your creative files. If we ever part ways, everything stays with you.",
   },
   {
     q: "How do you measure results?",
-    a: "Terra IQ ties your traffic, leads, and revenue together so you can see what each channel returns — not just clicks and impressions. You get a live dashboard plus plain-language reporting on what we changed and why.",
+    a: "TerraIQ, our Growth Workspace, ties traffic, inquiries, booked calls and revenue together so you can see what each channel returns, not just clicks and impressions. You also get plain-language notes on what we changed and why.",
   },
   {
-    q: "Do you replace my existing marketing team?",
-    a: "Usually we extend it. If you have someone in-house, we plug in around them — they keep the parts they're great at, and we cover strategy, production, and measurement. If you have no one, we can be the whole engine.",
-  },
-  {
-    q: "What industries do you work with?",
-    a: "Mostly established local and regional businesses: services, trades, clinics, restaurants, e-commerce, and professional practices. If you already have customers and want more of them, the system applies.",
-  },
-  {
-    q: "Is there a long-term contract?",
-    a: "No long lock-ins. Engagements are month to month after the initial setup period. We keep clients by performing, not by contract.",
-  },
-  {
-    q: "What do you need from me to get started?",
-    a: "Access to what already exists (website, ad accounts, CRM), about an hour for the kickoff conversation, and fast feedback during the first creative round. We handle the rest.",
+    q: "What happens on the 30-minute call?",
+    a: "We look at how customers find and contact you today, where they drop, and what we'd build first. No pressure and no obligation; you'll leave with specific observations either way.",
   },
   {
     q: "How much does it cost?",
-    a: "It depends on scope — which channels, how much creative, and how much automation you need. Pricing is flat and agreed up front; see the pricing page or book a demo and we'll scope it live with you.",
+    a: "It depends on scope: which channels, how much creative and how much automation you need. Pricing is agreed up front. Book a call and we'll scope it with you.",
   },
 ] as const
 
 export default function MarketingPage() {
   return (
     <div className="min-h-screen bg-cream">
-      {/* HERO — copy only (interim, 2026-10-06): the routing hero (VD-027) is withdrawn while the approved
-          product-led hero is built. MarketingHeroRouting stays in the codebase for rollback. */}
-      <section className="relative bg-cream" aria-labelledby="marketing-hero-title">
-        <div className="page-shell pb-14 pt-28 sm:pt-32 md:pb-20 lg:pb-24 lg:pt-40">
-          <div className="max-w-4xl">
-            <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-gold-ink lg:text-ink/75">
-              Software, strategy, and execution
+      {/* 1 HERO: the outcome in words, the system in motion (one inquiry traced through it). */}
+      <section className="relative" aria-labelledby="marketing-hero-title">
+        <div className="page-shell grid gap-10 pb-16 pt-6 sm:pt-10 md:pb-24 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] xl:items-center xl:gap-14 xl:pt-8">
+          <div className="max-w-xl">
+            <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-gold-ink">
+              Marketing, built as one system
             </p>
             <h1
               id="marketing-hero-title"
-              className="mt-4 text-[2.2rem] font-bold leading-[1.08] tracking-[-0.02em] text-ink sm:text-5xl lg:text-[clamp(2.5rem,3.6vw,3.25rem)]"
+              className="mt-4 text-[2.5rem] font-bold leading-[1.04] tracking-[-0.03em] text-ink sm:text-[3.25rem] lg:text-[clamp(3rem,4.6vw,4rem)]"
             >
-              <span className="sm:block">We find what your business needs next.</span>{" "}
-              <span className="sm:block">Then we get it done.</span>
+              Turn attention into customers.
             </h1>
-            <p className="mt-5 max-w-xl text-[17px] leading-relaxed text-slate-700 md:text-[18px]">
-              Terramore combines software, strategy, and hands-on execution to find the next growth opportunity, act on it,
-              and measure what happens.
+            <p className="mt-5 text-[17px] leading-relaxed text-slate-700 md:text-[18px]">
+              Most marketing stops at the click. Terramore builds and runs what happens next: the page, the instant
+              reply, the booked call, and the numbers that show what paid off.
             </p>
-            <div className="mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-              <TalkButton ctaId="marketing_hero_book" />
-              <ReportPopupLink
-                direct
-                ctaId="marketing_hero_report"
-                className="inline-flex min-h-11 items-center justify-center text-[15px] font-medium text-ink underline underline-offset-4 hover:text-brand sm:justify-start"
-              >
-                See your free Digital Footprint
+            <div className="mt-8 flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:gap-5">
+              <ReportPopupLink direct ctaId="marketing_hero_report" className={PRIMARY}>
+                Get my free Digital Footprint report
               </ReportPopupLink>
+              <BookingLink
+                source="marketing"
+                ctaId="marketing_hero_book"
+                className="inline-flex min-h-11 items-center justify-center text-[16px] font-medium text-ink underline underline-offset-4 hover:text-brand"
+              >
+                Or book a 30-minute call
+              </BookingLink>
             </div>
+            <p className="mt-3 text-center text-[14px] text-slate-600 sm:text-left">
+              Free · No call required · In your inbox in minutes
+            </p>
+          </div>
+          <div className="w-full max-w-[46rem] xl:max-w-none">
+            <GrowthJourney />
           </div>
         </div>
       </section>
 
-      {/* SERVICE CAROUSEL — the execution lanes made real: the services, on cream below the light hero. */}
-      <section className="relative overflow-hidden pb-14 pt-2 md:pb-20" aria-label="What Terramore builds">
-        <div className="relative pt-4 md:pt-8">
-          <ServiceCarousel />
-        </div>
-      </section>
-
-      {/* AD FATIGUE — copy left, lifestyle photo right */}
-      <section className="page-shell pb-14 md:pb-20">
-        <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
-          <div>
-            <p className="border-b border-ink/15 pb-4 text-[12px] font-semibold uppercase tracking-[0.18em] text-ink/70">
-              Fresh campaigns fuel performance
-            </p>
-            <h2 className="mt-6 max-w-xl text-[1.9rem] font-bold leading-[1.12] tracking-[-0.02em] text-ink md:text-[2.6rem]">
-              <span className="font-serif italic">Tired of ad fatigue?</span> It&apos;s time to refresh your marketing.
-            </h2>
-            <p className="mt-5 max-w-lg text-[18px] font-medium leading-relaxed text-ink/80 md:text-[20px]">
-              Ads lose effectiveness quickly. If it&apos;s not your audience getting bored, it&apos;s the algorithm.
-            </p>
-            <p className="mt-4 max-w-lg text-[15px] leading-relaxed text-slate-600">
-              You know it has a direct impact on your revenue, but tight deadlines, limited resources, and gaps in the
-              system make it hard to keep up with the demand for compelling campaigns. That&apos;s what Terramore is
-              for.
-            </p>
-          </div>
-          <div className="overflow-hidden rounded-[1.75rem] shadow-[0_24px_60px_-24px_rgba(15,30,46,0.35)]">
-            <Image
-              src="/marketing/fatigue-couch.png"
-              alt="A relaxed business owner scrolling on his phone at home"
-              width={1024}
-              height={1024}
-              className="h-auto w-full object-cover"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* MID-PAGE CTA — same photo-led treatment as the lower CreativeCtaCard */}
-      <section className="page-shell pb-14 md:pb-20">
-        <div className="relative overflow-hidden rounded-[1.75rem] shadow-[0_20px_60px_rgba(15,30,46,0.18)]">
-          <Image
-            src="/marketing/cta-pocket.png"
-            alt="Phone in a jean back pocket showing a mobile ad"
-            width={1600}
-            height={900}
-            className="absolute inset-0 h-full w-full object-cover object-[center_35%]"
-            sizes="(max-width: 896px) 100vw, 896px"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-ink/90 via-ink/60 to-ink/15" aria-hidden />
-          <div className="relative px-7 py-12 sm:px-12 sm:py-16 md:max-w-[36rem] md:py-20">
-            <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-gold-from">
-              Fresh campaigns fuel performance
-            </p>
-            <h2 className="mt-3 text-[1.7rem] font-bold leading-[1.12] tracking-[-0.02em] text-white md:text-[2.2rem]">
-              Get ads people actually stop for.
-            </h2>
-            <p className="mt-3 max-w-md text-[15px] leading-relaxed text-white/75">
-              Strategy, creative, and campaigns from one team — book a demo and see what that looks like for your
-              business.
-            </p>
-            <BookingLink
-              source="marketing"
-              className="mt-7 inline-flex items-center rounded-full bg-white px-6 py-3 text-[14px] font-semibold text-ink transition hover:bg-white/90"
+      {/* 2 THE PROBLEM: the same path, disconnected. */}
+      <section className="border-t border-ink/[0.07] py-16 md:py-24" aria-labelledby="leaks-title">
+        <div className="page-shell">
+          <div className="max-w-2xl">
+            <p className="section-eyebrow">Where growth leaks</p>
+            <h2
+              id="leaks-title"
+              className="mt-3 text-[1.9rem] font-bold leading-[1.1] tracking-[-0.02em] text-ink md:text-[2.6rem]"
             >
-              Book a demo
-            </BookingLink>
+              Most marketing breaks between the tools.
+            </h2>
+            <p className="mt-4 text-[17px] leading-relaxed text-slate-700">
+              Ads, the website, the phone, the inbox and the reports usually get set up by different people at different
+              times. Nobody owns the handoffs, so interested customers slip through.
+            </p>
+          </div>
+          <div className="mt-10 md:mt-14">
+            <SystemLeaks />
+          </div>
+          <p className="mt-10 text-[18px] font-semibold text-ink md:mt-12 md:text-[20px]">
+            More ad spend just pushes more people through the same gaps.
+          </p>
+        </div>
+      </section>
+
+      {/* 3 THE SYSTEM: the connected stack, on the page's one ink band. */}
+      <section className="bg-ink py-16 md:py-24" aria-labelledby="system-title">
+        <div className="page-shell">
+          <div className="max-w-2xl">
+            <p className="text-[12px] font-semibold uppercase tracking-[0.2em] text-gold-from">The Terramore system</p>
+            <h2
+              id="system-title"
+              className="mt-3 text-[1.9rem] font-bold leading-[1.1] tracking-[-0.02em] text-white md:text-[2.6rem]"
+            >
+              One connected system, built and run by one team.
+            </h2>
+            <p className="mt-4 text-[17px] leading-relaxed text-white/80">
+              We build every stage, wire them together so nothing drops between them, and keep running it with you after
+              launch.
+            </p>
+          </div>
+          <div className="mt-10 md:mt-14">
+            <SystemMap />
           </div>
         </div>
       </section>
 
-      {/* THE DATA IS CLEAR — count-up stats */}
-      <section className="page-shell pb-14 md:pb-20">
-        <p className="section-eyebrow text-center">The data is clear</p>
-        <h2 className="mx-auto mt-3 max-w-2xl text-center text-[1.8rem] font-bold leading-[1.12] tracking-[-0.02em] text-ink md:text-[2.5rem]">
-          Terramore is <span className="font-serif italic">your shortcut</span> to revenue.
-        </h2>
-        <p className="mx-auto mt-4 max-w-xl text-center text-[16px] leading-relaxed text-slate-600">
-          As an extension of your team, we run every stage of the growth system — strategy through revenue — and
-          measure what it returns.
-        </p>
-        <div className="mx-auto mt-12 max-w-4xl">
-          <StatsCountUp />
+      {/* 4–7 THE STAGES: one chapter each, one visual each, alternating rhythm. */}
+      <section id="attract" className="scroll-mt-24 py-16 md:py-24" aria-label="Attract">
+        <div className="page-shell grid items-center gap-10 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-16">
+          <ChapterCopy id="attract">
+            We run search, maps, social and short video around the offers that actually make you money, and tag every
+            placement so we can tell later which one produced the customer.
+          </ChapterCopy>
+          <div className="pb-6">
+            <AttractVisual />
+          </div>
         </div>
       </section>
 
-      {/* CREATIVE SERVICES — animated, non-clickable tiles */}
-      <section className="page-shell pb-14 md:pb-20">
-        <p className="section-eyebrow text-center">Creative that keeps up</p>
-        <h2 className="mx-auto mt-3 max-w-2xl text-center text-[1.8rem] font-bold leading-[1.12] tracking-[-0.02em] text-ink md:text-[2.5rem]">
-          From big concepts to finished assets.
-        </h2>
-        <p className="mx-auto mt-4 max-w-xl text-center text-[16px] leading-relaxed text-slate-600">
-          The creative muscle to keep your campaigns fresh and on-brand, across every channel.
-        </p>
-        <div className="mx-auto mt-10 max-w-5xl">
-          <CreativeTilesGrid />
+      <section id="convert" className="scroll-mt-24 border-t border-ink/[0.07] py-16 md:py-24" aria-label="Convert">
+        <div className="page-shell grid items-center gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:gap-16">
+          <div className="order-2 lg:order-1">
+            <ConvertVisual />
+          </div>
+          <div className="order-1 lg:order-2">
+            <ChapterCopy id="convert">
+              Each campaign lands on a page built for it, with one clear next step: book, call or ask. Every call and
+              form carries its source into your CRM.
+            </ChapterCopy>
+          </div>
         </div>
       </section>
 
-      {/* HOW WE COLLABORATE — steps highlight as you scroll */}
-      <section className="page-shell pb-14 md:pb-24">
-        <div className="mx-auto max-w-5xl">
-          <CollaborationSteps />
+      <section id="follow-up" className="scroll-mt-24 bg-white py-16 md:py-24" aria-label="Follow up">
+        <div className="page-shell">
+          <ChapterCopy id="follow-up" split>
+            People who don&apos;t hear back keep shopping. The system replies the moment an inquiry arrives, tells your
+            team, and sends reminders so the visit actually happens.
+          </ChapterCopy>
+          <div className="mt-10 md:mt-14">
+            <FollowUpVisual />
+          </div>
+          <p className="mt-6 text-[13px] text-slate-600">Sample business · example timeline</p>
         </div>
-        <div className="mx-auto mt-14 max-w-5xl md:mt-20">
-          <CreativeCtaCard />
+      </section>
+
+      <section id="measure" className="scroll-mt-24 py-16 md:py-24" aria-label="Measure">
+        <div className="page-shell grid items-center gap-10 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-16">
+          <ChapterCopy id="measure">
+            TerraIQ, our Growth Workspace, follows each customer from the first click to the booked job, so budget goes
+            where it returns, not where the clicks are cheapest.
+          </ChapterCopy>
+          <MeasureVisual />
+        </div>
+      </section>
+
+      {/* 8 THE LOOP: we keep running it. */}
+      <section className="border-t border-ink/[0.07] py-16 md:py-24" aria-labelledby="loop-title">
+        <div className="page-shell">
+          <div className="max-w-2xl">
+            <p className="section-eyebrow">After launch</p>
+            <h2
+              id="loop-title"
+              className="mt-3 text-[1.9rem] font-bold leading-[1.1] tracking-[-0.02em] text-ink md:text-[2.6rem]"
+            >
+              Launch is where the work starts.
+            </h2>
+            <p className="mt-4 text-[17px] leading-relaxed text-slate-700">
+              Every month we read what TerraIQ shows, pick the one constraint costing you the most, fix it, and check
+              that it moved. You see the reasoning, not just a report.
+            </p>
+          </div>
+          <div className="mt-12 md:mt-20">
+            <SystemLoop />
+          </div>
+        </div>
+      </section>
+
+      {/* 9 CTA: two equivalent ways in (VR-36 exception); the report is the filled one. */}
+      <section className="pb-16 md:pb-24" aria-labelledby="start-title">
+        <div className="page-shell">
+          <div className="sm:rounded-[1.75rem] sm:border sm:border-ink/10 sm:bg-white sm:p-10 lg:p-14">
+            <div className="max-w-2xl">
+              <h2
+                id="start-title"
+                className="text-[1.9rem] font-bold leading-[1.1] tracking-[-0.02em] text-ink md:text-[2.6rem]"
+              >
+                Find out where your system leaks.
+              </h2>
+              <p className="mt-4 text-[17px] leading-relaxed text-slate-700">
+                Start free, or talk it through. Either way you get specific observations about your business.
+              </p>
+            </div>
+            <div className="mt-10 grid gap-4 md:grid-cols-2">
+              <div className="flex flex-col rounded-2xl border border-ink/10 bg-white p-5 sm:bg-cream sm:p-6">
+                <h3 className="text-[18px] font-semibold text-ink">Start with the free report</h3>
+                <p className="mt-2 text-[16px] leading-relaxed text-slate-700">
+                  We review your website, Google presence, reviews and ads, then email what&apos;s working, what&apos;s
+                  hurting you, and what we&apos;d fix first.
+                </p>
+                <div className="mt-6 flex flex-col gap-2 pt-1 sm:mt-auto">
+                  <ReportPopupLink direct ctaId="marketing_closing_report" className={PRIMARY}>
+                    Get my free Digital Footprint report
+                  </ReportPopupLink>
+                  <p className="text-[14px] text-slate-600">About a minute to request.</p>
+                </div>
+              </div>
+              <div className="flex flex-col rounded-2xl border border-ink/10 bg-white p-5 sm:bg-cream sm:p-6">
+                <h3 className="text-[18px] font-semibold text-ink">Talk it through</h3>
+                <p className="mt-2 text-[16px] leading-relaxed text-slate-700">
+                  A 30-minute call on how customers find you today, where they drop, and what we&apos;d build first.
+                </p>
+                <div className="mt-6 flex flex-col gap-2 pt-1 sm:mt-auto">
+                  <BookingLink source="marketing" ctaId="marketing_closing_book" className={SECONDARY}>
+                    Book a 30-minute call
+                  </BookingLink>
+                  <p className="text-[14px] text-slate-600">Pick a time that suits you.</p>
+                </div>
+              </div>
+            </div>
+            <p className="mt-8 text-[15px] text-slate-600">
+              Everything we build runs in accounts you own: ad accounts, domain, CRM and creative.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="page-shell pb-16 md:pb-24" id="faq" aria-labelledby="faq-title">
+        <div className="mx-auto max-w-3xl">
+          <h2 id="faq-title" className="text-[1.6rem] font-bold tracking-[-0.02em] text-ink md:text-[2rem]">
+            Questions, answered
+          </h2>
+          <div className="mt-8 divide-y divide-ink/[0.08] border-y border-ink/[0.08]">
+            {FAQ_ITEMS.map((item) => (
+              <details key={item.q} className="group py-5">
+                <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 rounded-md text-[16px] font-semibold tracking-tight text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-4 focus-visible:ring-offset-cream [&::-webkit-details-marker]:hidden">
+                  {item.q}
+                  <span
+                    aria-hidden
+                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-ink/[0.05] text-[16px] font-medium text-ink/70 motion-safe:transition-transform motion-safe:duration-200 group-open:rotate-45"
+                  >
+                    +
+                  </span>
+                </summary>
+                <p className="mt-3 max-w-2xl text-[16px] leading-relaxed text-slate-700">{item.a}</p>
+              </details>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* RELATED ARTICLES */}
-      <section className="page-shell pb-14 md:pb-20">
-        <div className="flex items-end justify-between gap-6">
-          <div>
-            <p className="section-eyebrow">From the notebook</p>
-            <h2 className="mt-3 text-[1.6rem] font-bold tracking-[-0.02em] text-ink md:text-[2rem]">Related articles</h2>
-          </div>
-        </div>
+      <section className="page-shell pb-16 md:pb-24" aria-labelledby="articles-title">
+        <h2 id="articles-title" className="text-[1.6rem] font-bold tracking-[-0.02em] text-ink md:text-[2rem]">
+          From the notebook
+        </h2>
         <div className="mt-8 grid gap-4 md:grid-cols-3">
           {RELATED_ARTICLES.map((article) => (
             <Link
               key={article.title}
               href={article.href}
-              className="group flex flex-col overflow-hidden rounded-[1.5rem] border border-black/[0.06] bg-white shadow-[0_8px_30px_rgba(15,30,46,0.05)] transition-shadow hover:shadow-[0_16px_50px_rgba(15,30,46,0.12)]"
+              className="group flex flex-col overflow-hidden rounded-2xl border border-ink/10 bg-white transition-colors hover:border-ink/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
             >
-              <div className="relative h-40 overflow-hidden">
+              <div className="relative hidden aspect-[16/9] overflow-hidden md:block">
                 <Image
                   src={article.image}
                   alt={article.alt}
                   width={1024}
                   height={768}
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-                  sizes="(max-width: 768px) 100vw, 33vw"
+                  className="h-full w-full object-cover"
+                  sizes="33vw"
                 />
-                <span className="absolute bottom-3 left-4 rounded-full bg-white/90 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-ink backdrop-blur">
-                  {article.tag}
-                </span>
               </div>
               <div className="flex flex-1 flex-col p-5">
-                <h3 className="text-[16px] font-semibold leading-snug tracking-tight text-ink">{article.title}</h3>
-                <p className="mt-2 text-[14px] leading-relaxed text-slate-600">{article.excerpt}</p>
-                <p className="mt-auto pt-4 text-[12px] font-medium text-ink/70">{article.readTime}</p>
+                <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-ink/70">{article.tag}</p>
+                <h3 className="mt-2 text-[16px] font-semibold leading-snug tracking-tight text-ink group-hover:underline group-hover:underline-offset-4">
+                  {article.title}
+                </h3>
+                <p className="mt-auto pt-4 text-[13px] font-medium text-slate-600">{article.readTime}</p>
               </div>
             </Link>
           ))}
         </div>
       </section>
 
-      {/* FAQ */}
-      <section className="page-shell pb-16 md:pb-24" id="faq">
-        <div className="mx-auto max-w-3xl">
-          <p className="section-eyebrow text-center">Questions, answered</p>
-          <h2 className="mt-3 text-center text-[1.6rem] font-bold tracking-[-0.02em] text-ink md:text-[2rem]">
-            Frequently asked questions
-          </h2>
-          <div className="mt-9 divide-y divide-black/[0.07] rounded-[1.5rem] border border-black/[0.06] bg-white px-6 shadow-[0_8px_30px_rgba(15,30,46,0.05)] sm:px-8">
-            {FAQ_ITEMS.map((item) => (
-              <details key={item.q} className="group py-5">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-[15.5px] font-semibold tracking-tight text-ink [&::-webkit-details-marker]:hidden">
-                  {item.q}
-                  <span
-                    aria-hidden
-                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-ink/[0.05] text-[16px] font-medium text-ink/60 transition-transform duration-300 group-open:rotate-45"
-                  >
-                    +
-                  </span>
-                </summary>
-                <p className="mt-3 max-w-2xl text-[14.5px] leading-relaxed text-slate-600">{item.a}</p>
-              </details>
-            ))}
-          </div>
-          <p className="mt-6 text-center text-[14px] text-slate-500">
-            Still have a question?{" "}
-            <BookingLink source="marketing" className="font-semibold text-brand underline-offset-4 hover:underline">
-              Book a demo
-            </BookingLink>{" "}
-            and ask us live.
-          </p>
-        </div>
-      </section>
-
-      <SiteFooter
-        tagline="Your next campaign is an adventure away."
-        backgroundImage="/marketing/footer-cartoon.png"
-      />
+      <SiteFooter showDualCtas={false} />
     </div>
   )
 }

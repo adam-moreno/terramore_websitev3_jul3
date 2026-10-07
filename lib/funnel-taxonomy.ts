@@ -50,6 +50,8 @@ export const CTA_IDS = {
   book_hero_report: { destination: "report", placement: "hero", view: true },
   marketing_hero_book: { destination: "booking", placement: "hero", view: true },
   marketing_hero_report: { destination: "report", placement: "hero", view: true },
+  marketing_closing_report: { destination: "report", placement: "closing", view: true },
+  marketing_closing_book: { destination: "booking", placement: "closing", view: true },
   infopage_hero_book: { destination: "booking", placement: "hero", view: true },
   infopage_hero_report: { destination: "report", placement: "hero", view: true },
 } as const satisfies Record<string, CtaSpec>

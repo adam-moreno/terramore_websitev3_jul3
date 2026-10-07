@@ -1,5 +1,51 @@
 # Development Log - Terramore Website
 
+## 2026-10-06 — /marketing rebuilt as a growth-system page (branch `feature/marketing-growth-system`, preview only)
+
+**Why.** Production `/marketing` was a copy-only interim hero (597fd49) over an agency-style deliverables catalog: service carousel, ad-fatigue photo, two "Get ads people stop for" bands, count-up stats (VR-34), AI dashboard tiles and process steps. There was no visual, and it read as "14 services". Owner brief (2026-10-06): show that marketing is one connected system, from attention to customer. VD-030 and UX-031 are in the dashboard repo.
+
+- **Narrative.**
+  1. Hero: one inquiry traced through the system.
+  2. Where growth leaks: the same path, broken between tools.
+  3. The Terramore system (the page's one ink band): Attract, Convert, Follow up, Measure, plus the loop back.
+  4. Four stage chapters, one native visual each.
+  5. After launch: the monthly loop, with real TerraIQ captures.
+  6. Two-path CTA, FAQ (7, trimmed), articles.
+- **Hero.**
+  - Eyebrow "Marketing, built as one system". H1 "Turn attention into customers."
+  - Supporting line "Most marketing stops at the click. Terramore builds and runs what happens next…".
+  - `components/marketing/growth-journey.tsx` shows six artifacts on a "system bus": search ad, landing page, estimate form, text reply, Slack alert, and the booking with its source attached. Sample business "Example Remodeling Co" (as in VD-029); the board says "Sample business · example journey".
+- **Motion.**
+  - CSS only (`gs-` block at the end of `app/globals.css`), transform and opacity.
+  - Plays once from first paint, about 8 s, and holds the final frame, so it reaches the end without JavaScript.
+  - MotionToggle gives Pause, Play and Replay. It pauses off screen and in a hidden tab.
+  - Reduced motion shows the final frame with no control.
+  - Replay remounts an inner `display: contents` wrapper, so the observed board keeps its node.
+  - No other section moves (one demonstration per page).
+- **Mobile.** Below md the board is a log down a left-hand bus, one line per step; the text reply and the booking keep their artifacts. Play starts at 15% visibility. Below lg: the leaks are a column and the system map is 2×2 (phones: one column, parts on one line). Below xl the hero stacks. On phones the articles are text-only cards.
+- **CTAs.**
+  - The report is the filled hero primary; booking is the text link "Or book a 30-minute call". Ids `marketing_hero_report` and `marketing_hero_book` are unchanged.
+  - Closing: two equivalent paths (VR-36 exception), `marketing_closing_report` (filled) and `marketing_closing_book` (outline). Both are new in `lib/funnel-taxonomy.ts`.
+  - "Book a demo" is retired on this page (MK-15).
+  - The footer runs with `showDualCtas={false}`, as on /book.
+- **Analytics.** Two new CTA ids (above) give primary_cta_view and primary_cta_click. Replay sends `select_content` (content_type `marketing_demo`, content_id `journey_replay`). No new events or architecture.
+- **Assets.**
+  - Reused from `feature/marketing-hero-next-move`, same paths, so the branches merge cleanly: `revenue-path.webp`, `gap-up-next-conversion.webp`, `smallest-useful-next-step.webp`.
+  - Everything else is HTML, with no new images.
+  - No longer rendered (files kept): `fatigue-couch.png`, `cta-pocket.png`, `footer-cartoon.png`, `components/marketing-visuals.tsx` exports, `public/marketing/services/*`.
+- **Copy.**
+  - Removed: the FAQ "long-term contract / month to month" answer, which conflicts with the 12-month language in the nurture sequence (owner to decide); the count-up stats; "Terramore is your shortcut to revenue".
+  - Kept: the ownership statement.
+- **Metadata.** Title "Marketing, built as one growth system | Terramore", a new description, and the `openGraph` image restored (it was dropped by the page override).
+- **Relation to the Next Move hero (VD-029, `feature/marketing-hero-next-move`, not deployed).** This page replaces that hero slot. Its real captures are reused in Measure and After launch. Its play-once story overlaps the loop section, so only one demonstration sequence runs per page. Owner to confirm (VD-030).
+- **Checks.**
+  - All 6 verifiers pass. `tsc` reports 16 errors, the same set as main.
+  - `next build` passes, with `/marketing` at 4.03 kB (was 5.6 kB).
+  - Browser, 69/69 on next dev: 1280, 390 and 320; one H1; no overflow; no console errors; Pause holds; ends on Replay; Replay restarts; pauses off screen; reduced motion has no running animation and no control; hero and closing CTAs open their dialogs; the CTA and replay events fire; keyboard order goes CTA → control.
+  - Local production build: 66/69 (the 3 misses are dev-only console capture).
+  - LCP, median of 5, branch vs production build 597fd49: mobile (4× CPU, slow 4G) 816 vs 836 ms; desktop 200 vs 164 ms; CLS 0 vs 0.
+  - Contrast: all new text pairs 5.0:1 or better. The secondary button border was raised to ink/60 (4.4:1). The gold ring on the final card is decorative (1.8:1), like the VD-027 brass.
+
 ## 2026-10-06 — /marketing hero: copy-only interim replaces the routing hero (branch `hotfix/marketing-hero-copy-only`)
 
 **Decision (owner, 2026-10-06).** The routing / "mancala" hero (VD-027) is rejected. This is step A of the approved deploy order: take it off production with a copy-only hero while the approved product-led "Next Move" hero is built.

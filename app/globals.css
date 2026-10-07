@@ -1594,3 +1594,175 @@ body {
     transition: none;
   }
 }
+
+/*
+  /marketing growth system (gs-): the hero journey board, components/marketing/growth-journey.tsx.
+  Plays once from first paint (about 8 s) and holds its final frame; transform and opacity only (VR-44).
+  Arrivals: 0.4, 1.7, 3.0, 4.3, 5.6, 6.9 s (ARRIVE in the component). Bus stops sit at each card's top + 30px:
+  0, 5, 33.5, 38.5, 67, 72 % of the board. [data-paused] holds every animation (Pause, off screen, hidden tab).
+  Reduced motion: no animation, final frame (VR-45).
+*/
+.gs-in {
+  animation: gs-in 450ms cubic-bezier(0.2, 0.7, 0.2, 1) var(--d, 0s) both;
+}
+.gs-node {
+  animation: gs-fade 250ms ease-out var(--d, 0s) both;
+}
+.gs-ring {
+  opacity: 0;
+  animation: gs-ring 1300ms ease var(--d, 0s) both;
+}
+.gs-final {
+  animation: gs-final 500ms ease-out 7.3s both;
+}
+.gs-dot {
+  transform: translateY(calc(72% + 30px));
+  animation: gs-dot 7.2s both;
+}
+.gs-fill {
+  transform-origin: top;
+  animation: gs-fill 7.2s both;
+}
+.gs-fill-m {
+  transform-origin: top;
+  animation: gs-fill-m 6.5s cubic-bezier(0.4, 0, 0.6, 1) 0.4s both;
+}
+.gs-board[data-paused] .gs-in,
+.gs-board[data-paused] .gs-node,
+.gs-board[data-paused] .gs-ring,
+.gs-board[data-paused] .gs-final,
+.gs-board[data-paused] .gs-dot,
+.gs-board[data-paused] .gs-fill,
+.gs-board[data-paused] .gs-fill-m {
+  animation-play-state: paused;
+}
+@keyframes gs-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes gs-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes gs-final {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes gs-ring {
+  0% {
+    opacity: 0;
+  }
+  20%,
+  75% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+/* Holds at each stop, eases between them. Percentages are arrival and departure times over 7.2 s. */
+@keyframes gs-dot {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  5.6%,
+  16.7% {
+    opacity: 1;
+    transform: translateY(30px);
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  23.6%,
+  34.7% {
+    opacity: 1;
+    transform: translateY(calc(5% + 30px));
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  41.7%,
+  52.8% {
+    opacity: 1;
+    transform: translateY(calc(33.5% + 30px));
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  59.7%,
+  70.8% {
+    opacity: 1;
+    transform: translateY(calc(38.5% + 30px));
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  77.8%,
+  88.9% {
+    opacity: 1;
+    transform: translateY(calc(67% + 30px));
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  95.8%,
+  100% {
+    opacity: 1;
+    transform: translateY(calc(72% + 30px));
+  }
+}
+@keyframes gs-fill {
+  0%,
+  16.7% {
+    transform: scaleY(0);
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  23.6%,
+  34.7% {
+    transform: scaleY(0.069);
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  41.7%,
+  52.8% {
+    transform: scaleY(0.465);
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  59.7%,
+  70.8% {
+    transform: scaleY(0.535);
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  77.8%,
+  88.9% {
+    transform: scaleY(0.932);
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  95.8%,
+  100% {
+    transform: scaleY(1);
+  }
+}
+@keyframes gs-fill-m {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gs-in,
+  .gs-node,
+  .gs-ring,
+  .gs-final,
+  .gs-dot,
+  .gs-fill,
+  .gs-fill-m {
+    animation: none;
+  }
+}
