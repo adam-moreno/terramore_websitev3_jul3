@@ -148,7 +148,7 @@ export default function MarketingPage() {
             <div className="mt-8">
               <MarketingPrimaryAction
                 ctaId="marketing_hero_report"
-                helper="Free · No call required · In your inbox in minutes"
+                helper="Free · No email needed to see the first results"
               >
                 <MarketingSecondaryAction ctaId="marketing_hero_book" />
               </MarketingPrimaryAction>
@@ -297,13 +297,13 @@ export default function MarketingPage() {
             </div>
             <div className="mt-10 grid gap-4 md:grid-cols-2">
               <div className="flex flex-col rounded-2xl border border-ink/10 bg-white p-5 sm:bg-cream sm:p-6">
-                <h3 className="text-[18px] font-semibold text-ink">Start with the free report</h3>
+                <h3 className="text-[18px] font-semibold text-ink">Check your business, free</h3>
                 <p className="mt-2 text-[16px] leading-relaxed text-slate-700">
-                  We review your website, Google presence, reviews and ads, then email what&apos;s working, what&apos;s
-                  hurting you, and what we&apos;d fix first.
+                  Enter your website to see what&apos;s in place, what&apos;s missing and where we&apos;d look first.
+                  Want it in writing? We&apos;ll email you the full report.
                 </p>
                 <div className="mt-6 pt-1 sm:mt-auto">
-                  <MarketingPrimaryAction ctaId="marketing_closing_report" helper="About a minute to request." />
+                  <MarketingPrimaryAction ctaId="marketing_closing_report" helper="No email needed to start." />
                 </div>
               </div>
               <div className="flex flex-col rounded-2xl border border-ink/10 bg-white p-5 sm:bg-cream sm:p-6">

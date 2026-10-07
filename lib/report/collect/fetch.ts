@@ -3,9 +3,16 @@
  * Keep request volume low: short timeouts, truncated bodies, no auth.
  */
 
+import { assertPublicUrl } from "@/lib/report/collect/public-url"
+
 export const FOOTPRINT_UA =
   "Mozilla/5.0 (compatible; TerramoreFootprintBot/1.0; +https://terramore.io/report)"
 
+/**
+ * GET with a short timeout. Every URL and every redirect hop must be a public http(s) address (assertPublicUrl):
+ * the free lookup fetches visitor-supplied sites, so redirects are followed by hand, at most 5 hops.
+ * Returns null on any failure, including a blocked address.
+ */
 export async function fetchText(
   url: string,
   timeoutMs = 10000,
@@ -13,13 +20,26 @@ export async function fetchText(
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), timeoutMs)
   try {
-    const response = await fetch(url, {
-      headers: { "User-Agent": FOOTPRINT_UA, Accept: "text/html,application/xhtml+xml,application/json,text/plain,*/*" },
-      redirect: "follow",
-      signal: controller.signal,
-    })
-    const text = await response.text()
-    return { status: response.status, text: text.slice(0, 600_000), finalUrl: response.url || url }
+    let current = url
+    for (let hop = 0; hop <= 5; hop++) {
+      await assertPublicUrl(current)
+      const response = await fetch(current, {
+        headers: {
+          "User-Agent": FOOTPRINT_UA,
+          Accept: "text/html,application/xhtml+xml,application/json,text/plain,*/*",
+        },
+        redirect: "manual",
+        signal: controller.signal,
+      })
+      const location = response.headers.get("location")
+      if (response.status >= 300 && response.status < 400 && location) {
+        current = new URL(location, current).toString()
+        continue
+      }
+      const text = await response.text()
+      return { status: response.status, text: text.slice(0, 600_000), finalUrl: current }
+    }
+    return null
   } catch {
     return null
   } finally {

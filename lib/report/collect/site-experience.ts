@@ -81,7 +81,10 @@ function parsePage(url: string, status: number | null, html: string): PageSnapsh
  * Homepage + up to 5 key linked pages discovered from the homepage.
  * Deterministic counts only; no LLM.
  */
-export async function collectSiteExperience(website: string | null): Promise<{
+export async function collectSiteExperience(
+  website: string | null,
+  options: { maxExtraPages?: number } = {},
+): Promise<{
   pages: PageSnapshot[]
   platform: string | null
   pixels: string[]
@@ -140,7 +143,7 @@ export async function collectSiteExperience(website: string | null): Promise<{
   const pageHtml: Array<{ url: string; html: string }> = [{ url: home.finalUrl, html: home.text }]
   const linked = extractInternalLinks(home.text, home.finalUrl).filter((u) => u !== home.finalUrl.replace(/\/$/, ""))
   const extraPages: PageSnapshot[] = []
-  for (const url of linked.slice(0, 5)) {
+  for (const url of linked.slice(0, options.maxExtraPages ?? 5)) {
     const page = await fetchText(url, 8000)
     if (!page) continue
     extraPages.push(parsePage(page.finalUrl, page.status, page.text))

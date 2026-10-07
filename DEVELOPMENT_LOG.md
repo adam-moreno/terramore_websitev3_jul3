@@ -1,5 +1,43 @@
 # Development Log - Terramore Website
 
+## 2026-10-06 (night) — Free business lookup becomes the /marketing primary conversion (branch `feature/marketing-growth-system`, preview only)
+
+**Owner direction (2026-10-06).** The hero's primary action becomes "Your website [ … ] [Check my business]", with "Or book a 30-minute call" as the secondary. It is the new entry into the Digital Footprint, and it shows real findings before asking for an email. Not merged, not deployed to production.
+
+- **Endpoint.** `POST /api/lookup { website }` (`app/api/lookup/route.ts`, `lib/lookup/run.ts`) streams NDJSON events as each source finishes.
+  - Sources: website, how customers reach you, analytics and ad tags, search basics, social profiles, Google Maps listing.
+  - It reuses the report collectors (site-experience capped at the homepage plus 2 pages, technical, directories, Places confirm). Findings are deterministic sentences about observed facts, each with its evidence.
+  - No model call, no lead row, nothing stored.
+  - A source reports `done`, `not_found`, `unavailable` (not configured, e.g. no Places key) or `failed`, so nothing is shown as complete unless it actually ran.
+  - Places rating and review count never leave memory.
+  - Limits, per instance: 6 lookups per IP per 10 minutes, a 15-minute per-domain cache, and a 40-second budget.
+- **SSRF guard (also protects the report pipeline).** `lib/report/collect/public-url.ts` admits only public http(s) hosts on standard ports, with every resolved address public and no credentials in the URL. `fetchText` now follows redirects by hand (at most 5 hops) and re-checks every hop.
+- **Component.** `components/business-lookup.tsx` (`BusinessLookup`, `LookupReportButton`, `LookupBookButton`) is reusable on `/`, `/report` and onboarding.
+  - States: idle, checking (button reads "Checking…"), done and error, with inline field errors (`role="alert"`, `aria-invalid`, focus back to the field).
+  - Results stream per source. Then "Where we'd look first" (the highest-priority observed gap) and an honest scope line: search rankings, ad activity and reviews aren't part of this check.
+  - Next steps: "Email me the full report" opens the existing report popup (`direct`, `entry="popup_lookup"`, website prefilled), so attribution, the 409 dedupe and the report conversion are unchanged. Or book a 30-minute call.
+  - The hero's secondary link hides once results show.
+  - Phones: the field and button stack full width (48 px each).
+- **Analytics** (`lib/funnel-taxonomy.ts`).
+  - The submit is the host CTA's `primary_cta_click` (`marketing_hero_report` / `marketing_closing_report`, ids unchanged).
+  - New events `lookup_start {cta_id}` and `lookup_result {cta_id, outcome, lookup_id}`. The outcome is complete, partial, invalid_website, blocked, unreachable, rate_limited or error. The lookup id is random 32-hex; the domain is never sent.
+  - New CTA ids `marketing_lookup_report` and `marketing_lookup_book` (placement confirmation). New report entry `popup_lookup`; `report-form` fires `started` for any direct-style entry.
+  - Conversions still fire only on the saved report row.
+- **Copy.** Hero helper: "Free · No email needed to see the first results". The closing card is "Check your business, free" and no longer promises a review of "reviews and ads", which the report doesn't analyze (MK-02).
+- **Journey board** plays from 5% visibility, because the stacked lookup pushes the board lower at 320 px.
+- **Checks.**
+  - All 7 verifiers pass, including the new `scripts/verify-lookup.mjs` (60 checks: address guard, redirect-hop block, input normalization, a stubbed end-to-end lookup, Places transient, analytics sanitizing, 400/429).
+  - `tsc` 16, the same set. `next build` passes, with `/marketing` at 7.64 kB.
+  - Browser:
+    - The lookup flow against the live blueprintswithbob.com, about 4 s: 41/41 on dev and 41/41 on the production build at 1280/390/320. Report and booking POSTs were blocked.
+    - Motion and CTA suite 63/63.
+  - LCP vs 597fd49: mobile 828 vs 864 ms, desktop 208 vs 192 ms. CLS 0.
+- **Known limits.**
+  - Rate limiting and cache are per serverless instance; edge rate limiting or Turnstile is the follow-up.
+  - Google Maps is "Not checked here" wherever `GOOGLE_PLACES_API_KEY` isn't set.
+  - The report pipeline still re-crawls instead of reusing the lookup.
+  - The 7-day website-host dedupe can 409 a second requester for the same domain.
+
 ## 2026-10-06 (later) — /marketing second pass: Next Move in After launch, lookup-ready CTA slot, 1024 and 320 (branch `feature/marketing-growth-system`, preview only)
 
 **Owner direction (2026-10-06).** Keep the growth-system hero. Move Next Move (VD-029) into After launch. Make the hero and closing ready for the business/domain lookup, but don't build it yet. Not merged, not deployed to production. VD-030 amended in the dashboard repo.

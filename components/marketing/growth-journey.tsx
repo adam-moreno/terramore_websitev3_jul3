@@ -39,7 +39,7 @@ const ARRIVE = [0.4, 1.7, 3.0, 4.3, 5.6, 6.9] as const
 
 export function GrowthJourney() {
   const boardRef = useRef<HTMLDivElement>(null)
-  const visible = useOnScreenAndVisible(boardRef, 0.15)
+  const visible = useOnScreenAndVisible(boardRef, 0.05)
   const reduce = usePrefersReducedMotion()
   const [userPaused, setUserPaused] = useState(false)
   const [ended, setEnded] = useState(false)
