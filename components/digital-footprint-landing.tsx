@@ -5,12 +5,9 @@ import Link from "next/link"
 import { useEffect, useRef, useState } from "react"
 import { BookingLink } from "@/components/booking-popup"
 import { MotionToggle } from "@/components/motion-toggle"
-import { ReportPopup } from "@/components/report-popup"
+import { BusinessLookup, CheckMyBusinessLink, LookupBookButton, LookupReportButton } from "@/components/business-lookup"
 import { CHAPTERS } from "@/lib/report/chapters"
 import { useOnScreenAndVisible, usePrefersReducedMotion } from "@/hooks/use-autoplay"
-import { useCtaView } from "@/hooks/use-cta-view"
-import { trackCtaClick } from "@/lib/analytics"
-import type { CtaId } from "@/lib/funnel-taxonomy"
 
 const PDF_PAGES = [
   { src: "/report/pdf-cover.png", alt: "Sample report page: Where you show up" },
@@ -45,14 +42,6 @@ function exampleLine(sample: string) {
   return sample.replace(/^Northline:\s*/i, "Example: ")
 }
 
-function trackCta() {
-  if (typeof window === "undefined") return
-  const gtag = (window as Window & { gtag?: (...args: unknown[]) => void }).gtag
-  if (typeof gtag === "function") {
-    gtag("event", "report_cta_click", { cta_id: "report_primary" })
-    gtag("event", "cta_click", { cta_id: "report_primary" })
-  }
-}
 
 function PdfStack() {
   const rootRef = useRef<HTMLDivElement>(null)
@@ -132,18 +121,20 @@ function PdfStack() {
   )
 }
 
-export function DigitalFootprintLanding() {
-  const [open, setOpen] = useState(false)
-  const heroCtaRef = useCtaView<HTMLButtonElement>("report_hero_report")
-  const midCtaRef = useCtaView<HTMLButtonElement>("report_mid_report")
-  const closingCtaRef = useCtaView<HTMLButtonElement>("report_closing_report")
-
-  const openForm = (ctaId: CtaId) => {
-    trackCta()
-    trackCtaClick(ctaId)
-    setOpen(true)
+/** The /report landing's original click events (report_primary), kept on its search-first CTAs. */
+function trackCta() {
+  if (typeof window === "undefined") return
+  const gtag = (window as Window & { gtag?: (...args: unknown[]) => void }).gtag
+  if (typeof gtag === "function") {
+    gtag("event", "report_cta_click", { cta_id: "report_primary" })
+    gtag("event", "cta_click", { cta_id: "report_primary" })
   }
+}
 
+/** Search-first (docs/acquisition/SEARCH_FIRST_ROUTE_AUDIT.md): the report starts with the free lookup, so the
+ * visitor sees real findings before any email is asked for. The lookup's "Email me the full report" opens the report
+ * popup with the website prefilled; the mid and closing CTAs bring the visitor back to the lookup. */
+export function DigitalFootprintLanding() {
   return (
     <>
       <section className="relative isolate overflow-hidden bg-cream pt-6 pb-14 md:pt-10 md:pb-20">
@@ -166,19 +157,20 @@ export function DigitalFootprintLanding() {
                 hurting you, and what we’d fix first.
               </p>
 
-              <div className="mt-7 flex flex-col items-center gap-2.5 lg:items-start">
-                <button
-                  ref={heroCtaRef}
-                  type="button"
-                  onClick={() => openForm("report_hero_report")}
-                  className="inline-flex h-12 items-center justify-center rounded-full bg-brand px-7 text-[16px] font-medium text-white hover:bg-brand-hover"
-                >
-                  Get my free Digital Footprint report
-                </button>
-                <p className="text-[13px] font-medium text-ink/70">Free · No login · No call required</p>
-                <p className="max-w-sm text-[13px] font-medium text-ink/70 lg:max-w-none">
-                  About a minute to request. In your inbox in minutes.
-                </p>
+              <div className="mx-auto mt-7 max-w-xl text-left lg:mx-0">
+                <BusinessLookup
+                  ctaId="report_hero_report"
+                  source="report"
+                  anchor
+                  onSubmitted={trackCta}
+                  helper="Free · No login · No email needed to see the first results"
+                  next={
+                    <>
+                      <LookupReportButton ctaId="marketing_lookup_report" />
+                      <LookupBookButton ctaId="marketing_lookup_book" />
+                    </>
+                  }
+                />
               </div>
             </div>
 
@@ -220,16 +212,13 @@ export function DigitalFootprintLanding() {
 
       <section className="border-t border-black/[0.04] bg-white py-12 md:py-16">
         <div className="page-shell flex flex-col items-center text-center">
-          <button
-            ref={midCtaRef}
-            type="button"
-            onClick={() => openForm("report_mid_report")}
+          <CheckMyBusinessLink
+            ctaId="report_mid_report"
+            onClick={trackCta}
             className="inline-flex h-12 items-center justify-center rounded-full bg-brand px-7 text-[16px] font-medium text-white hover:bg-brand-hover"
-          >
-            Get my free Digital Footprint report
-          </button>
+          />
           <p className="mt-3 text-[13px] font-medium text-ink/70">
-            In your inbox in minutes.
+            See the first results free, then get the full report in your inbox.
           </p>
         </div>
       </section>
@@ -269,14 +258,11 @@ export function DigitalFootprintLanding() {
             You don’t need to hire Terramore to get the report. If you want help implementing what we find, we’ll walk
             through the priorities with you.
           </p>
-          <button
-            ref={closingCtaRef}
-            type="button"
-            onClick={() => openForm("report_closing_report")}
+          <CheckMyBusinessLink
+            ctaId="report_closing_report"
+            onClick={trackCta}
             className="mt-8 inline-flex h-12 items-center justify-center rounded-full bg-brand px-7 text-[16px] font-medium text-white hover:bg-brand-hover"
-          >
-            Get my free Digital Footprint report
-          </button>
+          />
           <BookingLink
             label="Or talk through a report with us"
             source="report"
@@ -291,7 +277,6 @@ export function DigitalFootprintLanding() {
         </div>
       </section>
 
-      <ReportPopup open={open} onClose={() => setOpen(false)} />
     </>
   )
 }

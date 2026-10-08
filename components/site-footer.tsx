@@ -135,7 +135,7 @@ export function SiteFooter({
           <div className="max-w-sm">
             <Logo size="md" animate={false} on="light" />
             {tagline ? <p className="mt-4 text-[15px] leading-relaxed text-slate-600">{tagline}</p> : null}
-            {showDualCtas ? <DualCtas className="mt-6" /> : null}
+            {showDualCtas ? <DualCtas ctaId="footer_closing_report" className="mt-6" /> : null}
           </div>
           <div>
             <p className="text-[12px] font-medium uppercase tracking-[0.14em] text-ink/70">Explore</p>

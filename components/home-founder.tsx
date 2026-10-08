@@ -27,7 +27,7 @@ export function HomeFounder() {
           <Link href="/about" className="mt-6 inline-block text-[15px] font-medium text-brand hover:text-brand-hover">
             Read the full story
           </Link>
-          <DualCtas className="mt-5" />
+          <DualCtas ctaId="infopage_closing_report" className="mt-5" />
         </div>
       </div>
     </section>

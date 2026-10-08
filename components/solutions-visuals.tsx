@@ -15,12 +15,10 @@
  * (the .solutions-* classes are guarded in globals.css).
  */
 
-import { useEffect, useRef, useState, type FormEvent } from "react"
+import { useEffect, useRef, useState } from "react"
 import { ArrowDown, ArrowRight, BarChart3, Target, Workflow } from "lucide-react"
 import { BookingLink } from "@/components/booking-popup"
-import { ReportPopup } from "@/components/report-popup"
-import { useCtaView } from "@/hooks/use-cta-view"
-import { trackCtaClick } from "@/lib/analytics"
+import { BusinessLookup, LookupBookButton, LookupReportButton } from "@/components/business-lookup"
 
 /* ------------------------------------------------------------------ */
 /* Growth system flow                                                  */
@@ -441,53 +439,33 @@ export function PillarsShowcase() {
 /* ------------------------------------------------------------------ */
 
 export function HeroWebsiteInput() {
-  const [website, setWebsite] = useState("")
-  const [open, setOpen] = useState(false)
-  const submitRef = useCtaView<HTMLButtonElement>("solutions_hero_report")
-
-  const submit = (event: FormEvent) => {
-    event.preventDefault()
-    if (!website.trim()) return
-    trackCtaClick("solutions_hero_report")
-    setOpen(true)
-  }
-
+  // The canonical business lookup (components/business-lookup.tsx), compact: no separate form or report hand-off here.
   return (
-    <div>
-      <form onSubmit={submit} className="flex max-w-xl flex-col gap-3 sm:flex-row">
-        <label className="flex-1">
-          <span className="sr-only">Enter your website</span>
-          <input
-            value={website}
-            onChange={(event) => setWebsite(event.target.value)}
-            placeholder="Enter your website"
-            autoComplete="url"
-            inputMode="url"
-            className="h-12 w-full rounded-full border border-ink/10 bg-white px-5 text-[16px] text-ink placeholder:text-ink/40 shadow-[0_8px_30px_rgba(15,30,46,0.04)] outline-none focus:border-brand"
-          />
-        </label>
-        <button
-          ref={submitRef}
-          type="submit"
-          disabled={!website.trim()}
-          title={!website.trim() ? "Enter your business website first" : undefined}
-          className="inline-flex h-12 shrink-0 items-center justify-center rounded-full bg-brand px-6 text-[15px] font-semibold text-white transition-colors hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          See my Digital Footprint
-        </button>
-      </form>
-      <p className="mt-3 text-[14px] text-ink/50">
-        Free written report, in your inbox in minutes. Rather talk it through?{" "}
-        <BookingLink
-          source="solutions"
-          ctaId="solutions_hero_book"
-          className="whitespace-nowrap font-medium text-brand underline-offset-4 hover:text-brand-hover hover:underline"
-        >
-          Book a call →
-        </BookingLink>
-      </p>
-      <ReportPopup open={open} onClose={() => setOpen(false)} website={website.trim() || undefined} direct />
-    </div>
+    <BusinessLookup
+      ctaId="solutions_hero_report"
+      source="solutions"
+      variant="compact"
+      anchor
+      helper="Free · No email needed to see the first results"
+      secondary={
+        <p className="text-[14px] text-ink/60">
+          Rather talk it through?{" "}
+          <BookingLink
+            source="solutions"
+            ctaId="solutions_hero_book"
+            className="inline-flex min-h-11 items-center whitespace-nowrap font-medium text-brand underline-offset-4 hover:text-brand-hover hover:underline"
+          >
+            Book a call →
+          </BookingLink>
+        </p>
+      }
+      next={
+        <>
+          <LookupReportButton ctaId="marketing_lookup_report" />
+          <LookupBookButton ctaId="marketing_lookup_book" />
+        </>
+      }
+    />
   )
 }
 

@@ -33,7 +33,17 @@ export const CTA_IDS = {
   home_hero_book: { destination: "booking", placement: "hero", view: true },
   home_hero_report: { destination: "report", placement: "hero", view: true },
   home_band_report: { destination: "report", placement: "inline", view: true },
+  home_closing_report: { destination: "report", placement: "closing", view: true },
   header_book: { destination: "booking", placement: "header", view: false },
+  /** "Check my business" in the shared header: scrolls to this page's lookup, else opens the homepage lookup. */
+  header_report: { destination: "report", placement: "header", view: false },
+  report_header_report: { destination: "report", placement: "header", view: false },
+  /** Closing "Check my business" CTAs (search-first): footer, service pages (compact lookup), info pages, articles. */
+  footer_closing_report: { destination: "report", placement: "closing", view: true },
+  service_closing_report: { destination: "report", placement: "closing", view: true },
+  service_closing_book: { destination: "booking", placement: "closing", view: true },
+  infopage_closing_report: { destination: "report", placement: "closing", view: true },
+  article_closing_report: { destination: "report", placement: "closing", view: true },
   report_header_book: { destination: "booking", placement: "header", view: false },
   floating_book: { destination: "booking", placement: "floating", view: false },
   report_hero_report: { destination: "report", placement: "hero", view: true },
@@ -50,6 +60,9 @@ export const CTA_IDS = {
   book_hero_report: { destination: "report", placement: "hero", view: true },
   marketing_hero_book: { destination: "booking", placement: "hero", view: true },
   marketing_hero_report: { destination: "report", placement: "hero", view: true },
+  /** Next steps under a finished business lookup (components/business-lookup.tsx), on any page that hosts it. */
+  marketing_lookup_report: { destination: "report", placement: "confirmation", view: true },
+  marketing_lookup_book: { destination: "booking", placement: "confirmation", view: true },
   infopage_hero_book: { destination: "booking", placement: "hero", view: true },
   infopage_hero_report: { destination: "report", placement: "hero", view: true },
 } as const satisfies Record<string, CtaSpec>
@@ -64,8 +77,21 @@ export function isCtaId(value: unknown): value is CtaId {
 export const REPORT_FIELDS = ["website", "first_name", "last_name", "email", "email_format", "consent"] as const
 export const BOOKING_FIELDS = ["name", "email", "email_format", "phone", "phone_invalid"] as const
 
-export const REPORT_ENTRIES = ["popup_questions", "popup_direct"] as const
+export const REPORT_ENTRIES = ["popup_questions", "popup_direct", "popup_lookup"] as const
 export const BOOKING_ENTRIES = ["popup", "inline"] as const
+/** How a business lookup ended: every source answered, some didn't, or the lookup couldn't run. */
+export const LOOKUP_OUTCOMES = [
+  "complete",
+  "partial",
+  "invalid_website",
+  "blocked",
+  "unreachable",
+  "rate_limited",
+  "network",
+  "error",
+] as const
+export type LookupOutcome = (typeof LOOKUP_OUTCOMES)[number]
+
 export const REPORT_STEPS = ["started", "details_shown", "required_complete", "submit_attempt"] as const
 export const BOOKING_STEPS = ["owner", "business", "stage", "schedule", "details"] as const
 export const BOOKING_ERRORS = ["validation", "slot_taken", "backend", "network", "availability", "no_slots"] as const
@@ -105,6 +131,9 @@ const VALIDATORS = {
   booking_reason: oneOf(BOOKING_ERRORS),
   source: isBookingSource,
   flow: oneOf(["qualify", "schedule_first"]),
+  /** Random 32-hex id per lookup (lib/lookup/run.ts). Not derived from the domain or any visitor data. */
+  lookup_id: (value: unknown) => typeof value === "string" && /^[0-9a-f]{32}$/.test(value),
+  lookup_outcome: oneOf(LOOKUP_OUTCOMES),
 } as const
 
 type Validator = keyof typeof VALIDATORS
@@ -118,6 +147,11 @@ export const FUNNEL_EVENTS = {
   report_validation_error: { fields: "report_fields", entry: "report_entry", page_path: "page_path" },
   /** "Open My Growth Workspace" on the report success screen: the hand-off from terramore.io to TerraIQ. */
   workspace_cta_click: { entry: "report_entry", page_path: "page_path" },
+  /** The free business lookup: submitted (the CTA click is primary_cta_click) and how it ended. Never the domain. */
+  /** First focus of a lookup field, once per field per page session (the step before lookup_start). */
+  lookup_input_focus: { cta_id: "cta_id", page_path: "page_path" },
+  lookup_start: { cta_id: "cta_id", page_path: "page_path" },
+  lookup_result: { cta_id: "cta_id", outcome: "lookup_outcome", lookup_id: "lookup_id", page_path: "page_path" },
   booking_start: { source: "source", entry: "booking_entry", flow: "flow", page_path: "page_path" },
   booking_progress: {
     step: "booking_step",

@@ -92,7 +92,7 @@ export function HomeFaq() {
             </AccordionItem>
           ))}
         </Accordion>
-        <DualCtas className="mt-12 md:mt-10" />
+        <DualCtas ctaId="home_closing_report" className="mt-12 md:mt-10" />
       </div>
     </section>
   )

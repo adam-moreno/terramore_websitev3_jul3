@@ -149,3 +149,6 @@ tmp-og/
 
 # Supabase CLI link state
 supabase/.temp/
+
+# Search-first review screenshots (local; rebuilt from the local production build)
+docs/acquisition/review/*.png

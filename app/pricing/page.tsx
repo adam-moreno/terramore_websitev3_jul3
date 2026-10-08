@@ -52,6 +52,7 @@ const plans = [
 export default function PricingPage() {
   return (
     <LindyPage
+      primary="book"
       title="Talk first."
       accent="Pay when we start."
       subtitle="The call is free. Scope and payment are set after that call. Jobs are priced by the work, not a menu. You never pay to find out what is broken."

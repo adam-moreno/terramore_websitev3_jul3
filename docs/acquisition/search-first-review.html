@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Search-First Review</title>
+<style>
+:root{--bg:#f6f6f4;--panel:#fff;--ink:#1d1f21;--muted:#5d6166;--line:#d9dad6;--accent:#2a5bd7;--ph:#ececea}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#151617;--panel:#1e2022;--ink:#e9eaeb;--muted:#a3a7ab;--line:#33363a;--accent:#8db0ff;--ph:#26292c}}
+:root[data-theme="dark"]{--bg:#151617;--panel:#1e2022;--ink:#e9eaeb;--muted:#a3a7ab;--line:#33363a;--accent:#8db0ff;--ph:#26292c}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:1600px;margin:0 auto;padding:16px}
+h1{font-size:20px;margin:0 0 6px} h2{font-size:17px;margin:22px 0 6px;border-top:1px solid var(--line);padding-top:16px} h3{font-size:14px;margin:0 0 6px}
+p{color:var(--muted);max-width:110ch;margin:4px 0}
+a{color:var(--accent)} code{font-size:12px}
+nav{display:flex;flex-wrap:wrap;gap:6px 14px;margin:10px 0}
+.pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,520px),1fr));gap:14px}
+.row{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;align-items:flex-start}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px;min-width:0}
+.row .card{flex:0 0 auto}
+figure{margin:0} figure img{display:block;max-width:100%;height:auto;border:1px solid var(--line);border-radius:4px}
+.row figure img{height:520px;width:auto;max-width:none}
+figcaption{font-size:12px;color:var(--muted);margin-top:4px}
+table{border-collapse:collapse;font-size:12.5px;margin:6px 0} td,th{border:1px solid var(--line);padding:3px 8px;text-align:left;vertical-align:top}
+.tablewrap{overflow-x:auto}
+.tag{display:inline-block;border:1px solid var(--line);border-radius:3px;padding:0 6px;font-size:11px;margin-left:6px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Search-first acquisition — owner review</h1>
+  <p>Branch <code>acquisition/search-first</code> (from production <code>597fd49</code>), local only. The live local site is <a href="http://localhost:3302/">http://localhost:3302/</a> (production build; start it with <code>npx next start -p 3302</code> in the worktree). Screenshots come from headless Chrome against that build. The full record is in <code>docs/acquisition/SEARCH_FIRST_ROUTE_AUDIT.md</code>.</p>
+  <nav><a href="#hier">CTA hierarchy (desktop)</a><a href="#home">Homepage mobile</a><a href="#marketing">/marketing mobile</a><a href="#report">/report</a><a href="#compact">Compact</a><a href="#ctaonly">CTA-only and None</a><a href="#flow">Funnel states</a></nav>
+
+  <h2 id="hier">CTA hierarchy, before → after (1440×900, first viewport)</h2>
+  <div class="pair">
+    <div class="card"><h3>Homepage — before</h3><figure><img src="review/before-home-desktop.png" alt="Homepage before: Let's talk primary"><figcaption>Let's talk is primary; the report is a small text link.</figcaption></figure></div>
+    <div class="card"><h3>Homepage — after</h3><figure><img src="review/after-home-1440.png" alt="Homepage after: website lookup primary"><figcaption>The lookup is primary; "Or book a free 30-minute call" is secondary; the header has Check my business (filled) and Let's talk (outlined).</figcaption></figure></div>
+    <div class="card"><h3>/marketing — before</h3><figure><img src="review/before-marketing-desktop.png" alt="Marketing before: Book a demo primary"><figcaption>Book a demo is primary.</figcaption></figure></div>
+    <div class="card"><h3>/marketing — after</h3><figure><img src="review/after-marketing-1440.png" alt="Marketing after: lookup primary"><figcaption>The lookup is primary; "Or book a demo" is secondary. Copy and the page below are unchanged.</figcaption></figure></div>
+    <div class="card"><h3>/report — before</h3><figure><img src="review/before-report-desktop.png" alt="Report landing before: email-first button"><figcaption>"Get my free Digital Footprint report" opened the email form.</figcaption></figure></div>
+    <div class="card"><h3>/report — after</h3><figure><img src="review/after-report-1440.png" alt="Report landing after: lookup first"><figcaption>The lookup comes first; email is only asked for after the results (Email me the full report).</figcaption></figure></div>
+  </div>
+
+  <h2 id="home">Homepage — mobile and tablet (first viewport)</h2>
+  <div class="row">
+    <div class="card"><figure><img src="review/before-home-390.png" alt="Homepage 390 before"><figcaption>390×844 before</figcaption></figure></div>
+    <div class="card"><figure><img src="review/after-home-320.png" alt="Homepage 320 after"><figcaption>320×568: the field is visible; the button is just below</figcaption></figure></div>
+    <div class="card"><figure><img src="review/after-home-375.png" alt="Homepage 375 after"><figcaption>375×667</figcaption></figure></div>
+    <div class="card"><figure><img src="review/after-home-390.png" alt="Homepage 390 after"><figcaption>390×844</figcaption></figure></div>
+    <div class="card"><figure><img src="review/after-home-430.png" alt="Homepage 430 after"><figcaption>430×932</figcaption></figure></div>
+    <div class="card"><figure><img src="review/after-home-768.png" alt="Homepage 768 after"><figcaption>768×1024</figcaption></figure></div>
+  </div>
+
+  <h2 id="marketing">/marketing — mobile and tablet</h2>
+  <div class="row">
+    <div class="card"><figure><img src="review/before-marketing-390.png" alt="Marketing 390 before"><figcaption>390×844 before</figcaption></figure></div>
+    <div class="card"><figure><img src="review/after-marketing-320.png" alt="Marketing 320 after"><figcaption>320×568</figcaption></figure></div>
+    <div class="card"><figure><img src="review/after-marketing-375.png" alt="Marketing 375 after"><figcaption>375×667</figcaption></figure></div>
+    <div class="card"><figure><img src="review/after-marketing-390.png" alt="Marketing 390 after"><figcaption>390×844</figcaption></figure></div>
+    <div class="card"><figure><img src="review/after-marketing-430.png" alt="Marketing 430 after"><figcaption>430×932</figcaption></figure></div>
+    <div class="card"><figure><img src="review/after-marketing-768.png" alt="Marketing 768 after"><figcaption>768×1024</figcaption></figure></div>
+  </div>
+
+  <h2 id="report">/report — mobile and tablet <span class="tag">launch blocker: hero copy (MK-02)</span></h2>
+  <p>The hero copy promises reviews and ads; the lookup beneath it says they aren't part of the check. The copy wasn't changed (owner decision; see §10 of the audit).</p>
+  <div class="row">
+    <div class="card"><figure><img src="review/after-report-320.png" alt="Report 320"><figcaption>320×568</figcaption></figure></div>
+    <div class="card"><figure><img src="review/after-report-375.png" alt="Report 375"><figcaption>375×667</figcaption></figure></div>
+    <div class="card"><figure><img src="review/after-report-390.png" alt="Report 390"><figcaption>390×844</figcaption></figure></div>
+    <div class="card"><figure><img src="review/after-report-430.png" alt="Report 430"><figcaption>430×932</figcaption></figure></div>
+    <div class="card"><figure><img src="review/after-report-768.png" alt="Report 768"><figcaption>768×1024</figcaption></figure></div>
+  </div>
+
+  <h2 id="compact">COMPACT variant</h2>
+  <div class="pair">
+    <div class="card"><h3>/solutions — before</h3><figure><img src="review/before-solutions-desktop.png" alt="Solutions before"><figcaption>Its own website form, which went straight to the email popup.</figcaption></figure></div>
+    <div class="card"><h3>/solutions — after (1440)</h3><figure><img src="review/after-solutions-1440.png" alt="Solutions after"><figcaption>The canonical compact lookup.</figcaption></figure></div>
+    <div class="card"><h3>Service page closing (41 pages) — 1440</h3><figure><img src="review/after-capability-compact-1440.png" alt="Capability page compact lookup desktop"><figcaption><code>/solutions/marketing-and-sales</code>, scrolled to the closing lookup.</figcaption></figure></div>
+  </div>
+  <div class="row">
+    <div class="card"><figure><img src="review/after-solutions-390.png" alt="Solutions 390"><figcaption>/solutions 390×844</figcaption></figure></div>
+    <div class="card"><figure><img src="review/after-capability-compact-390.png" alt="Capability compact 390"><figcaption>Service page closing, 390×844</figcaption></figure></div>
+  </div>
+
+  <h2 id="ctaonly">CTA-ONLY and NONE</h2>
+  <div class="pair">
+    <div class="card"><h3>/about (CTA-only) — 1440</h3><figure><img src="review/after-about-ctaonly-1440.png" alt="About page CTA-only"><figcaption>Check my business (to the homepage lookup) · Or talk with us.</figcaption></figure></div>
+    <div class="card"><h3>/book (None) — 1440</h3><figure><img src="review/after-book-none-1440.png" alt="Book page unchanged"><figcaption>Unchanged; the header keeps Let's talk primary at the booking stage.</figcaption></figure></div>
+  </div>
+  <div class="row"><div class="card"><figure><img src="review/after-about-ctaonly-390.png" alt="About 390"><figcaption>/about 390×844</figcaption></figure></div></div>
+
+  <h2 id="flow">Funnel states (real lookup of terramore.io)</h2>
+  <div class="row">
+    <div class="card"><figure><img src="review/A-result-390.png" alt="Lookup result"><figcaption>A: result and next steps (/marketing, 390)</figcaption></figure></div>
+    <div class="card"><figure><img src="review/J-report-popup-390.png" alt="Report popup prefilled"><figcaption>J: report popup, website prefilled; email asked only here</figcaption></figure></div>
+    <div class="card"><figure><img src="review/K-booking-390.png" alt="Booking dialog"><figcaption>K: booking hand-off</figcaption></figure></div>
+    <div class="card"><figure><img src="review/I-offline-390.png" alt="Offline error"><figcaption>I: network failure message</figcaption></figure></div>
+  </div>
+  <div class="pair">
+    <div class="card"><figure><img src="review/B-malformed-1440.png" alt="Malformed domain error"><figcaption>B: malformed website, inline error</figcaption></figure></div>
+    <div class="card"><figure><img src="review/G-header-to-home-1440.png" alt="Header link lands on homepage lookup"><figcaption>G: "Check my business" from /about lands on the homepage lookup, focused</figcaption></figure></div>
+  </div>
+</div>
+</body>
+</html>

@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
 import { BookingLink } from "@/components/booking-popup"
+import { CheckMyBusinessLink } from "@/components/business-lookup"
 import { SiteFooter } from "@/components/site-footer"
 
 export const metadata: Metadata = {
@@ -93,12 +94,18 @@ export default function ArticlePage() {
               Terramore keeps client campaigns fresh with scheduled creative rotation, so cost per lead stays flat
               while everyone else&apos;s climbs.
             </p>
-            <BookingLink
-              source="article"
-              className="mt-4 inline-flex h-11 items-center justify-center rounded-full bg-brand px-6 text-[15px] font-medium text-white hover:bg-brand-hover"
-            >
-              Book a demo
-            </BookingLink>
+            <div className="mt-4 flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-4">
+              <CheckMyBusinessLink
+                ctaId="article_closing_report"
+                className="inline-flex h-11 items-center justify-center rounded-full bg-brand px-6 text-[15px] font-medium text-white hover:bg-brand-hover"
+              />
+              <BookingLink
+                source="article"
+                className="inline-flex min-h-11 items-center text-[15px] font-medium text-ink/70 underline-offset-4 hover:text-ink hover:underline"
+              >
+                Or book a demo
+              </BookingLink>
+            </div>
           </div>
           <p className="mt-8 text-[14px]">
             <Link href="/marketing" className="font-medium text-brand underline-offset-4 hover:underline">

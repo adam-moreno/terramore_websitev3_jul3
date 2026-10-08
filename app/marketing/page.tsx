@@ -2,8 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import Image from "next/image"
 import { BookingLink } from "@/components/booking-popup"
-import { ReportPopupLink } from "@/components/report-popup"
-import type { CtaId } from "@/lib/funnel-taxonomy"
+import { MarketingPrimaryAction } from "@/components/marketing/primary-action"
 import {
   CollaborationSteps,
   CreativeCtaCard,
@@ -26,17 +25,6 @@ export const metadata: Metadata = {
   },
 }
 
-function TalkButton({ className = "", ctaId }: { className?: string; ctaId?: CtaId }) {
-  return (
-    <BookingLink
-      source="marketing"
-      ctaId={ctaId}
-      className={`inline-flex h-11 w-full items-center justify-center rounded-full bg-brand px-6 text-[16px] font-medium text-white hover:bg-brand-hover sm:w-auto ${className}`}
-    >
-      Book a demo
-    </BookingLink>
-  )
-}
 
 const RELATED_ARTICLES = [
   {
@@ -125,7 +113,7 @@ export default function MarketingPage() {
       {/* HERO — copy only (interim, 2026-10-06): the routing hero (VD-027) is withdrawn while the approved
           product-led hero is built. MarketingHeroRouting stays in the codebase for rollback. */}
       <section className="relative bg-cream" aria-labelledby="marketing-hero-title">
-        <div className="page-shell pb-14 pt-28 sm:pt-32 md:pb-20 lg:pb-24 lg:pt-40">
+        <div className="page-shell pb-14 pt-4 sm:pt-32 md:pb-20 lg:pb-24 lg:pt-40">
           <div className="max-w-4xl">
             <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-gold-ink lg:text-ink/75">
               Software, strategy, and execution
@@ -141,15 +129,17 @@ export default function MarketingPage() {
               Terramore combines software, strategy, and hands-on execution to find the next growth opportunity, act on it,
               and measure what happens.
             </p>
-            <div className="mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-              <TalkButton ctaId="marketing_hero_book" />
-              <ReportPopupLink
-                direct
-                ctaId="marketing_hero_report"
-                className="inline-flex min-h-11 items-center justify-center text-[15px] font-medium text-ink underline underline-offset-4 hover:text-brand sm:justify-start"
-              >
-                See your free Digital Footprint
-              </ReportPopupLink>
+            {/* Search-first: the business lookup is the primary action; the demo call is the secondary line. */}
+            <div className="mt-8">
+              <MarketingPrimaryAction ctaId="marketing_hero_report" helper="Free · No email needed to see the first results">
+                <BookingLink
+                  source="marketing"
+                  ctaId="marketing_hero_book"
+                  className="inline-flex min-h-11 items-center justify-center text-[15px] font-medium text-ink underline underline-offset-4 hover:text-brand"
+                >
+                  Or book a demo
+                </BookingLink>
+              </MarketingPrimaryAction>
             </div>
           </div>
         </div>

@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { BookingLink } from "@/components/booking-popup"
-import { ReportPopupLink } from "@/components/report-popup"
+import { CheckMyBusinessLink } from "@/components/business-lookup"
 import { SiteFooter } from "@/components/site-footer"
 
 interface LindyPageProps {
@@ -9,6 +9,8 @@ interface LindyPageProps {
   subtitle: string
   children: React.ReactNode
   ctaLabel?: string
+  /** Search-first by default; "book" where the page itself is about the call (pricing, enterprise). */
+  primary?: "check" | "book"
 }
 
 export function LindyPage({
@@ -17,6 +19,7 @@ export function LindyPage({
   subtitle,
   children,
   ctaLabel = "Let's talk",
+  primary = "check",
 }: LindyPageProps) {
   return (
     <div className="min-h-screen bg-cream">
@@ -30,14 +33,37 @@ export function LindyPage({
           <p className="mx-auto mt-5 max-w-xl text-base font-medium leading-relaxed text-ink/80 sm:text-lg">
             {subtitle}
           </p>
-          <BookingLink
-            label={ctaLabel}
-            ctaId="infopage_hero_book"
-            className="mt-8 inline-flex h-10 items-center rounded-full bg-brand px-4 text-[16px] font-medium text-white hover:bg-brand-hover"
-          />
-          <div className="mt-6">
-            <ReportPopupLink ctaId="infopage_hero_report" />
-          </div>
+          {primary === "check" ? (
+            <>
+              <CheckMyBusinessLink
+                ctaId="infopage_hero_report"
+                className="mt-8 inline-flex h-10 items-center rounded-full bg-brand px-4 text-[16px] font-medium text-white hover:bg-brand-hover"
+              />
+              <div className="mt-6">
+                <BookingLink
+                  label={`Or ${ctaLabel.charAt(0).toLowerCase()}${ctaLabel.slice(1)}`}
+                  ctaId="infopage_hero_book"
+                  className="text-[14px] font-medium text-ink/70 underline-offset-4 hover:text-ink hover:underline"
+                />
+              </div>
+            </>
+          ) : (
+            <>
+              <BookingLink
+                label={ctaLabel}
+                ctaId="infopage_hero_book"
+                className="mt-8 inline-flex h-10 items-center rounded-full bg-brand px-4 text-[16px] font-medium text-white hover:bg-brand-hover"
+              />
+              <div className="mt-6">
+                <CheckMyBusinessLink
+                  ctaId="infopage_hero_report"
+                  className="text-[14px] font-medium text-ink/70 underline-offset-4 hover:text-ink hover:underline"
+                >
+                  Or check your business first, free
+                </CheckMyBusinessLink>
+              </div>
+            </>
+          )}
         </div>
         </div>
       </section>

@@ -2,7 +2,7 @@
 
 import { BookingLink } from "@/components/booking-popup"
 import { League_Spartan } from "next/font/google"
-import { ReportPopupLink } from "@/components/report-popup"
+import { BusinessLookup, LookupBookButton, LookupReportButton } from "@/components/business-lookup"
 import { HomeFaq } from "@/components/home-faq"
 import { ReportBand } from "@/components/report-band"
 import { ReviewCarousel } from "@/components/review-carousel"
@@ -68,20 +68,29 @@ export default function TerramoreHomepage() {
                 </span>{" "}
                 revenue.
               </p>
-              <div className="mt-6 flex flex-col items-center md:mt-8">
-                <BookingLink
-                  label="Let's talk"
+              {/* Search-first: the business lookup is the primary action; booking is the secondary line under it. */}
+              <div className="mt-6 w-full text-left md:mt-8 md:w-[36rem]">
+                <BusinessLookup
+                  ctaId="home_hero_report"
                   source="homepage"
-                  ctaId="home_hero_book"
-                  className="inline-flex h-11 items-center justify-center rounded-full bg-brand px-6 text-[16px] font-medium text-white hover:bg-brand-hover md:h-10 md:px-4"
+                  align="center"
+                  anchor
+                  helper="Free · No email needed to see the first results"
+                  secondary={
+                    <BookingLink
+                      label="Or book a free 30-minute call"
+                      source="homepage"
+                      ctaId="home_hero_book"
+                      className="inline-flex min-h-11 items-center justify-center text-[14px] font-medium text-ink/70 underline underline-offset-4 hover:text-ink"
+                    />
+                  }
+                  next={
+                    <>
+                      <LookupReportButton ctaId="marketing_lookup_report" />
+                      <LookupBookButton ctaId="marketing_lookup_book" />
+                    </>
+                  }
                 />
-                <div className="mt-2.5 flex flex-col items-center gap-1 text-center text-[13px] font-medium text-ink/70">
-                  <p>Free 30-minute call.</p>
-                  <ReportPopupLink ctaId="home_hero_report" className="text-[13px] font-medium text-ink/70 underline-offset-4 hover:text-ink">
-                    <span className="md:hidden">Or tap for a free Digital Footprint report</span>
-                    <span className="hidden md:inline">Or click here for a Digital Footprint report</span>
-                  </ReportPopupLink>
-                </div>
               </div>
             </div>
           </div>

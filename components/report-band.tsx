@@ -1,15 +1,10 @@
 "use client"
 
-import { useState } from "react"
-import { ReportPopup } from "@/components/report-popup"
+import { CheckMyBusinessLink } from "@/components/business-lookup"
 import { ReportScanVisual } from "@/components/report-scan-visual"
-import { useCtaView } from "@/hooks/use-cta-view"
-import { trackCtaClick } from "@/lib/analytics"
 import { CHAPTERS } from "@/lib/report/chapters"
 
 export function ReportBand() {
-  const [open, setOpen] = useState(false)
-  const ctaRef = useCtaView<HTMLButtonElement>("home_band_report")
 
   return (
     <section id="report" className="section-y scroll-mt-28 md:py-24">
@@ -53,21 +48,14 @@ export function ReportBand() {
         </div>
 
         <div className="mt-12 flex flex-col items-center gap-3 md:mt-10">
-          <button
-            ref={ctaRef}
-            type="button"
-            onClick={() => {
-              trackCtaClick("home_band_report")
-              setOpen(true)
-            }}
+          {/* Search-first: back to the hero lookup, so the first results come before any email. */}
+          <CheckMyBusinessLink
+            ctaId="home_band_report"
             className="inline-flex h-12 items-center justify-center rounded-full bg-brand px-6 text-[16px] font-medium text-white hover:bg-brand-hover md:h-11 md:text-[15px]"
-          >
-            Send me the free report
-          </button>
+          />
         </div>
       </div>
 
-      <ReportPopup open={open} onClose={() => setOpen(false)} />
     </section>
   )
 }

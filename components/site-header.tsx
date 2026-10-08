@@ -5,6 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
 import { BookingLink } from "@/components/booking-popup"
+import { CheckMyBusinessLink } from "@/components/business-lookup"
 import { Logo } from "@/components/logo"
 import { ScheduleFab } from "@/components/schedule-fab"
 import { DASHBOARD_LOGIN_URL } from "@/lib/dashboard"
@@ -19,9 +20,20 @@ const NAV_LINKS = [
   { href: "/book", label: "How we work" },
 ] as const
 
+/** Visitors already booking (or managing a booking) keep "Let's talk" as the header's primary action. */
+function isBookingStage(pathname: string | null): boolean {
+  return pathname === "/schedule" || pathname === "/book" || Boolean(pathname?.startsWith("/book/"))
+}
+
+const PRIMARY_SM = "shrink-0 rounded-lg bg-brand px-2.5 py-1.5 text-[12px] font-medium text-white hover:bg-brand-hover"
+const PRIMARY_LG = "rounded-full bg-brand px-4 py-2 text-[13px] font-medium text-white hover:bg-brand-hover"
+const SECONDARY_LG = "rounded-full border border-ink/20 px-4 py-2 text-[13px] font-medium text-ink hover:border-ink/40"
+
 export function SiteHeader() {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
+  // Search-first: "Check my business" leads on every public page except the booking stage.
+  const searchFirst = !isBookingStage(pathname)
 
   useEffect(() => {
     setOpen(false)
@@ -56,16 +68,15 @@ export function SiteHeader() {
             animate={false}
             on="light"
             className="min-w-0 shrink"
-            wordmarkClassName="!h-6 w-auto sm:!h-7 lg:!h-8"
+            wordmarkClassName="!h-5 w-auto min-[400px]:!h-6 sm:!h-7 lg:!h-8"
           />
 
           <div className="ml-auto flex items-center gap-1.5 lg:hidden">
-            <BookingLink
-              label="Let's talk"
-              source="header"
-              ctaId="header_book"
-              className="shrink-0 rounded-lg bg-brand px-2.5 py-1.5 text-[12px] font-medium text-white hover:bg-brand-hover"
-            />
+            {searchFirst ? (
+              <CheckMyBusinessLink ctaId="header_report" className={`${PRIMARY_SM} max-[374px]:hidden`} />
+            ) : (
+              <BookingLink label="Let's talk" source="header" ctaId="header_book" className={PRIMARY_SM} />
+            )}
             <button
               type="button"
               className="rounded-lg p-1.5 text-ink"
@@ -94,12 +105,14 @@ export function SiteHeader() {
               <span>Log in</span>
               <span className="text-[10px] font-normal text-slate-500">Current clients</span>
             </a>
-            <BookingLink
-              label="Let's talk"
-              source="header"
-              ctaId="header_book"
-              className="rounded-full bg-brand px-4 py-2 text-[13px] font-medium text-white hover:bg-brand-hover"
-            />
+            {searchFirst ? (
+              <>
+                <BookingLink label="Let's talk" source="header" ctaId="header_book" className={SECONDARY_LG} />
+                <CheckMyBusinessLink ctaId="header_report" className={PRIMARY_LG} />
+              </>
+            ) : (
+              <BookingLink label="Let's talk" source="header" ctaId="header_book" className={PRIMARY_LG} />
+            )}
           </div>
         </div>
 
@@ -119,11 +132,27 @@ export function SiteHeader() {
                 key={item.href}
                 href={item.href}
                 onClick={close}
-                className="block border-b border-black/[0.04] py-4 text-[17px] font-medium text-ink last:border-b-0"
+                className="block border-b border-black/[0.04] py-4 text-[17px] font-medium text-ink"
               >
                 {item.label}
               </Link>
             ))}
+            {searchFirst ? (
+              <div className="py-4">
+                {/* Under 375 px the bar has no room for "Check my business"; it leads the menu instead. */}
+                <CheckMyBusinessLink
+                  ctaId="header_report"
+                  className="mb-3 inline-flex min-h-11 items-center rounded-full bg-brand px-5 text-[16px] font-medium text-white min-[375px]:hidden"
+                />
+                <br className="min-[375px]:hidden" />
+                <BookingLink
+                  label="Let's talk"
+                  source="header"
+                  ctaId="header_book"
+                  className="inline-flex min-h-11 items-center text-[17px] font-medium text-ink underline underline-offset-4"
+                />
+              </div>
+            ) : null}
           </div>
         ) : null}
       </div>
@@ -141,16 +170,20 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
       <>
         <header className="sticky top-0 z-[80] border-b border-black/[0.06] bg-cream/95 backdrop-blur-md">
           <div className="page-shell flex h-14 items-center justify-between md:h-16">
-            <Logo size="sm" animate={false} on="light" />
-            <div className="flex items-center gap-3">
-              <a href={DASHBOARD_LOGIN_URL} className="text-[13px] font-medium text-ink/70 hover:text-ink">
+            <Logo size="sm" animate={false} on="light" wordmarkClassName="!h-5 min-[400px]:!h-6" />
+            <div className="flex shrink-0 items-center gap-3">
+              <a href={DASHBOARD_LOGIN_URL} className="whitespace-nowrap text-[13px] font-medium text-ink/70 hover:text-ink">
                 Log in
               </a>
               <BookingLink
                 label="Let's talk"
                 source="report"
                 ctaId="report_header_book"
-                className="inline-flex h-9 items-center justify-center rounded-full bg-brand px-4 text-[14px] font-medium text-white hover:bg-brand-hover"
+                className="hidden h-9 items-center justify-center rounded-full border border-ink/20 px-4 text-[14px] font-medium text-ink hover:border-ink/40 sm:inline-flex"
+              />
+              <CheckMyBusinessLink
+                ctaId="report_header_report"
+                className="hidden h-9 items-center justify-center whitespace-nowrap rounded-full bg-brand px-3 text-[13px] font-medium text-white hover:bg-brand-hover min-[375px]:inline-flex sm:px-4 sm:text-[14px]"
               />
             </div>
           </div>

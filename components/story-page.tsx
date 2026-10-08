@@ -3,6 +3,8 @@ import type { StaticImageData } from "next/image"
 import Image from "next/image"
 import Link from "next/link"
 import { Source_Serif_4 } from "next/font/google"
+import { BookingLink } from "@/components/booking-popup"
+import { BusinessLookup, LookupBookButton, LookupReportButton } from "@/components/business-lookup"
 import { DualCtas } from "@/components/dual-ctas"
 
 const serif = Source_Serif_4({
@@ -129,7 +131,11 @@ export function StoryTiles({ items }: { items: StoryBlock[] }) {
   )
 }
 
-export function StoryCta() {
+/**
+ * Closing CTA of the story templates. `lookup` (capability and offering pages, where a visitor is still deciding
+ * whether Terramore fits) embeds the compact business lookup; `cta` (integration pages) links to it.
+ */
+export function StoryCta({ mode = "cta" }: { mode?: "lookup" | "cta" }) {
   return (
     <section className="pb-24">
       <div className="page-shell">
@@ -137,10 +143,45 @@ export function StoryCta() {
           <h2 className={`${serif.className} text-[2rem] font-semibold tracking-[-0.02em] text-ink md:text-[2.4rem]`}>
             Tell us where the business is stuck.
           </h2>
-          <p className="mt-4 max-w-xl text-[1.05rem] leading-relaxed text-ink/70">
-            We map the work, the tools, and whether Terramore is the right partner. Or ask for a report in your inbox.
-          </p>
-          <DualCtas className="mt-7" />
+          {mode === "lookup" ? (
+            <>
+              <p className="mt-4 max-w-xl text-[1.05rem] leading-relaxed text-ink/70">
+                Start with a free check of your website. Or talk with us and we map the work, the tools, and whether
+                Terramore is the right partner.
+              </p>
+              <div className="mt-7">
+                <BusinessLookup
+                  ctaId="service_closing_report"
+                  source="solutions"
+                  variant="compact"
+                  anchor
+                  helper="Free · No email needed to see the first results"
+                  secondary={
+                    <BookingLink
+                      label="Or talk with us"
+                      source="solutions"
+                      ctaId="service_closing_book"
+                      className="inline-flex min-h-11 items-center text-[15px] font-medium text-ink/70 underline-offset-4 hover:text-ink hover:underline"
+                    />
+                  }
+                  next={
+                    <>
+                      <LookupReportButton ctaId="marketing_lookup_report" />
+                      <LookupBookButton ctaId="marketing_lookup_book" />
+                    </>
+                  }
+                />
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="mt-4 max-w-xl text-[1.05rem] leading-relaxed text-ink/70">
+                We map the work, the tools, and whether Terramore is the right partner. Or start with a free check of
+                your website.
+              </p>
+              <DualCtas ctaId="infopage_closing_report" className="mt-7" />
+            </>
+          )}
         </div>
       </div>
     </section>

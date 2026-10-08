@@ -47,6 +47,7 @@ export function ReportPopup({
   website,
   direct = false,
   description,
+  entry: entryOverride,
 }: {
   open: boolean
   onClose: () => void
@@ -58,6 +59,8 @@ export function ReportPopup({
   direct?: boolean
   /** Optional header copy override (display only). */
   description?: string
+  /** Funnel entry when it isn't implied by `direct`, e.g. "popup_lookup" after a business lookup. */
+  entry?: ReportEntry
 }) {
   const router = useRouter()
   /** Every report entry, direct ones included, hands off to the Growth Workspace when it's configured. */
@@ -71,7 +74,7 @@ export function ReportPopup({
   closeRef.current = onClose
   const successRef = useRef(success)
   successRef.current = success
-  const entry: ReportEntry = direct ? "popup_direct" : "popup_questions"
+  const entry: ReportEntry = entryOverride ?? (direct ? "popup_direct" : "popup_questions")
   /** The success state's main action. Focus moves here when the report is requested, so keyboard and screen-reader users land on the next step. */
   const successActionRef = useRef<HTMLAnchorElement & HTMLButtonElement>(null)
   const detailsShownRef = useRef(false)

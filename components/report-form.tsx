@@ -63,7 +63,7 @@ export function ReportForm({
 
   // With the qualifying questions, the first answer was the start; the direct form starts at first focus.
   useEffect(() => {
-    if (started && entry === "popup_direct") trackFunnelEvent("report_progress", { step: "started", entry })
+    if (started && entry !== "popup_questions") trackFunnelEvent("report_progress", { step: "started", entry })
   }, [started, entry])
 
   const requiredCompleteRef = useRef(false)

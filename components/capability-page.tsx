@@ -32,7 +32,7 @@ export function CapabilityPage({ capability }: { capability: Capability }) {
       <StorySection title={capability.workTitle}>
         <StoryRevealTiles image={image} imageAlt={capability.title} items={capability.work} />
       </StorySection>
-      <StoryCta />
+      <StoryCta mode="lookup" />
     </div>
   )
 }
@@ -61,7 +61,7 @@ export function OfferingPage({
           items={offering.help}
         />
       </StorySection>
-      <StoryCta />
+      <StoryCta mode="lookup" />
     </div>
   )
 }

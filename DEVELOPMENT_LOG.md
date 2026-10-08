@@ -1,5 +1,36 @@
 # Development Log - Terramore Website
 
+## 2026-10-08 — Search-first acquisition (branch `acquisition/search-first` from production `597fd49`, local only)
+
+**Owner priority:** paid Google traffic produced few Digital Footprint requests. Cold visitors now start with the free business lookup ("Check my business"); booking stays available as the secondary action. Full record: `docs/acquisition/SEARCH_FIRST_ROUTE_AUDIT.md`. Review page: `docs/acquisition/search-first-review.html`.
+
+- **Base:** the lookup, safety and analytics work (classes A/B/C from `feature/marketing-growth-system`) is ported onto production, including the `970690f` detection fix and the identity-only dedupe. The out-of-scope /marketing redesign and the hero film are not.
+- **One lookup:** `components/business-lookup.tsx` gets `variant` (full / compact), `align`, `anchor` (`#check-my-business`), `onSubmitted`, and `CheckMyBusinessLink` (scroll to and focus the page's lookup, else `/#check-my-business`). There's one endpoint, one validation path, one analytics path and one report hand-off.
+- **FULL:** `/`, `/marketing`, `/report` heroes.
+- **COMPACT:** the `/solutions` hero. Its forked website form, which went straight to the email popup, is gone. Also the closing CTA of the 41 capability and offering pages.
+- **CTA-ONLY:**
+  - every page: header, standard footer;
+  - integrations (23), articles (3), about, resources, security, example report;
+  - homepage report band and FAQ;
+  - `/report` mid and closing CTAs;
+  - pricing and enterprise, with booking kept primary.
+- **NONE:** `/book`, `/book/manage`, `/schedule`, legal pages. The booking routes keep "Let's talk" in the header.
+- **Header:** "Check my business" (filled) + "Let's talk" (outlined). On phones, "Let's talk" moves into the menu. Below 375 px "Check my business" leads the menu, and the wordmark steps to 20 px under 400 px so the CTA fits.
+- **Floating Schedule button:** hidden below `lg` while the lookup is on screen.
+- **/marketing:** mobile top padding trimmed so the field is in the first viewport at 320 px.
+- **Analytics:**
+  - new event `lookup_input_focus`, new outcome `network` (with its own message);
+  - new CTA ids: header, report header, homepage closing, footer, service closing (report + book), info-page closing, article closing;
+  - the legacy `/report` events `report_cta_click` / `cta_click` (`report_primary`) are kept via `onSubmitted` / `onClick`;
+  - existing conversions are unchanged.
+- **Checks:**
+  - all 8 verifiers pass (lookup 93, funnel 79), `tsc` has the same 16 errors as production, and `next build` passes;
+  - headless Chrome on the production build: tests A–K, first viewport at 320–1440, no horizontal scroll;
+  - LCP and CLS unchanged or better; about 3 KB more transfer.
+- **Open:**
+  - blockers: the Cloudflare rate limit and the `/report` hero copy (MK-02);
+  - can follow: Places key, GA4 custom dimensions, Ads final URLs, MC-08, a construction dark-surface variant, homepage hydration weight.
+
 ## 2026-10-06 — /marketing hero: copy-only interim replaces the routing hero (branch `hotfix/marketing-hero-copy-only`)
 
 **Decision (owner, 2026-10-06).** The routing / "mancala" hero (VD-027) is rejected. This is step A of the approved deploy order: take it off production with a copy-only hero while the approved product-led "Next Move" hero is built.

@@ -4,15 +4,28 @@ import { Calendar } from "lucide-react"
 import { usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
 import { BookingLink } from "@/components/booking-popup"
+import { LOOKUP_ANCHOR } from "@/components/business-lookup"
 
 /**
  * Sitewide floating Schedule control.
  * In the first viewport (hero): calendar + "Schedule".
  * After scrolling past the hero: calendar icon only.
+ * Search-first: below lg it steps aside while the page's business lookup (#check-my-business) is on screen, so the
+ * secondary booking action never covers the primary field, button or results.
  */
 export function ScheduleFab() {
   const pathname = usePathname()
   const [inHero, setInHero] = useState(true)
+  const [lookupOnScreen, setLookupOnScreen] = useState(false)
+
+  useEffect(() => {
+    setLookupOnScreen(false)
+    const lookup = document.getElementById(LOOKUP_ANCHOR)
+    if (!lookup || typeof IntersectionObserver === "undefined") return
+    const observer = new IntersectionObserver((entries) => setLookupOnScreen(entries[entries.length - 1].isIntersecting))
+    observer.observe(lookup)
+    return () => observer.disconnect()
+  }, [pathname])
 
   useEffect(() => {
     const sync = () => {
@@ -28,7 +41,9 @@ export function ScheduleFab() {
   }, [pathname])
 
   return (
-    <div className="fixed bottom-[calc(0.75rem+env(safe-area-inset-bottom))] right-3 z-[70] sm:right-4">
+    <div
+      className={`fixed bottom-[calc(0.75rem+env(safe-area-inset-bottom))] right-3 z-[70] sm:right-4 ${lookupOnScreen ? "max-lg:hidden" : ""}`}
+    >
       <BookingLink
         source="floating_cta"
         ctaId="floating_book"

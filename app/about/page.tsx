@@ -55,7 +55,7 @@ export default function AboutPage() {
           Adam Moreno spent a decade doing that work for large advertisers at Kantar and Samba TV. Terramore is the
           same work, done inside the tools a shop, a service, or a brand already uses.
         </p>
-        <DualCtas className="mt-8" />
+        <DualCtas ctaId="infopage_hero_report" className="mt-8" />
       </section>
 
       <section className="page-shell py-10 md:py-14">
@@ -117,7 +117,7 @@ export default function AboutPage() {
           <p className="mt-4 text-[1.05rem] leading-relaxed text-ink/70">
             A free call maps the work. A free report reads your site and lands in your email.
           </p>
-          <DualCtas className="mt-7" />
+          <DualCtas ctaId="infopage_closing_report" className="mt-7" />
         </div>
       </section>
 

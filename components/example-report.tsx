@@ -204,7 +204,7 @@ export function ExampleReport({ hideDisclosure = false }: { hideDisclosure?: boo
           <p className="mt-3 text-[1.05rem] leading-relaxed text-ink/70">
             Give us the site and an email. In your inbox in minutes. Or talk and we map the work in a meeting.
           </p>
-          <DualCtas className="mt-7" />
+          <DualCtas ctaId="infopage_closing_report" className="mt-7" />
           <p className="mt-5 text-[14px] text-slate-500">
             Want yours?{" "}
             <Link href="/report" className="font-medium text-brand hover:text-brand-hover">

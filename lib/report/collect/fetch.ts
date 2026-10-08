@@ -3,9 +3,16 @@
  * Keep request volume low: short timeouts, truncated bodies, no auth.
  */
 
+import { assertPublicUrl } from "@/lib/report/collect/public-url"
+
 export const FOOTPRINT_UA =
   "Mozilla/5.0 (compatible; TerramoreFootprintBot/1.0; +https://terramore.io/report)"
 
+/**
+ * GET with a short timeout. Every URL and every redirect hop must be a public http(s) address (assertPublicUrl):
+ * the free lookup fetches visitor-supplied sites, so redirects are followed by hand, at most 5 hops.
+ * Returns null on any failure, including a blocked address.
+ */
 export async function fetchText(
   url: string,
   timeoutMs = 10000,
@@ -13,13 +20,26 @@ export async function fetchText(
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), timeoutMs)
   try {
-    const response = await fetch(url, {
-      headers: { "User-Agent": FOOTPRINT_UA, Accept: "text/html,application/xhtml+xml,application/json,text/plain,*/*" },
-      redirect: "follow",
-      signal: controller.signal,
-    })
-    const text = await response.text()
-    return { status: response.status, text: text.slice(0, 600_000), finalUrl: response.url || url }
+    let current = url
+    for (let hop = 0; hop <= 5; hop++) {
+      await assertPublicUrl(current)
+      const response = await fetch(current, {
+        headers: {
+          "User-Agent": FOOTPRINT_UA,
+          Accept: "text/html,application/xhtml+xml,application/json,text/plain,*/*",
+        },
+        redirect: "manual",
+        signal: controller.signal,
+      })
+      const location = response.headers.get("location")
+      if (response.status >= 300 && response.status < 400 && location) {
+        current = new URL(location, current).toString()
+        continue
+      }
+      const text = await response.text()
+      return { status: response.status, text: text.slice(0, 600_000), finalUrl: current }
+    }
+    return null
   } catch {
     return null
   } finally {
@@ -77,11 +97,65 @@ export const KEY_PAGE_HINTS =
 export const STATIC_ASSET = /\.(css|js|mjs|map|png|jpe?g|gif|svg|webp|ico|woff2?|ttf|eot|pdf|mp4|webm)(\?|$)/i
 export const CDN_PATH = /\/cdn\/|\/assets\/|_next\/static|\/static\//i
 
+/**
+ * A call to action asks the visitor to do something, so its label starts with the action ("Book a call", "Get a
+ * quote"). Matching anywhere in the label counted headings such as "Fill the appointment book" or "Reach people
+ * ready to buy" as requests.
+ */
 export const CTA_HINT =
-  /book|schedule|call|contact|get\s+(a\s+)?quote|request|buy|shop|order|start|learn more|get started|free consult|message|reserve|claim|try|subscribe|sign up|add to (cart|bag)/i
+  /^(?:book|schedule|call|contact|get|request|buy|shop|order|start|learn more|free (?:consult|quote|estimate|trial)|message|reserve|claim|try|subscribe|sign up|add to (?:cart|bag)|let['’]?s talk|talk (?:to|with)|send me|join|apply|enroll|register)\b/i
 
-export const BOOKING_HINT =
-  /calendly\.com|squareup\.com\/appointments|acuityscheduling|book(?:ing)?[-_ ]?(?:now|online|an? appointment)|vagaro|mindbody|zocdoc|opentable|resy\.com/i
+/** Hosts (and, for Square and Google, paths) of third-party booking and reservation tools. */
+export function isSchedulerUrl(url: string): boolean {
+  let u: URL
+  try {
+    u = new URL(url)
+  } catch {
+    return false
+  }
+  const host = u.hostname.toLowerCase()
+  const on = (domain: string) => host === domain || host.endsWith(`.${domain}`)
+  if (
+    [
+      "calendly.com",
+      "acuityscheduling.com",
+      "as.me",
+      "cal.com",
+      "savvycal.com",
+      "youcanbook.me",
+      "setmore.com",
+      "simplybook.me",
+      "tidycal.com",
+      "booksy.com",
+      "vagaro.com",
+      "mindbodyonline.com",
+      "zocdoc.com",
+      "opentable.com",
+      "resy.com",
+      "fresha.com",
+      "schedulicity.com",
+      "calendar.app.google",
+    ].some(on)
+  )
+    return true
+  if (host === "meetings.hubspot.com") return true
+  if (on("squareup.com") || on("square.site")) return /\/(appointments|book)(\/|$)/i.test(u.pathname)
+  if (host === "calendar.google.com") return /\/calendar\/appointments\//i.test(u.pathname)
+  return false
+}
+
+/** Same-site paths that conventionally hold a booking flow. A candidate only: the page itself is then checked. */
+export const BOOKING_PATH = /^\/(?:book|booking|bookings|schedule|scheduling|appointments?|reserve|reservations?|consult|consultation)(?:\/|$)/i
+
+/** Link or button labels that offer booking. Also only a candidate. */
+export const BOOKING_LABEL = /^(?:book|schedule|reserve)\b/i
+
+/**
+ * Text that only appears where a visitor can actually choose a time. Ordinary copy that mentions booking or
+ * scheduling ("we book out weeks ahead") doesn't match.
+ */
+export const SCHEDULING_TEXT =
+  /\b(?:pick|choose|select|find) (?:a|your) (?:time|date|day|time ?slot|slot)\b|\bavailable (?:times|time ?slots|slots|appointments)\b|\btimes (?:are )?shown? in your (?:local )?time ?zone\b/i
 
 export const TRUST_HINTS: Array<[string, RegExp]> = [
   ["testimonials", /testimonial|what (?:our )?clients say|customer (?:stories|reviews)/i],
