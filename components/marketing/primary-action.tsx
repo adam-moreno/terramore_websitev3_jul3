@@ -4,7 +4,7 @@ import type { CtaId } from "@/lib/funnel-taxonomy"
 
 /**
  * The /marketing primary action, one slot used by the hero and the closing section: the free business lookup
- * ("Your website [ … ] [Check my business]"), then the secondary action passed as children. The lookup's own next
+ * (a described website field, then [Check my business]), then the secondary action passed as children. The lookup's own next
  * steps (full report by email, or a call) carry the marketing_lookup_* ids. Callers pass literal CTA ids
  * (`ctaId="marketing_hero_report"`) so verify-funnel can see them.
  */

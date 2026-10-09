@@ -66,9 +66,9 @@ The canonical component is `components/business-lookup.tsx`, with the same endpo
 | Header (public pages) | **Let's talk** | **Check my business** (filled) + Let's talk (outlined). On phones, "Check my business" is in the bar and "Let's talk" in the menu. Below 375 px the bar has no room, so "Check my business" leads the menu. |
 | Header on `/book`, `/book/*`, `/schedule` | Let's talk | Let's talk (unchanged) |
 | Report funnel header (`/report*`) | Let's talk | **Check my business** + Let's talk (from 640 px) |
-| Homepage hero | **Let's talk** · "Free 30-minute call." · "Or click here for a Digital Footprint report" | **[Your website] [Check my business]** · "Free · No email needed to see the first results" · "Or book a free 30-minute call" |
-| /marketing hero | **Book a demo** · See your free Digital Footprint | **[Your website] [Check my business]** · helper · "Or book a demo" |
-| /report hero | **Get my free Digital Footprint report** (email form) | **[Your website] [Check my business]** · "Free · No login · No email needed to see the first results" |
+| Homepage hero | **Let's talk** · "Free 30-minute call." · "Or click here for a Digital Footprint report" | **[described website field] [Check my business]** · "Free · No email needed to see the first results" · "Or book a free 30-minute call" |
+| /marketing hero | **Book a demo** · See your free Digital Footprint | **[described website field] [Check my business]** · helper · "Or book a demo" |
+| /report hero | **Get my free Digital Footprint report** (email form) | **[described website field] [Check my business]** · "Free · No login · No email needed to see the first results" |
 | /solutions hero | Own form → email popup · Book a call → | Canonical compact lookup · "Rather talk it through? Book a call →" |
 | Service-page closing (41) | **Let's talk** · Or get a free report | Compact lookup · "Or talk with us" |
 | Info / integration / footer closing | **Let's talk** · Or get a free report | **Check my business** · "Or talk with us" |
@@ -191,3 +191,10 @@ Verifiers: `verify-lookup` 93, `verify-report-dedupe` 10, `verify-funnel` 79 (26
 - Floating button: it hides only while the lookup is on screen, below `lg`, which reduces fixed bottom layers rather than adding one.
 - Reduced motion: no new animation; the scroll on the "Check my business" link is instant under reduced motion.
 - No new colors, fonts or radii; existing tokens (`bg-brand`, `ink`, `slate`) only.
+
+## 2026-10-09 — Lookup field copy (owner request)
+
+- The label "Your website" became a described field. Label: "Enter your website to check how customers find and reach your business." Description, tied to the input with `aria-describedby`: "See what's working and what's missing across search basics, contact and booking, analytics and ad tags, social profiles, and your Google Maps listing."
+- Placeholder: "Enter your business's website here" (was "yourbusiness.com"). The visible label still names the field; the placeholder is never the label.
+- The owner's model sentence mentioned performance, Core Web Vitals and loading speed. The lookup measures none of these (its six sources are listed above), so the description names what it actually checks. If speed checks are added to the lookup later, the copy can say so.
+- Checks: all 8 verifiers pass; `next build` passes; DevTools emulation at 320×700 and 390×844 on `/`, `/solutions`, `/marketing`: no horizontal scroll. At 390 the field and button sit in the first viewport. At 320 the placeholder's last word is clipped and the button sits just below a 700 px viewport.

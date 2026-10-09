@@ -18,7 +18,7 @@ import {
 } from "@/lib/lookup/types"
 
 /**
- * Free business lookup: "Your website [ … ] [Check my business]". The one canonical lookup for every public page
+ * Free business lookup: a described website field, then [Check my business]. The one canonical lookup for every public page
  * (search-first: docs/acquisition/SEARCH_FIRST_ROUTE_AUDIT.md). `variant` and `align` change layout and spacing only;
  * validation, the endpoint, analytics and the report hand-off are the same everywhere. It streams POST /api/lookup and shows each source as
  * it finishes, then offers next steps passed in by the host page (`next`, e.g. LookupReportButton and
@@ -120,6 +120,7 @@ export function BusinessLookup({
 }) {
   const inputId = useId()
   const errorId = useId()
+  const descId = useId()
   const inputRef = useRef<HTMLInputElement>(null)
   const [value, setValue] = useState("")
   const [inputError, setInputError] = useState<string | null>(null)
@@ -230,8 +231,15 @@ export function BusinessLookup({
             htmlFor={inputId}
             className={`block font-semibold text-ink ${variant === "compact" ? "text-[14px]" : "text-[15px]"} ${align === "center" ? "text-center" : ""}`}
           >
-            Your website
+            Enter your website to check how customers find and reach your business.
           </label>
+          <p
+            id={descId}
+            className={`mt-1 text-slate-600 ${variant === "compact" ? "text-[13px]" : "text-[14px]"} ${align === "center" ? "text-center" : ""}`}
+          >
+            See what's working and what's missing across search basics, contact and booking, analytics and ad tags,
+            social profiles, and your Google Maps listing.
+          </p>
           <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
             <input
               ref={inputRef}
@@ -243,7 +251,7 @@ export function BusinessLookup({
               autoCapitalize="none"
               autoCorrect="off"
               spellCheck={false}
-              placeholder="yourbusiness.com"
+              placeholder="Enter your business's website here"
               value={value}
               onFocus={() => trackFunnelEvent("lookup_input_focus", { cta_id: ctaId }, { once: ctaId })}
               onChange={(e) => {
@@ -251,7 +259,7 @@ export function BusinessLookup({
                 if (inputError && looksLikeWebsite(e.target.value)) setInputError(null)
               }}
               aria-invalid={inputError ? true : undefined}
-              aria-describedby={inputError ? errorId : undefined}
+              aria-describedby={inputError ? `${descId} ${errorId}` : descId}
               className="min-h-12 w-full min-w-0 sm:w-auto sm:min-w-[15rem] sm:flex-1 rounded-full border border-ink/55 bg-white px-5 text-[16px] text-ink placeholder:text-slate-500 focus-visible:border-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40"
             />
             <button ref={viewRef} type="submit" className={PRIMARY} disabled={pending}>
