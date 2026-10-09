@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto"
+import { collectCatalog } from "@/lib/report/collect/catalog"
 import { collectDirectories } from "@/lib/report/collect/directories"
 import { pickAttr } from "@/lib/report/collect/fetch"
 import { collectLocations } from "@/lib/report/collect/locations"
@@ -6,8 +7,9 @@ import { assertPublicUrl, BlockedUrlError } from "@/lib/report/collect/public-ur
 import { collectSiteExperience, type BookingCheck } from "@/lib/report/collect/site-experience"
 import { collectTechnical } from "@/lib/report/collect/technical"
 import { normalizeWebsite } from "@/lib/report/footprint"
-import type { PageSnapshot } from "@/lib/report/types"
-import type { LookupEvent, LookupFinding, LookupSourceId } from "@/lib/lookup/types"
+import { scoreDigitalPresence } from "@/lib/report/score/digital-presence"
+import type { PageSnapshot, PlacesLookup } from "@/lib/report/types"
+import type { LookupEvent, LookupFinding, LookupScore, LookupSourceId } from "@/lib/lookup/types"
 
 /**
  * The free business lookup: the Digital Footprint collectors, run without a lead, streamed source by source.
@@ -15,6 +17,16 @@ import type { LookupEvent, LookupFinding, LookupSourceId } from "@/lib/lookup/ty
  * and (when configured) a Google Maps listing confirmed by its website host. No model call, no stored rows.
  * Google Places rating and review count never leave memory (lib/report/types.ts PlacesLookup).
  */
+
+/** No Places key or no lookup: scored as not confirmed, and the score says Maps wasn't checked. */
+const PLACES_NOT_CHECKED: PlacesLookup = {
+  checked: false,
+  confirmed: false,
+  placeId: null,
+  rating: null,
+  reviewCount: null,
+  hasAddress: false,
+}
 
 /** Gaps in the order a first look should surface them: the ones closest to a lost customer first. */
 const FIRST_LOOK_ORDER = [
@@ -252,12 +264,20 @@ export async function runLookup(
   }
   report("measurement", "done", measurementFindings)
 
+  // The full report's Digital Presence Score, from this check's pages. Null when the technical read didn't run.
+  let score: LookupScore | null = null
   if (Date.now() > deadline) {
     for (const source of ["search_basics", "social", "google_maps"] as const) report(source, "failed")
   } else {
-    const [technical, places] = await Promise.all([
+    const [technical, places, catalog] = await Promise.all([
       collectTechnical(website, site.homeHtml, home.status, site.homeFinalUrl),
       process.env.GOOGLE_PLACES_API_KEY ? collectLocations(name || "", website) : Promise.resolve(null),
+      collectCatalog({
+        website,
+        platform: site.platform,
+        hasCheckout: site.hasCheckout,
+        servicePageExcerpts: site.pages.map((p) => p.excerpt),
+      }),
     ])
 
     const search: LookupFinding[] = []
@@ -309,7 +329,8 @@ export async function runLookup(
       )
     report("search_basics", "done", search)
 
-    const linked = collectDirectories(site.pageHtml).filter((d) => d.found && d.linkedFromSite)
+    const directories = collectDirectories(site.pageHtml)
+    const linked = directories.filter((d) => d.found && d.linkedFromSite)
     report(
       "social",
       linked.length ? "done" : "not_found",
@@ -323,7 +344,7 @@ export async function runLookup(
               where,
             ),
           ]
-        : [finding("social", "none", "gap", "No social profiles are linked from the pages we read", where)],
+        : [finding("social", "none", "note", "No social profiles are linked from the pages we read", where)],
     )
 
     if (!places) report("google_maps", "unavailable")
@@ -343,9 +364,25 @@ export async function runLookup(
         ),
       ])
     }
+
+    const breakdown = scoreDigitalPresence({
+      pages: site.pages,
+      technical,
+      directories,
+      places: places ?? PLACES_NOT_CHECKED,
+      catalog,
+      hasCheckout: site.hasCheckout,
+    })
+    // Numbers and labels only: factor evidence stays server-side, and Places values never leave memory.
+    score = {
+      overall: breakdown.overall,
+      pagesRead: pages.length,
+      mapsChecked: Boolean(places?.checked),
+      factors: breakdown.factors.map((f) => ({ id: f.id, label: f.label, score: f.available ? f.score : null })),
+    }
   }
 
   const gaps = found.filter((f) => f.tone === "gap")
   const firstLook = FIRST_LOOK_ORDER.map((id) => gaps.find((g) => g.id === id)).find(Boolean) ?? gaps[0] ?? null
-  emit({ type: "done", firstLook, checked: 6 })
+  emit({ type: "done", firstLook, checked: 6, score })
 }

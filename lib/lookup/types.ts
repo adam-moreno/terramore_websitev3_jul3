@@ -24,11 +24,29 @@ export type LookupFinding = {
 /** `network` is client-side only: the request never reached Terramore (offline, dropped connection). */
 export type LookupErrorCode = "invalid_website" | "blocked" | "unreachable" | "rate_limited" | "server" | "network"
 
+/**
+ * The full report's Digital Presence Score (lib/report/score/digital-presence.ts), computed from the lookup's pages.
+ * 0 to 100 per factor; null when a factor couldn't be scored. No evidence text or Places values.
+ */
+export type LookupScore = {
+  overall: number | null
+  pagesRead: number
+  mapsChecked: boolean
+  factors: Array<{ id: string; label: string; score: number | null }>
+}
+
+/** Score scale shared by the score rings and their legend. */
+export const SCORE_BANDS = [
+  { min: 0, max: 49, label: "0–49" },
+  { min: 50, max: 89, label: "50–89" },
+  { min: 90, max: 100, label: "90–100" },
+] as const
+
 export type LookupEvent =
   | { type: "start"; lookupId: string; domain: string; website: string }
   | { type: "identity"; name: string | null }
   | { type: "source"; source: LookupSourceId; status: LookupSourceStatus; findings: LookupFinding[] }
-  | { type: "done"; firstLook: LookupFinding | null; checked: number }
+  | { type: "done"; firstLook: LookupFinding | null; checked: number; score: LookupScore | null }
   | { type: "error"; code: LookupErrorCode; message: string }
 
 /** Display order and owner-language labels. */

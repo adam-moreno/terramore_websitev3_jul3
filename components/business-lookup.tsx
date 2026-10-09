@@ -1,7 +1,19 @@
 "use client"
 
 import { createContext, useContext, useEffect, useId, useRef, useState } from "react"
-import { AlertCircle, Check, CircleDashed, Info, Loader2, Minus } from "lucide-react"
+import {
+  AlertCircle,
+  Check,
+  CircleDashed,
+  Info,
+  LayoutTemplate,
+  Loader2,
+  Minus,
+  MousePointerClick,
+  Search,
+  ShieldCheck,
+  Wrench,
+} from "lucide-react"
 import { BookingLink } from "@/components/booking-popup"
 import { ReportPopup } from "@/components/report-popup"
 import { useCtaView } from "@/hooks/use-cta-view"
@@ -15,9 +27,10 @@ import {
   type LookupFinding,
   type LookupSourceId,
   type LookupSourceStatus,
+  SCORE_BANDS,
+  type LookupScore,
 } from "@/lib/lookup/types"
 import { useIsMobile } from "@/components/ui/use-mobile"
-import { scoreLookup, type SourceScore } from "@/lib/lookup/score"
 
 /**
  * Free business lookup: a described website field, then [Check my business]. The one canonical lookup for every public page
@@ -47,6 +60,7 @@ type LookupState = {
   name: string | null
   sources: Partial<Record<LookupSourceId, { status: LookupSourceStatus; findings: LookupFinding[] }>>
   firstLook: LookupFinding | null
+  score: LookupScore | null
   error: LookupErrorCode | null
 }
 
@@ -58,6 +72,7 @@ const EMPTY: LookupState = {
   name: null,
   sources: {},
   firstLook: null,
+  score: null,
   error: null,
 }
 
@@ -82,7 +97,7 @@ function reduce(state: LookupState, event: LookupEvent): LookupState {
         sources: { ...state.sources, [event.source]: { status: event.status, findings: event.findings } },
       }
     case "done":
-      return { ...state, phase: "done", firstLook: event.firstLook }
+      return { ...state, phase: "done", firstLook: event.firstLook, score: event.score ?? null }
     case "error":
       return { ...state, phase: "error", error: event.code }
     default:
@@ -298,7 +313,12 @@ export function BusinessLookup({
         {variant === "hero" && !(state.phase === "error") ? (
           <>
             <ScoreCard state={state} next={next} />
-            {state.phase === "done" ? <LookupResults state={state} onReset={reset} detail /> : null}
+            {state.phase === "done" ? (
+              <>
+                <ScoreFactors score={state.score} />
+                <LookupResults state={state} onReset={reset} detail />
+              </>
+            ) : null}
           </>
         ) : showResults ? (
           <LookupResults state={state} next={next} onReset={reset} />
@@ -343,61 +363,111 @@ function FindingIcon({ tone }: { tone: LookupFinding["tone"] }) {
   return <Info aria-hidden className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" />
 }
 
+/** Report factor ids (lib/report/score/digital-presence.ts) in display order, with what each one counts. */
+const FACTORS: ReadonlyArray<{ id: string; label: string; icon: typeof Search; counts: string }> = [
+  {
+    id: "digital_experience",
+    label: "Digital Experience",
+    icon: LayoutTemplate,
+    counts: "One clear headline, a page title, focused navigation, and one or two clear next steps for visitors.",
+  },
+  {
+    id: "discoverability",
+    label: "Discoverability",
+    icon: Search,
+    counts:
+      "A page title and search description, robots.txt and a sitemap, linked social profiles, and a Google Maps listing that points to your site.",
+  },
+  {
+    id: "trust",
+    label: "Trust & Credibility",
+    icon: ShieldCheck,
+    counts:
+      "Testimonials, case studies, guarantees, credentials, awards, policies, team or before-and-after pages, plus your Google listing.",
+  },
+  {
+    id: "conversion",
+    label: "Conversion Readiness",
+    icon: MousePointerClick,
+    counts: "A clear call to action, a phone, email or form on the homepage, online booking, and a checkout or visible services.",
+  },
+  {
+    id: "technical",
+    label: "Technical Health",
+    icon: Wrench,
+    counts: "A secure (https) connection, a page title and description, a canonical tag, robots.txt, a sitemap, and phone-ready pages.",
+  },
+]
+
+/** Score scale: 0–49 red, 50–89 orange, 90–100 green (owner decision 2026-10-09; the number always shows too). */
+function bandTone(score: number) {
+  if (score < 50) return { stroke: "stroke-red-600", fill: "bg-red-600" }
+  if (score < 90) return { stroke: "stroke-orange-600", fill: "bg-orange-600" }
+  return { stroke: "stroke-green-600", fill: "bg-green-600" }
+}
+
+const BAND_DOT = ["bg-red-600", "bg-orange-600", "bg-green-600"] as const
+
 /**
- * The "hero" variant's score card. Idle (md and up only), it shows what the check will fill in: a 0 score ring, each
- * source at 0, and the two steps (instant score here, full report by email). Running the check fills this same card.
- * The score is a count of basics in place (lib/lookup/score.ts), never a rating, and sources the check couldn't read
- * are left out of it and said so.
+ * The "hero" variant's score card: the full report's Digital Presence Score as a teaser. Idle (md and up only), every
+ * ring is at 0 with the scale and the two steps (instant score here, full report by email). Running the check shows
+ * progress along the card's bottom edge, then fills each ring. The scores come from the report's own scoring code.
  */
 function ScoreCard({ state, next }: { state: LookupState; next?: React.ReactNode }) {
   const idle = state.phase === "idle"
   const pending = state.phase === "checking"
-  const score = scoreLookup(state.sources)
+  const done = state.phase === "done"
+  const score = done ? state.score : null
   const finished = Object.values(state.sources).filter((r) => r && r.status !== "checking").length
-  const denominator = state.phase === "done" ? score.counted : score.total
-  const unread = score.total - score.counted
+  const factorScore = (id: string) => score?.factors.find((f) => f.id === id)?.score ?? null
 
   return (
     <section
-      aria-label="Your website score"
-      className={`mt-8 rounded-2xl border border-ink/10 bg-white p-5 text-left md:p-8 ${idle ? "hidden md:block" : ""}`}
+      aria-label="Your Digital Presence Score"
+      className={`relative mt-8 overflow-hidden rounded-2xl border border-ink/10 bg-white p-5 text-left md:p-8 ${idle ? "hidden md:block" : ""}`}
     >
-      <div className="flex items-center gap-5 max-[359px]:flex-col max-[359px]:items-start md:gap-7">
-        <ScoreRing passed={score.passed} total={denominator} idle={idle} />
-        <div className="min-w-0">
-          <p className="text-[18px] font-semibold text-ink md:text-[20px]">Your website score</p>
-          {idle ? (
-            <p className="mt-1 text-[15px] leading-snug text-slate-600">
-              Basics in place, out of {score.total} we can see from your public website. Your score fills in here when
-              the check finishes.
-            </p>
-          ) : (
-            <p role="status" className="mt-1 text-[15px] leading-snug text-slate-600">
-              {pending
-                ? `Checking ${state.domain ?? "your website"}: ${finished} of ${LOOKUP_SOURCES.length} done`
-                : `${score.passed} of ${score.counted} basics in place on ${state.domain}.${
-                    unread ? ` ${unread} couldn't be checked from the public site.` : ""
-                  }`}
-            </p>
-          )}
-        </div>
-      </div>
+      <p className="text-[18px] font-semibold text-ink md:text-[20px]">Your Digital Presence Score</p>
+      {idle ? (
+        <p className="mt-1 text-[15px] leading-snug text-slate-600">
+          Scored 0 to 100 with the same method as our full Digital Footprint report. Your scores fill in here when the
+          check finishes.
+        </p>
+      ) : (
+        <p role="status" className="mt-1 text-[15px] leading-snug text-slate-600">
+          {pending
+            ? `Checking ${state.domain ?? "your website"}: ${finished} of ${LOOKUP_SOURCES.length} done`
+            : score?.overall != null
+              ? `${state.domain} scores ${score.overall} out of 100 overall, read from ${score.pagesRead} ${
+                  score.pagesRead === 1 ? "page" : "pages"
+                }${score.mapsChecked ? "" : " (Google Maps wasn't checked)"}. Your full report reads more, so its score can differ.`
+              : `We couldn't score ${state.domain ?? "this website"} from its public pages. The findings below still apply.`}
+        </p>
+      )}
 
-      <ul className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {LOOKUP_SOURCES.map(({ id, label }) => (
-          <ScoreTile
-            key={id}
-            label={label}
-            score={score.perSource[id]}
-            status={state.sources[id]?.status}
-            pending={pending}
-          />
+      <ul className="mt-6 grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 lg:grid-cols-6">
+        <li className="col-span-2 flex flex-col items-center sm:col-span-3 lg:col-span-1">
+          <ScoreRing label="Overall" value={score?.overall ?? null} state={state.phase} size="lg" />
+        </li>
+        {FACTORS.map((f) => (
+          <li key={f.id} className="flex flex-col items-center">
+            <ScoreRing label={f.label} value={factorScore(f.id)} state={state.phase} size="md" />
+          </li>
         ))}
       </ul>
 
+      <p className="mt-6 flex flex-wrap items-center justify-end gap-x-3 gap-y-1 text-[13px] text-slate-600">
+        <span>Score scale:</span>
+        {SCORE_BANDS.map((b, i) => (
+          <span key={b.label} className="inline-flex items-center gap-1.5">
+            <span aria-hidden className={`h-2.5 w-2.5 rounded-full ${BAND_DOT[i]}`} />
+            {b.label}
+          </span>
+        ))}
+      </p>
+
       <ol className="mt-6 grid gap-4 border-t border-ink/10 pt-6 md:grid-cols-2">
         <li className="flex gap-3">
-          <StepNumber n={1} done={state.phase === "done"} />
+          <StepNumber n={1} done={done} />
           <span>
             <span className="block text-[15px] font-semibold text-ink">Instant score</span>
             <span className="block text-[14px] leading-snug text-slate-600">Free, right on this page. No email needed.</span>
@@ -408,90 +478,129 @@ function ScoreCard({ state, next }: { state: LookupState; next?: React.ReactNode
           <span>
             <span className="block text-[15px] font-semibold text-ink">Full report by email</span>
             <span className="block text-[14px] leading-snug text-slate-600">
-              When the check finishes, get the complete Digital Footprint report in your inbox.
+              The evidence behind every score, how you compare, and the top five things we&apos;d fix first.
             </span>
           </span>
         </li>
       </ol>
-      {state.phase === "done" && next ? (
+      {done && next ? (
         <div className="mt-5 flex flex-col items-stretch gap-x-5 gap-y-2 sm:flex-row sm:flex-wrap sm:items-center">{next}</div>
+      ) : null}
+
+      {pending ? (
+        <div aria-hidden className="absolute inset-x-0 bottom-0 h-1 bg-ink/10">
+          <div
+            className="h-full bg-brand motion-safe:transition-[width] motion-safe:duration-500"
+            style={{ width: `${Math.max(4, Math.round((finished / LOOKUP_SOURCES.length) * 100))}%` }}
+          />
+        </div>
       ) : null}
     </section>
   )
 }
 
-function ScoreRing({ passed, total, idle }: { passed: number; total: number; idle: boolean }) {
+function ScoreRing({
+  label,
+  value,
+  state,
+  size,
+}: {
+  label: string
+  value: number | null
+  state: Phase
+  size: "lg" | "md"
+}) {
   const r = 42
   const c = 2 * Math.PI * r
-  const share = total > 0 ? passed / total : 0
+  const scored = state === "done" && value != null
+  const shown = scored ? value : 0
+  const tone = scored ? bandTone(value) : null
+  const name =
+    state === "done"
+      ? value != null
+        ? `${label}: ${value} out of 100`
+        : `${label}: couldn't be scored`
+      : `${label}: not checked yet`
   return (
-    <div
-      role="img"
-      aria-label={idle ? `Score not checked yet, out of ${total}` : `${passed} of ${total} basics in place`}
-      className="relative h-24 w-24 shrink-0 md:h-28 md:w-28"
-    >
-      <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90" aria-hidden>
-        <circle cx="50" cy="50" r={r} fill="none" strokeWidth="9" className="stroke-ink/10" />
-        <circle
-          cx="50"
-          cy="50"
-          r={r}
-          fill="none"
-          strokeWidth="9"
-          strokeLinecap="round"
-          strokeDasharray={c}
-          strokeDashoffset={c * (1 - share)}
-          className={`stroke-green-700 motion-safe:transition-[stroke-dashoffset] motion-safe:duration-700 ${share === 0 ? "opacity-0" : ""}`}
-        />
-      </svg>
-      <span aria-hidden className="absolute inset-0 flex flex-col items-center justify-center leading-none">
-        <span className={`text-[30px] font-bold md:text-[34px] ${idle ? "text-slate-500" : "text-ink"}`}>{passed}</span>
-        <span className="mt-1 text-[12px] text-slate-600">of {total}</span>
+    <>
+      <span
+        className={`mb-2 flex min-h-[2.5em] items-end justify-center text-center leading-tight text-ink ${
+          size === "lg" ? "text-[16px] font-semibold" : "text-[14px] font-medium"
+        }`}
+      >
+        {label}
       </span>
-    </div>
+      <div role="img" aria-label={name} className={`relative shrink-0 ${size === "lg" ? "h-28 w-28" : "h-[5.5rem] w-[5.5rem]"}`}>
+        <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90" aria-hidden>
+          <circle cx="50" cy="50" r={r} fill="none" strokeWidth="8" className="stroke-ink/10" />
+          {tone ? (
+            <circle
+              cx="50"
+              cy="50"
+              r={r}
+              fill="none"
+              strokeWidth="8"
+              strokeLinecap="round"
+              strokeDasharray={c}
+              strokeDashoffset={c * (1 - shown / 100)}
+              className={`${tone.stroke} motion-safe:transition-[stroke-dashoffset] motion-safe:duration-700`}
+            />
+          ) : null}
+        </svg>
+        <span
+          aria-hidden
+          className={`absolute inset-0 flex items-center justify-center font-bold ${size === "lg" ? "text-[32px]" : "text-[24px]"} ${
+            scored ? "text-ink" : "text-slate-500"
+          }`}
+        >
+          {state === "done" && value == null ? "–" : shown}
+        </span>
+      </div>
+    </>
   )
 }
 
-function ScoreTile({
-  label,
-  score,
-  status,
-  pending,
-}: {
-  label: string
-  score: SourceScore
-  status: LookupSourceStatus | undefined
-  pending: boolean
-}) {
-  const checking = pending && (!status || status === "checking")
-  const value = score.read
-    ? score.counted
-      ? `${score.passed} of ${score.counted}`
-      : "Couldn't check"
-    : status === "failed" || status === "unavailable"
-      ? "Couldn't check"
-      : `0 of ${score.total}`
-  const share = score.counted ? score.passed / score.counted : 0
+/**
+ * After the check: what goes into each score, with this site's number beside it, so every score is explained where
+ * it's shown (UX Doctrine §3.19).
+ */
+function ScoreFactors({ score }: { score: LookupScore | null }) {
+  if (!score) return null
   return (
-    <li className="rounded-xl bg-cream px-4 py-3.5">
-      <div className="flex items-baseline justify-between gap-3">
-        <span className="text-[15px] font-medium leading-snug text-ink">{label}</span>
-        {checking ? (
-          <span className="inline-flex shrink-0 items-center gap-1.5 text-[13px] text-slate-600">
-            <Loader2 aria-hidden className="h-3.5 w-3.5 motion-safe:animate-spin" />
-            Checking…
-          </span>
-        ) : (
-          <span className={`shrink-0 text-[14px] font-semibold ${score.read ? "text-ink" : "text-slate-500"}`}>{value}</span>
-        )}
-      </div>
-      <div aria-hidden className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-ink/10">
-        <div
-          className="h-full rounded-full bg-green-700 motion-safe:transition-[width] motion-safe:duration-700"
-          style={{ width: `${Math.round(share * 100)}%` }}
-        />
-      </div>
-    </li>
+    <section aria-labelledby="score-factors-heading" className="mt-12 text-left">
+      <h2 id="score-factors-heading" className="text-center text-[26px] font-bold leading-tight text-ink md:text-[32px]">
+        What goes into your score
+      </h2>
+      <p className="mx-auto mt-2 max-w-[40rem] text-center text-[15px] leading-snug text-slate-600">
+        Five areas, each scored 0 to 100 from what a customer can see on your public website. The overall score weights
+        Digital Experience and Discoverability most.
+      </p>
+      <ul className="mt-8 grid gap-x-8 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
+        {FACTORS.map(({ id, label, icon: Icon, counts }) => {
+          const value = score.factors.find((f) => f.id === id)?.score ?? null
+          return (
+            <li key={id} className="flex flex-col items-center text-center">
+              <Icon aria-hidden className="h-8 w-8 text-ink" strokeWidth={1.75} />
+              <h3 className="mt-3 text-[18px] font-semibold text-ink">{label}</h3>
+              <p className="mt-1 inline-flex items-center gap-1.5 text-[14px] font-semibold text-ink">
+                {value != null ? (
+                  <>
+                    <span aria-hidden className={`h-2.5 w-2.5 rounded-full ${bandTone(value).fill}`} />
+                    {value} out of 100
+                  </>
+                ) : (
+                  <span className="font-normal text-slate-600">Couldn&apos;t be scored</span>
+                )}
+              </p>
+              <p className="mt-2 max-w-[20rem] text-[14px] leading-snug text-slate-600">
+                <span className="font-medium text-ink">What counts: </span>
+                {counts}
+              </p>
+            </li>
+          )
+        })}
+      </ul>
+    </section>
   )
 }
 
@@ -592,7 +701,7 @@ function LookupResults({
             </div>
           ) : null}
           <p className="mt-4 text-[13px] leading-snug text-slate-600">
-            This free check reads your public pages. Search rankings, ad activity and reviews aren&apos;t part of it.
+            This free check reads your public pages and, when we can confirm it, your Google listing. Search rankings and ad activity aren&apos;t part of it.
           </p>
           {next ? (
             <div className="mt-4 flex flex-col items-stretch gap-x-5 gap-y-2 sm:flex-row sm:flex-wrap sm:items-center">
