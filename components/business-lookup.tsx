@@ -16,6 +16,7 @@ import {
   type LookupSourceId,
   type LookupSourceStatus,
 } from "@/lib/lookup/types"
+import { useIsMobile } from "@/components/ui/use-mobile"
 
 /**
  * Free business lookup: a described website field, then [Check my business]. The one canonical lookup for every public page
@@ -121,6 +122,7 @@ export function BusinessLookup({
   const inputId = useId()
   const errorId = useId()
   const descId = useId()
+  const isMobile = useIsMobile()
   const inputRef = useRef<HTMLInputElement>(null)
   const [value, setValue] = useState("")
   const [inputError, setInputError] = useState<string | null>(null)
@@ -251,7 +253,7 @@ export function BusinessLookup({
               autoCapitalize="none"
               autoCorrect="off"
               spellCheck={false}
-              placeholder="Enter your business's website here"
+              placeholder={isMobile ? "Your business's website" : "Enter your business's website here"}
               value={value}
               onFocus={() => trackFunnelEvent("lookup_input_focus", { cta_id: ctaId }, { once: ctaId })}
               onChange={(e) => {
