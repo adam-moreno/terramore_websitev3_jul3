@@ -225,3 +225,7 @@ Verifiers: `verify-lookup` 93, `verify-report-dedupe` 10, `verify-funnel` 79 (26
 - **Teaser step 2** names what the full report adds, from its real sections: the evidence behind every score, competitive context ("how you compare"), and the top five actions.
 - `social.none` returns to a note (the count that needed it is gone). `contact.no_phone` / `contact.no_message` stay. The findings footer now says the check can include the Google listing (Trust uses it when confirmed).
 - **Checks.** All 8 verifiers pass (lookup 99, incl. the score shape and no-evidence checks); TypeScript 16 (unchanged); no horizontal scroll at 320–1440. Local lookup of terramore.io: overall 64 (DX 76, Discoverability 58, Trust 44, Conversion 63, Technical 95); Maps not checked locally (no Places key).
+
+## 2026-10-09 — Five equal rings; overall as a summary (owner request; local)
+
+- No Overall ring: the five area rings are one size, idle and after the check. After the check, a summary under the rings gives the overall score (with its band dot and what it weights), the strongest and weakest area, and "Where we'd look first" (moved from the findings list, so it shows once).

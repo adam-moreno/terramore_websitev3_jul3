@@ -437,23 +437,22 @@ function ScoreCard({ state, next }: { state: LookupState; next?: React.ReactNode
           {pending
             ? `Checking ${state.domain ?? "your website"}: ${finished} of ${LOOKUP_SOURCES.length} done`
             : score?.overall != null
-              ? `${state.domain} scores ${score.overall} out of 100 overall, read from ${score.pagesRead} ${
-                  score.pagesRead === 1 ? "page" : "pages"
-                }${score.mapsChecked ? "" : " (Google Maps wasn't checked)"}. Your full report reads more, so its score can differ.`
+              ? `Checked ${state.domain}: read from ${score.pagesRead} ${score.pagesRead === 1 ? "page" : "pages"}${
+                  score.mapsChecked ? "" : " (Google Maps wasn't checked)"
+                }. Your full report reads more, so its scores can differ.`
               : `We couldn't score ${state.domain ?? "this website"} from its public pages. The findings below still apply.`}
         </p>
       )}
 
-      <ul className="mt-6 grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 lg:grid-cols-6">
-        <li className="col-span-2 flex flex-col items-center sm:col-span-3 lg:col-span-1">
-          <ScoreRing label="Overall" value={score?.overall ?? null} state={state.phase} size="lg" />
-        </li>
+      <ul className="mt-6 grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 lg:grid-cols-5">
         {FACTORS.map((f) => (
           <li key={f.id} className="flex flex-col items-center">
-            <ScoreRing label={f.label} value={factorScore(f.id)} state={state.phase} size="md" />
+            <ScoreRing label={f.label} value={factorScore(f.id)} state={state.phase} />
           </li>
         ))}
       </ul>
+
+      {score?.overall != null ? <OverallSummary score={score} firstLook={state.firstLook} /> : null}
 
       <p className="mt-6 flex flex-wrap items-center justify-end gap-x-3 gap-y-1 text-[13px] text-slate-600">
         <span>Score scale:</span>
@@ -499,17 +498,43 @@ function ScoreCard({ state, next }: { state: LookupState; next?: React.ReactNode
   )
 }
 
-function ScoreRing({
-  label,
-  value,
-  state,
-  size,
-}: {
-  label: string
-  value: number | null
-  state: Phase
-  size: "lg" | "md"
-}) {
+/**
+ * After the check: the overall score, why it landed there (strongest and weakest area), and where we'd look first.
+ * Shown under the rings rather than as a sixth ring.
+ */
+function OverallSummary({ score, firstLook }: { score: LookupScore; firstLook: LookupFinding | null }) {
+  const overall = score.overall as number
+  const scored = FACTORS.map((f) => ({ ...f, value: score.factors.find((x) => x.id === f.id)?.score ?? null })).filter(
+    (f): f is (typeof FACTORS)[number] & { value: number } => f.value != null,
+  )
+  const strongest = scored.reduce<(typeof scored)[number] | null>((a, b) => (a && a.value >= b.value ? a : b), null)
+  const weakest = scored.reduce<(typeof scored)[number] | null>((a, b) => (a && a.value <= b.value ? a : b), null)
+  return (
+    <div className="mt-6 rounded-xl bg-cream p-5">
+      <p className="flex flex-wrap items-baseline gap-x-2 text-ink">
+        <span aria-hidden className={`h-3 w-3 self-center rounded-full ${bandTone(overall).fill}`} />
+        <span className="text-[18px] font-semibold">Overall score: {overall} out of 100</span>
+        <span className="text-[14px] text-slate-600">
+          (all five areas, with Digital Experience and Discoverability counting most)
+        </span>
+      </p>
+      {strongest && weakest && strongest.id !== weakest.id ? (
+        <p className="mt-2 text-[15px] leading-snug text-slate-700">
+          Your strongest area is {strongest.label} ({strongest.value}). {weakest.label} ({weakest.value}) is pulling your
+          score down the most.
+        </p>
+      ) : null}
+      {firstLook ? (
+        <p className="mt-2 text-[15px] leading-snug text-slate-700">
+          <span className="font-semibold text-ink">Where we&apos;d look first: </span>
+          {withStop(firstLook.text)}
+        </p>
+      ) : null}
+    </div>
+  )
+}
+
+function ScoreRing({ label, value, state }: { label: string; value: number | null; state: Phase }) {
   const r = 42
   const c = 2 * Math.PI * r
   const scored = state === "done" && value != null
@@ -524,13 +549,11 @@ function ScoreRing({
   return (
     <>
       <span
-        className={`mb-2 flex min-h-[2.5em] items-end justify-center text-center leading-tight text-ink ${
-          size === "lg" ? "text-[16px] font-semibold" : "text-[14px] font-medium"
-        }`}
+        className="mb-2 flex min-h-[2.5em] items-end justify-center text-center text-[14px] font-medium leading-tight text-ink"
       >
         {label}
       </span>
-      <div role="img" aria-label={name} className={`relative shrink-0 ${size === "lg" ? "h-28 w-28" : "h-[5.5rem] w-[5.5rem]"}`}>
+      <div role="img" aria-label={name} className="relative h-24 w-24 shrink-0">
         <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90" aria-hidden>
           <circle cx="50" cy="50" r={r} fill="none" strokeWidth="8" className="stroke-ink/10" />
           {tone ? (
@@ -549,7 +572,7 @@ function ScoreRing({
         </svg>
         <span
           aria-hidden
-          className={`absolute inset-0 flex items-center justify-center font-bold ${size === "lg" ? "text-[32px]" : "text-[24px]"} ${
+          className={`absolute inset-0 flex items-center justify-center text-[26px] font-bold ${
             scored ? "text-ink" : "text-slate-500"
           }`}
         >
@@ -692,7 +715,7 @@ function LookupResults({
 
       {state.phase === "done" ? (
         <>
-          {state.firstLook ? (
+          {state.firstLook && !detail ? (
             <div className="mt-4 rounded-xl border border-gold-from bg-gold-from/10 p-4">
               <p className="text-[13px] font-semibold uppercase tracking-[0.12em] text-gold-ink">
                 Where we&apos;d look first
