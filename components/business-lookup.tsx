@@ -17,6 +17,7 @@ import {
   type LookupSourceStatus,
 } from "@/lib/lookup/types"
 import { useIsMobile } from "@/components/ui/use-mobile"
+import { scoreLookup, type SourceScore } from "@/lib/lookup/score"
 
 /**
  * Free business lookup: a described website field, then [Check my business]. The one canonical lookup for every public page
@@ -230,7 +231,7 @@ export function BusinessLookup({
       <div
         id={anchor ? LOOKUP_ANCHOR : undefined}
         data-lookup-variant={variant}
-        className={`w-full scroll-mt-28 ${variant === "compact" ? "max-w-lg" : variant === "hero" ? "max-w-xl md:max-w-2xl" : "max-w-xl"} ${align === "center" ? "mx-auto" : ""}`}
+        className={`w-full scroll-mt-28 ${variant === "compact" ? "max-w-lg" : variant === "hero" ? "max-w-xl md:max-w-4xl" : "max-w-xl"} ${align === "center" ? "mx-auto" : ""}`}
       >
         <form noValidate onSubmit={submit} className={variant === "hero" ? "md:mx-auto md:max-w-xl" : undefined}>
           <label
@@ -287,17 +288,20 @@ export function BusinessLookup({
           ) : null}
         </form>
         {helper && state.phase === "idle" ? (
-          <p className={`mt-3 text-slate-600 ${variant === "compact" ? "text-[13px]" : "text-[14px]"} ${align === "center" ? "text-center" : ""}`}>
+          <p className={`mt-3 text-slate-600 ${variant === "compact" ? "text-[13px]" : "text-[14px]"} ${variant === "hero" ? "md:hidden" : ""} ${align === "center" ? "text-center" : ""}`}>
             {helper}
           </p>
         ) : null}
         {secondary && state.phase !== "done" ? (
           <div className={`mt-1 flex ${align === "center" ? "justify-center" : "justify-start"}`}>{secondary}</div>
         ) : null}
-        {showResults ? (
+        {variant === "hero" && !(state.phase === "error") ? (
+          <>
+            <ScoreCard state={state} next={next} />
+            {state.phase === "done" ? <LookupResults state={state} onReset={reset} detail /> : null}
+          </>
+        ) : showResults ? (
           <LookupResults state={state} next={next} onReset={reset} />
-        ) : variant === "hero" ? (
-          <LookupPreview />
         ) : null}
       </div>
       <ReportPopup
@@ -340,29 +344,167 @@ function FindingIcon({ tone }: { tone: LookupFinding["tone"] }) {
 }
 
 /**
- * The "hero" variant's idle card (md and up): the six sources the check reads, none checked yet. It holds the place the
- * results stream into, so running the check fills this card instead of adding a new one. No scores or sample findings:
- * nothing is shown that the check hasn't produced.
+ * The "hero" variant's score card. Idle (md and up only), it shows what the check will fill in: a 0 score ring, each
+ * source at 0, and the two steps (instant score here, full report by email). Running the check fills this same card.
+ * The score is a count of basics in place (lib/lookup/score.ts), never a rating, and sources the check couldn't read
+ * are left out of it and said so.
  */
-function LookupPreview() {
+function ScoreCard({ state, next }: { state: LookupState; next?: React.ReactNode }) {
+  const idle = state.phase === "idle"
+  const pending = state.phase === "checking"
+  const score = scoreLookup(state.sources)
+  const finished = Object.values(state.sources).filter((r) => r && r.status !== "checking").length
+  const denominator = state.phase === "done" ? score.counted : score.total
+  const unread = score.total - score.counted
+
   return (
     <section
-      aria-label="What the free check looks at"
-      className="mt-8 hidden rounded-2xl border border-ink/10 bg-white p-6 text-left md:block"
+      aria-label="Your website score"
+      className={`mt-8 rounded-2xl border border-ink/10 bg-white p-5 text-left md:p-8 ${idle ? "hidden md:block" : ""}`}
     >
-      <p className="text-[15px] font-semibold text-ink">What the free check looks at</p>
-      <ul className="mt-4 grid grid-cols-3 gap-x-6 gap-y-4">
+      <div className="flex items-center gap-5 max-[359px]:flex-col max-[359px]:items-start md:gap-7">
+        <ScoreRing passed={score.passed} total={denominator} idle={idle} />
+        <div className="min-w-0">
+          <p className="text-[18px] font-semibold text-ink md:text-[20px]">Your website score</p>
+          {idle ? (
+            <p className="mt-1 text-[15px] leading-snug text-slate-600">
+              Basics in place, out of {score.total} we can see from your public website. Your score fills in here when
+              the check finishes.
+            </p>
+          ) : (
+            <p role="status" className="mt-1 text-[15px] leading-snug text-slate-600">
+              {pending
+                ? `Checking ${state.domain ?? "your website"}: ${finished} of ${LOOKUP_SOURCES.length} done`
+                : `${score.passed} of ${score.counted} basics in place on ${state.domain}.${
+                    unread ? ` ${unread} couldn't be checked from the public site.` : ""
+                  }`}
+            </p>
+          )}
+        </div>
+      </div>
+
+      <ul className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {LOOKUP_SOURCES.map(({ id, label }) => (
-          <li key={id} className="flex items-start gap-2.5">
-            <CircleDashed aria-hidden className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" />
-            <span>
-              <span className="block text-[15px] font-medium leading-snug text-ink">{label}</span>
-              <span className="block text-[13px] text-slate-600">Not checked yet</span>
-            </span>
-          </li>
+          <ScoreTile
+            key={id}
+            label={label}
+            score={score.perSource[id]}
+            status={state.sources[id]?.status}
+            pending={pending}
+          />
         ))}
       </ul>
+
+      <ol className="mt-6 grid gap-4 border-t border-ink/10 pt-6 md:grid-cols-2">
+        <li className="flex gap-3">
+          <StepNumber n={1} done={state.phase === "done"} />
+          <span>
+            <span className="block text-[15px] font-semibold text-ink">Instant score</span>
+            <span className="block text-[14px] leading-snug text-slate-600">Free, right on this page. No email needed.</span>
+          </span>
+        </li>
+        <li className="flex gap-3">
+          <StepNumber n={2} done={false} />
+          <span>
+            <span className="block text-[15px] font-semibold text-ink">Full report by email</span>
+            <span className="block text-[14px] leading-snug text-slate-600">
+              When the check finishes, get the complete Digital Footprint report in your inbox.
+            </span>
+          </span>
+        </li>
+      </ol>
+      {state.phase === "done" && next ? (
+        <div className="mt-5 flex flex-col items-stretch gap-x-5 gap-y-2 sm:flex-row sm:flex-wrap sm:items-center">{next}</div>
+      ) : null}
     </section>
+  )
+}
+
+function ScoreRing({ passed, total, idle }: { passed: number; total: number; idle: boolean }) {
+  const r = 42
+  const c = 2 * Math.PI * r
+  const share = total > 0 ? passed / total : 0
+  return (
+    <div
+      role="img"
+      aria-label={idle ? `Score not checked yet, out of ${total}` : `${passed} of ${total} basics in place`}
+      className="relative h-24 w-24 shrink-0 md:h-28 md:w-28"
+    >
+      <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90" aria-hidden>
+        <circle cx="50" cy="50" r={r} fill="none" strokeWidth="9" className="stroke-ink/10" />
+        <circle
+          cx="50"
+          cy="50"
+          r={r}
+          fill="none"
+          strokeWidth="9"
+          strokeLinecap="round"
+          strokeDasharray={c}
+          strokeDashoffset={c * (1 - share)}
+          className={`stroke-green-700 motion-safe:transition-[stroke-dashoffset] motion-safe:duration-700 ${share === 0 ? "opacity-0" : ""}`}
+        />
+      </svg>
+      <span aria-hidden className="absolute inset-0 flex flex-col items-center justify-center leading-none">
+        <span className={`text-[30px] font-bold md:text-[34px] ${idle ? "text-slate-500" : "text-ink"}`}>{passed}</span>
+        <span className="mt-1 text-[12px] text-slate-600">of {total}</span>
+      </span>
+    </div>
+  )
+}
+
+function ScoreTile({
+  label,
+  score,
+  status,
+  pending,
+}: {
+  label: string
+  score: SourceScore
+  status: LookupSourceStatus | undefined
+  pending: boolean
+}) {
+  const checking = pending && (!status || status === "checking")
+  const value = score.read
+    ? score.counted
+      ? `${score.passed} of ${score.counted}`
+      : "Couldn't check"
+    : status === "failed" || status === "unavailable"
+      ? "Couldn't check"
+      : `0 of ${score.total}`
+  const share = score.counted ? score.passed / score.counted : 0
+  return (
+    <li className="rounded-xl bg-cream px-4 py-3.5">
+      <div className="flex items-baseline justify-between gap-3">
+        <span className="text-[15px] font-medium leading-snug text-ink">{label}</span>
+        {checking ? (
+          <span className="inline-flex shrink-0 items-center gap-1.5 text-[13px] text-slate-600">
+            <Loader2 aria-hidden className="h-3.5 w-3.5 motion-safe:animate-spin" />
+            Checking…
+          </span>
+        ) : (
+          <span className={`shrink-0 text-[14px] font-semibold ${score.read ? "text-ink" : "text-slate-500"}`}>{value}</span>
+        )}
+      </div>
+      <div aria-hidden className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-ink/10">
+        <div
+          className="h-full rounded-full bg-green-700 motion-safe:transition-[width] motion-safe:duration-700"
+          style={{ width: `${Math.round(share * 100)}%` }}
+        />
+      </div>
+    </li>
+  )
+}
+
+function StepNumber({ n, done }: { n: number; done: boolean }) {
+  return (
+    <span
+      aria-hidden
+      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[14px] font-semibold ${
+        done ? "bg-green-700 text-white" : "bg-ink text-white"
+      }`}
+    >
+      {done ? <Check className="h-4 w-4" /> : n}
+    </span>
   )
 }
 
@@ -373,7 +515,18 @@ function withStop(text: string): string {
 
 const TONE_LABEL: Record<LookupFinding["tone"], string> = { working: "In place", gap: "Gap", note: "Note" }
 
-function LookupResults({ state, next, onReset }: { state: LookupState; next?: React.ReactNode; onReset: () => void }) {
+function LookupResults({
+  state,
+  next,
+  onReset,
+  detail = false,
+}: {
+  state: LookupState
+  next?: React.ReactNode
+  onReset: () => void
+  /** Under the hero score card: the card carries the progress status and next steps, so this is the findings only. */
+  detail?: boolean
+}) {
   const pending = state.phase === "checking"
   const finished = Object.values(state.sources).filter(Boolean).length
   const statusLine =
@@ -385,9 +538,13 @@ function LookupResults({ state, next, onReset }: { state: LookupState; next?: Re
 
   return (
     <section aria-label="Business lookup results" className="mt-5 rounded-2xl border border-ink/10 bg-white p-5">
-      <p role="status" className={`text-[15px] font-semibold ${state.phase === "error" ? "text-red-700" : "text-ink"}`}>
-        {statusLine}
-      </p>
+      {detail ? (
+        <p className="text-[15px] font-semibold text-ink">What we found</p>
+      ) : (
+        <p role="status" className={`text-[15px] font-semibold ${state.phase === "error" ? "text-red-700" : "text-ink"}`}>
+          {statusLine}
+        </p>
+      )}
       {state.name && state.phase !== "error" ? <p className="mt-0.5 text-[14px] text-slate-600">{state.name}</p> : null}
 
       {state.phase !== "error" ? (

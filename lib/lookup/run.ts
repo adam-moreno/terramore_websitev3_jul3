@@ -22,6 +22,8 @@ const FIRST_LOOK_ORDER = [
   "contact.booking_unreachable",
   "website.no_cta",
   "contact.no_contact",
+  "contact.no_phone",
+  "contact.no_message",
   "measurement.none",
   "search_basics.no_title",
   "search_basics.no_sitemap",
@@ -204,6 +206,14 @@ export async function runLookup(
       finding("contact", "no_contact", "gap", "We didn't find a phone number or contact form either", where),
     )
   }
+  // Each missing contact basic is said in words, so the score (lib/lookup/score.ts) never counts a gap it doesn't name.
+  else {
+    if (!phone) contactFindings.push(finding("contact", "no_phone", "gap", "No phone number is listed on the pages we read", where))
+    if (!forms && !email)
+      contactFindings.push(
+        finding("contact", "no_message", "gap", "There's no contact form or email address on the pages we read", where),
+      )
+  }
   report("contact", "done", contactFindings)
 
   const pixels = site.pixels
@@ -313,7 +323,7 @@ export async function runLookup(
               where,
             ),
           ]
-        : [finding("social", "none", "note", "No social profiles are linked from the pages we read", where)],
+        : [finding("social", "none", "gap", "No social profiles are linked from the pages we read", where)],
     )
 
     if (!places) report("google_maps", "unavailable")

@@ -24,7 +24,7 @@ const brandMore = League_Spartan({
 export default function TerramoreHomepage() {
   return (
     <div className="min-h-screen bg-cream">
-      <section className="relative isolate overflow-hidden bg-cream pt-36 pb-0 md:pt-32 md:pb-0">
+      <section className="relative isolate overflow-hidden bg-cream pt-36 pb-0 md:pt-32 md:pb-8">
         {/* The orbit only runs from md up. On phones it floated over the headline, so the marks move to a slim row under the CTA. */}
         <HeroLogoOrbit />
 
@@ -70,7 +70,7 @@ export default function TerramoreHomepage() {
                 revenue.
               </p>
               {/* Search-first: the business lookup is the primary action; booking is the secondary line under it. */}
-              <div className="mt-6 w-full text-left md:mt-8 md:w-[42rem]">
+              <div className="mt-6 w-full text-left md:mt-8 md:w-[min(56rem,calc(100vw-4rem))]">
                 <BusinessLookup
                   ctaId="home_hero_report"
                   source="homepage"
@@ -99,27 +99,12 @@ export default function TerramoreHomepage() {
         </div>
       </section>
 
-      {/*
-        Slack straddles the hero → toolkit seam: top half cream (hero), bottom half cream
-        (same as "Why Terramore…"), with a soft mid/bottom gradient so scrolling onward feels continuous.
-      */}
-      {/*
-        Slack straddles the hero → toolkit seam. Mobile uses equal px-6 insets (not page-shell
-        width-calc) so L/R cream stays balanced; desktop keeps the 972px centered column.
-      */}
-      <div className="relative overflow-x-clip">
-        <div aria-hidden className="pointer-events-none absolute inset-0">
-          <div className="h-1/2 bg-cream" />
-          <div className="h-1/2 bg-cream" />
-          <div className="absolute inset-x-0 top-[42%] h-[28%] bg-gradient-to-b from-cream via-white/55 to-cream" />
-          <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-b from-transparent to-cream" />
+      {/* The Slack demo is its own section under the hero (no longer overlapping it). */}
+      <section aria-label="Terramore in your team's Slack" className="bg-cream pt-12 pb-10 md:pt-24 md:pb-24">
+        <div className="mx-auto w-full max-w-[972px] px-6 md:w-[min(972px,calc(100%-3rem))] md:px-0">
+          <HeroAnalytics />
         </div>
-        <div className="relative z-20 mx-auto mt-6 w-full max-w-[972px] px-6 pb-10 md:mt-0 md:w-[min(972px,calc(100%-3rem))] md:px-0 md:pb-24">
-          <div className="mx-auto w-full min-w-0 max-w-full">
-            <HeroAnalytics />
-          </div>
-        </div>
-      </div>
+      </section>
 
       <TerramoreToolkit />
       <ReviewCarousel />

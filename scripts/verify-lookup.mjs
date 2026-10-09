@@ -289,10 +289,44 @@ const BOOKING_FLOW = page(`<h2>Pick a time</h2><p>Times show in your time zone.<
   let contact = events.find((e) => e.type === "source" && e.source === "contact").findings
   assert(contact[0].id === "contact.booking" && contact[0].evidence === "Booking page /book", "lookup: booking found on /book")
   assert(events.at(-1).firstLook?.id !== "contact.no_booking", "lookup: no false booking gap")
+  const contactIds = contact.map((f) => f.id)
+  assert(
+    contactIds.includes("contact.no_phone") && contactIds.includes("contact.no_message") && !contactIds.includes("contact.no_contact"),
+    `lookup: each missing contact basic is named (${contactIds.join(",")})`,
+  )
   events = await run({ [ORIGIN]: page(`<a href="/book">Book a call</a>`), [`${ORIGIN}/book`]: () => new Response("x", { status: 503 }) })
   contact = events.find((e) => e.type === "source" && e.source === "contact").findings
   assert(contact[0].id === "contact.booking_unreachable", `lookup: broken booking link reported (${contact[0].id})`)
   assert(events.at(-1).firstLook?.id === "contact.booking_unreachable", "lookup: broken booking link can be the first look")
+}
+
+// The score counts fixed basics from the findings, and never scores what the check couldn't read.
+{
+  const { scoreLookup, LOOKUP_BASICS_TOTAL } = await load("lib/lookup/score.ts")
+  const f = (id) => ({ id, source: id.split(".")[0], tone: "working", text: "", evidence: "" })
+  const done = (...ids) => ({ status: "done", findings: ids.map(f) })
+  assert(LOOKUP_BASICS_TOTAL === 12, `score: 12 basics (${LOOKUP_BASICS_TOTAL})`)
+  let s = scoreLookup({})
+  assert(s.passed === 0 && s.counted === 0 && s.total === 12, "score: nothing read before the check")
+  s = scoreLookup({
+    website: done("website.headline", "website.ctas"),
+    contact: done("contact.no_booking", "contact.phone"),
+    measurement: done("measurement.gtm"),
+    search_basics: done("search_basics.no_description", "search_basics.sitemap"),
+    social: { status: "not_found", findings: [f("social.none")] },
+    google_maps: { status: "unavailable", findings: [] },
+  })
+  assert(s.perSource.website.passed === 1 && s.perSource.website.counted === 1, "score: next step found")
+  assert(s.perSource.contact.passed === 1 && s.perSource.contact.counted === 3, "score: booking and form/email missing, phone found")
+  assert(s.perSource.measurement.passed === 1, "score: Tag Manager counts as tracking in place")
+  assert(s.perSource.search_basics.passed === 4 && s.perSource.search_basics.counted === 5, "score: missing description only")
+  assert(s.perSource.social.passed === 0 && s.perSource.social.counted === 1, "score: no linked social is a missing basic")
+  assert(!s.perSource.google_maps.read && s.perSource.google_maps.counted === 0, "score: unavailable Maps is left out, not failed")
+  assert(s.passed === 7 && s.counted === 11, `score: 7 of 11 counted (${s.passed}/${s.counted})`)
+  s = scoreLookup({ contact: done("contact.booking_unconfirmed", "contact.email") })
+  assert(s.perSource.contact.counted === 2 && s.perSource.contact.passed === 1, "score: unconfirmed booking is unknown")
+  s = scoreLookup({ search_basics: { status: "failed", findings: [] } })
+  assert(s.counted === 0, "score: a failed source counts nothing")
 }
 
 console.log(`lookup: ok (${checks} checks)`)
