@@ -54,7 +54,8 @@ export default function TerramoreHomepage() {
                 <span className="text-gold-ink">you already built.</span>
               </h1>
               {/* Mobile: full hero-copy width so line 2 stays one line (3 forced breaks). */}
-              <p className="mx-auto mt-5 max-w-none text-center text-[16px] font-medium leading-[1.4] text-ink sm:max-w-[26rem] md:mt-8 md:max-w-[626px] md:text-[20px] md:leading-[30px]">
+              {/* From md up the lookup's label is the hero's one supporting line (variant "hero"), so this line is mobile-only. */}
+              <p className="mx-auto mt-5 max-w-none text-center text-[16px] font-medium leading-[1.4] text-ink sm:max-w-[26rem] md:hidden">
                 We find where the business wins today,
                 <br />
                 then automate marketing and sales to get
@@ -69,10 +70,11 @@ export default function TerramoreHomepage() {
                 revenue.
               </p>
               {/* Search-first: the business lookup is the primary action; booking is the secondary line under it. */}
-              <div className="mt-6 w-full text-left md:mt-8 md:w-[36rem]">
+              <div className="mt-6 w-full text-left md:mt-8 md:w-[42rem]">
                 <BusinessLookup
                   ctaId="home_hero_report"
                   source="homepage"
+                  variant="hero"
                   align="center"
                   anchor
                   helper="Free · No email needed to see the first results"

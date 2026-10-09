@@ -110,8 +110,12 @@ export function BusinessLookup({
   secondary?: React.ReactNode
   /** Next steps shown once the lookup has results (LookupReportButton, LookupBookButton). */
   next?: React.ReactNode
-  /** "full" in a page's first viewport; "compact" on service pages (smaller label and helper, narrower). */
-  variant?: "full" | "compact"
+  /**
+   * "full" in a page's first viewport; "compact" on service pages (smaller label and helper, narrower). "hero" is "full"
+   * below md; from md up the label reads as the hero's one supporting line, the description moves into a "what we
+   * check" card under the field, and the results fill that same card.
+   */
+  variant?: "full" | "compact" | "hero"
   /** Center the label and secondary line for a centered hero. Results stay left-aligned for reading. */
   align?: "start" | "center"
   /** This is the page's canonical lookup: it carries the #check-my-business anchor. One per page. */
@@ -226,23 +230,23 @@ export function BusinessLookup({
       <div
         id={anchor ? LOOKUP_ANCHOR : undefined}
         data-lookup-variant={variant}
-        className={`w-full scroll-mt-28 ${variant === "compact" ? "max-w-lg" : "max-w-xl"} ${align === "center" ? "mx-auto" : ""}`}
+        className={`w-full scroll-mt-28 ${variant === "compact" ? "max-w-lg" : variant === "hero" ? "max-w-xl md:max-w-2xl" : "max-w-xl"} ${align === "center" ? "mx-auto" : ""}`}
       >
-        <form noValidate onSubmit={submit}>
+        <form noValidate onSubmit={submit} className={variant === "hero" ? "md:mx-auto md:max-w-xl" : undefined}>
           <label
             htmlFor={inputId}
-            className={`block font-semibold text-ink ${variant === "compact" ? "text-[14px]" : "text-[15px]"} ${align === "center" ? "text-center" : ""}`}
+            className={`block font-semibold text-ink ${variant === "compact" ? "text-[14px]" : "text-[15px]"} ${variant === "hero" ? "md:mx-auto md:max-w-[34rem] md:text-balance md:text-[20px] md:font-medium md:leading-[30px]" : ""} ${align === "center" ? "text-center" : ""}`}
           >
             Enter your website to check how customers find and reach your business.
           </label>
           <p
             id={descId}
-            className={`mt-1 text-slate-600 ${variant === "compact" ? "text-[13px]" : "text-[14px]"} ${align === "center" ? "text-center" : ""}`}
+            className={`mt-1 text-slate-600 ${variant === "compact" ? "text-[13px]" : "text-[14px]"} ${variant === "hero" ? "md:sr-only" : ""} ${align === "center" ? "text-center" : ""}`}
           >
             See what's working and what's missing across search basics, contact and booking, analytics and ad tags,
             social profiles, and your Google Maps listing.
           </p>
-          <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+          <div className={`mt-2 flex flex-col gap-2 sm:flex-row sm:flex-wrap ${variant === "hero" ? "md:mt-6" : ""}`}>
             <input
               ref={inputRef}
               id={inputId}
@@ -290,7 +294,11 @@ export function BusinessLookup({
         {secondary && state.phase !== "done" ? (
           <div className={`mt-1 flex ${align === "center" ? "justify-center" : "justify-start"}`}>{secondary}</div>
         ) : null}
-        {showResults ? <LookupResults state={state} next={next} onReset={reset} /> : null}
+        {showResults ? (
+          <LookupResults state={state} next={next} onReset={reset} />
+        ) : variant === "hero" ? (
+          <LookupPreview />
+        ) : null}
       </div>
       <ReportPopup
         open={reportOpen}
@@ -329,6 +337,33 @@ function FindingIcon({ tone }: { tone: LookupFinding["tone"] }) {
   if (tone === "working") return <Check aria-hidden className="mt-0.5 h-4 w-4 shrink-0 text-green-700" />
   if (tone === "gap") return <AlertCircle aria-hidden className="mt-0.5 h-4 w-4 shrink-0 text-gold-ink" />
   return <Info aria-hidden className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" />
+}
+
+/**
+ * The "hero" variant's idle card (md and up): the six sources the check reads, none checked yet. It holds the place the
+ * results stream into, so running the check fills this card instead of adding a new one. No scores or sample findings:
+ * nothing is shown that the check hasn't produced.
+ */
+function LookupPreview() {
+  return (
+    <section
+      aria-label="What the free check looks at"
+      className="mt-8 hidden rounded-2xl border border-ink/10 bg-white p-6 text-left md:block"
+    >
+      <p className="text-[15px] font-semibold text-ink">What the free check looks at</p>
+      <ul className="mt-4 grid grid-cols-3 gap-x-6 gap-y-4">
+        {LOOKUP_SOURCES.map(({ id, label }) => (
+          <li key={id} className="flex items-start gap-2.5">
+            <CircleDashed aria-hidden className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" />
+            <span>
+              <span className="block text-[15px] font-medium leading-snug text-ink">{label}</span>
+              <span className="block text-[13px] text-slate-600">Not checked yet</span>
+            </span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
 }
 
 /** Findings are written without a closing stop; add one unless the text already ends in punctuation or a quote. */

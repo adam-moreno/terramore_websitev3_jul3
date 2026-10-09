@@ -198,3 +198,11 @@ Verifiers: `verify-lookup` 93, `verify-report-dedupe` 10, `verify-funnel` 79 (26
 - Placeholder: "Enter your business's website here" (was "yourbusiness.com"). The visible label still names the field; the placeholder is never the label.
 - The owner's model sentence mentioned performance, Core Web Vitals and loading speed. The lookup measures none of these (its six sources are listed above), so the description names what it actually checks. If speed checks are added to the lookup later, the copy can say so.
 - Checks: all 8 verifiers pass; `next build` passes; DevTools emulation at 320×700 and 390×844 on `/`, `/solutions`, `/marketing`: no horizontal scroll. At 390 the field and button sit in the first viewport. At 320 the placeholder's last word is clipped and the button sits just below a 700 px viewport.
+
+## 2026-10-09 — Desktop homepage hero, tool-first layout (owner request; local prototype)
+
+- **Ask.** The desktop hero read as busy. The owner pointed to a public page-speed checker as an example of placement and amount of text: headline, one supporting line, the field and button in one row, then an empty results card. A reference, not a template: none of its colors, imagery, score gauges or red/amber/green scale are used.
+- **What changed, md and up only (mobile unchanged).** New lookup `variant="hero"`. The brand line "We find where the business wins today…" is hidden; the lookup label becomes the one supporting line (20 px, balanced). The six-source description stays for screen readers (`aria-describedby`) and is shown visually as a "What the free check looks at" card under the field, each source "Not checked yet". Running the check replaces that card with the streaming results in the same place.
+- **Honesty.** The idle card shows no scores, numbers or sample findings (VR-29, VR-30), and no gauges (the Scene 1 spec also excluded them).
+- **Open for the owner.** Whether the brand line should come back on desktop (for example under the H1, or lower on the page); whether the integration logo orbit (a V1 constraint) stays in this hero.
+- **Checks.** All 8 verifiers pass; TypeScript 16 (unchanged); no horizontal scroll at 1024, 1280, 1440 or 390. A real lookup of terramore.io on localhost filled the card ("Checked terramore.io").
