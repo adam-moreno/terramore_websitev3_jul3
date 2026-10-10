@@ -259,3 +259,10 @@ Verifiers: `verify-lookup` 93, `verify-report-dedupe` 10, `verify-funnel` 79 (26
 - **Orbit was following the card.** It centres on `[data-hero-copy]`, which had grown to include the score card; the marker is now on the headline-and-search group only, so the orbit wraps that group again.
 - **Settling.** After the 5 s drift the marks dip to half opacity for 300 ms (the reviewed 0.5 floor for the marks, rule `hero-logos-not-desaturated`) and reappear at their resting spots on the visible outer curves, which now avoid the search field as well as the headline. Before, they froze wherever they were, sometimes behind the type.
 - **Checks.** All 8 verifiers pass; TypeScript 16; no horizontal scroll 320–1440; full journey passes at 1280.
+
+## 2026-10-09 — Endless orbit restored, with a compact pause control (owner request; local)
+
+- **Why it had stopped.** Removing the labelled Pause button was done by stopping the orbit after 5 s (WCAG 2.2.2 / VR-47: motion longer than 5 s needs a pause control). The owner wants the endless loop, so the loop is back exactly as before (42 s, travelling marks through the mask hole) and the pause control returns in a quieter form.
+- **Control.** `MotionToggle` gains `compact`: icon only (Pause/Play), still a 44×44 px target, named "Pause logo animation" / "Play logo animation" with a matching tooltip. It sits in the hero's lower-left corner near the fold (`left-4`/`lg:left-6`, `top: 100svh − 8.5rem`), not top right. Reduced motion: marks rest still, no control.
+- **Kept from the settle work:** the resting layout (reduced motion) avoids the search field as well as the headline; `verify-visual` keeps accepting a ≤ 5 s self-stop as an alternative to a control (not used here).
+- **Checks.** All 8 verifiers pass; TypeScript 16. Browser: a mark keeps moving at 3 s, 12 s and 13.5 s at 1440×900 and 1024×768; the control pauses it (position unchanged over 2 s) and flips to "Play logo animation".

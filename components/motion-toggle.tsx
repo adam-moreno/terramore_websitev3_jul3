@@ -13,6 +13,7 @@ export function MotionToggle({
   tone = "light",
   className = "",
   ended = false,
+  compact = false,
 }: {
   paused: boolean
   onToggle: () => void
@@ -22,6 +23,8 @@ export function MotionToggle({
   className?: string
   /** The demo played to its end and is holding its last frame. */
   ended?: boolean
+  /** Icon only (still a 44 px target, named for assistive tech and with a tooltip), for quiet placements. */
+  compact?: boolean
 }) {
   const verb = ended ? "Replay" : paused ? "Play" : "Pause"
   const Icon = ended ? RotateCcw : paused ? Play : Pause
@@ -35,10 +38,13 @@ export function MotionToggle({
       type="button"
       onClick={onToggle}
       aria-label={`${verb} ${label}`}
-      className={`inline-flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-full border px-4 text-[14px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${colors} ${className}`}
+      title={compact ? `${verb} ${label}` : undefined}
+      className={`inline-flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-full border text-[14px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
+        compact ? "w-11 px-0" : "px-4"
+      } ${colors} ${className}`}
     >
       <Icon className="h-4 w-4" aria-hidden />
-      {verb}
+      {compact ? null : verb}
     </button>
   )
 }

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import { useOnScreenAndVisible, usePrefersReducedMotion } from "@/hooks/use-autoplay"
+import { MotionToggle } from "@/components/motion-toggle"
 import { INTEGRATION_LOGOS } from "@/lib/integrations"
 
 // The marks travel the figure eight and fade through the mask hole as they cross behind the headline.
@@ -209,42 +210,35 @@ export function HeroLogoMobius({ moving = false, running = false }: { moving?: b
 }
 
 /**
- * Desktop hero orbit. The marks drift for the first 5 seconds the hero is on screen, then dip to half opacity (300 ms; the reviewed floor for the marks) and reappear at their
- * resting spots on the visible curve, clear of the headline: nothing moves for longer than 5 s, so no pause control is
- * needed (WCAG 2.2.2, VR-47; owner removed the Pause button 2026-10-09). Under reduced motion they rest still from the
- * start. Phones use HeroFloatingLogos.
+ * Desktop hero orbit: the marks travel the loop endlessly, with a pause control (VR-47, WCAG 2.2.2: the loop runs
+ * longer than 5 s). The control is icon-only in the hero's lower-left corner (owner, 2026-10-09: no labelled Pause
+ * button at the top right). Under reduced motion the marks rest still and there's nothing to pause. Phones use
+ * HeroFloatingLogos.
  */
 export function HeroLogoOrbit() {
   const reduce = usePrefersReducedMotion()
+  const [paused, setPaused] = useState(false)
   const frameRef = useRef<HTMLDivElement>(null)
   const visible = useOnScreenAndVisible(frameRef, 0)
   const moving = !reduce
-  const [settled, setSettled] = useState(false)
-  const [resting, setResting] = useState(false)
-  const started = useRef(false)
-
-  // The 5 s starts the first time the hero is on screen and never restarts, so the total motion stays under 5 s.
-  useEffect(() => {
-    if (!moving || !visible || started.current) return
-    started.current = true
-    window.setTimeout(() => setSettled(true), 5000)
-  }, [moving, visible])
-
-  // Once the drift ends, swap to the resting layout while the marks are faded out, so none stops behind the type.
-  useEffect(() => {
-    if (!settled) return
-    const timer = window.setTimeout(() => setResting(true), 300)
-    return () => window.clearTimeout(timer)
-  }, [settled])
 
   return (
-    <div
-      ref={frameRef}
-      className={`pointer-events-none absolute inset-x-0 top-0 z-0 hidden h-[100svh] overflow-hidden transition-opacity duration-300 md:block ${
-        settled && !resting ? "opacity-50" : "opacity-100"
-      }`}
-    >
-      <HeroLogoMobius moving={moving && !resting} running={moving && visible && !settled} />
-    </div>
+    <>
+      <div
+        ref={frameRef}
+        className="pointer-events-none absolute inset-x-0 top-0 z-0 hidden h-[100svh] overflow-hidden md:block"
+      >
+        <HeroLogoMobius moving={moving} running={moving && visible && !paused} />
+      </div>
+      {moving ? (
+        <MotionToggle
+          compact
+          paused={paused}
+          onToggle={() => setPaused((value) => !value)}
+          label="logo animation"
+          className="absolute left-4 top-[calc(100svh-8.5rem)] z-30 hidden md:inline-flex lg:left-6"
+        />
+      ) : null}
+    </>
   )
 }
