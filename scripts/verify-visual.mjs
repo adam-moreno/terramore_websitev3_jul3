@@ -53,6 +53,14 @@ const SIMULATIONS = [
 const FINITE_MOTION = new Map()
 
 /**
+ * Owner exceptions to the motion-control rules, each with its decision. Looping motion here runs without a Pause
+ * control; reduced motion must still stop it (checked below).
+ */
+const MOTION_CONTROL_EXCEPTIONS = new Map([
+  ["components/hero-logo-mobius.tsx", "Owner, 2026-10-09: hero logo orbit loops with no pause control (WCAG 2.2.2 exception)"],
+])
+
+/**
  * Motion that stops by itself within 5 s needs no Pause control (WCAG 2.2.2 applies to motion lasting more than 5 s):
  * a one-shot timer of at most 5000 ms that sets `settled`, and the animation runs only while `!settled`.
  */
@@ -306,7 +314,8 @@ const CHECKS = [
       if (/<video\b[^>]*\b(loop|autoPlay)\b/.test(code)) reasons.push("looping or autoplay video")
       for (const cls of motion.infinite) if (usesClass(code, cls)) reasons.push(`infinite .${cls}`)
       if (reasons.length === 0) return []
-      const control = /<MotionToggle\b|aria-label=\{?[`"'](Pause|Play)\b/.test(code) || autoStopsWithin5s(code)
+      const control =
+        /<MotionToggle\b|aria-label=\{?[`"'](Pause|Play)\b/.test(code) || autoStopsWithin5s(code) || MOTION_CONTROL_EXCEPTIONS.has(file)
       const reduced = /usePrefersReducedMotion\(|prefers-reduced-motion/.test(code)
       if (control && reduced) return []
       return [{ line: 1, detail: `${reasons.join(", ")} without ${control ? "" : "a Pause/Play control"}${!control && !reduced ? " and " : ""}${reduced ? "" : "a reduced-motion path"}` }]
@@ -512,7 +521,7 @@ const CHECKS = [
       ]
       for (const [pattern, detail] of need) if (!pattern.test(code)) out.push({ line: 1, detail })
       // A Pause control, or the orbit settles by itself within 5 s (owner removed the Pause button, 2026-10-09).
-      if (!/<MotionToggle\b/.test(code) && !autoStopsWithin5s(code))
+      if (!/<MotionToggle\b/.test(code) && !autoStopsWithin5s(code) && !MOTION_CONTROL_EXCEPTIONS.has(file))
         out.push({ line: 1, detail: "the moving orbit has no Pause control and doesn't settle within 5 s" })
       out.push(...matches(code, /offsetDistance\s*=\s*`\$\{\s*\(\s*index\s*\/[^`]*`/g, () => "marks spread evenly along the whole path (some sit behind the headline)"))
       return out

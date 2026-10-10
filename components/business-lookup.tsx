@@ -742,7 +742,9 @@ function useScrollLit(ref: React.RefObject<HTMLElement | null>, enabled: boolean
       if (!el) return
       const vh = window.innerHeight
       const travelled = vh - el.getBoundingClientRect().top - 24
-      const span = (vh * 0.5) / count
+      // Owner, 2026-10-09: slower. About a sixth of the screen of scrolling per step; the fourth lights when the row
+      // reaches the top third of the screen.
+      const span = (vh * 0.7) / count
       setLit(Math.max(0, Math.min(count, Math.ceil(travelled / span))))
     }
     const onScroll = () => {
@@ -783,7 +785,7 @@ function JourneySteps({ current }: { current: Journey | null }) {
                 {Array.from({ length: JOURNEY_STEPS.length }, (_, bar) => (
                   <span
                     key={bar}
-                    className={`w-1.5 rounded-sm motion-safe:transition-colors motion-safe:duration-300 ${
+                    className={`w-1.5 rounded-sm motion-safe:transition-colors motion-safe:duration-700 ${
                       bar <= i ? (gold || done || active ? "bg-gold-from" : "bg-ink/25") : "bg-ink/[0.07]"
                     }`}
                     style={{ height: `${(bar + 1) * 25}%` }}
@@ -1258,7 +1260,7 @@ function StepNumber({
   return (
     <span
       aria-hidden
-      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[14px] font-semibold motion-safe:transition-colors motion-safe:duration-300 ${
+      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[14px] font-semibold motion-safe:transition-colors motion-safe:duration-700 ${
         done
           ? "bg-green-700 text-white"
           : active

@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react"
 import { useOnScreenAndVisible, usePrefersReducedMotion } from "@/hooks/use-autoplay"
-import { MotionToggle } from "@/components/motion-toggle"
 import { INTEGRATION_LOGOS } from "@/lib/integrations"
 
 // The marks travel the figure eight and fade through the mask hole as they cross behind the headline.
@@ -210,35 +209,22 @@ export function HeroLogoMobius({ moving = false, running = false }: { moving?: b
 }
 
 /**
- * Desktop hero orbit: the marks travel the loop endlessly, with a pause control (VR-47, WCAG 2.2.2: the loop runs
- * longer than 5 s). The control is icon-only in the hero's lower-left corner (owner, 2026-10-09: no labelled Pause
- * button at the top right). Under reduced motion the marks rest still and there's nothing to pause. Phones use
- * HeroFloatingLogos.
+ * Desktop hero orbit: the marks travel the loop endlessly. Owner exception (2026-10-09): no pause control, although
+ * the loop runs longer than 5 s (VR-47, WCAG 2.2.2). What remains: under reduced motion the marks rest still, and the
+ * loop holds while the hero is off screen or the tab is hidden. Phones use HeroFloatingLogos.
  */
 export function HeroLogoOrbit() {
   const reduce = usePrefersReducedMotion()
-  const [paused, setPaused] = useState(false)
   const frameRef = useRef<HTMLDivElement>(null)
   const visible = useOnScreenAndVisible(frameRef, 0)
   const moving = !reduce
 
   return (
-    <>
-      <div
-        ref={frameRef}
-        className="pointer-events-none absolute inset-x-0 top-0 z-0 hidden h-[100svh] overflow-hidden md:block"
-      >
-        <HeroLogoMobius moving={moving} running={moving && visible && !paused} />
-      </div>
-      {moving ? (
-        <MotionToggle
-          compact
-          paused={paused}
-          onToggle={() => setPaused((value) => !value)}
-          label="logo animation"
-          className="absolute left-4 top-[calc(100svh-8.5rem)] z-30 hidden md:inline-flex lg:left-6"
-        />
-      ) : null}
-    </>
+    <div
+      ref={frameRef}
+      className="pointer-events-none absolute inset-x-0 top-0 z-0 hidden h-[100svh] overflow-hidden md:block"
+    >
+      <HeroLogoMobius moving={moving} running={moving && visible} />
+    </div>
   )
 }

@@ -277,3 +277,8 @@ Verifiers: `verify-lookup` 93, `verify-report-dedupe` 10, `verify-funnel` 79 (26
 - **Button font.** Every button and button-style link already uses the site's body font, Arial (checked on /, /marketing, /report, /book, /solutions). Nothing changed. Google's own UI fonts (Roboto, Google Sans) would be a new typeface: VR-02 / VD-004, owner decision.
 - **Windsor.ai connectors (checked on windsor.ai/data-sources, 2026-10-09):** Shopify, Google My Business (Business Profile), Google Ads, Facebook Ads (Meta), Facebook Page Insights, Instagram Insights, TikTok Ads, TikTok Organic, Google Analytics 4, Google Search Console, YouTube, Microsoft Ads, LinkedIn Ads, Pinterest Ads, Snapchat Ads, Amazon Ads, WooCommerce, Square, Stripe, Klaviyo, Mailchimp, HubSpot. Yelp not seen in the part of the page read.
 - **Checks.** All 8 verifiers pass; TypeScript 16; no horizontal scroll 320–1440; full journey passes at 1280 and 390.
+
+## 2026-10-09 — Slower gold sequence; orbit pause control removed (owner exception)
+
+- Gold steps: one step per ~0.175 of the screen height of scrolling (was 0.125), so about 160 px per step at 900 px tall; colour transitions 700 ms (was 300).
+- **Owner exception to VR-47 / WCAG 2.2.2 (2026-10-09):** the hero logo orbit loops with no pause control. Kept: the marks rest still under reduced motion, and the loop holds while the hero is off screen or the tab is hidden. Known risk: WCAG 2.2.2 is Level A, and the project's floor is WCAG 2.2 AA, so this is a recorded accessibility failure on desktop. `verify-visual` names it in `MOTION_CONTROL_EXCEPTIONS` (rules `autoplay-has-control`, `hero-logos-visible-arc`); the reduced-motion requirement still applies. Needs a VD ledger entry.
