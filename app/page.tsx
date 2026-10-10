@@ -7,7 +7,6 @@ import { BusinessLookup, LookupBookButton, LookupReportButton } from "@/componen
 import { HomeFaq } from "@/components/home-faq"
 import { ReportBand } from "@/components/report-band"
 import { ReviewCarousel } from "@/components/review-carousel"
-import { SecurityBand } from "@/components/security-band"
 import { SiteFooter } from "@/components/site-footer"
 import { HeroFloatingLogos } from "@/components/hero-floating-logos"
 import { HeroLogoOrbit } from "@/components/hero-logo-mobius"
@@ -106,7 +105,6 @@ export default function TerramoreHomepage() {
 
       <TerramoreToolkit />
       <ReviewCarousel />
-      <SecurityBand />
       <TerramoreUseCases />
       <ReportBand />
       <HomeFaq />

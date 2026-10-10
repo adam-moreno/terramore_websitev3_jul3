@@ -38,7 +38,7 @@ const ITEMS = [
   },
   {
     title: "Leave with a 90-day plan",
-    copy: "Within days, a week at most, you have a written plan for the quarter with owners and dates: what to fix, what to turn on, and what comes next. It stays with your team whether we stay or not.",
+    copy: "Within seven days, you have a written plan for the quarter with owners and dates: what to fix, what to turn on, and what comes next. It stays with your team whether we stay or not.",
     visual: RoadmapVisual,
   },
 ]

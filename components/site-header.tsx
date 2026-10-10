@@ -20,20 +20,17 @@ const NAV_LINKS = [
   { href: "/book", label: "How we work" },
 ] as const
 
-/** Visitors already booking (or managing a booking) keep "Let's talk" as the header's primary action. */
+/** On the booking pages the menu drops "Check my business": the visitor is already booking. */
 function isBookingStage(pathname: string | null): boolean {
   return pathname === "/schedule" || pathname === "/book" || Boolean(pathname?.startsWith("/book/"))
 }
 
 const PRIMARY_SM = "shrink-0 rounded-lg bg-brand px-2.5 py-1.5 text-[12px] font-medium text-white hover:bg-brand-hover"
 const PRIMARY_LG = "rounded-full bg-brand px-4 py-2 text-[13px] font-medium text-white hover:bg-brand-hover"
-const SECONDARY_LG = "rounded-full border border-ink/20 px-4 py-2 text-[13px] font-medium text-ink hover:border-ink/40"
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
-  // Search-first: "Check my business" leads on every public page except the booking stage.
-  const searchFirst = !isBookingStage(pathname)
 
   useEffect(() => {
     setOpen(false)
@@ -72,11 +69,7 @@ export function SiteHeader() {
           />
 
           <div className="ml-auto flex items-center gap-1.5 lg:hidden">
-            {searchFirst ? (
-              <CheckMyBusinessLink ctaId="header_report" className={`${PRIMARY_SM} max-[374px]:hidden`} />
-            ) : (
-              <BookingLink label="Let's talk" source="header" ctaId="header_book" className={PRIMARY_SM} />
-            )}
+            <BookingLink label="Book your call" source="header" ctaId="header_book" className={`${PRIMARY_SM} max-[359px]:hidden`} />
             <button
               type="button"
               className="rounded-lg p-1.5 text-ink"
@@ -105,14 +98,7 @@ export function SiteHeader() {
               <span>Log in</span>
               <span className="text-[10px] font-normal text-slate-500">Current clients</span>
             </a>
-            {searchFirst ? (
-              <>
-                <BookingLink label="Let's talk" source="header" ctaId="header_book" className={SECONDARY_LG} />
-                <CheckMyBusinessLink ctaId="header_report" className={PRIMARY_LG} />
-              </>
-            ) : (
-              <BookingLink label="Let's talk" source="header" ctaId="header_book" className={PRIMARY_LG} />
-            )}
+            <BookingLink label="Book your call" source="header" ctaId="header_book" className={PRIMARY_LG} />
           </div>
         </div>
 
@@ -137,22 +123,21 @@ export function SiteHeader() {
                 {item.label}
               </Link>
             ))}
-            {searchFirst ? (
-              <div className="py-4">
-                {/* Under 375 px the bar has no room for "Check my business"; it leads the menu instead. */}
+            <div className="py-4">
+              {/* Under 360 px the bar has no room for the button; it leads the menu instead. */}
+              <BookingLink
+                label="Book your call"
+                source="header"
+                ctaId="header_book"
+                className="inline-flex min-h-11 items-center rounded-full bg-brand px-5 text-[16px] font-medium text-white min-[360px]:hidden"
+              />
+              {isBookingStage(pathname) ? null : (
                 <CheckMyBusinessLink
                   ctaId="header_report"
-                  className="mb-3 inline-flex min-h-11 items-center rounded-full bg-brand px-5 text-[16px] font-medium text-white min-[375px]:hidden"
+                  className="inline-flex min-h-11 items-center text-[17px] font-medium text-ink underline underline-offset-4 max-[359px]:mt-3 max-[359px]:block"
                 />
-                <br className="min-[375px]:hidden" />
-                <BookingLink
-                  label="Let's talk"
-                  source="header"
-                  ctaId="header_book"
-                  className="inline-flex min-h-11 items-center text-[17px] font-medium text-ink underline underline-offset-4"
-                />
-              </div>
-            ) : null}
+              )}
+            </div>
           </div>
         ) : null}
       </div>
