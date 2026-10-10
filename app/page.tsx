@@ -37,7 +37,7 @@ export default function TerramoreHomepage() {
           Slack peeks into the first viewport — one step above 14rem, still below 18rem.
           Do not justify-center on mobile. Desktop tall centered column unchanged.
         */}
-        <div className="relative z-20 flex min-h-[calc(100svh-18rem)] flex-col justify-start md:-mt-28 md:min-h-0 md:pt-28">
+        <div className="relative z-20 flex min-h-[calc(100svh-18rem)] flex-col justify-start md:-mt-28 md:min-h-0 md:pt-24 [@media(min-width:768px)_and_(max-height:820px)]:md:pt-[5.5rem]">
           <div className="page-shell relative z-20 text-center">
             <div
               className="mx-auto flex w-full max-w-none flex-col items-center sm:max-w-[28rem] md:max-w-none md:inline-flex"
@@ -51,13 +51,13 @@ export default function TerramoreHomepage() {
                   align="center"
                   header={
                     <>
-                    <h1 className="mx-auto text-center text-[2.35rem] font-bold leading-[1.08] tracking-[-0.02em] text-ink sm:text-5xl md:text-[72px] md:leading-[75.6px] [@media(min-width:768px)_and_(max-height:820px)]:text-[58px] [@media(min-width:768px)_and_(max-height:820px)]:leading-[62px]">
+                    <h1 className="mx-auto text-center text-[2.35rem] font-bold leading-[1.08] tracking-[-0.02em] text-ink sm:text-5xl md:text-[64px] md:leading-[68px] [@media(min-width:768px)_and_(max-height:820px)]:text-[54px] [@media(min-width:768px)_and_(max-height:820px)]:leading-[58px]">
                     Unlock{" "}
                     <span className={`${brandMore.className} text-[1.28em] font-bold leading-none tracking-[-0.08em] text-ink`}>
                       more
                     </span>
                     <br />
-                    from the <span className="text-gold-ink">business</span>
+                    from <span className="text-gold-ink">the business</span>
                     <br />
                     <span className="text-gold-ink">you already built.</span>
                   </h1>

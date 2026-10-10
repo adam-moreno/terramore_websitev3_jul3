@@ -313,7 +313,7 @@ export function BusinessLookup({
         <div
           className={
             variant === "hero"
-              ? "md:flex md:min-h-[clamp(0px,calc(100svh-var(--hero-peek)),44rem)] md:flex-col md:justify-center [--hero-peek:386px] [@media(min-width:768px)_and_(max-height:820px)]:[--hero-peek:374px]"
+              ? "md:flex md:min-h-[clamp(0px,calc(100svh-var(--hero-peek)),46rem)] md:flex-col md:justify-center [--hero-peek:470px]"
               : undefined
           }
         >
@@ -531,7 +531,7 @@ function ScoreCard({
     <section
       id="lookup-score"
       aria-label="Your Digital Presence Score"
-      className={`relative mt-8 scroll-mt-28 [@media(min-width:768px)_and_(max-height:820px)]:mt-5 overflow-hidden rounded-2xl border border-ink/10 bg-white p-5 text-left md:p-8 ${idle ? "hidden md:block" : ""}`}
+      className={`relative mt-8 scroll-mt-28 [@media(min-width:768px)_and_(max-height:820px)]:mt-5 overflow-hidden rounded-2xl border border-ink/10 bg-white p-5 text-left md:px-8 md:pb-8 md:pt-6 ${idle ? "hidden md:block" : ""}`}
     >
       <p className="text-[18px] font-semibold text-ink md:text-[20px]">Your Digital Presence Score</p>
       {idle ? (
@@ -551,7 +551,7 @@ function ScoreCard({
         </p>
       )}
 
-      <p className="mt-4 flex flex-wrap items-center justify-end gap-x-3 gap-y-1 text-[13px] text-slate-600">
+      <p className="mt-2 flex flex-wrap items-center justify-end gap-x-3 gap-y-1 text-[13px] text-slate-600">
         <span>Score scale:</span>
         {SCORE_BANDS.map((b, i) => (
           <span key={b.label} className="inline-flex items-center gap-1.5">
@@ -561,7 +561,7 @@ function ScoreCard({
         ))}
       </p>
 
-      <ul className="mt-3 grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 lg:grid-cols-5">
+      <ul className="mt-1 grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 lg:grid-cols-5">
         {FACTORS.map((f) => (
           <li key={f.id} className="flex flex-col items-center">
             <ScoreRing label={f.label} value={factorScore(f.id)} state={state.phase} />
@@ -652,11 +652,11 @@ function ScoreRing({ label, value, state }: { label: string; value: number | nul
   return (
     <>
       <span
-        className="mb-2 flex min-h-[2.5em] items-end justify-center text-center text-[14px] font-medium leading-tight text-ink"
+        className="mb-2 flex min-h-[2.5em] items-end justify-center text-center text-[14px] font-medium leading-tight text-ink lg:min-h-0"
       >
         {label}
       </span>
-      <div role="img" aria-label={name} className="relative h-24 w-24 shrink-0">
+      <div role="img" aria-label={name} className="relative h-24 w-24 shrink-0 lg:h-[5.25rem] lg:w-[5.25rem]">
         <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90" aria-hidden>
           <circle cx="50" cy="50" r={r} fill="none" strokeWidth="8" className="stroke-ink/10" />
           {tone ? (
@@ -686,36 +686,131 @@ function ScoreRing({ label, value, state }: { label: string; value: number | nul
   )
 }
 
-const JOURNEY_STEPS: ReadonlyArray<{ id: Journey | "score"; title: string; body: string }> = [
-  { id: "score", title: "Instant score", body: "Free, right on this page. No email needed." },
-  { id: "socials", title: "Add your social profiles", body: "See how they change your score." },
-  { id: "ads", title: "Your advertising", body: "Tell us where you've advertised." },
+/**
+ * The four steps: what each gives the owner, and what they share for it (their "level of investment"), which rises
+ * one step at a time. Copy stays true to what's live: nothing here says a connection exists before it does.
+ */
+const JOURNEY_STEPS: ReadonlyArray<{ id: Journey | "score"; title: string; points: string[]; invest: string }> = [
+  {
+    id: "score",
+    title: "Instant score",
+    points: ["How a new customer finds your business, and what they see when they do.", "Free, right on this page. No email."],
+    invest: "Your website",
+  },
+  {
+    id: "socials",
+    title: "Add your social profiles",
+    points: [
+      "More of where customers find you, and how your score changes.",
+      "Connected later, it shows how your content brings customers in and keeps them.",
+    ],
+    invest: "+ Your social profiles",
+  },
+  {
+    id: "ads",
+    title: "Your advertising",
+    points: [
+      "Connect the ad accounts you've used, and see where your spend works and where it doesn't.",
+      "New to ads? We'll explain what they can do and help you past the first hurdles.",
+    ],
+    invest: "+ Your ad accounts",
+  },
   {
     id: "report",
-    title: "Full report and Growth Workspace",
-    body: "The evidence behind every score, how you compare, the top five fixes, and a free workspace for your accounts.",
+    title: "Full report & Growth Workspace",
+    points: [
+      "Your email gets the free, in-depth report.",
+      "Free access to your Growth Workspace, where accounts like Shopify, Google Business Profile, Google Ads, Meta, TikTok and Google Analytics will connect.",
+    ],
+    invest: "+ Your email",
   },
 ]
 
-/** The four steps, with the ones behind the visitor ticked. `current` is null before the first score. */
+/**
+ * How many steps the visitor's scroll has lit (0 to 4): the first lights as the row comes into view, the fourth by
+ * the time it's a little above the middle of the screen. Driven by scroll, so it follows the visitor and never plays
+ * on its own; colour changes only, no movement (reduced motion drops the transition).
+ */
+function useScrollLit(ref: React.RefObject<HTMLElement | null>, enabled: boolean, count: number) {
+  const [lit, setLit] = useState(0)
+  useEffect(() => {
+    if (!enabled) return
+    let frame = 0
+    const measure = () => {
+      frame = 0
+      const el = ref.current
+      if (!el) return
+      const vh = window.innerHeight
+      const travelled = vh - el.getBoundingClientRect().top - 24
+      const span = (vh * 0.5) / count
+      setLit(Math.max(0, Math.min(count, Math.ceil(travelled / span))))
+    }
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(measure)
+    }
+    measure()
+    window.addEventListener("scroll", onScroll, { passive: true })
+    window.addEventListener("resize", onScroll)
+    return () => {
+      if (frame) cancelAnimationFrame(frame)
+      window.removeEventListener("scroll", onScroll)
+      window.removeEventListener("resize", onScroll)
+    }
+  }, [ref, enabled, count])
+  return lit
+}
+
+/**
+ * The four steps under the score. Before a check, scrolling lights them in gold, 1 to 4, with the rising "level of
+ * investment" above them. After a check they show real progress: done (green), current (blue), to come.
+ */
 function JourneySteps({ current }: { current: Journey | null }) {
-  const at = current ? JOURNEY_STEPS.findIndex((s) => s.id === current) : 0
+  const listRef = useRef<HTMLOListElement>(null)
+  const scrollLit = useScrollLit(listRef, current == null, JOURNEY_STEPS.length)
+  const at = current ? JOURNEY_STEPS.findIndex((s) => s.id === current) : -1
   return (
-    <ol className="mt-6 grid gap-4 border-t border-ink/10 pt-6 sm:grid-cols-2 lg:grid-cols-4">
-      {JOURNEY_STEPS.map((step, i) => {
-        const done = current != null && i < at
-        const active = current != null && i === at
-        return (
-          <li key={step.id} className="flex gap-3" aria-current={active ? "step" : undefined}>
-            <StepNumber n={i + 1} done={done} active={active} />
-            <span>
-              <span className="block text-[15px] font-semibold text-ink">{step.title}</span>
-              <span className="block text-[14px] leading-snug text-slate-600">{step.body}</span>
-            </span>
-          </li>
-        )
-      })}
-    </ol>
+    <div className="mt-5 border-t border-ink/10 pt-4">
+      <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-slate-600">Your level of investment</p>
+      <ol ref={listRef} className="mt-2.5 grid gap-x-6 gap-y-6 sm:grid-cols-2 lg:grid-cols-4">
+        {JOURNEY_STEPS.map((step, i) => {
+          const done = current != null && i < at
+          const active = current != null && i === at
+          const gold = current == null && i < scrollLit
+          return (
+            <li key={step.id} aria-current={active ? "step" : undefined}>
+              <div className="flex items-end gap-2">
+              <div aria-hidden className="flex h-4 items-end gap-0.5">
+                {Array.from({ length: JOURNEY_STEPS.length }, (_, bar) => (
+                  <span
+                    key={bar}
+                    className={`w-1.5 rounded-sm motion-safe:transition-colors motion-safe:duration-300 ${
+                      bar <= i ? (gold || done || active ? "bg-gold-from" : "bg-ink/25") : "bg-ink/[0.07]"
+                    }`}
+                    style={{ height: `${(bar + 1) * 25}%` }}
+                  />
+                ))}
+              </div>
+              <p className="text-[13px] font-medium leading-none text-slate-600">{step.invest}</p>
+              </div>
+              <div className="mt-2.5 flex gap-3">
+                <StepNumber n={i + 1} done={done} active={active} gold={gold} />
+                <div>
+                  <p className="text-[16px] font-semibold leading-snug text-ink">{step.title}</p>
+                  <ul className="mt-1.5 space-y-1.5">
+                    {step.points.map((point) => (
+                      <li key={point} className="flex gap-2 text-[14px] leading-snug text-slate-700">
+                        <span aria-hidden className="mt-[0.45em] h-1.5 w-1.5 shrink-0 rounded-full bg-ink/40" />
+                        {point}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </li>
+          )
+        })}
+      </ol>
+    </div>
   )
 }
 
@@ -1148,12 +1243,29 @@ function ScoreFactors({ score }: { score: LookupScore | null }) {
   )
 }
 
-function StepNumber({ n, done, active = false }: { n: number; done: boolean; active?: boolean }) {
+function StepNumber({
+  n,
+  done,
+  active = false,
+  gold = false,
+}: {
+  n: number
+  done: boolean
+  active?: boolean
+  /** Lit by scroll before a check: gold fill, ink number (gold is an accent, never text on light). */
+  gold?: boolean
+}) {
   return (
     <span
       aria-hidden
-      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[14px] font-semibold ${
-        done ? "bg-green-700 text-white" : active ? "bg-brand text-white ring-4 ring-brand/20" : "bg-ink text-white"
+      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[14px] font-semibold motion-safe:transition-colors motion-safe:duration-300 ${
+        done
+          ? "bg-green-700 text-white"
+          : active
+            ? "bg-brand text-white ring-4 ring-brand/20"
+            : gold
+              ? "bg-gold-from text-ink ring-4 ring-gold-from/25"
+              : "bg-ink text-white"
       }`}
     >
       {done ? <Check className="h-4 w-4" /> : n}
