@@ -1,5 +1,6 @@
 "use client"
 
+import { WhatTerramoreDoes } from "@/components/what-terramore-does"
 import { BookingLink } from "@/components/booking-popup"
 import { League_Spartan } from "next/font/google"
 import { BusinessLookup, LookupBookButton, LookupReportButton } from "@/components/business-lookup"
@@ -101,6 +102,8 @@ export default function TerramoreHomepage() {
           </div>
         </div>
       </section>
+
+      <WhatTerramoreDoes />
 
       {/* The Slack demo is its own section under the hero (no longer overlapping it). */}
       <section aria-label="Terramore in your team's Slack" className="bg-cream pt-12 pb-10 md:pt-24 md:pb-24">

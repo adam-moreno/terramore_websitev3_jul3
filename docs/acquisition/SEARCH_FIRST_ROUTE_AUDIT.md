@@ -282,3 +282,9 @@ Verifiers: `verify-lookup` 93, `verify-report-dedupe` 10, `verify-funnel` 79 (26
 
 - Gold steps: one step per ~0.175 of the screen height of scrolling (was 0.125), so about 160 px per step at 900 px tall; colour transitions 700 ms (was 300).
 - **Owner exception to VR-47 / WCAG 2.2.2 (2026-10-09):** the hero logo orbit loops with no pause control. Kept: the marks rest still under reduced motion, and the loop holds while the hero is off screen or the tab is hidden. Known risk: WCAG 2.2.2 is Level A, and the project's floor is WCAG 2.2 AA, so this is a recorded accessibility failure on desktop. `verify-visual` names it in `MOTION_CONTROL_EXCEPTIONS` (rules `autoplay-has-control`, `hero-logos-visible-arc`); the reduced-motion requirement still applies. Needs a VD ledger entry.
+
+## 2026-10-09 — "What Terramore does for your business" section (owner request; local)
+
+- New section under the hero, above the Slack demo (`components/what-terramore-does.tsx`): eyebrow "How we work with businesses", H2, the owner-approved /marketing line (VD-029), and four stages on one path: Find / See the broken step, Connect / Work inside your tools, Act / Follow up the same day, Measure / Leave a 90-day plan. Stage copy is the existing How-we-work wording (`components/terramore-toolkit.tsx`), shortened; no new claims. "See each step in detail" links to `#how-we-work`.
+- Motion: library D3 (path draws with stages settling as the line reaches them), purpose sequence, once on first view (1.4 s path, stages 0.35 s apart), never loops. Drawn at rest when reduced motion is on, when the section is already on screen at load, or without IntersectionObserver. Tokens only (`theme(colors.brand.DEFAULT)`); vertical line on phones.
+- Checks: all 8 verifiers pass; TypeScript 16; no horizontal scroll at 1440 or 390; captured mid-draw and settled at both widths.
