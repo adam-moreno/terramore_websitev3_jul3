@@ -108,7 +108,8 @@ export default function TerramoreHomepage() {
       <TerramoreUseCases />
       <ReportBand />
       <HomeFaq />
-      <SiteFooter />
+      {/* The FAQ already closes with Check my business / Talk with us, so the footer does not repeat them here. */}
+      <SiteFooter showDualCtas={false} />
     </div>
   )
 }

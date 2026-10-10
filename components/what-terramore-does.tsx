@@ -7,7 +7,9 @@ import { MotionToggle } from "@/components/motion-toggle"
  * "What Terramore does for your business": the owner-approved brand film (v6, 51.8 s, silent), under the section's
  * heading and the approved /marketing line (VD-029). It replaces the earlier Find / Connect / Act / Measure path.
  *
- * Motion (WCAG 2.2.2, VISUAL_DOCTRINE motion rules): the film loops, so it always has a visible Pause / Play button.
+ * Motion (WCAG 2.2.2, VISUAL_DOCTRINE motion rules): the film loops, so it always has a Pause / Play control: a small
+ * icon-only button in the corner, quiet at rest and full strength on hover or focus (the pattern used on product pages
+ * such as Apple's), and a tap on the film itself also pauses or plays it.
  * It plays only while it's on screen and never restarts on its own after the viewer pauses it. Under reduced motion it
  * doesn't autoplay: the poster shows with a Play button. The film is silent, so it needs no captions; its content is
  * described in text for screen readers. Every business, score, audience, ad and revenue figure in it is an example and
@@ -17,13 +19,27 @@ import { MotionToggle } from "@/components/motion-toggle"
  * (H.264, CRF 24, no audio, fast start).
  */
 
-const FILM = "/marketing/film/terramore-brand-film.mp4"
-const POSTER = "/marketing/film/terramore-brand-film-poster.jpg"
+/** Landscape (16:9) from md up; the 4:5 portrait cut on phones (film repo: TerramoreBrandFilmPortrait). */
+const CUTS = {
+  landscape: { src: "/marketing/film/terramore-brand-film.mp4", poster: "/marketing/film/terramore-brand-film-poster.jpg", aspect: "aspect-video" },
+  portrait: { src: "/marketing/film/terramore-brand-film-portrait.mp4", poster: "/marketing/film/terramore-brand-film-portrait-poster.jpg", aspect: "aspect-[4/5]" },
+} as const
+const PHONE = "(max-width: 767px)"
 
 export function WhatTerramoreDoes() {
   const videoRef = useRef<HTMLVideoElement>(null)
   const userPaused = useRef(false)
   const [playing, setPlaying] = useState(false)
+  const [cut, setCut] = useState<keyof typeof CUTS>("landscape")
+
+  // Phones get the portrait cut; the choice follows the viewport if it changes.
+  useEffect(() => {
+    const media = window.matchMedia(PHONE)
+    const sync = () => setCut(media.matches ? "portrait" : "landscape")
+    sync()
+    media.addEventListener("change", sync)
+    return () => media.removeEventListener("change", sync)
+  }, [])
 
   useEffect(() => {
     const video = videoRef.current
@@ -48,7 +64,7 @@ export function WhatTerramoreDoes() {
     )
     io.observe(video)
     return () => io.disconnect()
-  }, [])
+  }, [cut])
 
   function toggle() {
     const video = videoRef.current
@@ -81,16 +97,19 @@ export function WhatTerramoreDoes() {
 
         <figure className="mx-auto mt-10 max-w-[64rem] md:mt-12">
           <div className="relative overflow-hidden rounded-[20px] bg-ink shadow-[0_30px_60px_-30px_rgba(15,30,46,0.45)] ring-1 ring-black/[0.06] md:rounded-[28px]">
+            {/* Tapping the film also pauses or plays it; the corner button is the visible, keyboard-reachable control. */}
             <video
+              key={cut}
               ref={videoRef}
-              className="block aspect-video w-full"
-              src={FILM}
-              poster={POSTER}
+              className={`block w-full cursor-pointer ${CUTS[cut].aspect}`}
+              src={CUTS[cut].src}
+              poster={CUTS[cut].poster}
               muted
               loop
               playsInline
               preload="metadata"
               aria-describedby="terramore-film-description"
+              onClick={toggle}
               onPlay={() => setPlaying(true)}
               onPause={() => setPlaying(false)}
             />
@@ -99,7 +118,8 @@ export function WhatTerramoreDoes() {
               onToggle={toggle}
               label="video"
               tone="dark"
-              className="absolute bottom-3 left-3 backdrop-blur md:bottom-5 md:left-5"
+              compact
+              className="absolute bottom-3 left-3 opacity-70 backdrop-blur transition-opacity hover:opacity-100 focus-visible:opacity-100 md:bottom-4 md:left-4"
             />
           </div>
           <figcaption className="mt-3 text-center text-[13px] text-slate-600">

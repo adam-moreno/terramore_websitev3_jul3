@@ -308,3 +308,10 @@ Owner direction (Adam): the v6 brand film (51.8 s, silent; film repo branch `fil
 
 - **Jobs we already know** (`components/review-carousel.tsx`): cities removed. Each card is a button; tapping it stops the row and opens "Top 3 problems we find" for that kind of business, each with "How we fix it", plus a "Check my business" link. Copy describes typical patterns, not client results (no names, places or numbers). The link reuses the approved `home_band_report` CTA id (the tracking taxonomy is a no-touch file), so clicks here and on the report band share one id; a dedicated id needs a taxonomy change.
 - **Display gold** (`gold.display` #b98314, VD-036): the homepage H1 accent, the How-we-work title accent and "We have done it before." Small gold text stays `gold-ink`.
+
+## 2026-10-10 · Portrait film on phones; quieter film control; no repeated footer CTAs
+
+- **Portrait cut:** under 768 px the player loads `public/marketing/film/terramore-brand-film-portrait.mp4` (4:5, 1080 × 1350, CRF 24, 6.2 MB; film repo `TerramoreBrandFilmPortrait`) with its own poster; from 768 px up, the 16:9 film. The choice follows the viewport.
+- **Control:** the Pause / Play control is now the site's `MotionToggle` in its compact, icon-only form (44 px target, named "Pause video" / "Play video"), in the film's bottom-left corner at 70% opacity, full on hover or focus. Tapping the film also pauses or plays it. WCAG 2.2.2 is still met: the control is always present and keyboard-reachable.
+- **Footer:** on the homepage the footer no longer repeats "Check my business / Talk with us"; the FAQ section directly above already closes with them.
+- **Checked in Chrome (570 px window):** the portrait file loads, tapping toggles playback, the control is 44 × 44 at 12 px from the corner, and the footer has no duplicate CTA.
