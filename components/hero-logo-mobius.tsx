@@ -32,6 +32,8 @@ type Frame = {
   originY: number
   hole: { cx: number; cy: number; rx: number; ry: number }
   headline: { left: number; top: number; right: number; bottom: number }
+  /** The search field and its button, kept clear like the headline (the headline and search are one group). */
+  field: { left: number; top: number; right: number; bottom: number } | null
   width: number
   height: number
   fadeTop: number
@@ -47,7 +49,7 @@ function restingOffsets(d: string, frame: Frame, max: number) {
   const total = probe.getTotalLength()
   if (!total) return []
   const edge = MARK_SIZE / 2
-  const { hole, headline } = frame
+  const { hole, headline, field } = frame
   const clear: number[] = []
   for (let i = 0; i < SAMPLES; i++) {
     const at = (i / SAMPLES) * total
@@ -56,8 +58,9 @@ function restingOffsets(d: string, frame: Frame, max: number) {
     const x = frame.originX + point.x - edge
     const y = frame.originY + point.y - edge
     const inHole = Math.hypot((x - hole.cx) / hole.rx, (y - hole.cy) / hole.ry) < CLEAR_OF_HOLE
-    const onHeadline =
-      x > headline.left - edge && x < headline.right + edge && y > headline.top - edge && y < headline.bottom + edge
+    const inBox = (b: { left: number; top: number; right: number; bottom: number }) =>
+      x > b.left - edge && x < b.right + edge && y > b.top - edge && y < b.bottom + edge
+    const onHeadline = inBox(headline) || (field != null && inBox(field))
     const inFrame = x > edge && x < frame.width - edge && y > frame.fadeTop + edge && y < frame.height - edge
     if (!inHole && !onHeadline && inFrame) clear.push(at)
   }
@@ -123,6 +126,7 @@ export function HeroLogoMobius({ moving = false, running = false }: { moving?: b
       }
 
       const headlineBox = (copy.querySelector("h1") ?? copy).getBoundingClientRect()
+      const fieldBox = copy.querySelector("form")?.getBoundingClientRect() ?? null
       const offsets = restingOffsets(
         d,
         {
@@ -135,6 +139,14 @@ export function HeroLogoMobius({ moving = false, running = false }: { moving?: b
             right: headlineBox.right - sectionBox.left,
             bottom: headlineBox.bottom - sectionBox.top,
           },
+          field: fieldBox
+            ? {
+                left: fieldBox.left - sectionBox.left,
+                top: fieldBox.top - sectionBox.top,
+                right: fieldBox.right - sectionBox.left,
+                bottom: fieldBox.bottom - sectionBox.top,
+              }
+            : null,
           width: layer.clientWidth,
           height: Math.min(layer.clientHeight, section.clientHeight),
           // Same 5.75rem as the .hero-logo-topfade mask in globals.css.
@@ -197,9 +209,10 @@ export function HeroLogoMobius({ moving = false, running = false }: { moving?: b
 }
 
 /**
- * Desktop hero orbit. The marks drift for the first 5 seconds the hero is on screen, then settle where they are, so
- * nothing moves for longer than 5 s and no pause control is needed (WCAG 2.2.2, VR-47; owner removed the Pause button
- * 2026-10-09). Under reduced motion they rest still from the start. Phones use HeroFloatingLogos.
+ * Desktop hero orbit. The marks drift for the first 5 seconds the hero is on screen, then dip to half opacity (300 ms; the reviewed floor for the marks) and reappear at their
+ * resting spots on the visible curve, clear of the headline: nothing moves for longer than 5 s, so no pause control is
+ * needed (WCAG 2.2.2, VR-47; owner removed the Pause button 2026-10-09). Under reduced motion they rest still from the
+ * start. Phones use HeroFloatingLogos.
  */
 export function HeroLogoOrbit() {
   const reduce = usePrefersReducedMotion()
@@ -207,6 +220,7 @@ export function HeroLogoOrbit() {
   const visible = useOnScreenAndVisible(frameRef, 0)
   const moving = !reduce
   const [settled, setSettled] = useState(false)
+  const [resting, setResting] = useState(false)
   const started = useRef(false)
 
   // The 5 s starts the first time the hero is on screen and never restarts, so the total motion stays under 5 s.
@@ -216,12 +230,21 @@ export function HeroLogoOrbit() {
     window.setTimeout(() => setSettled(true), 5000)
   }, [moving, visible])
 
+  // Once the drift ends, swap to the resting layout while the marks are faded out, so none stops behind the type.
+  useEffect(() => {
+    if (!settled) return
+    const timer = window.setTimeout(() => setResting(true), 300)
+    return () => window.clearTimeout(timer)
+  }, [settled])
+
   return (
     <div
       ref={frameRef}
-      className="pointer-events-none absolute inset-x-0 top-0 z-0 hidden h-[100svh] overflow-hidden md:block"
+      className={`pointer-events-none absolute inset-x-0 top-0 z-0 hidden h-[100svh] overflow-hidden transition-opacity duration-300 md:block ${
+        settled && !resting ? "opacity-50" : "opacity-100"
+      }`}
     >
-      <HeroLogoMobius moving={moving} running={moving && visible && !settled} />
+      <HeroLogoMobius moving={moving && !resting} running={moving && visible && !settled} />
     </div>
   )
 }

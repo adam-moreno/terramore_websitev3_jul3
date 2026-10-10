@@ -140,6 +140,7 @@ export function BusinessLookup({
   align = "start",
   anchor = false,
   onSubmitted,
+  header,
 }: {
   /** The host CTA (report destination), e.g. "marketing_hero_report". The submit counts as its click. */
   ctaId: CtaId
@@ -163,6 +164,11 @@ export function BusinessLookup({
   anchor?: boolean
   /** Called once per valid submit, after the CTA click is recorded (e.g. a page's legacy click events). */
   onSubmitted?: () => void
+  /**
+   * "hero" only: the page headline, grouped with the field as one centred block above the score card. The block is
+   * the logo orbit's centre (`data-hero-copy`).
+   */
+  header?: React.ReactNode
 }) {
   const inputId = useId()
   const errorId = useId()
@@ -300,7 +306,24 @@ export function BusinessLookup({
         data-lookup-variant={variant}
         className={`w-full scroll-mt-28 ${variant === "compact" ? "max-w-lg" : variant === "hero" ? "max-w-xl md:max-w-4xl" : "max-w-xl"} ${align === "center" ? "mx-auto" : ""}`}
       >
-        <form noValidate onSubmit={submit} className={variant === "hero" ? "md:mx-auto md:max-w-xl" : undefined}>
+        {/*
+          Hero: headline and search are one block, centred in the space above the score card. That space grows with
+          the window so the idle rings sit on the fold, half showing (owner, 2026-10-09: a cue to scroll).
+        */}
+        <div
+          className={
+            variant === "hero"
+              ? "md:flex md:min-h-[clamp(0px,calc(100svh-var(--hero-peek)),44rem)] md:flex-col md:justify-center [--hero-peek:386px] [@media(min-width:768px)_and_(max-height:820px)]:[--hero-peek:374px]"
+              : undefined
+          }
+        >
+        <div data-hero-copy={variant === "hero" ? "" : undefined}>
+        {header}
+        <form
+          noValidate
+          onSubmit={submit}
+          className={variant === "hero" ? `mt-6 md:mx-auto md:mt-8 md:max-w-xl [@media(min-width:768px)_and_(max-height:820px)]:mt-5` : undefined}
+        >
           <label
             htmlFor={inputId}
             className={`block font-semibold text-ink ${variant === "compact" ? "text-[14px]" : "text-[15px]"} ${variant === "hero" ? "md:mx-auto md:max-w-[34rem] md:text-balance md:text-[20px] md:font-medium md:leading-[30px]" : ""} ${align === "center" ? "text-center" : ""}`}
@@ -373,6 +396,8 @@ export function BusinessLookup({
         {secondary && state.phase !== "done" ? (
           <div className={`mt-1 flex ${align === "center" ? "justify-center" : "justify-start"}`}>{secondary}</div>
         ) : null}
+        </div>
+        </div>
         {variant === "hero" && !(state.phase === "error") ? (
           <>
             <ScoreCard state={state} journey={journey} previousOverall={previousOverall} />

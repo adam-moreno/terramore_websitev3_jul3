@@ -252,3 +252,10 @@ Verifiers: `verify-lookup` 93, `verify-report-dedupe` 10, `verify-funnel` 79 (26
 - **Score scale** moved to the card's top right, under the description and above the area names.
 - **Pause button removed (owner).** The orbit looped forever, so removing only the button would fail WCAG 2.2.2 (Level A) and VR-47. Instead the marks drift for the first 5 s the hero is on screen, then stop where they are (one-shot timer, never restarts); reduced motion stays still from the start. `verify-visual` rules `autoplay-has-control` and `hero-logos-visible-arc` now accept motion that stops itself within 5 s (a ≤ 5000 ms `setSettled(true)` timer gating `!settled`); anything longer still needs a Pause control. Needs a VD ledger note beside VD-018.
 - **Checks.** All 8 verifiers pass; TypeScript 16 (unchanged); no horizontal scroll 320–1440; the full journey (check → TikTok added, 64 → 65 → advertising → report) still passes at 1280.
+
+## 2026-10-09 — Headline and search grouped and centred; orbit follows the group; logos rest clear after 5 s (owner request; local)
+
+- **Grouping.** The headline is now the lookup's `header` (hero variant), so headline, supporting line, field and booking link are one block, vertically centred in the space above the score card (equal space above and below: 66/60 px at 1440×900, 156/150 at 1920×1080). That space still grows with the window so the idle rings sit half on the fold (44–50% from 1024×768 to 1920×1080).
+- **Orbit was following the card.** It centres on `[data-hero-copy]`, which had grown to include the score card; the marker is now on the headline-and-search group only, so the orbit wraps that group again.
+- **Settling.** After the 5 s drift the marks dip to half opacity for 300 ms (the reviewed 0.5 floor for the marks, rule `hero-logos-not-desaturated`) and reappear at their resting spots on the visible outer curves, which now avoid the search field as well as the headline. Before, they froze wherever they were, sometimes behind the type.
+- **Checks.** All 8 verifiers pass; TypeScript 16; no horizontal scroll 320–1440; full journey passes at 1280.
