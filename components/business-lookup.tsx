@@ -30,7 +30,7 @@ import {
   SCORE_BANDS,
   type LookupScore,
 } from "@/lib/lookup/types"
-import { useIsMobile } from "@/components/ui/use-mobile"
+import { parseSocial, SOCIAL_PLATFORMS, type AddedSocial, type SocialPlatformId } from "@/lib/lookup/socials"
 
 /**
  * Free business lookup: a described website field, then [Check my business]. The one canonical lookup for every public page
@@ -84,6 +84,31 @@ function looksLikeWebsite(value: string): boolean {
   const v = value.trim().replace(/^https?:\/\//i, "")
   return v.length >= 4 && !/\s/.test(v) && /^[a-z0-9-]+(\.[a-z0-9-]+)+(\/.*)?$/i.test(v)
 }
+
+/** Posts to /api/lookup and hands each streamed event to `onEvent`. Throws TypeError when the connection fails. */
+async function streamLookup(body: object, onEvent: (e: LookupEvent) => void) {
+  const response = await fetch("/api/lookup", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  })
+  const reader = response.body?.getReader()
+  if (!reader) throw new Error("no body")
+  const decoder = new TextDecoder()
+  let buffer = ""
+  for (;;) {
+    const { done, value: chunk } = await reader.read()
+    if (done) break
+    buffer += decoder.decode(chunk, { stream: true })
+    const lines = buffer.split("\n")
+    buffer = lines.pop() ?? ""
+    for (const l of lines) if (l.trim()) onEvent(JSON.parse(l) as LookupEvent)
+  }
+  if (buffer.trim()) onEvent(JSON.parse(buffer) as LookupEvent)
+}
+
+/** The hero journey after the first score: add socials, then advertising, then the full report and workspace. */
+type Journey = "socials" | "ads" | "report"
 
 function reduce(state: LookupState, event: LookupEvent): LookupState {
   switch (event.type) {
@@ -142,7 +167,6 @@ export function BusinessLookup({
   const inputId = useId()
   const errorId = useId()
   const descId = useId()
-  const isMobile = useIsMobile()
   const inputRef = useRef<HTMLInputElement>(null)
   const [value, setValue] = useState("")
   const [inputError, setInputError] = useState<string | null>(null)
@@ -150,6 +174,10 @@ export function BusinessLookup({
   const [reportOpen, setReportOpen] = useState(false)
   const runRef = useRef(0)
   const viewRef = useCtaView<HTMLButtonElement>(ctaId)
+  const [journey, setJourney] = useState<Journey>("socials")
+  const [previousOverall, setPreviousOverall] = useState<number | null>(null)
+  const [rescoring, setRescoring] = useState(false)
+  const [rescoreError, setRescoreError] = useState<string | null>(null)
 
   const pending = state.phase === "checking"
 
@@ -179,6 +207,9 @@ export function BusinessLookup({
     trackFunnelEvent("lookup_start", { cta_id: ctaId })
     let current: LookupState = { ...EMPTY, phase: "checking" }
     setState(current)
+    setJourney("socials")
+    setPreviousOverall(null)
+    setRescoreError(null)
 
     const apply = (e: LookupEvent) => {
       current = reduce(current, e)
@@ -186,24 +217,7 @@ export function BusinessLookup({
     }
 
     try {
-      const response = await fetch("/api/lookup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ website: value.trim() }),
-      })
-      const reader = response.body?.getReader()
-      if (!reader) throw new Error("no body")
-      const decoder = new TextDecoder()
-      let buffer = ""
-      for (;;) {
-        const { done, value: chunk } = await reader.read()
-        if (done) break
-        buffer += decoder.decode(chunk, { stream: true })
-        const lines = buffer.split("\n")
-        buffer = lines.pop() ?? ""
-        for (const l of lines) if (l.trim()) apply(JSON.parse(l) as LookupEvent)
-      }
-      if (buffer.trim()) apply(JSON.parse(buffer) as LookupEvent)
+      await streamLookup({ website: value.trim() }, apply)
       if (current.phase === "checking") apply({ type: "error", code: "server", message: "" })
     } catch (error) {
       // A TypeError from fetch or the stream means the connection failed, not the lookup.
@@ -230,8 +244,39 @@ export function BusinessLookup({
     }
   }
 
+  /**
+   * Re-scores with the profiles the visitor added. The first results stay on screen until the new score arrives; the
+   * previous overall is kept so the card can say what changed.
+   */
+  async function addSocials(socials: AddedSocial[]) {
+    if (rescoring || !state.website) return
+    const before = state.score?.overall ?? null
+    const run = ++runRef.current
+    setRescoring(true)
+    setRescoreError(null)
+    let next: LookupState = { ...EMPTY, phase: "checking" }
+    try {
+      await streamLookup({ website: state.website, socials }, (e) => {
+        next = reduce(next, e)
+      })
+    } catch (error) {
+      next = { ...next, phase: "error", error: error instanceof TypeError ? "network" : "server" }
+    }
+    if (run !== runRef.current) return
+    setRescoring(false)
+    if (next.phase === "done") {
+      setPreviousOverall(before)
+      setState(next)
+    } else {
+      setRescoreError(LOOKUP_ERROR_COPY[next.error ?? "server"])
+    }
+  }
+
   function reset() {
     runRef.current++
+    setJourney("socials")
+    setPreviousOverall(null)
+    setRescoring(false)
     setState(EMPTY)
     setValue("")
     requestAnimationFrame(() => inputRef.current?.focus())
@@ -263,27 +308,38 @@ export function BusinessLookup({
             social profiles, and your Google Maps listing.
           </p>
           <div className={`mt-2 flex flex-col gap-2 sm:flex-row sm:flex-wrap ${variant === "hero" ? "md:mt-6" : ""}`}>
-            <input
-              ref={inputRef}
-              id={inputId}
-              name="website"
-              type="text"
-              inputMode="url"
-              autoComplete="url"
-              autoCapitalize="none"
-              autoCorrect="off"
-              spellCheck={false}
-              placeholder={isMobile ? "Your business's website" : "Enter your business's website here"}
-              value={value}
-              onFocus={() => trackFunnelEvent("lookup_input_focus", { cta_id: ctaId }, { once: ctaId })}
-              onChange={(e) => {
-                setValue(e.target.value)
-                if (inputError && looksLikeWebsite(e.target.value)) setInputError(null)
-              }}
-              aria-invalid={inputError ? true : undefined}
-              aria-describedby={inputError ? `${descId} ${errorId}` : descId}
-              className="min-h-12 w-full min-w-0 sm:w-auto sm:min-w-[15rem] sm:flex-1 rounded-full border border-ink/55 bg-white px-5 text-[16px] text-ink placeholder:text-slate-500 focus-visible:border-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40"
-            />
+            {/* "https://" is shown, not typed: a pasted http(s):// is dropped, and with or without www both work. */}
+            <div
+              className={`flex min-h-12 w-full min-w-0 items-center rounded-full border bg-white pl-5 focus-within:border-brand focus-within:ring-2 focus-within:ring-brand/40 sm:w-auto sm:min-w-[15rem] sm:flex-1 ${
+                inputError ? "border-red-700" : "border-ink/55"
+              }`}
+            >
+              <span aria-hidden className="select-none text-[16px] text-slate-600">
+                https://
+              </span>
+              <input
+                ref={inputRef}
+                id={inputId}
+                name="website"
+                type="text"
+                inputMode="url"
+                autoComplete="url"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                placeholder="yourbusiness.com"
+                value={value}
+                onFocus={() => trackFunnelEvent("lookup_input_focus", { cta_id: ctaId }, { once: ctaId })}
+                onChange={(e) => {
+                  const next = e.target.value.replace(/^\s*https?:\/\//i, "")
+                  setValue(next)
+                  if (inputError && looksLikeWebsite(next)) setInputError(null)
+                }}
+                aria-invalid={inputError ? true : undefined}
+                aria-describedby={inputError ? `${descId} ${errorId}` : descId}
+                className="min-h-12 w-full min-w-0 flex-1 rounded-r-full bg-transparent pr-5 text-[16px] text-ink placeholder:text-slate-500 focus-visible:outline-none"
+              />
+            </div>
             <button ref={viewRef} type="submit" className={PRIMARY} disabled={pending}>
               {pending ? (
                 <>
@@ -312,9 +368,19 @@ export function BusinessLookup({
         ) : null}
         {variant === "hero" && !(state.phase === "error") ? (
           <>
-            <ScoreCard state={state} next={next} />
+            <ScoreCard state={state} journey={journey} previousOverall={previousOverall} />
             {state.phase === "done" ? (
               <>
+                <JourneyStep
+                  state={state}
+                  journey={journey}
+                  setJourney={setJourney}
+                  rescoring={rescoring}
+                  rescoreError={rescoreError}
+                  previousOverall={previousOverall}
+                  onAddSocials={addSocials}
+                  next={next}
+                />
                 <ScoreFactors score={state.score} />
                 <LookupResults state={state} onReset={reset} detail />
               </>
@@ -413,7 +479,15 @@ const BAND_DOT = ["bg-red-600", "bg-orange-600", "bg-green-600"] as const
  * ring is at 0 with the scale and the two steps (instant score here, full report by email). Running the check shows
  * progress along the card's bottom edge, then fills each ring. The scores come from the report's own scoring code.
  */
-function ScoreCard({ state, next }: { state: LookupState; next?: React.ReactNode }) {
+function ScoreCard({
+  state,
+  journey,
+  previousOverall,
+}: {
+  state: LookupState
+  journey: Journey
+  previousOverall: number | null
+}) {
   const idle = state.phase === "idle"
   const pending = state.phase === "checking"
   const done = state.phase === "done"
@@ -452,7 +526,9 @@ function ScoreCard({ state, next }: { state: LookupState; next?: React.ReactNode
         ))}
       </ul>
 
-      {score?.overall != null ? <OverallSummary score={score} firstLook={state.firstLook} /> : null}
+      {score?.overall != null ? (
+        <OverallSummary score={score} firstLook={state.firstLook} previousOverall={previousOverall} />
+      ) : null}
 
       <p className="mt-6 flex flex-wrap items-center justify-end gap-x-3 gap-y-1 text-[13px] text-slate-600">
         <span>Score scale:</span>
@@ -464,27 +540,7 @@ function ScoreCard({ state, next }: { state: LookupState; next?: React.ReactNode
         ))}
       </p>
 
-      <ol className="mt-6 grid gap-4 border-t border-ink/10 pt-6 md:grid-cols-2">
-        <li className="flex gap-3">
-          <StepNumber n={1} done={done} />
-          <span>
-            <span className="block text-[15px] font-semibold text-ink">Instant score</span>
-            <span className="block text-[14px] leading-snug text-slate-600">Free, right on this page. No email needed.</span>
-          </span>
-        </li>
-        <li className="flex gap-3">
-          <StepNumber n={2} done={false} />
-          <span>
-            <span className="block text-[15px] font-semibold text-ink">Full report by email</span>
-            <span className="block text-[14px] leading-snug text-slate-600">
-              The evidence behind every score, how you compare, and the top five things we&apos;d fix first.
-            </span>
-          </span>
-        </li>
-      </ol>
-      {done && next ? (
-        <div className="mt-5 flex flex-col items-stretch gap-x-5 gap-y-2 sm:flex-row sm:flex-wrap sm:items-center">{next}</div>
-      ) : null}
+      <JourneySteps current={done ? journey : null} />
 
       {pending ? (
         <div aria-hidden className="absolute inset-x-0 bottom-0 h-1 bg-ink/10">
@@ -502,7 +558,15 @@ function ScoreCard({ state, next }: { state: LookupState; next?: React.ReactNode
  * After the check: the overall score, why it landed there (strongest and weakest area), and where we'd look first.
  * Shown under the rings rather than as a sixth ring.
  */
-function OverallSummary({ score, firstLook }: { score: LookupScore; firstLook: LookupFinding | null }) {
+function OverallSummary({
+  score,
+  firstLook,
+  previousOverall,
+}: {
+  score: LookupScore
+  firstLook: LookupFinding | null
+  previousOverall: number | null
+}) {
   const overall = score.overall as number
   const scored = FACTORS.map((f) => ({ ...f, value: score.factors.find((x) => x.id === f.id)?.score ?? null })).filter(
     (f): f is (typeof FACTORS)[number] & { value: number } => f.value != null,
@@ -514,6 +578,11 @@ function OverallSummary({ score, firstLook }: { score: LookupScore; firstLook: L
       <p className="flex flex-wrap items-baseline gap-x-2 text-ink">
         <span aria-hidden className={`h-3 w-3 self-center rounded-full ${bandTone(overall).fill}`} />
         <span className="text-[18px] font-semibold">Overall score: {overall} out of 100</span>
+        {previousOverall != null && previousOverall !== overall ? (
+          <span className="text-[15px] font-semibold text-ink">
+            ({overall > previousOverall ? "up" : "down"} from {previousOverall})
+          </span>
+        ) : null}
         <span className="text-[14px] text-slate-600">
           (all five areas, with Digital Experience and Discoverability counting most)
         </span>
@@ -583,6 +652,424 @@ function ScoreRing({ label, value, state }: { label: string; value: number | nul
   )
 }
 
+const JOURNEY_STEPS: ReadonlyArray<{ id: Journey | "score"; title: string; body: string }> = [
+  { id: "score", title: "Instant score", body: "Free, right on this page. No email needed." },
+  { id: "socials", title: "Add your social profiles", body: "See how they change your score." },
+  { id: "ads", title: "Your advertising", body: "Tell us where you've advertised." },
+  {
+    id: "report",
+    title: "Full report and Growth Workspace",
+    body: "The evidence behind every score, how you compare, the top five fixes, and a free workspace for your accounts.",
+  },
+]
+
+/** The four steps, with the ones behind the visitor ticked. `current` is null before the first score. */
+function JourneySteps({ current }: { current: Journey | null }) {
+  const at = current ? JOURNEY_STEPS.findIndex((s) => s.id === current) : 0
+  return (
+    <ol className="mt-6 grid gap-4 border-t border-ink/10 pt-6 sm:grid-cols-2 lg:grid-cols-4">
+      {JOURNEY_STEPS.map((step, i) => {
+        const done = current != null && i < at
+        const active = current != null && i === at
+        return (
+          <li key={step.id} className="flex gap-3" aria-current={active ? "step" : undefined}>
+            <StepNumber n={i + 1} done={done} active={active} />
+            <span>
+              <span className="block text-[15px] font-semibold text-ink">{step.title}</span>
+              <span className="block text-[14px] leading-snug text-slate-600">{step.body}</span>
+            </span>
+          </li>
+        )
+      })}
+    </ol>
+  )
+}
+
+const ADS_OPTIONS = [
+  { id: "google", label: "Google Ads" },
+  { id: "meta", label: "Facebook & Instagram ads" },
+  { id: "tiktok", label: "TikTok ads" },
+  { id: "other", label: "Somewhere else" },
+] as const
+
+/**
+ * The step after the score: one question at a time, each optional. Socials re-score here (no email); advertising
+ * points to the Growth Workspace, where ad accounts would be connected; the last step is the full report, which is
+ * where an email (and the workspace account) comes in.
+ */
+function JourneyStep({
+  state,
+  journey,
+  setJourney,
+  rescoring,
+  rescoreError,
+  previousOverall,
+  onAddSocials,
+  next,
+}: {
+  state: LookupState
+  journey: Journey
+  setJourney: (j: Journey) => void
+  rescoring: boolean
+  rescoreError: string | null
+  previousOverall: number | null
+  onAddSocials: (socials: AddedSocial[]) => void
+  next?: React.ReactNode
+}) {
+  const headingRef = useRef<HTMLHeadingElement>(null)
+  const first = useRef(true)
+  // Moving to the next question moves focus to its heading, so keyboard and screen-reader users follow along.
+  useEffect(() => {
+    if (first.current) {
+      first.current = false
+      return
+    }
+    headingRef.current?.focus()
+  }, [journey])
+
+  return (
+    <section
+      aria-labelledby="journey-heading"
+      className="mt-6 rounded-2xl border-2 border-ink bg-white p-5 text-left md:p-8"
+    >
+      <p className="text-[13px] font-semibold uppercase tracking-[0.12em] text-slate-600">
+        Step {JOURNEY_STEPS.findIndex((s) => s.id === journey) + 1} of {JOURNEY_STEPS.length}
+      </p>
+      {journey === "socials" ? (
+        <SocialsStep
+          headingRef={headingRef}
+          score={state.score}
+          rescoring={rescoring}
+          rescoreError={rescoreError}
+          updated={previousOverall != null}
+          previousOverall={previousOverall}
+          onAdd={onAddSocials}
+          onNext={() => setJourney("ads")}
+        />
+      ) : journey === "ads" ? (
+        <AdsStep headingRef={headingRef} onNext={() => setJourney("report")} onBack={() => setJourney("socials")} />
+      ) : (
+        <>
+          <h3 id="journey-heading" ref={headingRef} tabIndex={-1} className="mt-1 text-[22px] font-bold text-ink focus:outline-none">
+            Get your full report and free Growth Workspace
+          </h3>
+          <p className="mt-2 max-w-[44rem] text-[15px] leading-snug text-slate-700">
+            We&apos;ll email the full Digital Footprint report for {state.domain}: the evidence behind every score, how you
+            compare, and the top five things we&apos;d fix first. It opens your free Growth Workspace, where your accounts
+            can be connected.
+          </p>
+          {next ? (
+            <div className="mt-5 flex flex-col items-stretch gap-x-5 gap-y-2 sm:flex-row sm:flex-wrap sm:items-center">
+              {next}
+            </div>
+          ) : null}
+          <button
+            type="button"
+            onClick={() => setJourney("ads")}
+            className="mt-3 inline-flex min-h-11 items-center text-[14px] font-medium text-ink/70 underline underline-offset-4 hover:text-ink"
+          >
+            Back to advertising
+          </button>
+        </>
+      )}
+    </section>
+  )
+}
+
+function SocialsStep({
+  headingRef,
+  score,
+  rescoring,
+  rescoreError,
+  updated,
+  previousOverall,
+  onAdd,
+  onNext,
+}: {
+  headingRef: React.RefObject<HTMLHeadingElement | null>
+  score: LookupScore | null
+  rescoring: boolean
+  rescoreError: string | null
+  updated: boolean
+  previousOverall: number | null
+  onAdd: (socials: AddedSocial[]) => void
+  onNext: () => void
+}) {
+  const linked = new Set(score?.profilesLinked ?? [])
+  const added = new Set(score?.profilesAdded ?? [])
+  const open = SOCIAL_PLATFORMS.filter((p) => !linked.has(p.id))
+  const [values, setValues] = useState<Partial<Record<SocialPlatformId, string>>>({})
+  const [errors, setErrors] = useState<Partial<Record<SocialPlatformId, string>>>({})
+  const [formError, setFormError] = useState<string | null>(null)
+  const fieldRefs = useRef<Partial<Record<SocialPlatformId, HTMLInputElement | null>>>({})
+  const formErrorId = useId()
+
+  function submit(event: React.FormEvent) {
+    event.preventDefault()
+    if (rescoring) return
+    const nextErrors: Partial<Record<SocialPlatformId, string>> = {}
+    const socials: AddedSocial[] = []
+    for (const p of open) {
+      const raw = values[p.id]?.trim()
+      if (!raw) continue
+      const parsed = parseSocial(p.id, raw)
+      if (parsed) socials.push(parsed)
+      else nextErrors[p.id] = `That doesn't look like a ${p.label} account name. Try the name after the @.`
+    }
+    setErrors(nextErrors)
+    const firstBad = open.find((p) => nextErrors[p.id])
+    if (firstBad) {
+      setFormError(null)
+      fieldRefs.current[firstBad.id]?.focus()
+      return
+    }
+    if (!socials.length) {
+      setFormError("Add at least one account name, or choose \"I don't use social media\".")
+      return
+    }
+    setFormError(null)
+    onAdd(socials)
+  }
+
+  const overall = score?.overall
+  return (
+    <>
+      <h3 id="journey-heading" ref={headingRef} tabIndex={-1} className="mt-1 text-[22px] font-bold text-ink focus:outline-none">
+        Do you have social media accounts?
+      </h3>
+      <p className="mt-2 max-w-[44rem] text-[15px] leading-snug text-slate-700">
+        Add the ones you use, even if it&apos;s just one. Each profile counts toward Discoverability, so adding them can
+        raise your score. We don&apos;t post or sign in to anything.
+      </p>
+
+      {linked.size || added.size ? (
+        <ul className="mt-4 flex flex-wrap gap-2">
+          {SOCIAL_PLATFORMS.filter((p) => linked.has(p.id) || added.has(p.id)).map((p) => (
+            <li key={p.id} className="inline-flex items-center gap-1.5 rounded-full bg-cream px-3 py-1.5 text-[14px] text-ink">
+              <Check aria-hidden className="h-4 w-4 text-green-700" />
+              {p.label}: {linked.has(p.id) ? "found on your site, already counted" : "added by you, counted"}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+
+      {updated && overall != null ? (
+        <p role="status" className="mt-4 rounded-xl bg-cream p-4 text-[15px] leading-snug text-ink">
+          {previousOverall != null && overall !== previousOverall ? (
+            <>
+              <span className="font-semibold">
+                Your score went {overall > previousOverall ? "up" : "down"} from {previousOverall} to {overall}.
+              </span>{" "}
+            </>
+          ) : (
+            <>
+              <span className="font-semibold">Your score stayed at {overall}.</span>{" "}
+            </>
+          )}
+          {added.size
+            ? "Link these profiles from your website too, so visitors and search engines can find them."
+            : null}
+        </p>
+      ) : null}
+
+      {open.length ? (
+        <form noValidate onSubmit={submit} className="mt-5" aria-describedby={formError ? formErrorId : undefined}>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {open.map((p) => {
+              const id = `social-${p.id}`
+              const errId = `${id}-error`
+              const visible = p.id === "facebook" ? "facebook.com/" : p.id === "linkedin" ? "linkedin.com/company/" : "@"
+              return (
+                <div key={p.id}>
+                  <label htmlFor={id} className="block text-[15px] font-medium text-ink">
+                    {p.label} <span className="font-normal text-slate-600">(optional)</span>
+                  </label>
+                  <div
+                    className={`mt-1.5 flex min-h-12 items-center rounded-xl border bg-white pl-3 focus-within:border-brand focus-within:ring-2 focus-within:ring-brand/40 ${
+                      errors[p.id] ? "border-red-700" : "border-ink/55"
+                    }`}
+                  >
+                    <span aria-hidden className="select-none text-[16px] text-slate-600">
+                      {visible}
+                    </span>
+                    <input
+                      ref={(el) => {
+                        fieldRefs.current[p.id] = el
+                      }}
+                      id={id}
+                      type="text"
+                      autoCapitalize="none"
+                      autoCorrect="off"
+                      spellCheck={false}
+                      autoComplete="off"
+                      placeholder="accountname"
+                      value={values[p.id] ?? ""}
+                      onChange={(e) => {
+                        // The prefix is shown, not typed: a leading "@" is dropped, and a pasted profile link becomes
+                        // its account name.
+                        const raw = e.target.value
+                        const parsed = /[/.]com\b|^https?:/i.test(raw) ? parseSocial(p.id, raw) : null
+                        const next = parsed ? parsed.handle : raw.replace(/^\s*@/, "")
+                        setValues((v) => ({ ...v, [p.id]: next }))
+                        if (errors[p.id] && parseSocial(p.id, next)) setErrors((x) => ({ ...x, [p.id]: undefined }))
+                      }}
+                      aria-invalid={errors[p.id] ? true : undefined}
+                      aria-describedby={errors[p.id] ? errId : undefined}
+                      className="min-h-12 w-full min-w-0 flex-1 bg-transparent pr-3 text-[16px] text-ink placeholder:text-slate-500 focus-visible:outline-none"
+                    />
+                  </div>
+                  {errors[p.id] ? (
+                    <p id={errId} role="alert" className="mt-1.5 flex items-start gap-1.5 text-[14px] text-red-700">
+                      <AlertCircle aria-hidden className="mt-0.5 h-4 w-4 shrink-0" />
+                      {errors[p.id]}
+                    </p>
+                  ) : null}
+                </div>
+              )
+            })}
+          </div>
+          {formError || rescoreError ? (
+            <p id={formErrorId} role="alert" className="mt-3 flex items-start gap-1.5 text-[15px] text-red-700">
+              <AlertCircle aria-hidden className="mt-0.5 h-4 w-4 shrink-0" />
+              {formError ?? rescoreError}
+            </p>
+          ) : null}
+          <div className="mt-5 flex flex-col items-stretch gap-x-5 gap-y-2 sm:flex-row sm:items-center">
+            {updated ? (
+              <>
+                <button type="button" onClick={onNext} className={PRIMARY}>
+                  Next: your advertising
+                </button>
+                <button
+                  type="submit"
+                  disabled={rescoring}
+                  className="inline-flex min-h-11 items-center justify-center text-[16px] font-medium text-ink underline underline-offset-4 hover:text-brand"
+                >
+                  {rescoring ? "Updating…" : "Update my score again"}
+                </button>
+              </>
+            ) : (
+              <>
+                <button type="submit" disabled={rescoring} className={PRIMARY}>
+                  {rescoring ? (
+                    <>
+                      <Loader2 aria-hidden className="h-4 w-4 motion-safe:animate-spin" />
+                      Updating your score…
+                    </>
+                  ) : (
+                    "Update my score"
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={onNext}
+                  className="inline-flex min-h-11 items-center justify-center text-[16px] font-medium text-ink underline underline-offset-4 hover:text-brand"
+                >
+                  I don&apos;t use social media
+                </button>
+              </>
+            )}
+          </div>
+        </form>
+      ) : (
+        <div className="mt-5">
+          <p className="text-[15px] text-slate-700">Every profile we look for is already linked from your site.</p>
+          <button type="button" onClick={onNext} className={`mt-4 ${PRIMARY}`}>
+            Next: your advertising
+          </button>
+        </div>
+      )}
+    </>
+  )
+}
+
+function AdsStep({
+  headingRef,
+  onNext,
+  onBack,
+}: {
+  headingRef: React.RefObject<HTMLHeadingElement | null>
+  onNext: () => void
+  onBack: () => void
+}) {
+  const [picked, setPicked] = useState<Set<string>>(new Set())
+  const [notYet, setNotYet] = useState(false)
+  const answered = notYet || picked.size > 0
+  const names = ADS_OPTIONS.filter((o) => picked.has(o.id) && o.id !== "other").map((o) => o.label)
+  return (
+    <>
+      <h3 id="journey-heading" ref={headingRef} tabIndex={-1} className="mt-1 text-[22px] font-bold text-ink focus:outline-none">
+        Have you advertised before?
+      </h3>
+      <fieldset className="mt-4">
+        <legend className="text-[15px] text-slate-700">Choose all that apply.</legend>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {ADS_OPTIONS.map((o) => {
+            const on = picked.has(o.id)
+            return (
+              <button
+                key={o.id}
+                type="button"
+                aria-pressed={on}
+                onClick={() => {
+                  setNotYet(false)
+                  setPicked((prev) => {
+                    const next = new Set(prev)
+                    if (next.has(o.id)) next.delete(o.id)
+                    else next.add(o.id)
+                    return next
+                  })
+                }}
+                className={`inline-flex min-h-11 items-center gap-1.5 rounded-full border px-4 text-[15px] font-medium ${
+                  on ? "border-ink bg-ink text-white" : "border-ink/40 bg-white text-ink hover:border-ink"
+                }`}
+              >
+                {on ? <Check aria-hidden className="h-4 w-4" /> : null}
+                {o.label}
+              </button>
+            )
+          })}
+          <button
+            type="button"
+            aria-pressed={notYet}
+            onClick={() => {
+              setPicked(new Set())
+              setNotYet((v) => !v)
+            }}
+            className={`inline-flex min-h-11 items-center gap-1.5 rounded-full border px-4 text-[15px] font-medium ${
+              notYet ? "border-ink bg-ink text-white" : "border-ink/40 bg-white text-ink hover:border-ink"
+            }`}
+          >
+            {notYet ? <Check aria-hidden className="h-4 w-4" /> : null}
+            Not yet
+          </button>
+        </div>
+      </fieldset>
+      {answered ? (
+        <p role="status" className="mt-4 max-w-[44rem] rounded-xl bg-cream p-4 text-[15px] leading-snug text-ink">
+          {notYet
+            ? "Good to know. Your full report shows the first moves we'd make, with or without ads."
+            : `Your free Growth Workspace is where ${
+                names.length ? names.join(" and ") : "your ad accounts"
+              } can be connected, so you can see what your ads actually bring in. We'll help you set it up.`}
+        </p>
+      ) : null}
+      <div className="mt-5 flex flex-col items-stretch gap-x-5 gap-y-2 sm:flex-row sm:items-center">
+        <button type="button" onClick={onNext} disabled={!answered} className={PRIMARY}>
+          Next: your full report
+        </button>
+        <button
+          type="button"
+          onClick={onBack}
+          className="inline-flex min-h-11 items-center justify-center text-[16px] font-medium text-ink underline underline-offset-4 hover:text-brand"
+        >
+          Back to social profiles
+        </button>
+      </div>
+    </>
+  )
+}
+
 /**
  * After the check: what goes into each score, with this site's number beside it, so every score is explained where
  * it's shown (UX Doctrine §3.19).
@@ -627,12 +1114,12 @@ function ScoreFactors({ score }: { score: LookupScore | null }) {
   )
 }
 
-function StepNumber({ n, done }: { n: number; done: boolean }) {
+function StepNumber({ n, done, active = false }: { n: number; done: boolean; active?: boolean }) {
   return (
     <span
       aria-hidden
       className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[14px] font-semibold ${
-        done ? "bg-green-700 text-white" : "bg-ink text-white"
+        done ? "bg-green-700 text-white" : active ? "bg-brand text-white ring-4 ring-brand/20" : "bg-ink text-white"
       }`}
     >
       {done ? <Check className="h-4 w-4" /> : n}

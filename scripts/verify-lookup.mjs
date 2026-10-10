@@ -310,4 +310,57 @@ const BOOKING_FLOW = page(`<h2>Pick a time</h2><p>Times show in your time zone.<
   assert(events.at(-1).firstLook?.id === "contact.booking_unreachable", "lookup: broken booking link can be the first look")
 }
 
+// Social handles: "@name", "name" and profile URLs on the right host only; nothing else becomes a link.
+{
+  const { parseSocial, parseSocials } = await load("lib/lookup/socials.ts")
+  assert(parseSocial("instagram", "@bwb_builds")?.url === "https://www.instagram.com/bwb_builds", "socials: @handle")
+  assert(parseSocial("instagram", "https://instagram.com/bwb_builds/")?.handle === "bwb_builds", "socials: pasted URL")
+  assert(parseSocial("tiktok", "tiktok.com/@bwb")?.url === "https://www.tiktok.com/@bwb", "socials: TikTok URL without scheme")
+  assert(parseSocial("facebook", "https://evil.example/bwb") === null, "socials: other host refused")
+  assert(parseSocial("instagram", "bad name") === null && parseSocial("instagram", "") === null, "socials: junk refused")
+  assert(parseSocial("linkedin", "https://www.linkedin.com/company/terramore")?.handle === "terramore", "socials: LinkedIn company URL")
+  const list = parseSocials([{ platform: "tiktok", handle: "a" }, { platform: "tiktok", handle: "b" }, { platform: "myspace", handle: "x" }])
+  assert(list.length === 1 && list[0].handle === "a", "socials: one per platform, unknown platforms dropped")
+}
+
+// AEO reads: structured data types, AI crawlers blocked only by a whole-site disallow, FAQ.
+{
+  const { readAeo, blockedAiCrawlers } = await load("lib/lookup/aeo.ts")
+  const html = `<script type="application/ld+json">{"@context":"https://schema.org","@type":["LocalBusiness","FAQPage"]}</script><h2>FAQ</h2>`
+  const aeo = readAeo(html, "User-agent: *\nAllow: /")
+  assert(aeo.structuredDataTypes.includes("LocalBusiness") && aeo.hasFaq && !aeo.blockedCrawlers.length, "aeo: types, FAQ, allowed")
+  assert(blockedAiCrawlers("User-agent: GPTBot\nDisallow: /\n\nUser-agent: *\nDisallow:").join() === "GPTBot", "aeo: GPTBot blocked only")
+  assert(blockedAiCrawlers("User-agent: *\nDisallow: /admin").length === 0, "aeo: a folder disallow doesn't block the site")
+  assert(blockedAiCrawlers("User-agent: *\nDisallow: /").length === 5, "aeo: whole-site disallow blocks every AI crawler")
+  assert(readAeo("<h1>Hi</h1>", null).robotsRead === false, "aeo: missing robots.txt isn't read as blocking")
+}
+
+// Added profiles re-score from the same inputs: counted as found, said to be added and not linked.
+{
+  const { socialAndScore, alternateWww } = await load("lib/lookup/run.ts")
+  const home = { url: "https://a.test/", status: 200, title: "A", h1: ["A"], navLabels: [], ctaTexts: ["Call"], hasPhone: true, hasEmail: false, formCount: 0, hasBookingLink: false, trustSignals: [], excerpt: "" }
+  const inputs = {
+    pages: [home],
+    technical: { https: true, title: "A", description: null, canonical: null, hasRobots: false, hasSitemap: false, viewport: true, status: 200, note: "" },
+    directories: [{ platform: "instagram", url: "https://instagram.com/a", found: true, linkedFromSite: true, note: "" }],
+    places: { checked: false, confirmed: false, placeId: null, rating: null, reviewCount: null, hasAddress: false },
+    catalog: { kind: "unknown", available: false, productCount: null, sampleNames: [] },
+    hasCheckout: false,
+    where: "Homepage",
+    pagesRead: 1,
+  }
+  const base = socialAndScore(inputs, [])
+  const disc = (r) => r.score.factors.find((f) => f.id === "discoverability").score
+  const more = socialAndScore(inputs, [
+    { platform: "tiktok", handle: "a", url: "https://www.tiktok.com/@a" },
+    { platform: "instagram", handle: "a", url: "https://www.instagram.com/a" },
+  ])
+  assert(disc(more) === disc(base) + 4, `socials: one new profile adds the report's 4 points (${disc(base)} -> ${disc(more)})`)
+  assert(more.score.profilesAdded.join() === "tiktok" && more.score.profilesLinked.join() === "instagram", "socials: linked stays linked")
+  assert(more.social.findings.some((f) => f.id === "social.added_tiktok" && f.tone === "gap"), "socials: added profile is a not-linked gap")
+  assert(alternateWww("https://terramore.io/") === "https://www.terramore.io/", "www: bare domain gets www")
+  assert(alternateWww("https://www.terramore.io/") === "https://terramore.io/", "www: www is dropped")
+  assert(alternateWww("https://shop.terramore.io/") === null, "www: subdomains are left alone")
+}
+
 console.log(`lookup: ok (${checks} checks)`)

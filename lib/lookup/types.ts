@@ -32,6 +32,10 @@ export type LookupScore = {
   overall: number | null
   pagesRead: number
   mapsChecked: boolean
+  /** Platforms the site links to (found on its pages). */
+  profilesLinked: string[]
+  /** Platforms the visitor added that the site doesn't link to (counted as found, marked as added). */
+  profilesAdded: string[]
   factors: Array<{ id: string; label: string; score: number | null }>
 }
 
@@ -54,7 +58,7 @@ export const LOOKUP_SOURCES: ReadonlyArray<{ id: LookupSourceId; label: string }
   { id: "website", label: "Website" },
   { id: "contact", label: "How customers reach you" },
   { id: "measurement", label: "Analytics and ad tags" },
-  { id: "search_basics", label: "Search basics" },
+  { id: "search_basics", label: "Search basics (SEO & AEO)" },
   { id: "social", label: "Social profiles" },
   { id: "google_maps", label: "Google Maps listing" },
 ]

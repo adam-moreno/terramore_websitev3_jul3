@@ -1,14 +1,16 @@
 import { randomUUID } from "node:crypto"
 import { collectCatalog } from "@/lib/report/collect/catalog"
 import { collectDirectories } from "@/lib/report/collect/directories"
-import { pickAttr } from "@/lib/report/collect/fetch"
+import { fetchText, pickAttr } from "@/lib/report/collect/fetch"
 import { collectLocations } from "@/lib/report/collect/locations"
 import { assertPublicUrl, BlockedUrlError } from "@/lib/report/collect/public-url"
 import { collectSiteExperience, type BookingCheck } from "@/lib/report/collect/site-experience"
 import { collectTechnical } from "@/lib/report/collect/technical"
 import { normalizeWebsite } from "@/lib/report/footprint"
 import { scoreDigitalPresence } from "@/lib/report/score/digital-presence"
-import type { PageSnapshot, PlacesLookup } from "@/lib/report/types"
+import type { CatalogSnapshot, DirectoryProfile, PageSnapshot, PlacesLookup, TechnicalSnapshot } from "@/lib/report/types"
+import { readAeo } from "@/lib/lookup/aeo"
+import { SOCIAL_PLATFORMS, type AddedSocial } from "@/lib/lookup/socials"
 import type { LookupEvent, LookupFinding, LookupScore, LookupSourceId } from "@/lib/lookup/types"
 
 /**
@@ -17,6 +19,127 @@ import type { LookupEvent, LookupFinding, LookupScore, LookupSourceId } from "@/
  * and (when configured) a Google Maps listing confirmed by its website host. No model call, no stored rows.
  * Google Places rating and review count never leave memory (lib/report/types.ts PlacesLookup).
  */
+
+/** What the score needs, kept by the route for 15 minutes so added profiles re-score without a second read. */
+export type ScoreInputs = {
+  pages: PageSnapshot[]
+  technical: TechnicalSnapshot
+  directories: DirectoryProfile[]
+  /** In memory only, never sent: Places values stay on the server (lib/report/types.ts). */
+  places: PlacesLookup
+  catalog: CatalogSnapshot
+  hasCheckout: boolean
+  where: string
+  pagesRead: number
+}
+
+/**
+ * The social source and the score, with any profiles the visitor added. A profile the site already links to stays as
+ * found; an added one counts as a found profile (the report's own rule) and is said to be added and not linked.
+ */
+export function socialAndScore(inputs: ScoreInputs, socials: AddedSocial[]) {
+  const linked = inputs.directories.filter((d) => d.found && d.linkedFromSite)
+  const added = socials.filter((s) => !linked.some((d) => d.platform === s.platform))
+  const directories: DirectoryProfile[] = [
+    ...inputs.directories.filter((d) => !added.some((a) => a.platform === d.platform)),
+    ...added.map((a) => ({
+      platform: a.platform,
+      url: a.url,
+      found: true,
+      linkedFromSite: false,
+      note: "Added by the visitor; not checked.",
+    })),
+  ]
+  const findings: LookupFinding[] = []
+  if (linked.length)
+    findings.push(
+      finding(
+        "social",
+        "linked",
+        "working",
+        `Linked from your site: ${unique(linked.map((d) => platformName(d.platform))).join(", ")}`,
+        inputs.where,
+      ),
+    )
+  for (const a of added) {
+    const label = SOCIAL_PLATFORMS.find((p) => p.id === a.platform)?.label ?? a.platform
+    findings.push(
+      finding(
+        "social",
+        `added_${a.platform}`,
+        "gap",
+        `You added ${label} (@${a.handle}). Your website doesn't link to it, so visitors there can't find it`,
+        "Added by you, not checked",
+      ),
+    )
+  }
+  if (!findings.length)
+    findings.push(finding("social", "none", "note", "No social profiles are linked from the pages we read", inputs.where))
+
+  const breakdown = scoreDigitalPresence({
+    pages: inputs.pages,
+    technical: inputs.technical,
+    directories,
+    places: inputs.places,
+    catalog: inputs.catalog,
+    hasCheckout: inputs.hasCheckout,
+  })
+  // Numbers and labels only: factor evidence stays server-side, and Places values never leave memory.
+  const score: LookupScore = {
+    overall: breakdown.overall,
+    pagesRead: inputs.pagesRead,
+    mapsChecked: inputs.places.checked,
+    profilesLinked: unique(linked.map((d) => d.platform)),
+    profilesAdded: added.map((a) => a.platform),
+    factors: breakdown.factors.map((f) => ({ id: f.id, label: f.label, score: f.available ? f.score : null })),
+  }
+  return {
+    social: { status: (linked.length || added.length ? "done" : "not_found") as "done" | "not_found", findings },
+    score,
+  }
+}
+
+function aeoFindings(aeo: ReturnType<typeof readAeo>): LookupFinding[] {
+  const out: LookupFinding[] = []
+  out.push(
+    aeo.structuredDataTypes.length
+      ? finding(
+          "search_basics",
+          "aeo_structured",
+          "working",
+          `AI answers: structured data describes the business (${aeo.structuredDataTypes.slice(0, 3).join(", ")})`,
+          "Homepage code",
+        )
+      : finding(
+          "search_basics",
+          "aeo_no_structured",
+          "gap",
+          "AI answers: no structured data tells answer engines what the business is and does",
+          "Homepage code",
+        ),
+  )
+  if (aeo.blockedCrawlers.length)
+    out.push(
+      finding(
+        "search_basics",
+        "aeo_blocked",
+        "gap",
+        `AI answers: robots.txt blocks ${aeo.blockedCrawlers.join(", ")}, so those answer engines can't read the site`,
+        "robots.txt",
+      ),
+    )
+  else if (aeo.robotsRead)
+    out.push(
+      finding("search_basics", "aeo_allowed", "working", "AI answers: robots.txt lets AI answer engines read the site", "robots.txt"),
+    )
+  if (aeo.hasFaq)
+    out.push(finding("search_basics", "aeo_faq", "working", "AI answers: the homepage has an FAQ answer engines can quote", "Homepage"))
+  else
+    out.push(
+      finding("search_basics", "aeo_no_faq", "note", "AI answers: no FAQ on the homepage for answer engines to quote", "Homepage"),
+    )
+  return out
+}
 
 /** No Places key or no lookup: scored as not confirmed, and the score says Maps wasn't checked. */
 const PLACES_NOT_CHECKED: PlacesLookup = {
@@ -112,6 +235,19 @@ export function hostOf(website: string): string {
 }
 
 /** Validates and normalizes the visitor's input. Null when it isn't a usable public web address. */
+/** The same site with "www." added or removed; null for hosts where that makes no sense (subdomains, IPs). */
+export function alternateWww(website: string): string | null {
+  try {
+    const url = new URL(website)
+    const host = url.hostname
+    if (host.startsWith("www.")) return `${url.protocol}//${host.slice(4)}/`
+    if (host.split(".").length === 2) return `${url.protocol}//www.${host}/`
+    return null
+  } catch {
+    return null
+  }
+}
+
 export function normalizeLookupWebsite(raw: unknown): string | null {
   if (typeof raw !== "string") return null
   const trimmed = raw.trim()
@@ -136,16 +272,31 @@ export async function runLookup(
   lookupId: string,
   emit: (event: LookupEvent) => void,
   deadline: number,
+  opts: {
+    /** Profiles the visitor added after a first look; scored like found profiles, marked as added. */
+    socials?: AddedSocial[]
+    /** Receives the scoring inputs, so the caller can re-score added profiles without reading the site again. */
+    onInputs?: (inputs: ScoreInputs) => void
+  } = {},
 ) {
+  // With or without www: if the address as typed doesn't resolve, try the other form before giving up.
+  const other = alternateWww(website)
   try {
     await assertPublicUrl(website)
   } catch (error) {
-    emit({
-      type: "error",
-      code: error instanceof BlockedUrlError && /resolve/.test(error.message) ? "unreachable" : "blocked",
-      message: "",
-    })
-    return
+    const unresolved = error instanceof BlockedUrlError && /resolve/.test(error.message)
+    let recovered = false
+    if (unresolved && other) {
+      try {
+        await assertPublicUrl(other)
+        website = other
+        recovered = true
+      } catch {}
+    }
+    if (!recovered) {
+      emit({ type: "error", code: unresolved ? "unreachable" : "blocked", message: "" })
+      return
+    }
   }
 
   emit({ type: "start", lookupId, domain: hostOf(website), website })
@@ -160,8 +311,20 @@ export async function runLookup(
   }
 
   // Website, contact and measurement all come from one read of the homepage and two linked pages.
-  const site = await collectSiteExperience(website, { maxExtraPages: 2 })
-  const pages = site.pages.filter((p) => p.status !== null && p.status < 400)
+  let site = await collectSiteExperience(website, { maxExtraPages: 2 })
+  let pages = site.pages.filter((p) => p.status !== null && p.status < 400)
+  if (pages.length === 0 && other && website !== other) {
+    try {
+      await assertPublicUrl(other)
+      const retry = await collectSiteExperience(other, { maxExtraPages: 2 })
+      const retryPages = retry.pages.filter((p) => p.status !== null && p.status < 400)
+      if (retryPages.length) {
+        website = other
+        site = retry
+        pages = retryPages
+      }
+    } catch {}
+  }
   if (pages.length === 0) {
     emit({ type: "error", code: "unreachable", message: "" })
     return
@@ -269,7 +432,11 @@ export async function runLookup(
   if (Date.now() > deadline) {
     for (const source of ["search_basics", "social", "google_maps"] as const) report(source, "failed")
   } else {
-    const [technical, places, catalog] = await Promise.all([
+    let origin = website
+    try {
+      origin = new URL(site.homeFinalUrl || website).origin
+    } catch {}
+    const [technical, places, catalog, robots] = await Promise.all([
       collectTechnical(website, site.homeHtml, home.status, site.homeFinalUrl),
       process.env.GOOGLE_PLACES_API_KEY ? collectLocations(name || "", website) : Promise.resolve(null),
       collectCatalog({
@@ -278,6 +445,7 @@ export async function runLookup(
         hasCheckout: site.hasCheckout,
         servicePageExcerpts: site.pages.map((p) => p.excerpt),
       }),
+      fetchText(`${origin}/robots.txt`, 6000),
     ])
 
     const search: LookupFinding[] = []
@@ -327,25 +495,22 @@ export async function runLookup(
       search.push(
         finding("search_basics", "no_viewport", "gap", "The homepage isn't set up for phone screens", "Homepage"),
       )
+    search.push(...aeoFindings(readAeo(site.homeHtml || "", robots && robots.status < 400 ? robots.text : null)))
     report("search_basics", "done", search)
 
-    const directories = collectDirectories(site.pageHtml)
-    const linked = directories.filter((d) => d.found && d.linkedFromSite)
-    report(
-      "social",
-      linked.length ? "done" : "not_found",
-      linked.length
-        ? [
-            finding(
-              "social",
-              "linked",
-              "working",
-              `Linked from your site: ${unique(linked.map((d) => platformName(d.platform))).join(", ")}`,
-              where,
-            ),
-          ]
-        : [finding("social", "none", "note", "No social profiles are linked from the pages we read", where)],
-    )
+    const inputs: ScoreInputs = {
+      pages: site.pages,
+      technical,
+      directories: collectDirectories(site.pageHtml),
+      places: places ?? PLACES_NOT_CHECKED,
+      catalog,
+      hasCheckout: site.hasCheckout,
+      where,
+      pagesRead: pages.length,
+    }
+    opts.onInputs?.(inputs)
+    const scored = socialAndScore(inputs, opts.socials ?? [])
+    report("social", scored.social.status, scored.social.findings)
 
     if (!places) report("google_maps", "unavailable")
     else if (!places.checked) report("google_maps", "failed")
@@ -365,21 +530,7 @@ export async function runLookup(
       ])
     }
 
-    const breakdown = scoreDigitalPresence({
-      pages: site.pages,
-      technical,
-      directories,
-      places: places ?? PLACES_NOT_CHECKED,
-      catalog,
-      hasCheckout: site.hasCheckout,
-    })
-    // Numbers and labels only: factor evidence stays server-side, and Places values never leave memory.
-    score = {
-      overall: breakdown.overall,
-      pagesRead: pages.length,
-      mapsChecked: Boolean(places?.checked),
-      factors: breakdown.factors.map((f) => ({ id: f.id, label: f.label, score: f.available ? f.score : null })),
-    }
+    score = scored.score
   }
 
   const gaps = found.filter((f) => f.tone === "gap")
