@@ -37,13 +37,19 @@ export default function TerramoreHomepage() {
           Slack peeks into the first viewport — one step above 14rem, still below 18rem.
           Do not justify-center on mobile. Desktop tall centered column unchanged.
         */}
-        <div className="relative z-20 flex min-h-[calc(100svh-18rem)] flex-col justify-start md:-mt-28 md:min-h-[calc(100svh-14rem)] md:justify-center md:pt-28">
+        <div className="relative z-20 flex min-h-[calc(100svh-18rem)] flex-col justify-start md:-mt-28 md:min-h-0 md:pt-28">
           <div className="page-shell relative z-20 text-center">
             <div
               className="mx-auto flex w-full max-w-none flex-col items-center sm:max-w-[28rem] md:max-w-none md:inline-flex"
               data-hero-copy
             >
-              <h1 className="mx-auto text-center text-[2.35rem] font-bold leading-[1.08] tracking-[-0.02em] text-ink sm:text-5xl md:text-[72px] md:leading-[75.6px]">
+              {/*
+                Desktop: the headline block grows with the window so the score card's rings sit on the fold, half
+                showing (owner, 2026-10-09: a cue to scroll). --peek is measured from the top of this block to the
+                rings' centre line; capped so very tall screens just show the whole card.
+              */}
+              <div className="md:flex md:min-h-[clamp(0px,calc(100svh-var(--hero-peek)),32rem)] md:flex-col md:justify-center [--hero-peek:600px] [@media(min-width:768px)_and_(max-height:820px)]:[--hero-peek:572px]">
+              <h1 className="mx-auto text-center text-[2.35rem] font-bold leading-[1.08] tracking-[-0.02em] text-ink sm:text-5xl md:text-[72px] md:leading-[75.6px] [@media(min-width:768px)_and_(max-height:820px)]:text-[58px] [@media(min-width:768px)_and_(max-height:820px)]:leading-[62px]">
                 Unlock{" "}
                 <span className={`${brandMore.className} text-[1.28em] font-bold leading-none tracking-[-0.08em] text-ink`}>
                   more
@@ -53,6 +59,7 @@ export default function TerramoreHomepage() {
                 <br />
                 <span className="text-gold-ink">you already built.</span>
               </h1>
+              </div>
               {/* Mobile: full hero-copy width so line 2 stays one line (3 forced breaks). */}
               {/* From md up the lookup's label is the hero's one supporting line (variant "hero"), so this line is mobile-only. */}
               <p className="mx-auto mt-5 max-w-none text-center text-[16px] font-medium leading-[1.4] text-ink sm:max-w-[26rem] md:hidden">
@@ -70,7 +77,7 @@ export default function TerramoreHomepage() {
                 revenue.
               </p>
               {/* Search-first: the business lookup is the primary action; booking is the secondary line under it. */}
-              <div className="mt-6 w-full text-left md:mt-8 md:w-[min(56rem,calc(100vw-4rem))]">
+              <div className="mt-6 w-full text-left md:mt-8 md:w-[min(56rem,calc(100vw-4rem))] [@media(min-width:768px)_and_(max-height:820px)]:mt-4">
                 <BusinessLookup
                   ctaId="home_hero_report"
                   source="homepage"

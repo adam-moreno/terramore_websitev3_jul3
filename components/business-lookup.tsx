@@ -210,6 +210,13 @@ export function BusinessLookup({
     setJourney("socials")
     setPreviousOverall(null)
     setRescoreError(null)
+    // The hero's score card sits low on the page (it peeks at the fold), so bring it up as the check starts.
+    if (variant === "hero") {
+      requestAnimationFrame(() => {
+        const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        document.getElementById("lookup-score")?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" })
+      })
+    }
 
     const apply = (e: LookupEvent) => {
       current = reduce(current, e)
@@ -497,8 +504,9 @@ function ScoreCard({
 
   return (
     <section
+      id="lookup-score"
       aria-label="Your Digital Presence Score"
-      className={`relative mt-8 overflow-hidden rounded-2xl border border-ink/10 bg-white p-5 text-left md:p-8 ${idle ? "hidden md:block" : ""}`}
+      className={`relative mt-8 scroll-mt-28 [@media(min-width:768px)_and_(max-height:820px)]:mt-5 overflow-hidden rounded-2xl border border-ink/10 bg-white p-5 text-left md:p-8 ${idle ? "hidden md:block" : ""}`}
     >
       <p className="text-[18px] font-semibold text-ink md:text-[20px]">Your Digital Presence Score</p>
       {idle ? (
@@ -518,7 +526,17 @@ function ScoreCard({
         </p>
       )}
 
-      <ul className="mt-6 grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 lg:grid-cols-5">
+      <p className="mt-4 flex flex-wrap items-center justify-end gap-x-3 gap-y-1 text-[13px] text-slate-600">
+        <span>Score scale:</span>
+        {SCORE_BANDS.map((b, i) => (
+          <span key={b.label} className="inline-flex items-center gap-1.5">
+            <span aria-hidden className={`h-2.5 w-2.5 rounded-full ${BAND_DOT[i]}`} />
+            {b.label}
+          </span>
+        ))}
+      </p>
+
+      <ul className="mt-3 grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 lg:grid-cols-5">
         {FACTORS.map((f) => (
           <li key={f.id} className="flex flex-col items-center">
             <ScoreRing label={f.label} value={factorScore(f.id)} state={state.phase} />
@@ -530,15 +548,6 @@ function ScoreCard({
         <OverallSummary score={score} firstLook={state.firstLook} previousOverall={previousOverall} />
       ) : null}
 
-      <p className="mt-6 flex flex-wrap items-center justify-end gap-x-3 gap-y-1 text-[13px] text-slate-600">
-        <span>Score scale:</span>
-        {SCORE_BANDS.map((b, i) => (
-          <span key={b.label} className="inline-flex items-center gap-1.5">
-            <span aria-hidden className={`h-2.5 w-2.5 rounded-full ${BAND_DOT[i]}`} />
-            {b.label}
-          </span>
-        ))}
-      </p>
 
       <JourneySteps current={done ? journey : null} />
 

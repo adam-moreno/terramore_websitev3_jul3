@@ -52,6 +52,15 @@ const SIMULATIONS = [
 /** Reviewed motion that runs once and ends within 5 s, so VR-47 needs no control. */
 const FINITE_MOTION = new Map()
 
+/**
+ * Motion that stops by itself within 5 s needs no Pause control (WCAG 2.2.2 applies to motion lasting more than 5 s):
+ * a one-shot timer of at most 5000 ms that sets `settled`, and the animation runs only while `!settled`.
+ */
+function autoStopsWithin5s(code) {
+  const timers = [...code.matchAll(/setTimeout\(\s*\(\)\s*=>\s*setSettled\(true\)\s*,\s*(\d+)\s*\)/g)]
+  return timers.length > 0 && timers.every((m) => Number(m[1]) <= 5000) && /!settled\b/.test(code)
+}
+
 /** Hero integration marks: desktop orbit and phone field (release constraint, VD-018). */
 const HERO_LOGO_FILES = ["components/hero-logo-mobius.tsx", "components/hero-floating-logos.tsx"]
 /** Chip opacity reviewed for V1, per surface. Fading the marks further greys the field out. */
@@ -297,7 +306,7 @@ const CHECKS = [
       if (/<video\b[^>]*\b(loop|autoPlay)\b/.test(code)) reasons.push("looping or autoplay video")
       for (const cls of motion.infinite) if (usesClass(code, cls)) reasons.push(`infinite .${cls}`)
       if (reasons.length === 0) return []
-      const control = /<MotionToggle\b|aria-label=\{?[`"'](Pause|Play)\b/.test(code)
+      const control = /<MotionToggle\b|aria-label=\{?[`"'](Pause|Play)\b/.test(code) || autoStopsWithin5s(code)
       const reduced = /usePrefersReducedMotion\(|prefers-reduced-motion/.test(code)
       if (control && reduced) return []
       return [{ line: 1, detail: `${reasons.join(", ")} without ${control ? "" : "a Pause/Play control"}${!control && !reduced ? " and " : ""}${reduced ? "" : "a reduced-motion path"}` }]
@@ -500,9 +509,11 @@ const CHECKS = [
         [/=\s*restingOffsets\s*\(/, "restingOffsets() is no longer used to place the marks"],
         [/\.style\.display\s*=\s*["']none["']/, "marks without a visible spot are no longer hidden"],
         [/\bmoving\s*=\s*!reduce\b/, "the orbit no longer stops under reduced motion (moving = !reduce)"],
-        [/<MotionToggle\b/, "the moving orbit has no Pause control"],
       ]
       for (const [pattern, detail] of need) if (!pattern.test(code)) out.push({ line: 1, detail })
+      // A Pause control, or the orbit settles by itself within 5 s (owner removed the Pause button, 2026-10-09).
+      if (!/<MotionToggle\b/.test(code) && !autoStopsWithin5s(code))
+        out.push({ line: 1, detail: "the moving orbit has no Pause control and doesn't settle within 5 s" })
       out.push(...matches(code, /offsetDistance\s*=\s*`\$\{\s*\(\s*index\s*\/[^`]*`/g, () => "marks spread evenly along the whole path (some sit behind the headline)"))
       return out
     },
