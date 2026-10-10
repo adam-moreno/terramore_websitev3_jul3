@@ -56,9 +56,9 @@ export default function TerramoreHomepage() {
                       more
                     </span>
                     <br />
-                    from <span className="text-gold-ink">the business</span>
+                    from <span className="text-gold-display">the business</span>
                     <br />
-                    <span className="text-gold-ink">you already built.</span>
+                    <span className="text-gold-display">you already built.</span>
                   </h1>
     {/* Mobile: full hero-copy width so line 2 stays one line (3 forced breaks). */}
                   {/* From md up the lookup's label is the hero's one supporting line (variant "hero"), so this line is mobile-only. */}

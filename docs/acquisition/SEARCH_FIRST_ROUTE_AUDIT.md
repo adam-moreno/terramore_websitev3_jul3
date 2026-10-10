@@ -303,3 +303,8 @@ Owner direction (Adam): the v6 brand film (51.8 s, silent; film repo branch `fil
 - **Toolkit spacing** (`components/sticky-showcase.tsx`): step 01 sits at the top of its block instead of centred in 70vh; measured gap subtitle → "01" is 48 px at 1440 px.
 - **Open:** the revenue line ("You watch as your revenue grows for your business.") is a results claim shown with sample data; confirm or soften before production.
 - **Verification:** `verify-visual` ok (65 checks), `verify-lookup` ok (117 checks); Pause/Play and the Slack removal confirmed in Chrome on the dev server. Autoplay on scroll could not be confirmed in the automation tab (Chrome reports it hidden, which blocks autoplay); check in a normal window.
+
+## 2026-10-10 · Tappable job cards; display gold (VD-036)
+
+- **Jobs we already know** (`components/review-carousel.tsx`): cities removed. Each card is a button; tapping it stops the row and opens "Top 3 problems we find" for that kind of business, each with "How we fix it", plus a "Check my business" link. Copy describes typical patterns, not client results (no names, places or numbers). The link reuses the approved `home_band_report` CTA id (the tracking taxonomy is a no-touch file), so clicks here and on the report band share one id; a dedicated id needs a taxonomy change.
+- **Display gold** (`gold.display` #b98314, VD-036): the homepage H1 accent, the How-we-work title accent and "We have done it before." Small gold text stays `gold-ink`.
