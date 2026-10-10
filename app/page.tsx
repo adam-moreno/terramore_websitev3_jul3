@@ -9,7 +9,6 @@ import { ReportBand } from "@/components/report-band"
 import { ReviewCarousel } from "@/components/review-carousel"
 import { SecurityBand } from "@/components/security-band"
 import { SiteFooter } from "@/components/site-footer"
-import { HeroAnalytics } from "@/components/hero-analytics"
 import { HeroFloatingLogos } from "@/components/hero-floating-logos"
 import { HeroLogoOrbit } from "@/components/hero-logo-mobius"
 import { TerramoreToolkit } from "@/components/terramore-toolkit"
@@ -104,13 +103,6 @@ export default function TerramoreHomepage() {
       </section>
 
       <WhatTerramoreDoes />
-
-      {/* The Slack demo is its own section under the hero (no longer overlapping it). */}
-      <section aria-label="Terramore in your team's Slack" className="bg-cream pt-12 pb-10 md:pt-24 md:pb-24">
-        <div className="mx-auto w-full max-w-[972px] px-6 md:w-[min(972px,calc(100%-3rem))] md:px-0">
-          <HeroAnalytics />
-        </div>
-      </section>
 
       <TerramoreToolkit />
       <ReviewCarousel />

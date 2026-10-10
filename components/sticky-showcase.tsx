@@ -73,8 +73,9 @@ export function StickyShowcase({
                     itemRefs.current[index] = node
                   }}
                   className={`card-radius card-pad flex flex-col justify-center border border-black/[0.06] bg-white transition-opacity duration-300 md:rounded-none md:border-0 md:bg-transparent md:p-0 md:py-10 lg:min-h-[70vh] lg:py-16 ${
-                    active === index ? "opacity-100" : "lg:opacity-35"
-                  }`}
+                    // The first step sits at the top of its block, not centred in 70vh, so it follows the heading closely.
+                    index === 0 ? "md:pt-2 lg:justify-start lg:pt-4" : ""
+                  } ${active === index ? "opacity-100" : "lg:opacity-35"}`}
                 >
                   <p className="text-[13px] font-medium text-gold-ink">{String(index + 1).padStart(2, "0")}</p>
                   <h3 className="mt-3 text-[1.5rem] md:whitespace-nowrap font-semibold leading-[1.15] tracking-tight text-ink md:text-[1.75rem] md:leading-normal">

@@ -292,3 +292,14 @@ Verifiers: `verify-lookup` 93, `verify-report-dedupe` 10, `verify-funnel` 79 (26
 ## 2026-10-10 · Step 06 copy: "Leave with a 90-day plan"
 
 Owner direction: the plan arrives within days, a week at most, and covers the quarter. Step 06 of How we work (`components/terramore-toolkit.tsx`) and the Measure stage (`components/what-terramore-does.tsx`) now read "Leave with a 90-day plan", and the copy says the written plan for the quarter comes within days, a week at most (it previously described a day-90 retrospective).
+
+## 2026-10-10 · Brand film replaces the four-stage path; Slack demo removed
+
+Owner direction (Adam): the v6 brand film (51.8 s, silent; film repo branch `film/terramore-explainer`) goes under "What Terramore does for your business" and the /marketing line, replacing the Find / Connect / Act / Measure path. The Slack demo section is removed from the homepage. The gap between "Six things we do that a freelancer or an agency usually does not." and step 01 is tightened.
+
+- **Player** (`components/what-terramore-does.tsx`): muted, looping, plays only while on screen; the site's `MotionToggle` gives a visible Pause / Play (WCAG 2.2.2, VR-47). It never restarts after the viewer pauses. Under reduced motion it doesn't autoplay (poster + Play). Silent, so no captions; a screen-reader description lists the beats. Note under the player: "Illustrative: example businesses and sample data." (the film also labels its examples on screen).
+- **Files:** `public/marketing/film/terramore-brand-film.mp4` (H.264, CRF 24, no audio, fast start, 7.3 MB) and its poster (84 KB). `preload="metadata"`.
+- **Removed:** the Slack section (`HeroAnalytics` stays in the repo, unused on the homepage) and the path's CSS in `app/globals.css`.
+- **Toolkit spacing** (`components/sticky-showcase.tsx`): step 01 sits at the top of its block instead of centred in 70vh; measured gap subtitle → "01" is 48 px at 1440 px.
+- **Open:** the revenue line ("You watch as your revenue grows for your business.") is a results claim shown with sample data; confirm or soften before production.
+- **Verification:** `verify-visual` ok (65 checks), `verify-lookup` ok (117 checks); Pause/Play and the Slack removal confirmed in Chrome on the dev server. Autoplay on scroll could not be confirmed in the automation tab (Chrome reports it hidden, which blocks autoplay); check in a normal window.
