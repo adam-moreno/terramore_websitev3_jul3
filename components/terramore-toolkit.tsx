@@ -37,8 +37,8 @@ const ITEMS = [
     visual: AudienceIntelVisual,
   },
   {
-    title: "Leave a 90-day plan",
-    copy: "At day 90 you have a written plan with owners and dates: what we fixed, what we turned on, and what comes next. It stays with your team whether we stay or not.",
+    title: "Leave with a 90-day plan",
+    copy: "Within days, a week at most, you have a written plan for the quarter with owners and dates: what to fix, what to turn on, and what comes next. It stays with your team whether we stay or not.",
     visual: RoadmapVisual,
   },
 ]

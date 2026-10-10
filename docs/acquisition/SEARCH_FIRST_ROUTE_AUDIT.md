@@ -288,3 +288,7 @@ Verifiers: `verify-lookup` 93, `verify-report-dedupe` 10, `verify-funnel` 79 (26
 - New section under the hero, above the Slack demo (`components/what-terramore-does.tsx`): eyebrow "How we work with businesses", H2, the owner-approved /marketing line (VD-029), and four stages on one path: Find / See the broken step, Connect / Work inside your tools, Act / Follow up the same day, Measure / Leave a 90-day plan. Stage copy is the existing How-we-work wording (`components/terramore-toolkit.tsx`), shortened; no new claims. "See each step in detail" links to `#how-we-work`.
 - Motion: library D3 (path draws with stages settling as the line reaches them), purpose sequence, once on first view (1.4 s path, stages 0.35 s apart), never loops. Drawn at rest when reduced motion is on, when the section is already on screen at load, or without IntersectionObserver. Tokens only (`theme(colors.brand.DEFAULT)`); vertical line on phones.
 - Checks: all 8 verifiers pass; TypeScript 16; no horizontal scroll at 1440 or 390; captured mid-draw and settled at both widths.
+
+## 2026-10-10 · Step 06 copy: "Leave with a 90-day plan"
+
+Owner direction: the plan arrives within days, a week at most, and covers the quarter. Step 06 of How we work (`components/terramore-toolkit.tsx`) and the Measure stage (`components/what-terramore-does.tsx`) now read "Leave with a 90-day plan", and the copy says the written plan for the quarter comes within days, a week at most (it previously described a day-90 retrospective).

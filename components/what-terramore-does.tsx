@@ -31,8 +31,8 @@ const STAGES = [
   },
   {
     label: "Measure",
-    title: "Leave a 90-day plan",
-    body: "A written plan with owners and dates: what we fixed, what we turned on, and what comes next. It stays with your team.",
+    title: "Leave with a 90-day plan",
+    body: "Within a week at most, a written plan for the quarter with owners and dates: what to fix, what to turn on, what comes next.",
   },
 ] as const
 
