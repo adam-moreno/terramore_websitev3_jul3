@@ -182,7 +182,7 @@ export function ReviewCarousel() {
                 </li>
               ))}
             </ol>
-            <div className="mt-6 flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-4">
+            <div className="mt-6 flex flex-col items-center gap-2 text-center">
               <CheckMyBusinessLink
                 ctaId="home_band_report"
                 className="inline-flex min-h-11 items-center rounded-full bg-brand px-5 text-[15px] font-medium text-white hover:bg-brand-hover"

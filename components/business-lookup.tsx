@@ -332,7 +332,7 @@ export function BusinessLookup({
           </label>
           <p
             id={descId}
-            className={`mt-1 text-slate-600 ${variant === "compact" ? "text-[13px]" : "text-[14px]"} ${variant === "hero" ? "md:sr-only" : ""} ${align === "center" ? "text-center" : ""}`}
+            className={`mt-1 text-slate-600 ${variant === "compact" ? "text-[13px]" : "text-[14px]"} ${variant === "hero" ? "sr-only" : ""} ${align === "center" ? "text-center" : ""}`}
           >
             See what's working and what's missing across search basics, contact and booking, analytics and ad tags,
             social profiles, and your Google Maps listing.

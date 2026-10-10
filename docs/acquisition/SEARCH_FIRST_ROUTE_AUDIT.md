@@ -315,3 +315,12 @@ Owner direction (Adam): the v6 brand film (51.8 s, silent; film repo branch `fil
 - **Control:** the Pause / Play control is now the site's `MotionToggle` in its compact, icon-only form (44 px target, named "Pause video" / "Play video"), in the film's bottom-left corner at 70% opacity, full on hover or focus. Tapping the film also pauses or plays it. WCAG 2.2.2 is still met: the control is always present and keyboard-reachable.
 - **Footer:** on the homepage the footer no longer repeats "Check my business / Talk with us"; the FAQ section directly above already closes with them.
 - **Checked in Chrome (570 px window):** the portrait file loads, tapping toggles playback, the control is 44 × 44 at 12 px from the corner, and the footer has no duplicate CTA.
+
+## 2026-10-10 · Lighter mobile hero; score CTA band; calendar icon; film v7 / portrait v2
+
+- **Mobile hero** now matches desktop: H1, the one-line field label, the field and button, and "Or book a free 30-minute call". Removed: the mobile-only paragraph and the "Free · No email needed" helper. The detail line ("See what's working…") is screen-reader only at every width.
+- **Score band** (`components/report-band.tsx`, homepage `#report`): replaces the chapter carousel with one dark CTA band: "See your business the way a new customer already can.", "Your score in seconds. No email needed.", **Check my business score** (`home_band_report`) and "Or talk with us" with a calendar icon. The picture is Terramore's own score card rendered from the brand film (`public/marketing/score-card-cta.png`, 1600 × 394, 93 KB, example data, labelled "Illustrative example"). Not reused: `cta-pocket.png` and the other /marketing images (unknown provenance, retired by VD-030).
+- **"Or talk with us"** (`DualCtas`) has a calendar icon everywhere it appears.
+- **Jobs panel:** the "Check my business" button and its line are centred.
+- **Film:** web files replaced with landscape v7 (53.5 s) and portrait v2: the three audience labels stay readable, "What they search" is slower, the closing TM mark is larger.
+- **Checked:** `verify-visual` ok (65), `verify-lookup` ok (117); in Chrome at 570 px, the hero and the band render as intended.

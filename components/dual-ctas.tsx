@@ -1,3 +1,4 @@
+import { CalendarDays } from "lucide-react"
 import { BookingLink } from "@/components/booking-popup"
 import { CheckMyBusinessLink } from "@/components/business-lookup"
 import type { CtaId } from "@/lib/funnel-taxonomy"
@@ -25,10 +26,10 @@ export function DualCtas({
         ctaId={ctaId}
         className="inline-flex h-11 items-center justify-center rounded-full bg-brand px-5 text-[15px] font-medium text-white hover:bg-brand-hover"
       />
-      <BookingLink
-        label="Or talk with us"
-        className="inline-flex h-11 items-center justify-center px-2 text-[15px] font-medium text-ink/70 underline-offset-4 hover:text-ink hover:underline"
-      />
+      <BookingLink className="inline-flex h-11 items-center justify-center gap-2 px-2 text-[15px] font-medium text-ink/70 underline-offset-4 hover:text-ink hover:underline">
+        <CalendarDays aria-hidden className="h-4 w-4" />
+        Or talk with us
+      </BookingLink>
     </div>
   )
 }

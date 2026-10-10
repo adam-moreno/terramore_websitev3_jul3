@@ -60,26 +60,9 @@ export default function TerramoreHomepage() {
                     <br />
                     <span className="text-gold-display">you already built.</span>
                   </h1>
-    {/* Mobile: full hero-copy width so line 2 stays one line (3 forced breaks). */}
-                  {/* From md up the lookup's label is the hero's one supporting line (variant "hero"), so this line is mobile-only. */}
-                  <p className="mx-auto mt-5 max-w-none text-center text-[16px] font-medium leading-[1.4] text-ink sm:max-w-[26rem] md:hidden">
-                    We find where the business wins today,
-                    <br />
-                    then automate marketing and sales to get
-                    <br />
-                    <span className={`${brandMore.className} text-[1.22em] font-bold leading-none tracking-[-0.08em] text-ink`}>
-                      more
-                    </span>{" "}
-                    customers &{" "}
-                    <span className={`${brandMore.className} text-[1.22em] font-bold leading-none tracking-[-0.08em] text-ink`}>
-                      more
-                    </span>{" "}
-                    revenue.
-                  </p>
                     </>
                   }
                   anchor
-                  helper="Free · No email needed to see the first results"
                   secondary={
                     <BookingLink
                       label="Or book a free 30-minute call"
