@@ -128,9 +128,9 @@ export function WhatTerramoreDoes() {
           <p id="terramore-film-description" className="sr-only">
             A silent film. We diagnose your business: a website check scores digital experience, discoverability, trust,
             conversion readiness and technical health. Integrate with your existing tools: Google, Meta, Shopify, HubSpot
-            and Mailchimp connect to the Growth Workspace. One intelligence layer: your target audience, where they are,
-            the states with your repeat customers and deal seekers, what they search and who they are, for service
-            businesses and product brands. Map your customer journey: search, a social post, reviews, emails, your landing
+            and Mailchimp connect to the Growth Workspace. One intelligence layer: find your customers, where your
+            customers are, where your buyers are (the states with your repeat customers and deal seekers), what your
+            customers search and their demographics, for service businesses and product brands. Map your customer journey: search, a social post, reviews, emails, your landing
             page, then a booked call or an order. Create your content: social, video, drone and animation. We create and
             manage your ads across Google, Meta, TikTok, YouTube and PR. Revenue month by month from June to September.
             We&rsquo;re your Growth Partner, not your agency. Get more. Earn more. Terramore.io.
