@@ -328,3 +328,7 @@ Owner direction (Adam): the v6 brand film (51.8 s, silent; film repo branch `fil
 ## 2026-10-11 · Film v8 / portrait v3: Intelligence labels say who they mean; larger closing logo
 - Owner direction (Adam): "Where they are" was ambiguous. The Intelligence steps and panel headings now read Find your customers → Where your customers are → Where your buyers are → What your customers search → Your customers' demographics ("Who they are" panel is now "Customer demographics"). The closing Terramore.io wordmark and TM mark are larger. Film length unchanged.
 - The screen-reader description in `components/what-terramore-does.tsx` matches the new labels. Files re-encoded as before (H.264, CRF 24, no audio, fast start); posters unchanged (their frames didn't change).
+
+## 2026-10-11 · Film v9 / portrait v4
+- Owner review of the portrait cut: rings fill in reading order; Integrate lines end in a travelling dot and a visible target (portrait: targets above the workspace title, so no line crosses words); portrait Create is two columns (vertical over landscape, landscape over vertical) with one caption under the grid instead of labels on the videos; Ads tracks run from spend to revenue and land on a goal dot with revenue and return (sample data); a red X crosses out "agency". Both cuts re-encoded as before (H.264, CRF 24, no audio, fast start). Posters unchanged.
+
