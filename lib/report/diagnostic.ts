@@ -87,5 +87,7 @@ export async function collectDiagnostic(businessName: string, rawWebsite: string
     scores,
     recommendations,
     disclaimers: REPORT_DISCLAIMERS,
+    // Tools found in the homepage code. The Growth Workspace's Connect screen lists them under "Found on your website".
+    tools: { platform: site.platform, pixels: site.pixels, emailTools: site.emailTools },
   }
 }

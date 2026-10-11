@@ -159,6 +159,8 @@ export type DiagnosticBundle = {
   scores: ScoreBreakdown
   recommendations: Recommendation[]
   disclaimers: string[]
+  /** Tools detected in the homepage code (platform, ad and analytics tags, email tools). Optional on older reports. */
+  tools?: { platform: string | null; pixels: string[]; emailTools: string[] }
 }
 
 export type MvpReportContent = {
