@@ -10,6 +10,7 @@ import { ATTR_KEYS, normalizeEmail, normalizePhone, pickAttribution } from "@/li
 import { runReportPipeline } from "@/lib/report/pipeline"
 import { sendReportAcceptSms } from "@/lib/report/sms"
 import { recordReportSubmitted } from "@/lib/report/stage-events"
+import { alertHotLead, isHotLead, readinessFromAnswers } from "@/lib/leads/readiness"
 
 export const maxDuration = 60
 
@@ -108,6 +109,7 @@ export async function POST(request: NextRequest) {
     const attribution = pickAttribution(rawAttribution)
     const attributionSummary = attributionForNotify(attribution)
     const courseType = packCourseType(rawAnswers, attribution)
+    const readiness = readinessFromAnswers(rawAnswers)
 
     if (!name || !email) {
       return NextResponse.json({ error: "Name and email are required" }, { status: 400 })
@@ -222,6 +224,15 @@ export async function POST(request: NextRequest) {
         rowId = String(data.id)
       }
       if (rowId) await recordReportSubmitted(rowId, submittedAt)
+      // Every qualifier answer in its own column (course_type only fits 48 characters). Older databases without the
+      // column skip it quietly; the answers are still in course_type and the admin alert.
+      if (rowId) {
+        const { error: answersError } = await supabase
+          .from("free_courses_signups")
+          .update({ qualifier_answers: { ...Object.fromEntries(Object.entries(rawAnswers).filter(([, value]) => typeof value === "string").map(([key, value]) => [key.slice(0, 20), String(value).slice(0, 40)])) } })
+          .eq("id", rowId)
+        if (answersError && !isMissingColumnError(answersError)) console.error("[report] qualifier answers not saved:", answersError.message)
+      }
     } else {
       console.info("Report lead (no Supabase):", {
         name,
@@ -254,7 +265,11 @@ export async function POST(request: NextRequest) {
         submittedAt,
         attribution,
       }
-      await Promise.all([notifyAdminOfLead(lead), confirmLeadToUser(lead)])
+      await Promise.all([
+        notifyAdminOfLead(lead),
+        confirmLeadToUser(lead),
+        isHotLead(readiness) ? alertHotLead({ name, email, phone: phone || null, business: businessName || null, website: website || null }) : Promise.resolve(),
+      ])
       await sendReportAcceptSms({ email, name, phone: phone || null })
       await enrollLead({
         email,

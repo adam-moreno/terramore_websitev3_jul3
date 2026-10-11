@@ -38,6 +38,34 @@ const QUESTIONS = [
   },
 ] as const
 
+/**
+ * Readiness (owner decision 2026-10-11): how soon, and how they'd like to get there. Asked on every entry, so the team
+ * can call people who want results now first. Visitors from the instant check skip the two business questions above
+ * (the check already knows the business), so they answer two taps; everyone else answers four.
+ */
+const READINESS = [
+  {
+    key: "when",
+    prompt: "How soon do you want results?",
+    options: [
+      { value: "month", label: "This month" },
+      { value: "quarter", label: "In the next few months" },
+      { value: "exploring", label: "Just exploring" },
+    ],
+    reassure: "Good to know. We'll pace your plan to match.",
+  },
+  {
+    key: "how",
+    prompt: "How would you like to get there?",
+    options: [
+      { value: "self", label: "Do it myself" },
+      { value: "help", label: "With some help" },
+      { value: "done", label: "Have it done for me" },
+    ],
+    reassure: "Thanks. Your plan will fit how you like to work.",
+  },
+] as const
+
 const REASSURE_MS = 750
 const SUCCESS_REDIRECT_MS = 3000
 
@@ -75,6 +103,7 @@ export function ReportPopup({
   const successRef = useRef(success)
   successRef.current = success
   const entry: ReportEntry = entryOverride ?? (direct ? "popup_direct" : "popup_questions")
+  const questions = direct ? READINESS : [...QUESTIONS, ...READINESS]
   /** The success state's main action. Focus moves here when the report is requested, so keyboard and screen-reader users land on the next step. */
   const successActionRef = useRef<HTMLAnchorElement & HTMLButtonElement>(null)
   const detailsShownRef = useRef(false)
@@ -92,10 +121,10 @@ export function ReportPopup({
     wasOpenRef.current = open
     if (!open || success || detailsShownRef.current) return
     // On reopen the first render still holds the previous step until the reset effect below lands.
-    if (!direct && (justOpened || step < QUESTIONS.length)) return
+    if (justOpened || step < questions.length) return
     detailsShownRef.current = true
     trackFunnelEvent("report_progress", { step: "details_shown", entry })
-  }, [open, success, direct, step, entry])
+  }, [open, success, step, entry, questions.length])
 
   const goHome = () => {
     closeRef.current()
@@ -149,7 +178,7 @@ export function ReportPopup({
 
   if (!open || typeof document === "undefined") return null
 
-  const question = !success && !direct && step < QUESTIONS.length ? QUESTIONS[step] : null
+  const question = !success && step < questions.length ? questions[step] : null
 
   const choose = (key: string, value: string) => {
     if (picked !== null) return
@@ -224,8 +253,8 @@ export function ReportPopup({
                 <p className="mt-2 text-[15px] leading-relaxed text-ink/75">
                   {description ??
                     (direct
-                      ? "Your details below — you'll find the report in your inbox."
-                      : "Two quick questions, then your details. In your inbox in minutes.")}
+                      ? "Two quick taps, then your details. In your inbox in minutes."
+                      : "Four quick taps, then your details. In your inbox in minutes.")}
                 </p>
               </div>
               <button type="button" onClick={onClose} className="shrink-0 text-[13px] font-medium text-ink/70 hover:text-ink">
@@ -237,10 +266,10 @@ export function ReportPopup({
               <div className="px-7 pb-7 pt-6 md:px-9 md:pb-9" key={question.key}>
                 <div className="flex items-center gap-3">
                   <span className="text-[12px] font-semibold text-brand">
-                    {step + 1} of {QUESTIONS.length}
+                    {step + 1} of {questions.length}
                   </span>
                   <div className="flex flex-1 gap-1.5">
-                    {QUESTIONS.map((item, index) => (
+                    {questions.map((item, index) => (
                       <span
                         key={item.key}
                         className={`h-1 flex-1 rounded-full ${index <= step ? "bg-brand" : "bg-ink/10"}`}
@@ -275,7 +304,7 @@ export function ReportPopup({
               </div>
             ) : (
               <div className="px-7 pb-7 pt-6 md:px-9 md:pb-9">
-                {direct ? null : (
+                {(
                   <>
                     <p className="text-[12px] font-semibold text-brand">Last step</p>
                     <p className="mt-2 text-[1.2rem] font-semibold tracking-tight text-ink">Where should the report go?</p>
