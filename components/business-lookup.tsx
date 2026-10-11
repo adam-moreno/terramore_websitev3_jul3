@@ -720,7 +720,7 @@ const JOURNEY_STEPS: ReadonlyArray<{ id: Journey | "score"; title: string; point
     title: "Full report & Growth Workspace",
     points: [
       "Your email gets the free, in-depth report.",
-      "Free access to your Growth Workspace, where accounts like Shopify, Google Business Profile, Google Ads, Meta, TikTok and Google Analytics will connect.",
+      "Free access to your Growth Workspace. Connect 2 tools you already use, like Shopify, Square, Instagram, Facebook, Google Ads, Meta Ads or Google Analytics.",
     ],
     invest: "+ Your email",
   },
