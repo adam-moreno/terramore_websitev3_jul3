@@ -30,7 +30,7 @@ const FAQS = [
   },
   {
     q: "What does the work cost?",
-    a: "The first call is free. We agree the scope and price before any work starts; if the scope changes, we agree the new price first. Month to month, no long contracts. Financing up to $10,000 through PayPal, subject to approval. Software on its own is monthly too. You own the data and the assets. You never pay to find out what is broken.",
+    a: "The first call is free. We agree the scope and price before any work starts; if the scope changes, we agree the new price first. Pay month to month with no long contract, or for a year up front. Financing up to $10,000 through PayPal, subject to approval. Software on its own is monthly too. You own the data and the assets. You never pay to find out what is broken.",
   },
 ]
 

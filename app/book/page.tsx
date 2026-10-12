@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 const TRUST_FACTS = [
   { value: "10+ years", label: "Measuring what ads actually sell, for Fortune 500 brands at Samba TV and Kantar" },
   { value: "$0", label: "Your growth roadmap is built before you sign anything, and it's yours to keep" },
-  { value: "Month to month", label: "No long contracts. You stay because the work pays off, and financing is available" },
+  { value: "Month to month", label: "No long contract required. Monthly or yearly, and financing is available" },
 ] as const
 
 /* Compact capability rows — editorial rhythm, not a service grid. */

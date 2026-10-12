@@ -23,12 +23,12 @@ const plans = [
   },
   {
     name: "Work with us",
-    price: "Month to month",
+    price: "Monthly or yearly",
     note: "Scope and price agreed up front",
     points: [
       "Priced by the work you need, not a menu",
-      "No long contracts: stay because it pays off",
-      "Pay monthly, or finance it",
+      "Month to month, no long contract required",
+      "Or commit to a year and pay up front",
       "Financing up to $10,000 through PayPal, subject to approval",
     ],
     featured: true,
@@ -51,8 +51,8 @@ export default function PricingPage() {
     <LindyPage
       primary="book"
       title="Talk first."
-      accent="Then month to month."
-      subtitle="The call is free. We agree the scope and price before any work starts, then it's month to month. You never pay to find out what is broken."
+      accent="Then monthly or yearly."
+      subtitle="The call is free. We agree the scope and price before any work starts. Pay month to month, or for the year up front. You never pay to find out what is broken."
       ctaLabel="Book a free call"
     >
       <section className="pb-20">

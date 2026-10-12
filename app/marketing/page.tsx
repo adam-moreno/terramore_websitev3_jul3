@@ -95,7 +95,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Is there a long-term contract?",
-    a: "No. It's month to month, with the scope and price agreed up front. We keep clients by performing, not by contract. Financing up to $10,000 through PayPal is available, subject to approval.",
+    a: "No. You can go month to month, or commit to a year and pay up front; the scope and price are agreed before any work starts. We keep clients by performing, not by contract. Financing up to $10,000 through PayPal is available, subject to approval.",
   },
   {
     q: "What do you need from me to get started?",
