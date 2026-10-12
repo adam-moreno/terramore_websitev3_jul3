@@ -1,5 +1,7 @@
 import { INTEGRATION_HEROES } from "@/lib/integration-heroes"
 import { INTEGRATION_CATEGORIES, integrationPath } from "@/lib/integrations"
+import { IntegrationNextStep } from "@/components/integration-page"
+import { SiteFooter } from "@/components/site-footer"
 import { StoryCta, StoryHero, StoryLinkTiles, StorySection } from "@/components/story-page"
 
 export default function IntegrationsPage() {
@@ -11,6 +13,7 @@ export default function IntegrationsPage() {
         follow="Pick a channel. Each page names the software and how it ties back to revenue."
         image={INTEGRATION_HEROES["email-marketing"]}
         imageAlt="Integrations"
+        next={<IntegrationNextStep />}
       />
       <StorySection title="The tools we sit in">
         <StoryLinkTiles
@@ -22,6 +25,7 @@ export default function IntegrationsPage() {
         />
       </StorySection>
       <StoryCta />
+      <SiteFooter showDualCtas={false} />
     </div>
   )
 }

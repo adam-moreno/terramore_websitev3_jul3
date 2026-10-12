@@ -121,7 +121,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <SiteFooter />
+      <SiteFooter showDualCtas={false} />
     </div>
   )
 }

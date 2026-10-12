@@ -1,3 +1,4 @@
+// Updated 2026-10-11 for SMS, connected data, billing and financing. Plain-language draft; have counsel review before relying on it.
 import type { Metadata } from "next"
 import { PlainEmail } from "@/components/plain-email"
 import { SiteFooter } from "@/components/site-footer"
@@ -20,7 +21,7 @@ export default function DisclosurePage() {
           <div className="prose prose-lg max-w-none">
             <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-8">
               <p className="text-sm font-medium text-yellow-800">
-                <strong>Last Updated:</strong> February 4, 2025
+                <strong>Last Updated:</strong> October 11, 2026
               </p>
             </div>
 
@@ -59,6 +60,23 @@ export default function DisclosurePage() {
                   we think you could possibly earn. There is no assurance you will do as well. Your results will 
                   depend on your efforts, background, knowledge, market conditions, and various other factors 
                   that are beyond our control.
+                </p>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">FINANCING DISCLOSURE</h2>
+                <p className="text-gray-700 leading-relaxed">
+                  Financing for our services may be available through PayPal, using PayPal Pay Later or PayPal Credit,
+                  for up to $10,000. Financing is subject to PayPal&apos;s credit approval and terms. PayPal is the
+                  lender, not Terramore.io. We don&apos;t make credit decisions, and we are not a lender or a loan broker.
+                </p>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">AI ASSISTANT DISCLOSURE</h2>
+                <p className="text-gray-700 leading-relaxed">
+                  Our phone line may be answered by an AI assistant. It will tell you it is an AI. Calls may be recorded
+                  and transcribed to take your message, book a call and improve our service.
                 </p>
               </section>
 

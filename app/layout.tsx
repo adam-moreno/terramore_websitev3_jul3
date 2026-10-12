@@ -109,21 +109,39 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               '@context': 'https://schema.org',
-              '@type': 'WebSite',
-              name: 'Terramore.io',
-              url: 'https://www.terramore.io',
-              description:
-                'Terramore finds where your store, ads, and email lose sales, then fixes that step. For owners with a shop, a service, or a list. Book a free call or request a Digital Footprint report.',
-              publisher: {
-                '@type': 'Organization',
-                name: 'Terramore.io',
-                url: 'https://www.terramore.io',
-              },
-              potentialAction: {
-                '@type': 'SearchAction',
-                target: { '@type': 'EntryPoint', urlTemplate: 'https://www.terramore.io/solutions?q={search_term_string}' },
-                'query-input': 'required name=search_term_string',
-              },
+              '@graph': [
+                {
+                  '@type': 'WebSite',
+                  '@id': 'https://www.terramore.io/#website',
+                  name: 'Terramore',
+                  alternateName: 'Terramore.io',
+                  url: 'https://www.terramore.io',
+                  publisher: { '@id': 'https://www.terramore.io/#organization' },
+                },
+                {
+                  '@type': 'ProfessionalService',
+                  '@id': 'https://www.terramore.io/#organization',
+                  name: 'Terramore',
+                  alternateName: 'Terramore.io',
+                  url: 'https://www.terramore.io',
+                  description:
+                    'Terramore is a growth partner for small businesses: it finds where a business loses customers, fixes it, and runs the marketing (ads, content, web, automation), measured in its TerraIQ software. Free Digital Footprint report and a free Growth Workspace.',
+                  founder: { '@id': 'https://www.terramore.io/#founder' },
+                  areaServed: 'US',
+                  makesOffer: [
+                    { '@type': 'Offer', name: 'Free 30-minute call', price: '0', priceCurrency: 'USD', url: 'https://www.terramore.io/book' },
+                    { '@type': 'Offer', name: 'Free Digital Footprint report', price: '0', priceCurrency: 'USD', url: 'https://www.terramore.io/report' },
+                  ],
+                },
+                {
+                  '@type': 'Person',
+                  '@id': 'https://www.terramore.io/#founder',
+                  name: 'Adam Moreno',
+                  jobTitle: 'Founder',
+                  worksFor: { '@id': 'https://www.terramore.io/#organization' },
+                  url: 'https://www.terramore.io/about',
+                },
+              ],
             }),
           }}
         />

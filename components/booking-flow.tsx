@@ -781,7 +781,10 @@ export function BookingFlow({
                 className={detailsInput}
                 autoComplete="tel"
               />
-              <span className="mt-1 block text-[12px] text-slate-500">We’ll text if you miss the call.</span>
+              <span className="mt-1 block text-[12px] leading-snug text-slate-500">
+                We&apos;ll text your confirmation and reminders, and if you miss the call. Msg &amp; data rates may apply.
+                Reply STOP to opt out. <a href="/terms#text-messages" className="underline underline-offset-2">Text terms</a>
+              </span>
             </label>
             <label className="block">
               <span className={detailsLabel}>Business name</span>

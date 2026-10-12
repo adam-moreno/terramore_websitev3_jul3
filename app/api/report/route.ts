@@ -93,6 +93,9 @@ export async function POST(request: NextRequest) {
     const email = normalizeEmail(body.email)
     const phoneRaw = String(body.phone || "").trim()
     const phone = normalizePhone(phoneRaw) || phoneRaw || ""
+    // Texts only with the separate, unticked-by-default SMS box (TCPA). The phone alone still lets the team call back.
+    const smsConsent = body.smsConsent === true && Boolean(phone)
+    const smsConsentAt = smsConsent ? new Date().toISOString() : null
     const website = String(body.website || "").trim()
     const socials = String(body.socials || "").trim()
     const businessName = String(body.businessName || "").trim()
@@ -229,7 +232,12 @@ export async function POST(request: NextRequest) {
       if (rowId) {
         const { error: answersError } = await supabase
           .from("free_courses_signups")
-          .update({ qualifier_answers: { ...Object.fromEntries(Object.entries(rawAnswers).filter(([, value]) => typeof value === "string").map(([key, value]) => [key.slice(0, 20), String(value).slice(0, 40)])) } })
+          .update({
+            qualifier_answers: {
+              ...Object.fromEntries(Object.entries(rawAnswers).filter(([, value]) => typeof value === "string").map(([key, value]) => [key.slice(0, 20), String(value).slice(0, 40)])),
+              ...(smsConsentAt ? { sms_consent: "yes", sms_consent_at: smsConsentAt } : {}),
+            },
+          })
           .eq("id", rowId)
         if (answersError && !isMissingColumnError(answersError)) console.error("[report] qualifier answers not saved:", answersError.message)
       }
@@ -270,7 +278,7 @@ export async function POST(request: NextRequest) {
         confirmLeadToUser(lead),
         isHotLead(readiness) ? alertHotLead({ name, email, phone: phone || null, business: businessName || null, website: website || null }) : Promise.resolve(),
       ])
-      await sendReportAcceptSms({ email, name, phone: phone || null })
+      if (smsConsent) await sendReportAcceptSms({ email, name, phone: phone || null })
       await enrollLead({
         email,
         name,
@@ -283,6 +291,7 @@ export async function POST(request: NextRequest) {
         name,
         email,
         phone: phone || null,
+        smsConsent,
         businessName,
         website: website || null,
         answers: answerSummary || null,

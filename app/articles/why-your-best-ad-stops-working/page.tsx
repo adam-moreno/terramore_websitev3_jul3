@@ -17,10 +17,15 @@ export default function ArticlePage() {
     <div className="min-h-screen bg-cream">
       <article className="page-shell pb-16 pt-8 md:pt-12">
         <div className="mx-auto max-w-3xl">
-          <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-brand">Ad creative · 6 min read</p>
+          <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-brand">Ad creative · 3 min read</p>
           <h1 className="mt-3 text-[2rem] font-bold leading-[1.1] tracking-[-0.02em] text-ink md:text-[2.6rem]">
             Why your best-performing ad will stop working (and what to do about it)
           </h1>
+          <p className="mt-4 text-[14px] leading-relaxed text-ink/70">
+            By Adam Moreno · formerly Samba TV and Kantar
+            <span aria-hidden="true"> · </span>
+            <time dateTime="2026-09">September 2026</time>
+          </p>
           <div className="mt-8 overflow-hidden rounded-[1.5rem] shadow-[0_16px_50px_rgba(15,30,46,0.12)]">
             <Image
               src="/marketing/articles/article-ad-fatigue.png"
@@ -69,6 +74,12 @@ export default function ArticlePage() {
                 offer, budget, or landing page. That trend almost never reverses on its own.
               </li>
             </ul>
+            <p className="border-l-2 border-brand pl-4 text-ink">
+              <CheckMyBusinessLink ctaId="article_mid_report" className="font-medium text-brand underline underline-offset-4 hover:text-brand-hover">
+                Check your business
+              </CheckMyBusinessLink>
+              , then connect Meta Ads or Google Ads free to see which ads still pay.
+            </p>
             <h2 className="pt-4 text-[1.35rem] font-bold tracking-tight text-ink">Refresh, don&apos;t restart</h2>
             <p>
               The instinct is to scrap the ad and brainstorm something brand new. Usually that&apos;s wasteful. Your
@@ -79,8 +90,8 @@ export default function ArticlePage() {
             </p>
             <p>
               A practical cadence: for every winning concept, have two or three variations ready before fatigue sets
-              in. Rotate on a schedule instead of reacting to a bad week. Teams that refresh proactively pay
-              noticeably less per lead over a quarter than teams that ride each ad into the ground.
+              in. Rotate on a schedule instead of reacting to a bad week. That way a tired ad is
+              replaced before it drags down the month, not after.
             </p>
             <h2 className="pt-4 text-[1.35rem] font-bold tracking-tight text-ink">The takeaway</h2>
             <p>
@@ -91,8 +102,8 @@ export default function ArticlePage() {
           </div>
           <div className="mt-12 rounded-[1.5rem] bg-white p-6 shadow-[0_8px_30px_rgba(15,30,46,0.05)] sm:p-8">
             <p className="text-[15px] leading-relaxed text-slate-600">
-              Terramore keeps client campaigns fresh with scheduled creative rotation, so cost per lead stays flat
-              while everyone else&apos;s climbs.
+              Terramore plans creative refreshes for client campaigns on a schedule, so a tired ad gets replaced
+              before it drags down the month.
             </p>
             <div className="mt-4 flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-4">
               <CheckMyBusinessLink

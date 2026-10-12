@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import { BookingLink } from "@/components/booking-popup"
+import { CheckMyBusinessLink } from "@/components/business-lookup"
 import { LindyPage } from "@/components/lindy-page"
 import { ReportPopupLink } from "@/components/report-popup"
 
@@ -35,12 +36,12 @@ const plans = [
   },
   {
     name: "Software only",
-    price: "Monthly",
+    price: "Free to start",
     note: "Run it yourself",
     points: [
-      "TerraIQ on its own, without our services",
-      "See visits, leads, and revenue in one place",
-      "Month to month, no contract",
+      "Check your business, then connect 2 tools free",
+      "Get a plan from your own numbers",
+      "More tools and history on a monthly plan, no contract",
     ],
     featured: false,
   },
@@ -72,14 +73,23 @@ export default function PricingPage() {
                   <li key={point}>{point}</li>
                 ))}
               </ul>
-              <BookingLink
-                label="Book a free call"
-                className={`mt-6 rounded-full px-4 py-2.5 text-center text-sm font-semibold ${
-                  plan.featured
-                    ? "bg-brand text-white hover:bg-brand-hover"
-                    : "bg-slate-100 text-slate-800 hover:bg-slate-200"
-                }`}
-              />
+{plan.name === "Software only" ? (
+                <CheckMyBusinessLink
+                  ctaId="pricing_software_report"
+                  className="mt-6 rounded-full bg-slate-100 px-4 py-2.5 text-center text-sm font-semibold text-slate-800 hover:bg-slate-200"
+                >
+                  Start free
+                </CheckMyBusinessLink>
+              ) : (
+                              <BookingLink
+                  label="Book a free call"
+                  className={`mt-6 rounded-full px-4 py-2.5 text-center text-sm font-semibold ${
+                    plan.featured
+                      ? "bg-brand text-white hover:bg-brand-hover"
+                      : "bg-slate-100 text-slate-800 hover:bg-slate-200"
+                  }`}
+                />
+              )}
             </div>
           ))}
         </div>

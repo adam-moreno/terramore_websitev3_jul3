@@ -14,7 +14,7 @@
  * you have a real public asset — do not invent URLs.
  */
 
-const SITE = "https://terramore.io"
+const SITE = "https://www.terramore.io"
 const REPORT_URL = `${SITE}/report`
 
 /** Fields needed to render booking SMS (matches BookingNotice). */

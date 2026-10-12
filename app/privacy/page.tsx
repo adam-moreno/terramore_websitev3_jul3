@@ -1,3 +1,4 @@
+// Updated 2026-10-11 for SMS, connected data, billing and financing. Plain-language draft; have counsel review before relying on it.
 import type { Metadata } from "next"
 import { PlainEmail } from "@/components/plain-email"
 import { SiteFooter } from "@/components/site-footer"
@@ -23,7 +24,7 @@ export default function PrivacyPolicyPage() {
           <div className="prose prose-lg max-w-none">
             <div className="bg-gray-50 p-6 rounded-lg mb-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">PRIVACY STATEMENT</h2>
-              <p className="text-gray-600 mb-0">Last Updated September 28, 2026</p>
+              <p className="text-gray-600 mb-0">Last Updated October 11, 2026</p>
             </div>
 
             <div className="space-y-8">
@@ -50,7 +51,7 @@ export default function PrivacyPolicyPage() {
               <section>
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">WHO WE ARE</h2>
                 <p className="text-gray-700 leading-relaxed">
-                  Terramore.io, LLC is a Sales Training company. For residents from the GDPR Jurisdictions, as defined
+                  Terramore.io, LLC is a marketing services and software company. We run marketing for businesses (ads, content, websites and automation). We also offer software: the TerraIQ dashboard for clients and a free Growth Workspace for business owners. For residents from the GDPR Jurisdictions, as defined
                   below, and some US state privacy laws, Terramore.io, LLC is the data controller responsible for your
                   personal data. For residents of California, Terramore.io, LLC is a "Business."
                 </p>
@@ -223,6 +224,47 @@ export default function PrivacyPolicyPage() {
                   .
                 </p>
 
+                <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Service Providers</h3>
+                <p className="text-gray-700 leading-relaxed">
+                  We use service providers to run our business. They process data for us, to provide their service to
+                  us. These are the kinds of providers we use, with examples:
+                </p>
+                <ul className="list-disc pl-6 space-y-2 text-gray-700">
+                  <li>
+                    <strong>Hosting</strong> – Vercel.
+                  </li>
+                  <li>
+                    <strong>Database</strong> – Supabase.
+                  </li>
+                  <li>
+                    <strong>Sign-in</strong> – Clerk.
+                  </li>
+                  <li>
+                    <strong>Email</strong> – Resend.
+                  </li>
+                  <li>
+                    <strong>Text messaging</strong> – Sendblue and Twilio.
+                  </li>
+                  <li>
+                    <strong>Phone and AI phone assistant</strong> – Retell AI.
+                  </li>
+                  <li>
+                    <strong>Data connectors</strong> – Windsor.ai.
+                  </li>
+                  <li>
+                    <strong>AI processing</strong> – Anthropic, for drafting and sorting messages and reports.
+                  </li>
+                  <li>
+                    <strong>Payments and financing</strong> – Stripe and PayPal.
+                  </li>
+                  <li>
+                    <strong>Scheduling and meetings</strong> – Microsoft Outlook and Google Meet.
+                  </li>
+                  <li>
+                    <strong>Analytics and advertising</strong> – Google Analytics, Google Ads and Meta.
+                  </li>
+                </ul>
+
                 <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Affiliates</h3>
                 <p className="text-gray-700 leading-relaxed">
                   In addition to those third parties set forth above, we may share your information, including personal
@@ -268,6 +310,93 @@ export default function PrivacyPolicyPage() {
               </section>
 
               <section>
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">CONNECTED ACCOUNTS</h2>
+                <p className="text-gray-700 leading-relaxed">
+                  In our free Growth Workspace, and in TerraIQ, you can connect business tools. Examples are Shopify,
+                  Square, Instagram, a Facebook Page, Google Ads, Meta Ads and Google Analytics. In the Growth
+                  Workspace, you can connect up to 2 tools.
+                </p>
+                <p className="text-gray-700 leading-relaxed">
+                  Connections go through Windsor.ai, a data connector service. You sign in to the tool yourself and
+                  choose which account to connect.
+                </p>
+                <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">What we receive</h3>
+                <ul className="list-disc pl-6 space-y-2 text-gray-700">
+                  <li>Business totals, such as sales, orders, reach, ad spend and website sessions.</li>
+                  <li>For Instagram, the captions of your own posts.</li>
+                </ul>
+                <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">What we don&apos;t ask for</h3>
+                <p className="text-gray-700 leading-relaxed">
+                  We do not request customer-level personal data. That means we don&apos;t ask for the names, emails,
+                  phone numbers or addresses of your customers.
+                </p>
+                <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">How we use it</h3>
+                <p className="text-gray-700 leading-relaxed">
+                  We use connected data to show your business numbers and build your reports.
+                </p>
+                <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">How to disconnect</h3>
+                <p className="text-gray-700 leading-relaxed">
+                  You can disconnect at any time. Revoke our access in the tool&apos;s own settings, or email us at{" "}
+                  <PlainEmail address="admin@terramore.io" />. Once you disconnect, we stop pulling new data.
+                </p>
+                <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">How long we keep it</h3>
+                <p className="text-gray-700 leading-relaxed">
+                  We keep connected data while your connection is active. After you disconnect, you can ask us to delete
+                  the connected data we stored, and we will delete it.
+                </p>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">TEXT MESSAGES (SMS)</h2>
+                <p className="text-gray-700 leading-relaxed">
+                  We text you only if you give us your mobile number and agree to receive texts. We may text you to:
+                </p>
+                <ul className="list-disc pl-6 space-y-2 text-gray-700">
+                  <li>reply to your report request;</li>
+                  <li>confirm and remind you about a booked call; and</li>
+                  <li>follow up from our team about your request.</li>
+                </ul>
+                <p className="text-gray-700 leading-relaxed">
+                  To get texts about your report request, check the separate, optional &ldquo;Text me about my report
+                  and booking&rdquo; box on our form. Booking confirmations and reminders go to the number you give
+                  when you book a call.
+                </p>
+                <p className="text-gray-700 leading-relaxed">
+                  Texts come from Terramore&apos;s business number. We send them through Sendblue, and sometimes Twilio.
+                  Message frequency varies. Message and data rates may apply. Reply STOP to opt out. Reply HELP for help.
+                </p>
+                <p className="text-gray-700 leading-relaxed">
+                  Marketing texts are optional and separate from these service texts. You don&apos;t have to agree to
+                  texts to buy anything from us.
+                </p>
+                <p className="text-gray-700 leading-relaxed">
+                  <strong>
+                    We do not share mobile numbers or SMS consent with third parties or affiliates for their marketing
+                    purposes.
+                  </strong>{" "}
+                  This applies even where other parts of this statement allow sharing.
+                </p>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">PHONE CALLS</h2>
+                <p className="text-gray-700 leading-relaxed">
+                  When you call us, an AI assistant may answer. It will tell you it is an AI. Calls may be recorded and
+                  transcribed. We use the recording and transcript to take your message, book a call with you and
+                  improve our service. Our phone and AI assistant provider is Retell AI.
+                </p>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">AI PROCESSING</h2>
+                <p className="text-gray-700 leading-relaxed">
+                  We use AI from Anthropic to help draft messages and reports and to sort incoming requests. To do that,
+                  we send it the information needed for the task, such as your request or your connected business
+                  totals. Anthropic does not use this data to train its public models.
+                </p>
+              </section>
+
+              <section>
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">YOUR RIGHTS AND OPTIONS</h2>
                 <p className="text-gray-700 leading-relaxed">
                   You may have to provide personal information to enjoy most of the features of our online and mobile
@@ -280,6 +409,13 @@ export default function PrivacyPolicyPage() {
                   provide you with the opportunity to opt out of our marketing communications or change your preferences
                   by following a link in the footer of all non-transactional email messages from us or by emailing us at{" "}
                   <PlainEmail address="admin@terramore.io" />.
+                </p>
+                <p className="text-gray-700 leading-relaxed">
+                  <strong>Texts:</strong> Reply STOP to any text from us to stop receiving texts.
+                </p>
+                <p className="text-gray-700 leading-relaxed">
+                  <strong>Connected accounts:</strong> Revoke access in the tool, or email us to disconnect and to ask
+                  us to delete your connected data.
                 </p>
               </section>
 

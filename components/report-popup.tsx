@@ -67,7 +67,6 @@ const READINESS = [
 ] as const
 
 const REASSURE_MS = 750
-const SUCCESS_REDIRECT_MS = 3000
 
 export function ReportPopup({
   open,
@@ -158,14 +157,6 @@ export function ReportPopup({
     if (success) successActionRef.current?.focus()
   }, [success])
 
-  useEffect(() => {
-    if (!success || direct || workspaceUrl) return
-    const id = window.setTimeout(() => {
-      closeRef.current()
-      router.push("/")
-    }, SUCCESS_REDIRECT_MS)
-    return () => window.clearTimeout(id)
-  }, [success, router, direct, workspaceUrl])
 
   useEffect(() => {
     if (picked === null) return
@@ -223,10 +214,17 @@ export function ReportPopup({
                     Open My Growth Workspace
                   </a>
                 </div>
+                <a
+                  href="/book"
+                  onClick={() => trackFunnelEvent("report_success_book_click", { entry })}
+                  className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-full border border-ink/15 px-4 text-[15px] font-medium text-ink hover:border-ink/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
+                >
+                  Or book a free call to walk through it
+                </a>
                 <button
                   type="button"
                   onClick={goHome}
-                  className="mt-3 inline-flex h-11 w-full items-center justify-center rounded-full text-[15px] font-medium text-ink/70 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
+                  className="mt-1 inline-flex h-11 w-full items-center justify-center rounded-full text-[15px] font-medium text-ink/70 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
                 >
                   Done
                 </button>
@@ -241,7 +239,13 @@ export function ReportPopup({
                 >
                   Done
                 </button>
-                {direct ? null : <p className="mt-3 text-[13px] text-slate-400">Taking you home in a moment…</p>}
+                <a
+                  href="/book"
+                  onClick={() => trackFunnelEvent("report_success_book_click", { entry })}
+                  className="mt-3 inline-flex min-h-11 w-full items-center justify-center text-[15px] font-medium text-ink underline underline-offset-4"
+                >
+                  Or book a free call to walk through it
+                </a>
               </>
             )}
           </div>

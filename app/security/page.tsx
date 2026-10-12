@@ -11,6 +11,7 @@ export const metadata: Metadata = {
 export default function SecurityPage() {
   return (
     <LindyPage
+      primary="book"
       title="Private"
       accent="and in your control."
       subtitle="Your lists, ads, and store stay in the tools you own."

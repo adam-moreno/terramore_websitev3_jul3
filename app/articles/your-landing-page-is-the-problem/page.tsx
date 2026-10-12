@@ -17,10 +17,15 @@ export default function ArticlePage() {
     <div className="min-h-screen bg-cream">
       <article className="page-shell pb-16 pt-8 md:pt-12">
         <div className="mx-auto max-w-3xl">
-          <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-brand">Landing pages · 5 min read</p>
+          <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-brand">Landing pages · 2 min read</p>
           <h1 className="mt-3 text-[2rem] font-bold leading-[1.1] tracking-[-0.02em] text-ink md:text-[2.6rem]">
             Your ads aren&apos;t the problem — your landing page is
           </h1>
+          <p className="mt-4 text-[14px] leading-relaxed text-ink/70">
+            By Adam Moreno · formerly Samba TV and Kantar
+            <span aria-hidden="true"> · </span>
+            <time dateTime="2026-09">September 2026</time>
+          </p>
           <div className="mt-8 overflow-hidden rounded-[1.5rem] shadow-[0_16px_50px_rgba(15,30,46,0.12)]">
             <Image
               src="/marketing/articles/article-landing.png"
@@ -72,6 +77,12 @@ export default function ArticlePage() {
                 data, a meaningful share of paid visitors never see it at all. You paid for those clicks.
               </li>
             </ul>
+            <p className="border-l-2 border-brand pl-4 text-ink">
+              <CheckMyBusinessLink ctaId="article_mid_report" className="font-medium text-brand underline underline-offset-4 hover:text-brand-hover">
+                Check your business
+              </CheckMyBusinessLink>{" "}
+              to see how your pages read to a customer.
+            </p>
             <h2 className="pt-4 text-[1.35rem] font-bold tracking-tight text-ink">Why this beats a new campaign</h2>
             <p>
               Improving page conversion compounds across every channel at once. Take a page from 1.5% to 3% and you

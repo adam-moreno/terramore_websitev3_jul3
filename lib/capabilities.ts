@@ -152,7 +152,7 @@ export const CAPABILITIES: Capability[] = [
       },
       {
         slug: "marketing-function-excellence",
-        title: "A Cheaper Marketing Week",
+        title: "A Leaner Marketing Function",
         deck: "Make the marketing week cheaper and clearer. Fewer tools. One owner per channel. A plan the team can run.",
         story: [
           "By making marketing more effective and less wasteful, we improve the return on spend you already have.",
@@ -604,7 +604,7 @@ export const CAPABILITIES: Capability[] = [
     navTitle: "Pricing and Revenue",
     title: "Pricing and Revenue Management",
     story: [
-      "By changing price and the timing of the ask, a company can move real value to the bottom line. Terramore helps you build the habit, the process, and the mindset that unlock pricing in good weeks and hard ones.",
+      "The right price, asked for at the right time, adds real profit. Terramore helps you set up a simple routine for checking prices and promos, so you can adjust in good weeks and slow ones.",
       "There is no textbook price for a local shop or a small brand. We look at what customers almost bought, what they will pay, and which promo trains them to wait.",
     ],
     offeringsTitle: "Our Pricing and Revenue Management Services",
@@ -742,9 +742,9 @@ export const CAPABILITIES: Capability[] = [
       {
         slug: "supply-chain-management",
         title: "Ship Dates You Can Hit",
-        deck: "Promise dates you can hit. Do not sell a ghost date. Tell the customer when it left.",
+        deck: "Promise dates you can hit. Do not sell what you cannot ship. Tell the customer when it left.",
         story: [
-          "Fulfillment is a promise. A ghost date is a refund and a bad review.",
+          "Fulfillment is a promise. A delivery date you miss turns into a refund and a bad review.",
           "We promise dates you can hit. We do not sell a date you cannot ship. We tell them when it left.",
         ],
         help: [
@@ -753,8 +753,8 @@ export const CAPABILITIES: Capability[] = [
             body: "The site and the warehouse agree.",
           },
           {
-            title: "Do not sell a ghost date",
-            body: "Live means you can fulfill.",
+            title: "Do not sell what you cannot ship",
+            body: "If the site says it is in stock, you can fulfill it.",
           },
           {
             title: "Tell them when it left",
@@ -1344,13 +1344,13 @@ export const CAPABILITIES: Capability[] = [
         title: "Paid Reach",
         deck: "Reach, leads, deals, and purchases in one view. Cut the audience that never buys.",
         story: [
-          "Paid reach is the last clock. Reach, leads, deals, and purchases in one view.",
-          "Numbers light when they are ready. No invented percents. We cut the audience that never buys.",
+          "Paid reach is the last step in the path. We put reach, leads, deals, and purchases in one view.",
+          "We show a number only when there is enough data behind it. No invented percents. We cut the audience that never buys.",
         ],
         help: [
           {
-            title: "Light the number when they are ready",
-            body: "The card stays dim until the list is true.",
+            title: "Show a number only when it is real",
+            body: "Until the data is complete, we say so instead of guessing.",
           },
           {
             title: "No invented percents",

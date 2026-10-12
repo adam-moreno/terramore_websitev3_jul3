@@ -37,6 +37,7 @@ export const CTA_IDS = {
   header_book: { destination: "booking", placement: "header", view: false },
   /** "Check my business" in the shared header: scrolls to this page's lookup, else opens the homepage lookup. */
   header_report: { destination: "report", placement: "header", view: false },
+  pricing_software_report: { destination: "report", placement: "inline", view: false },
   report_header_report: { destination: "report", placement: "header", view: false },
   /** Closing "Check my business" CTAs (search-first): footer, service pages (compact lookup), info pages, articles. */
   footer_closing_report: { destination: "report", placement: "closing", view: true },
@@ -44,6 +45,16 @@ export const CTA_IDS = {
   service_closing_book: { destination: "booking", placement: "closing", view: true },
   infopage_closing_report: { destination: "report", placement: "closing", view: true },
   article_closing_report: { destination: "report", placement: "closing", view: true },
+  /** Quiet next step under the lede of capability and offering pages (/solutions/[slug], /solutions/[slug]/[offering]). */
+  service_hero_report: { destination: "report", placement: "hero", view: true },
+  service_hero_book: { destination: "booking", placement: "hero", view: true },
+  /** Same next step under the lede of the integrations hub, category and tool pages. */
+  integration_hero_report: { destination: "report", placement: "hero", view: true },
+  integration_hero_book: { destination: "booking", placement: "hero", view: true },
+  /** "Connect your {Tool} free" line on tool pages the free Growth Workspace can connect (routes through the check). */
+  integration_workspace_report: { destination: "report", placement: "inline", view: true },
+  /** Topic-specific "check your business" line in the middle of an article. */
+  article_mid_report: { destination: "report", placement: "inline", view: true },
   report_header_book: { destination: "booking", placement: "header", view: false },
   floating_book: { destination: "booking", placement: "floating", view: false },
   report_hero_report: { destination: "report", placement: "hero", view: true },
@@ -56,7 +67,6 @@ export const CTA_IDS = {
   solutions_hero_book: { destination: "booking", placement: "hero", view: true },
   construction_hero_report: { destination: "report", placement: "hero", view: true },
   construction_hero_book: { destination: "booking", placement: "hero", view: true },
-  book_hero_book: { destination: "booking", placement: "hero", view: true },
   book_hero_report: { destination: "report", placement: "hero", view: true },
   marketing_hero_book: { destination: "booking", placement: "hero", view: true },
   marketing_hero_report: { destination: "report", placement: "hero", view: true },
@@ -147,6 +157,7 @@ export const FUNNEL_EVENTS = {
   report_validation_error: { fields: "report_fields", entry: "report_entry", page_path: "page_path" },
   /** "Open My Growth Workspace" on the report success screen: the hand-off from terramore.io to TerraIQ. */
   workspace_cta_click: { entry: "report_entry", page_path: "page_path" },
+  report_success_book_click: { entry: "report_entry", page_path: "page_path" },
   /** The free business lookup: submitted (the CTA click is primary_cta_click) and how it ended. Never the domain. */
   /** First focus of a lookup field, once per field per page session (the step before lookup_start). */
   lookup_input_focus: { cta_id: "cta_id", page_path: "page_path" },

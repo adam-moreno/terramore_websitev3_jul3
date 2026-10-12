@@ -15,6 +15,8 @@ export type ReportRequest = {
   website: string | null
   phone?: string | null
   answers?: string | null
+  /** The requester ticked the SMS box. Re-runs without it read the saved consent instead. */
+  smsConsent?: boolean
 }
 
 export type ReportStatus = "needs_keys" | "generating" | "sent" | "failed"
@@ -176,20 +178,21 @@ export async function runReportPipeline(request: ReportRequest): Promise<Pipelin
       `Report sent to ${request.name} <${request.email}> for ${subjectName} (score ${report.overallScore ?? "n/a"}, coverage ${report.evidenceCoverage}%, ${report.model}, ${Math.round((Date.now() - started) / 1000)}s). Copy is in your inbox.`,
     )
 
-    // Message 2 — fail soft; never blocks delivery success.
+    // Message 2 — fail soft; never blocks delivery success. Only with SMS consent (the box, or the saved consent).
     let phone = request.phone || null
-    if (!phone) {
-      const supabase = getServerSupabase()
-      if (supabase) {
-        const { data } = await supabase.from("free_courses_signups").select("phone,company").eq("email", request.email).maybeSingle()
-        phone = (data?.phone as string | null) || null
-        if (!phone && data?.company) {
-          const match = String(data.company).match(/phone:([+\d().\-\s]+)/i)
-          if (match) phone = match[1]
-        }
+    let smsConsent = request.smsConsent === true
+    const supabase = getServerSupabase()
+    if (supabase && (!phone || !smsConsent)) {
+      const { data } = await supabase.from("free_courses_signups").select("phone,company,qualifier_answers").eq("email", request.email).maybeSingle()
+      if (!phone) phone = (data?.phone as string | null) || null
+      if (!phone && data?.company) {
+        const match = String(data.company).match(/phone:([+\d().\-\s]+)/i)
+        if (match) phone = match[1]
       }
+      const answers = (data?.qualifier_answers ?? null) as Record<string, unknown> | null
+      if (answers?.sms_consent === "yes") smsConsent = true
     }
-    await sendReportDeliveredSms({ email: request.email, name: request.name, phone })
+    if (smsConsent) await sendReportDeliveredSms({ email: request.email, name: request.name, phone })
 
     return { ok: true, status: "sent", model: report.model }
   } catch (error) {

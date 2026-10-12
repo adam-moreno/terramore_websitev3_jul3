@@ -1,17 +1,24 @@
 const LLMS_TXT = `# Terramore
 
-> A Growth Team for Owners. Terramore is a founder-led growth consultancy that works inside the store, ads, and email a business already pays for, finds where it loses sales, and fixes that step.
+> Terramore is a growth partner for small businesses. It finds where a business loses customers, fixes it, and runs the marketing (ads, content, web, automation), measured in its own software, TerraIQ. A senior team led by Adam Moreno, formerly at Samba TV and Kantar measuring ad results for Fortune 500 brands.
 
-Terramore serves owners with a shop, a service, or a customer list. Work starts with a free call. A free Digital Footprint report is the backup if they are not ready to talk. The client dashboard (TerraIQ) is invite only for current clients. The client owns the data and assets. Monthly work is optional.
+Terramore serves owners with a shop, a service, or a customer list, in the US. Three ways to start, all free:
+- Check my business: enter a website for an instant score, then request the free Digital Footprint report (the website and Google listing, read the way a customer sees them; in your inbox in minutes).
+- Growth Workspace: after the check, connect two tools (Shopify, Square, Instagram, Facebook, Google Ads, Meta Ads, Google Analytics) and get a plan from your own numbers.
+- Book a free 30-minute call with the team.
+
+Terms: scope and price agreed before work starts; month to month or a year paid up front; financing up to $10,000 through PayPal, subject to approval. Software has a free start and monthly plans. The client owns the data and assets.
 
 ## Main
 
 - [Home](https://www.terramore.io): What Terramore does, how the work happens, use cases, and the free report
 - [Book a free call](https://www.terramore.io/book): Pick a time for the free 30-minute call, shown in your time zone
-- [Pricing](https://www.terramore.io/pricing): Talk is free, Start is a deposit after scope, Stay is optional monthly
+- [Pricing](https://www.terramore.io/pricing): Free call; services month to month or yearly; software free to start, then monthly
 - [Free Digital Footprint report](https://www.terramore.io/report): What is in the report, how long it takes, and how we send it
 - [Sample report](https://www.terramore.io/report/example): Ecommerce and service-business sample reports (illustrative demos)
-- [About](https://www.terramore.io/about): Adam Moreno and why the work looks like a growth team
+- [About](https://www.terramore.io/about): Adam Moreno and the team behind Terramore
+- [Marketing](https://www.terramore.io/marketing): Done-for-you marketing: ads, creative, pages, follow-up, measurement
+- [Contractors](https://www.terramore.io/industries/construction): Growth for construction and trade businesses
 - [Security](https://www.terramore.io/security): How client data stays private and in the client's control
 - [Start here](https://www.terramore.io/resources): Every page in the order owners ask about them
 
@@ -32,6 +39,12 @@ Terramore serves owners with a shop, a service, or a customer list. Work starts 
 - [Advertising](https://www.terramore.io/integrations/advertising): Google Ads, Meta, TikTok, and Pinterest tied to a page that can finish
 - [Ecommerce](https://www.terramore.io/integrations/ecommerce): Shopify, WooCommerce, WordPress, and Etsy
 - [Payments](https://www.terramore.io/integrations/payments): Stripe, PayPal, and Square
+
+## Articles
+
+- [Three numbers before raising ad spend](https://www.terramore.io/articles/three-numbers-before-raising-ad-spend)
+- [Why your best ad stops working](https://www.terramore.io/articles/why-your-best-ad-stops-working)
+- [Your landing page is the problem](https://www.terramore.io/articles/your-landing-page-is-the-problem)
 
 ## Legal
 

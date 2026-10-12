@@ -26,7 +26,7 @@ const FAQS = [
   },
   {
     q: "Can I use the dashboard?",
-    a: "The client dashboard, TerraIQ, is for current clients. We send an invite after work starts. New here? Talk first, or ask for the free report.",
+    a: "Yes. Check your business first, then connect two tools like Shopify or Google Ads in your free Growth Workspace and get a plan from your own numbers. Clients get the full TerraIQ dashboard when work starts.",
   },
   {
     q: "What does the work cost?",
@@ -84,7 +84,7 @@ export function HomeFaq() {
                 {item.q === "Can I use the dashboard?" ? (
                   <p className="mt-3">
                     <a href={DASHBOARD_LOGIN_URL} className="font-medium text-brand hover:text-brand-hover">
-                      Log in if we already invited you
+                      Already have an account? Log in
                     </a>
                   </p>
                 ) : null}

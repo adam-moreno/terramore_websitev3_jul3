@@ -12,7 +12,7 @@
 import { emailButton, emailLinkedImage, emailP, emailShell, emailSignoff } from "@/lib/email-template"
 import { type BookingNotice, type SendResult, sendEmail } from "@/lib/notify"
 
-const SITE = "https://terramore.io"
+const SITE = "https://www.terramore.io"
 const REPORT_URL = `${SITE}/report`
 /** Do not schedule if the intended send time is at or before now + this buffer. */
 const SCHEDULE_BUFFER_MS = 2 * 60 * 1000

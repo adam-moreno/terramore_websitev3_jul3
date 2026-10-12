@@ -20,7 +20,7 @@ export const REPORT_SMS = {
     `Your Digital Footprint report is ready, ${firstName}. Check your inbox for the findings and priorities.`,
   /** Optional later — not wired. Timing TBD (e.g. +24h soft book CTA). */
   m3: (firstName: string) =>
-    `Hi ${firstName}, Adam here. If you want to walk through your Digital Footprint report together, book a free call: https://terramore.io/book`,
+    `Hi ${firstName}, Adam here. If you want to walk through your Digital Footprint report together, book a free call: https://www.terramore.io/book`,
 } as const
 
 function firstOf(name: string): string {

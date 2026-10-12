@@ -90,13 +90,19 @@ export function SiteHeader() {
           </nav>
 
           <div className="hidden items-center gap-2 lg:flex">
+            {isBookingStage(pathname) ? null : (
+              <CheckMyBusinessLink
+                ctaId="header_report"
+                className="px-3 py-1 text-[13px] font-medium text-ink underline-offset-4 hover:underline"
+              />
+            )}
             <a
               href={DASHBOARD_LOGIN_URL}
-              title="Current clients. Invite only."
+              title="Clients and Growth Workspace"
               className="flex flex-col items-end px-3 py-1 text-[13px] font-medium text-slate-600 hover:text-slate-900"
             >
               <span>Log in</span>
-              <span className="text-[10px] font-normal text-slate-500">Current clients</span>
+              <span className="text-[10px] font-normal text-slate-500">Clients and workspace</span>
             </a>
             <BookingLink label="Book a free call" source="header" ctaId="header_book" className={PRIMARY_LG} />
           </div>
@@ -104,15 +110,6 @@ export function SiteHeader() {
 
         {open ? (
           <div className="pointer-events-auto mt-2 w-full rounded-2xl border border-black/[0.06] bg-white px-4 shadow-[0_20px_50px_-24px_rgba(15,23,42,0.35)] lg:hidden">
-            <a
-              href={DASHBOARD_LOGIN_URL}
-              title="Current clients. Invite only."
-              onClick={close}
-              className="block border-b border-black/[0.04] py-4 text-[17px] font-semibold text-brand"
-            >
-              Log in
-              <span className="mt-0.5 block text-[12px] font-medium text-brand/60">Current clients. Invite only.</span>
-            </a>
             {NAV_LINKS.map((item) => (
               <Link
                 key={item.href}
@@ -138,6 +135,15 @@ export function SiteHeader() {
                 />
               )}
             </div>
+            {/* Last and quiet: returning clients and workspace owners know where it is; new visitors aren't sent to sign-in. */}
+            <a
+              href={DASHBOARD_LOGIN_URL}
+              onClick={close}
+              className="block border-t border-black/[0.04] py-4 text-[15px] font-medium text-slate-600"
+            >
+              Log in
+              <span className="mt-0.5 block text-[12px] font-normal text-slate-500">Clients and Growth Workspace</span>
+            </a>
           </div>
         ) : null}
       </div>

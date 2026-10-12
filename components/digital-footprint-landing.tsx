@@ -20,8 +20,8 @@ const ROTATE_MS = 4000
 const STEPS = [
   {
     n: "01",
-    title: "Answer a few questions",
-    body: "Two short questions about your business, then your details. About a minute.",
+    title: "Enter your website",
+    body: "See your score in seconds. Then a few quick taps and your details for the full report. About a minute.",
     time: "~60 sec",
   },
   {

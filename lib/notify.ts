@@ -52,7 +52,7 @@ export const FROM = process.env.RESEND_FROM_EMAIL?.trim() || process.env.EMAIL_F
 export const REPLY_TO = process.env.EMAIL_REPLY_TO?.trim() || "adam.moreno@terramore.io"
 /** Slack member ID to @-mention on admin alerts so they push to Adam's phone even in mentions-only channels. Env can override; "" disables. */
 const SLACK_MENTION = (process.env.SLACK_MENTION_USER_ID?.trim() || "U0BMKSTCBFD")
-const SITE = "https://terramore.io"
+const SITE = "https://www.terramore.io"
 const BOOK_URL = `${SITE}/book`
 
 function skip(channel: string, why: string): SendResult {

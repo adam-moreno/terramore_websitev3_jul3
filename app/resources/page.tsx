@@ -69,11 +69,11 @@ export default function ResourcesPage() {
           />
         </div>
         <p className="page-shell mt-10 text-center text-[15px] text-ink/70">
-          Already a client?{" "}
+          Already have an account?{" "}
           <a href={DASHBOARD_LOGIN_URL} className="font-medium text-brand hover:text-brand-hover">
             Log in
           </a>
-          . Invite only. New work starts with a talk.
+          . New here? Check your business, then connect two tools free in your Growth Workspace.
         </p>
       </section>
     </LindyPage>

@@ -858,3 +858,19 @@ export function integrationToolPath(categorySlug: string, toolSlug: string) {
 }
 
 export const DEFAULT_INTEGRATION_PATH = integrationPath(INTEGRATION_CATEGORIES[0].slug)
+
+/**
+ * Tool pages for the tools the free Growth Workspace can connect, keyed by "category/tool", with the name the
+ * "Connect your {Tool} free" line uses. Keep in step with the workspace's connectors; other tools get no line.
+ */
+const WORKSPACE_CONNECT_NAMES: Record<string, string> = {
+  "ecommerce/shopify": "Shopify",
+  "payments/square": "Square",
+  "advertising/google-ads": "Google Ads",
+  "advertising/meta": "Meta ads",
+  "analytics/google-analytics": "Google Analytics",
+}
+
+export function workspaceConnectName(categorySlug: string, toolSlug: string): string | null {
+  return WORKSPACE_CONNECT_NAMES[`${categorySlug}/${toolSlug}`] ?? null
+}

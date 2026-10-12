@@ -4,7 +4,12 @@ import Image from "next/image"
 import Link from "next/link"
 import { Source_Serif_4 } from "next/font/google"
 import { BookingLink } from "@/components/booking-popup"
-import { BusinessLookup, LookupBookButton, LookupReportButton } from "@/components/business-lookup"
+import {
+  BusinessLookup,
+  CheckMyBusinessLink,
+  LookupBookButton,
+  LookupReportButton,
+} from "@/components/business-lookup"
 import { DualCtas } from "@/components/dual-ctas"
 
 const serif = Source_Serif_4({
@@ -32,6 +37,7 @@ export function StoryHero({
   image,
   imageAlt,
   parent,
+  next,
 }: {
   title: string
   lede: string
@@ -39,6 +45,8 @@ export function StoryHero({
   image?: StaticImageData
   imageAlt: string
   parent?: { href: string; label: string }
+  /** Compact next step rendered right under the lede (see StoryNextStep). */
+  next?: ReactNode
 }) {
   return (
     <section className="pb-4 pt-6 md:pt-10">
@@ -59,6 +67,7 @@ export function StoryHero({
         <p className="mt-6 max-w-3xl text-[1.125rem] leading-[1.7] text-ink/80 md:mt-8 md:text-[1.25rem]">
           {lede}
         </p>
+        {next ? <div className="mt-6">{next}</div> : null}
         {image ? (
           <div className="relative mt-10 overflow-hidden rounded-[1.75rem] md:mt-14">
             <Image
@@ -75,6 +84,60 @@ export function StoryHero({
         ) : null}
       </div>
     </section>
+  )
+}
+
+const NEXT_STEP_PRIMARY =
+  "inline-flex h-11 items-center justify-center rounded-full bg-brand px-5 text-[15px] font-medium text-white hover:bg-brand-hover"
+const NEXT_STEP_SECONDARY =
+  "inline-flex min-h-11 items-center text-[15px] font-medium text-ink/70 underline-offset-4 hover:text-ink hover:underline"
+
+/**
+ * Quiet above-the-fold next step for the story templates: "Check my business" (the lookup on this page if it has
+ * one, else the homepage lookup) and a plain "Or book a free call" link. One row, not a section. CTA ids are
+ * written out per surface so scripts/verify-funnel.mjs can see them.
+ */
+export function StoryNextStep({ surface }: { surface: "service" | "integration" }) {
+  return (
+    <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+      {surface === "service" ? (
+        <>
+          <CheckMyBusinessLink ctaId="service_hero_report" className={NEXT_STEP_PRIMARY} />
+          <BookingLink label="Or book a free call" source="solutions" ctaId="service_hero_book" className={NEXT_STEP_SECONDARY} />
+        </>
+      ) : (
+        <>
+          <CheckMyBusinessLink ctaId="integration_hero_report" className={NEXT_STEP_PRIMARY} />
+          <BookingLink
+            label="Or book a free call"
+            source="integrations"
+            ctaId="integration_hero_book"
+            className={NEXT_STEP_SECONDARY}
+          />
+        </>
+      )}
+    </div>
+  )
+}
+
+/** A short row of plain text links (sibling offerings, all services in a capability). */
+export function StoryLinkList({ label, items }: { label: string; items: { href: string; title: string }[] }) {
+  return (
+    <nav aria-label={label}>
+      <p className="text-[12px] font-medium uppercase tracking-[0.14em] text-ink/70">{label}</p>
+      <ul className="mt-3 flex flex-wrap gap-2">
+        {items.map((item) => (
+          <li key={item.href}>
+            <Link
+              href={item.href}
+              className="inline-flex min-h-11 items-center rounded-full bg-white px-4 text-[14px] font-medium text-ink ring-1 ring-ink/[0.06] hover:text-brand"
+            >
+              {item.title}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </nav>
   )
 }
 

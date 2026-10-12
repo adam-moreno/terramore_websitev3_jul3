@@ -17,10 +17,15 @@ export default function ArticlePage() {
     <div className="min-h-screen bg-cream">
       <article className="page-shell pb-16 pt-8 md:pt-12">
         <div className="mx-auto max-w-3xl">
-          <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-brand">Measurement · 8 min read</p>
+          <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-brand">Measurement · 2 min read</p>
           <h1 className="mt-3 text-[2rem] font-bold leading-[1.1] tracking-[-0.02em] text-ink md:text-[2.6rem]">
             The three numbers every owner should check before raising ad spend
           </h1>
+          <p className="mt-4 text-[14px] leading-relaxed text-ink/70">
+            By Adam Moreno · formerly Samba TV and Kantar
+            <span aria-hidden="true"> · </span>
+            <time dateTime="2026-09">September 2026</time>
+          </p>
           <div className="mt-8 overflow-hidden rounded-[1.5rem] shadow-[0_16px_50px_rgba(15,30,46,0.12)]">
             <Image
               src="/marketing/articles/article-metrics.png"
@@ -66,6 +71,13 @@ export default function ArticlePage() {
               rates collapse within minutes, not days — a lead answered in five minutes converts dramatically better
               than one answered in five hours. If your average response time is measured in hours, an automation fix
               will usually return more than any budget increase, and it costs a fraction as much.
+            </p>
+            <p className="border-l-2 border-brand pl-4 text-ink">
+              See these three numbers for your business:{" "}
+              <CheckMyBusinessLink ctaId="article_mid_report" className="font-medium text-brand underline underline-offset-4 hover:text-brand-hover">
+                check your business free
+              </CheckMyBusinessLink>
+              , then connect Shopify and Google Ads.
             </p>
             <h2 className="pt-4 text-[1.35rem] font-bold tracking-tight text-ink">The order of operations</h2>
             <ul className="list-disc space-y-2 pl-6">

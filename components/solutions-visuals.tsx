@@ -16,9 +16,11 @@
  */
 
 import { useEffect, useRef, useState } from "react"
+import Link from "next/link"
 import { ArrowDown, ArrowRight, BarChart3, Target, Workflow } from "lucide-react"
 import { BookingLink } from "@/components/booking-popup"
 import { BusinessLookup, LookupBookButton, LookupReportButton } from "@/components/business-lookup"
+import { capabilityPath, getCapability } from "@/lib/capabilities"
 
 /* ------------------------------------------------------------------ */
 /* Growth system flow                                                  */
@@ -603,6 +605,7 @@ export function HeroEngine({ compact = false }: { compact?: boolean }) {
 const CAPABILITY_GROUPS = [
   {
     id: "strategy",
+    capability: "business-transformation",
     title: "Strategy",
     line: "Know what to fix first.",
     items: ["Positioning", "Offer", "Audience", "Growth roadmap"],
@@ -610,6 +613,7 @@ const CAPABILITY_GROUPS = [
   },
   {
     id: "acquisition",
+    capability: "audience",
     title: "Acquisition",
     line: "Reach the right buyers.",
     items: ["Google Ads", "Meta", "TikTok", "Content", "Search"],
@@ -617,6 +621,7 @@ const CAPABILITY_GROUPS = [
   },
   {
     id: "conversion",
+    capability: "marketing-and-sales",
     title: "Conversion",
     line: "Turn visits into leads.",
     items: ["Websites", "Landing pages", "Lead capture", "Offers"],
@@ -624,6 +629,7 @@ const CAPABILITY_GROUPS = [
   },
   {
     id: "automation",
+    capability: "artificial-intelligence",
     title: "Automation",
     line: "Follow up without the busywork.",
     items: ["CRM", "Email", "SMS", "Lead routing", "Follow-up"],
@@ -631,6 +637,7 @@ const CAPABILITY_GROUPS = [
   },
   {
     id: "intelligence",
+    capability: "digital-technology-and-data",
     title: "Intelligence",
     line: "See what drives revenue.",
     items: ["Analytics", "Attribution", "TerraIQ", "Reporting"],
@@ -652,7 +659,7 @@ export function CapabilityGrid() {
         {CAPABILITY_GROUPS.map((group, index) => (
           <li
             key={group.id}
-            className={`rounded-[1.25rem] border border-black/[0.06] bg-white p-4 shadow-[0_8px_30px_rgba(15,30,46,0.04)] md:p-5 ${
+            className={`relative flex flex-col rounded-[1.25rem] border border-black/[0.06] bg-white p-4 shadow-[0_8px_30px_rgba(15,30,46,0.04)] transition hover:-translate-y-0.5 hover:shadow-[0_12px_36px_rgba(15,30,46,0.08)] md:p-5 ${
               index === CAPABILITY_GROUPS.length - 1 ? "col-span-2 lg:col-span-1" : ""
             }`}
           >
@@ -673,6 +680,13 @@ export function CapabilityGrid() {
                 </li>
               ))}
             </ul>
+            {/* Stretched link: the whole card opens the matching capability page. */}
+            <Link
+              href={capabilityPath(group.capability)}
+              className="mt-auto pt-3 text-[13px] font-medium text-brand after:absolute after:inset-0 after:rounded-[1.25rem] hover:text-brand-hover md:pt-4"
+            >
+              {getCapability(group.capability)?.navTitle ?? group.title} <span aria-hidden="true">→</span>
+            </Link>
           </li>
         ))}
       </ul>

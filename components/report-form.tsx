@@ -47,6 +47,8 @@ export function ReportForm({
   const [socials, setSocials] = useState("")
   const [businessName, setBusinessName] = useState("")
   const [consent, setConsent] = useState(false)
+  /** Separate, optional, unchecked: texts only go to people who tick it (TCPA). */
+  const [smsConsent, setSmsConsent] = useState(false)
   const [error, setError] = useState("")
   const [busy, setBusy] = useState(false)
   const [started, setStarted] = useState(false)
@@ -123,6 +125,7 @@ export function ReportForm({
           name: `${firstName.trim()} ${lastName.trim()}`.trim(),
           email,
           phone: phone.trim() || undefined,
+          smsConsent: Boolean(phone.trim()) && smsConsent,
           website,
           socials: socials.trim() || undefined,
           businessName,
@@ -274,6 +277,17 @@ export function ReportForm({
         />
         Send the report and occasional notes about the work. You can leave the list any time.
       </label>
+      {phone.trim() ? (
+        <label className="flex items-start gap-3 text-[14px] leading-relaxed text-ink/70">
+          <input type="checkbox" checked={smsConsent} onChange={(event) => setSmsConsent(event.target.checked)} className="mt-1" />
+          <span>
+            Text me about my report and booking. Optional. Message frequency varies; msg &amp; data rates may apply. Reply
+            STOP to opt out, HELP for help. Consent isn&apos;t required to buy anything. See our{" "}
+            <a href="/terms#text-messages" className="underline underline-offset-2 hover:text-ink">text terms</a> and{" "}
+            <a href="/privacy" className="underline underline-offset-2 hover:text-ink">privacy policy</a>.
+          </span>
+        </label>
+      ) : null}
       {error ? (
         <p className={`text-[14px] ${alreadyRequested ? "text-ink/80" : "text-red-600"}`} role="alert">
           {error}

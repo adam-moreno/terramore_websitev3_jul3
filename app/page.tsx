@@ -60,6 +60,9 @@ export default function TerramoreHomepage() {
                     <br />
                     <span className="text-gold-display">you already built.</span>
                   </h1>
+                  <p className="mx-auto mt-4 max-w-xl text-center text-[16px] leading-relaxed text-ink/70 md:text-[18px]">
+                    We find where you&apos;re losing customers, fix it, and run the marketing that brings them back.
+                  </p>
                     </>
                   }
                   anchor

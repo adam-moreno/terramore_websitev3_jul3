@@ -302,12 +302,12 @@ export default function BookPage() {
               Let&apos;s talk about where your business is today and where you want to take it.
             </p>
             <div className="mt-8 flex justify-center">
-              <BookingLink
-                source="book"
+              <a
+                href="#calendar"
                 className="inline-flex h-12 items-center justify-center rounded-full bg-ink px-9 text-[16px] font-semibold text-white shadow-[0_16px_40px_rgba(15,30,46,0.3)] transition hover:bg-ink/90"
               >
                 Book a free call
-              </BookingLink>
+              </a>
             </div>
           </Reveal>
         </div>
