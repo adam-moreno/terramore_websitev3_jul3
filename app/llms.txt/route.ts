@@ -2,7 +2,7 @@ const LLMS_TXT = `# Terramore
 
 > Terramore is a growth partner for small businesses. It finds where a business loses customers, fixes it, and runs the marketing (ads, content, web, automation), measured in its own software, TerraIQ. A senior team led by Adam Moreno, formerly at Samba TV and Kantar measuring ad results for Fortune 500 brands.
 
-Terramore serves owners with a shop, a service, or a customer list, in the US. Three ways to start, all free:
+Terramore is based in Los Angeles and serves owners with a shop, a service, or a customer list across the US. Three ways to start, all free:
 - Check my business: enter a website for an instant score, then request the free Digital Footprint report (the website and Google listing, read the way a customer sees them; in your inbox in minutes).
 - Growth Workspace: after the check, connect two tools (Shopify, Square, Instagram, Facebook, Google Ads, Meta Ads, Google Analytics) and get a plan from your own numbers.
 - Book a free 30-minute call with the team.

@@ -28,8 +28,8 @@ export const metadata: Metadata = {
     'Terramore finds where your store, ads, and email lose sales, then fixes that step. For owners with a shop, a service, or a list. Book a free call or request a Digital Footprint report.',
   keywords: 'growth team, small business marketing, ecommerce, email marketing, advertising, digital footprint report',
   authors: [{ name: 'Adam Moreno' }],
-  creator: 'Terramore.io',
-  publisher: 'Terramore.io',
+  creator: 'Terramore',
+  publisher: 'Terramore',
   formatDetection: {
     email: false,
     address: false,
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
     description:
       'Terramore finds where your store, ads, and email lose sales, then fixes that step. For owners with a shop, a service, or a list. Book a free call or request a Digital Footprint report.',
     url: 'https://www.terramore.io',
-    siteName: 'Terramore.io',
+    siteName: 'Terramore',
     locale: 'en_US',
     type: 'website',
     images: [
@@ -127,6 +127,7 @@ export default function RootLayout({
                   description:
                     'Terramore is a growth partner for small businesses: it finds where a business loses customers, fixes it, and runs the marketing (ads, content, web, automation), measured in its TerraIQ software. Free Digital Footprint report and a free Growth Workspace.',
                   founder: { '@id': 'https://www.terramore.io/#founder' },
+                  address: { '@type': 'PostalAddress', addressLocality: 'Los Angeles', addressRegion: 'CA', addressCountry: 'US' },
                   areaServed: 'US',
                   makesOffer: [
                     { '@type': 'Offer', name: 'Free 30-minute call', price: '0', priceCurrency: 'USD', url: 'https://www.terramore.io/book' },

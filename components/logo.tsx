@@ -72,7 +72,7 @@ export function Logo({
       {showText && (
         <img 
           src="https://res.cloudinary.com/dzzzkruux/image/upload/v1768374924/Screenshot_2026-01-13_at_11_11_07_PM-Picsart-BackgroundRemover_vwxvqo.png"
-          alt="TERRAMORE.IO"
+          alt="Terramore"
           className={`${textImageHeightClasses[size]} w-auto object-contain object-left ${invert} ${wordmarkClassName}`}
         />
       )}

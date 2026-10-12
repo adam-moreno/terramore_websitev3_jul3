@@ -6,7 +6,7 @@ import { SiteFooter } from "@/components/site-footer"
 export const metadata: Metadata = {
   title: "Privacy Policy | Terramore",
   description:
-    "How Terramore.io collects, uses, and shares personal information on terramore.io, including California privacy rights and how to contact us.",
+    "How Terramore collects, uses, and shares personal information on terramore.io, including California privacy rights and how to contact us.",
   alternates: { canonical: "https://www.terramore.io/privacy" },
 }
 
@@ -30,9 +30,9 @@ export default function PrivacyPolicyPage() {
             <div className="space-y-8">
               <section>
                 <p className="text-gray-700 leading-relaxed">
-                  Terramore.io, LLC ("us," "we," or "our") thanks you for visiting the online and mobile resources we
+                  Terramore.io, LLC ("Terramore," "us," "we," or "our") thanks you for visiting the online and mobile resources we
                   publish. We use the words "you" and "your" to mean you, the reader, and other visitors to our online
-                  and mobile resources who are, in all cases, over the age of 13. Our privacy statement ("this
+                  and mobile resources who are, in all cases, 18 or older. Our privacy statement ("this
                   statement," "this privacy statement," and "our statement") informs you about from whom and the types
                   of personal information we collect, how we use it, who we share it with and why, and what we do to try
                   to protect it.
@@ -51,7 +51,7 @@ export default function PrivacyPolicyPage() {
               <section>
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">WHO WE ARE</h2>
                 <p className="text-gray-700 leading-relaxed">
-                  Terramore.io, LLC is a marketing services and software company. We run marketing for businesses (ads, content, websites and automation). We also offer software: the TerraIQ dashboard for clients and a free Growth Workspace for business owners. For residents from the GDPR Jurisdictions, as defined
+                  Terramore is a marketing services and software company. We run marketing for businesses (ads, content, websites and automation). We also offer software: the TerraIQ dashboard for clients and a free Growth Workspace for business owners. For residents from the GDPR Jurisdictions, as defined
                   below, and some US state privacy laws, Terramore.io, LLC is the data controller responsible for your
                   personal data. For residents of California, Terramore.io, LLC is a "Business."
                 </p>
@@ -159,7 +159,7 @@ export default function PrivacyPolicyPage() {
               <section>
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">HOW WE USE YOUR INFORMATION</h2>
                 <p className="text-gray-700 leading-relaxed">
-                  Terramore.io, LLC may use the information we collect from and about you for a variety of business
+                  Terramore may use the information we collect from and about you for a variety of business
                   purposes; in general, to provide the services, improve customer experience and engagement and develop
                   the services. We are committed to protecting and maintaining the privacy of your information.
                   Therefore, we will process your data only in accordance with applicable data protection law and this
@@ -265,12 +265,10 @@ export default function PrivacyPolicyPage() {
                   </li>
                 </ul>
 
-                <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Affiliates</h3>
+                <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">No Sharing for Others&apos; Marketing</h3>
                 <p className="text-gray-700 leading-relaxed">
-                  In addition to those third parties set forth above, we may share your information, including personal
-                  information, within our family of companies. Those companies will use such information in generally
-                  the same manner as we do under this privacy statement which includes sending you information about
-                  their products, services, or initiatives that may be of interest to you.
+                  We never share your personal information with third parties or affiliates for their own marketing.
+                  Service providers may use it only to provide their service to us.
                 </p>
 
                 <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Legally Compelled Disclosures</h3>
@@ -341,8 +339,9 @@ export default function PrivacyPolicyPage() {
                 </p>
                 <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">How long we keep it</h3>
                 <p className="text-gray-700 leading-relaxed">
-                  We keep connected data while your connection is active. After you disconnect, you can ask us to delete
-                  the connected data we stored, and we will delete it.
+                  We keep connected data while your connection is active. We delete it within 30 days after you
+                  disconnect, close your account or ask us to delete it. We may keep aggregated or de-identified totals
+                  that don&apos;t identify your business.
                 </p>
               </section>
 
@@ -363,7 +362,9 @@ export default function PrivacyPolicyPage() {
                 </p>
                 <p className="text-gray-700 leading-relaxed">
                   Texts come from Terramore&apos;s business number. We send them through Sendblue, and sometimes Twilio.
-                  Message frequency varies. Message and data rates may apply. Reply STOP to opt out. Reply HELP for help.
+                  Message frequency varies (typically up to 4 messages per request or booking). Message and data rates
+                  may apply. Reply STOP to opt out. Reply HELP for help, or email{" "}
+                  <PlainEmail address="support@terramore.io" />.
                 </p>
                 <p className="text-gray-700 leading-relaxed">
                   Marketing texts are optional and separate from these service texts. You don&apos;t have to agree to
@@ -381,8 +382,8 @@ export default function PrivacyPolicyPage() {
               <section>
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">PHONE CALLS</h2>
                 <p className="text-gray-700 leading-relaxed">
-                  When you call us, an AI assistant may answer. It will tell you it is an AI. Calls may be recorded and
-                  transcribed. We use the recording and transcript to take your message, book a call with you and
+                  When you call us, an AI assistant may answer. It will tell you it is an AI. At the start of each call,
+                  we tell you that the call is recorded. Calls are recorded and transcribed. We use the recording and transcript to take your message, book a call with you and
                   improve our service. Our phone and AI assistant provider is Retell AI.
                 </p>
               </section>
@@ -405,7 +406,7 @@ export default function PrivacyPolicyPage() {
                   in California or a GDPR Jurisdiction, respectively, have certain additional rights.
                 </p>
                 <p className="text-gray-700 leading-relaxed">
-                  <strong>Emails:</strong> If you consented to receive direct marketing from Terramore.io, LLC, we
+                  <strong>Emails:</strong> If you consented to receive direct marketing from Terramore, we
                   provide you with the opportunity to opt out of our marketing communications or change your preferences
                   by following a link in the footer of all non-transactional email messages from us or by emailing us at{" "}
                   <PlainEmail address="admin@terramore.io" />.
@@ -416,6 +417,38 @@ export default function PrivacyPolicyPage() {
                 <p className="text-gray-700 leading-relaxed">
                   <strong>Connected accounts:</strong> Revoke access in the tool, or email us to disconnect and to ask
                   us to delete your connected data.
+                </p>
+              </section>
+
+              <section id="retention">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">HOW LONG WE KEEP INFORMATION</h2>
+                <p className="text-gray-700 leading-relaxed">
+                  We keep information only as long as we need it. These are our retention periods:
+                </p>
+                <ul className="list-disc pl-6 space-y-2 text-gray-700">
+                  <li>
+                    <strong>Connected data</strong> – kept while the connection is active. Deleted within 30 days after
+                    you disconnect, close your account or ask us to delete it. We may keep aggregated or de-identified
+                    totals that don&apos;t identify your business.
+                  </li>
+                  <li>
+                    <strong>Call recordings and transcripts</strong> – kept up to 12 months, then deleted.
+                  </li>
+                  <li>
+                    <strong>Text message consent and opt-out records</strong> – kept for 5 years, so we can show that
+                    you agreed or opted out.
+                  </li>
+                  <li>
+                    <strong>Text message content and logs</strong> – kept up to 24 months.
+                  </li>
+                  <li>
+                    <strong>Report and lead data</strong> – kept while we have an active relationship with you, and up
+                    to 3 years after our last contact. Then we delete or anonymize it.
+                  </li>
+                </ul>
+                <p className="text-gray-700 leading-relaxed">
+                  We may keep information longer if we need it for a dispute, to enforce our agreements or to meet a
+                  legal obligation.
                 </p>
               </section>
 
@@ -460,7 +493,7 @@ export default function PrivacyPolicyPage() {
               <section>
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">CHANGES TO THIS PRIVACY STATEMENT</h2>
                 <p className="text-gray-700 leading-relaxed">
-                  This privacy statement was drafted on December 11th, 2024, and is effective as of this date. The
+                  This privacy statement was last updated on October 11, 2026, and is effective as of that date. The
                   English language version of this privacy statement is the controlling version regardless of any
                   translation you may attempt.
                 </p>
@@ -481,13 +514,13 @@ export default function PrivacyPolicyPage() {
                     <strong>Attention Legal Department</strong>
                   </p>
                   <p className="text-gray-700 mb-2">Terramore.io, LLC</p>
-                  <p className="text-gray-700 mb-2">2108 N ST STE N</p>
-                  <p className="text-gray-700 mb-2">SACRAMENTO, CA 95816</p>
+                  <p className="text-gray-700 mb-2">2108 N St Ste N</p>
+                  <p className="text-gray-700 mb-2">Sacramento, CA 95816</p>
                   <p className="text-gray-700">
                     Email: <PlainEmail address="admin@terramore.io" />
                   </p>
                 </div>
-                <p className="text-gray-600 text-sm mt-6">Terramore.io, owned and operated by Adam Moreno, © 2026</p>
+                <p className="text-gray-600 text-sm mt-6">© 2026 Terramore.io, LLC. Terramore is owned and operated by Adam Moreno.</p>
               </section>
             </div>
           </div>

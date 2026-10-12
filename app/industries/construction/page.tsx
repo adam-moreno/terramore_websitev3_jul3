@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     title: TITLE,
     description: DESCRIPTION,
     url: URL,
-    siteName: "Terramore.io",
+    siteName: "Terramore",
     locale: "en_US",
     type: "website",
     images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: "Terramore" }],

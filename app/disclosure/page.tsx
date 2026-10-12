@@ -6,7 +6,7 @@ import { SiteFooter } from "@/components/site-footer"
 export const metadata: Metadata = {
   title: "Disclosure | Terramore",
   description:
-    "Affiliate and general disclosures for terramore.io, including how Terramore.io handles affiliate relationships and recommendations.",
+    "Affiliate and general disclosures for terramore.io, including how Terramore handles affiliate relationships and recommendations.",
   alternates: { canonical: "https://www.terramore.io/disclosure" },
 }
 
@@ -29,7 +29,7 @@ export default function DisclosurePage() {
               <section>
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">GENERAL DISCLOSURE</h2>
                 <p className="text-gray-700 leading-relaxed">
-                  This disclosure statement is provided by Terramore.io, LLC ("we," "us," or "our") to inform visitors 
+                  This disclosure statement is provided by Terramore.io, LLC ("Terramore," "we," "us," or "our") to inform visitors 
                   and users of our website about important information regarding our business practices, affiliate 
                   relationships, and potential conflicts of interest.
                 </p>
@@ -49,17 +49,14 @@ export default function DisclosurePage() {
               </section>
 
               <section>
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">FINANCIAL DISCLOSURE</h2>
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">RESULTS DISCLOSURE</h2>
                 <p className="text-gray-700 leading-relaxed">
-                  The information provided on this website is for educational and informational purposes only. 
-                  We are not financial advisors, and the content should not be considered as financial advice. 
-                  Always consult with a qualified financial advisor before making any investment decisions.
+                  <strong>Results vary; no guarantee of results.</strong> We do not guarantee any number of leads,
+                  calls, bookings, sales or revenue. Reports, scores, estimates and examples are for information only.
+                  Your results depend on your business, market, budget and other factors we don&apos;t control.
                 </p>
                 <p className="text-gray-700 leading-relaxed">
-                  Any income or earnings statements, or income or earnings examples, are only estimates of what 
-                  we think you could possibly earn. There is no assurance you will do as well. Your results will 
-                  depend on your efforts, background, knowledge, market conditions, and various other factors 
-                  that are beyond our control.
+                  We are not financial advisors. Nothing on this website is financial, legal or tax advice.
                 </p>
               </section>
 
@@ -68,15 +65,16 @@ export default function DisclosurePage() {
                 <p className="text-gray-700 leading-relaxed">
                   Financing for our services may be available through PayPal, using PayPal Pay Later or PayPal Credit,
                   for up to $10,000. Financing is subject to PayPal&apos;s credit approval and terms. PayPal is the
-                  lender, not Terramore.io. We don&apos;t make credit decisions, and we are not a lender or a loan broker.
+                  lender, not Terramore. We don&apos;t make credit decisions, and we are not a lender or a loan broker.
                 </p>
               </section>
 
               <section>
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">AI ASSISTANT DISCLOSURE</h2>
                 <p className="text-gray-700 leading-relaxed">
-                  Our phone line may be answered by an AI assistant. It will tell you it is an AI. Calls may be recorded
-                  and transcribed to take your message, book a call and improve our service.
+                  Our phone line may be answered by an AI assistant. It will tell you it is an AI. At the start of each
+                  call, we tell you that the call is recorded. Calls are recorded and transcribed to take your message,
+                  book a call and improve our service.
                 </p>
               </section>
 
@@ -144,8 +142,8 @@ export default function DisclosurePage() {
                   <p className="text-gray-700 mb-2">
                     <strong>Terramore.io, LLC</strong>
                   </p>
-                  <p className="text-gray-700 mb-2">2108 N ST STE N</p>
-                  <p className="text-gray-700 mb-2">SACRAMENTO, CA 95816</p>
+                  <p className="text-gray-700 mb-2">2108 N St Ste N</p>
+                  <p className="text-gray-700 mb-2">Sacramento, CA 95816</p>
                   <p className="text-gray-700">
                     Email: <PlainEmail address="admin@terramore.io" />
                   </p>

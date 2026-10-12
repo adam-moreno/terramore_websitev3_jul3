@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     title: "Book a call | Terramore",
     description: "The report showed the gaps, this call closes them. Free 30 minutes to discuss how we can work together.",
     url: "https://www.terramore.io/schedule",
-    siteName: "Terramore.io",
+    siteName: "Terramore",
     type: "website",
     images: [
       {
