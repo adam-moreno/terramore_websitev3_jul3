@@ -3,7 +3,7 @@ import Link from "next/link"
 import { LindyCard, LindyPage } from "@/components/lindy-page"
 
 export const metadata: Metadata = {
-  title: "Security | Terramore",
+  title: "Security | Terramore.io",
   description:
     "Your lists, ads, and store stay in the tools you own. We do not sell personal information.",
 }

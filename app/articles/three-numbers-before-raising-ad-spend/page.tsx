@@ -6,7 +6,7 @@ import { CheckMyBusinessLink } from "@/components/business-lookup"
 import { SiteFooter } from "@/components/site-footer"
 
 export const metadata: Metadata = {
-  title: "The three numbers to check before raising ad spend | Terramore",
+  title: "The three numbers to check before raising ad spend | Terramore.io",
   description:
     "More budget only helps if the system behind it converts. These are the numbers that tell you whether you're ready.",
   alternates: { canonical: "https://www.terramore.io/articles/three-numbers-before-raising-ad-spend" },

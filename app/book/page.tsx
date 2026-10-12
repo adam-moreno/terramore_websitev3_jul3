@@ -9,12 +9,12 @@ import { Logo } from "@/components/logo"
 import { SiteFooter } from "@/components/site-footer"
 
 export const metadata: Metadata = {
-  title: "Book a call | Terramore",
+  title: "Book a call | Terramore.io",
   description:
     "A 30-minute working session to look at your business, your current marketing system, and where we see the biggest opportunities to grow.",
   alternates: { canonical: "https://www.terramore.io/book" },
   openGraph: {
-    title: "Book a call | Terramore",
+    title: "Book a call | Terramore.io",
     description: "A short call to find what is holding growth back, and what we would change first.",
     url: "https://www.terramore.io/book",
   },

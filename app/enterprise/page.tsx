@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import { LindyCard, LindyPage } from "@/components/lindy-page"
 
 export const metadata: Metadata = {
-  title: "Larger teams | Terramore",
+  title: "Larger teams | Terramore.io",
   description:
     "For brands with a marketing team already in place. A named Terramore crew for ads, creative, and systems, with reporting your leadership can read.",
 }

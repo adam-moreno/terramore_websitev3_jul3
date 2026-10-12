@@ -3,7 +3,7 @@ import { PlainEmail } from "@/components/plain-email"
 import { SiteFooter } from "@/components/site-footer"
 
 export const metadata: Metadata = {
-  title: "DMCA Policy | Terramore",
+  title: "DMCA Policy | Terramore.io",
   description:
     "Terramore DMCA policy for reporting copyright infringement on terramore.io, including how to contact the designated copyright agent.",
   alternates: { canonical: "https://www.terramore.io/dmca" },
@@ -28,7 +28,7 @@ export default function DMCAPage() {
               <section>
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">DIGITAL MILLENNIUM COPYRIGHT ACT (DMCA) POLICY</h2>
                 <p className="text-gray-700 leading-relaxed">
-                  Terramore.io, LLC ("we," "us," or "our") respects the intellectual property rights of others and 
+                  Terramore LLC ("we," "us," or "our") respects the intellectual property rights of others and 
                   expects its users to do the same. In accordance with the Digital Millennium Copyright Act of 1998 
                   (the "DMCA"), we will respond expeditiously to claims of copyright infringement committed using 
                   our website that are reported to our designated copyright agent.
@@ -133,7 +133,7 @@ export default function DMCAPage() {
                   <p className="text-gray-700 mb-2">
                     <strong>Copyright Agent</strong>
                   </p>
-                  <p className="text-gray-700 mb-2">Terramore.io, LLC</p>
+                  <p className="text-gray-700 mb-2">Terramore LLC</p>
                   <p className="text-gray-700 mb-2">2108 N ST STE N</p>
                   <p className="text-gray-700 mb-2">SACRAMENTO, CA 95816</p>
                   <p className="text-gray-700">

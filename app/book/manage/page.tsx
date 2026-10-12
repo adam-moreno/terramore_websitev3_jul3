@@ -4,7 +4,7 @@ import { ManageBooking } from "@/components/manage-booking"
 import { SiteFooter } from "@/components/site-footer"
 
 export const metadata: Metadata = {
-  title: "Your call | Terramore",
+  title: "Your call | Terramore.io",
   description: "View, move, or cancel your Terramore call using the link from your confirmation email.",
   robots: { index: false, follow: false },
 }

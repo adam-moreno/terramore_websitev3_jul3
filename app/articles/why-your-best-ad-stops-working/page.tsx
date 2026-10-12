@@ -6,7 +6,7 @@ import { CheckMyBusinessLink } from "@/components/business-lookup"
 import { SiteFooter } from "@/components/site-footer"
 
 export const metadata: Metadata = {
-  title: "Why your best-performing ad will stop working | Terramore",
+  title: "Why your best-performing ad will stop working | Terramore.io",
   description:
     "Creative fatigue is measurable. Here's how to spot the drop-off early and refresh before your cost per lead climbs.",
   alternates: { canonical: "https://www.terramore.io/articles/why-your-best-ad-stops-working" },

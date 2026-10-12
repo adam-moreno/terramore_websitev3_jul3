@@ -3,7 +3,7 @@ import { Suspense } from "react"
 import { ExampleReportShell, type SampleKind } from "@/components/example-report-shell"
 
 export const metadata: Metadata = {
-  title: "Sample Digital Footprint report | Terramore",
+  title: "Sample Digital Footprint report | Terramore.io",
   description:
     "Sample Digital Footprint reports for ecommerce (Northline Atelier) and a service business (Ridgeview Home Services). Illustrative demos — not live client files.",
 }

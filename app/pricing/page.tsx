@@ -5,7 +5,7 @@ import { LindyPage } from "@/components/lindy-page"
 import { ReportPopupLink } from "@/components/report-popup"
 
 export const metadata: Metadata = {
-  title: "Pricing | Terramore",
+  title: "Pricing | Terramore.io",
   description:
     "The first call is free. Month to month, priced by the work, agreed up front. Financing up to $10,000 through PayPal, subject to approval. You own the data and assets.",
 }

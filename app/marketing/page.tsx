@@ -13,12 +13,12 @@ import {
 import { SiteFooter } from "@/components/site-footer"
 
 export const metadata: Metadata = {
-  title: "Marketing | Terramore",
+  title: "Marketing | Terramore.io",
   description:
     "Terramore builds a growth system around your business: strategy, demand, conversion, automation, and measurement. Talk first.",
   alternates: { canonical: "https://www.terramore.io/marketing" },
   openGraph: {
-    title: "Marketing | Terramore",
+    title: "Marketing | Terramore.io",
     description:
       "Strategy, ads, content, follow-up, and numbers in one growth system built around your business.",
     url: "https://www.terramore.io/marketing",

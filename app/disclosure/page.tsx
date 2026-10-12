@@ -4,7 +4,7 @@ import { PlainEmail } from "@/components/plain-email"
 import { SiteFooter } from "@/components/site-footer"
 
 export const metadata: Metadata = {
-  title: "Disclosure | Terramore",
+  title: "Disclosure | Terramore.io",
   description:
     "Affiliate and general disclosures for terramore.io, including how Terramore handles affiliate relationships and recommendations.",
   alternates: { canonical: "https://www.terramore.io/disclosure" },
@@ -29,7 +29,7 @@ export default function DisclosurePage() {
               <section>
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">GENERAL DISCLOSURE</h2>
                 <p className="text-gray-700 leading-relaxed">
-                  This disclosure statement is provided by Terramore.io, LLC ("Terramore," "we," "us," or "our") to inform visitors 
+                  This disclosure statement is provided by Terramore LLC ("Terramore," "we," "us," or "our") to inform visitors 
                   and users of our website about important information regarding our business practices, affiliate 
                   relationships, and potential conflicts of interest.
                 </p>
@@ -140,7 +140,7 @@ export default function DisclosurePage() {
                 </p>
                 <div className="bg-gray-50 p-6 rounded-lg mt-4">
                   <p className="text-gray-700 mb-2">
-                    <strong>Terramore.io, LLC</strong>
+                    <strong>Terramore LLC</strong>
                   </p>
                   <p className="text-gray-700 mb-2">2108 N St Ste N</p>
                   <p className="text-gray-700 mb-2">Sacramento, CA 95816</p>

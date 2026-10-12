@@ -95,7 +95,10 @@ export function SiteFooter({
               <div>
                 <Logo size="md" animate={false} on="dark" />
                 <p className="mt-3 text-[12px] text-white/70">
-                  &copy; {new Date().getFullYear()} Terramore. All rights reserved.
+                  &copy; {new Date().getFullYear()} Terramore LLC. All rights reserved.
+                </p>
+                <p className="mt-1 text-[12px] text-white/70">
+                  <a href="mailto:hello@terramore.io" className="underline-offset-4 hover:text-white hover:underline">hello@terramore.io</a>
                 </p>
               </div>
               <ul className="flex flex-wrap items-center gap-x-5 gap-y-2">
@@ -119,7 +122,7 @@ export function SiteFooter({
             </div>
             <p className="mt-6 max-w-4xl text-[11px] leading-relaxed text-white/65">
               Results mentioned on this website are not typical and are not a guarantee of your success. Individual
-              results vary. Terramore is owned and operated by Adam Moreno.
+              results vary. Terramore.io is owned and operated by Adam Moreno.
             </p>
           </div>
         </div>
@@ -178,8 +181,9 @@ export function SiteFooter({
           </ul>
           <p className="mt-4 max-w-4xl text-[12px] leading-relaxed text-slate-500">
             Results mentioned on this website are not typical and are not a guarantee of your success. Individual
-            results vary. Terramore is owned and operated by Adam Moreno. Copyright &copy;{" "}
-            {new Date().getFullYear()} Terramore. All rights reserved.
+            results vary. Terramore.io is owned and operated by Adam Moreno. Copyright &copy;{" "}
+            {new Date().getFullYear()} Terramore LLC. All rights reserved.{" "}
+            <a href="mailto:hello@terramore.io" className="underline underline-offset-2 hover:text-ink">hello@terramore.io</a>
           </p>
         </div>
       </div>

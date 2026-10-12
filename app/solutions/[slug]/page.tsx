@@ -17,10 +17,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!capability) return {}
 
   return {
-    title: `${capability.title} | Terramore`,
+    title: `${capability.title} | Terramore.io`,
     description: capability.story[0],
     openGraph: {
-      title: `${capability.title} | Terramore`,
+      title: `${capability.title} | Terramore.io`,
       description: capability.story[0],
       url: `https://www.terramore.io/solutions/${capability.slug}`,
     },

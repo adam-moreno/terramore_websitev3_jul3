@@ -6,7 +6,7 @@ import { CheckMyBusinessLink } from "@/components/business-lookup"
 import { SiteFooter } from "@/components/site-footer"
 
 export const metadata: Metadata = {
-  title: "Your ads aren't the problem — your landing page is | Terramore",
+  title: "Your ads aren't the problem — your landing page is | Terramore.io",
   description:
     "When clicks are cheap but sales are flat, the leak is usually after the click. A practical teardown checklist.",
   alternates: { canonical: "https://www.terramore.io/articles/your-landing-page-is-the-problem" },

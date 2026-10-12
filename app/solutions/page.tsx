@@ -6,12 +6,12 @@ import { BookingFlow } from "@/components/booking-flow"
 import { CapabilityGrid, FunnelStory, GrowthSystemFlow, HeroEngine, HeroWebsiteInput } from "@/components/solutions-visuals"
 
 export const metadata: Metadata = {
-  title: "Solutions | Terramore",
+  title: "Solutions | Terramore.io",
   description:
     "Terramore helps growing businesses find customers, convert more of them, and automate the follow-up across advertising, content, websites, CRM, email, SMS, automation, and analytics.",
   alternates: { canonical: "https://www.terramore.io/solutions" },
   openGraph: {
-    title: "Solutions | Terramore",
+    title: "Solutions | Terramore.io",
     description:
       "Marketing that connects all the way to revenue. Strategy, ads, websites, CRM, automation, and analytics in one system.",
     url: "https://www.terramore.io/solutions",

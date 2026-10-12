@@ -22,10 +22,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!match) return {}
 
   return {
-    title: `${match.tool.title} | ${match.category.title} | Terramore`,
+    title: `${match.tool.title} | ${match.category.title} | Terramore.io`,
     description: match.tool.story[0],
     openGraph: {
-      title: `${match.tool.title} | Terramore`,
+      title: `${match.tool.title} | Terramore.io`,
       description: match.tool.story[0],
       url: `https://www.terramore.io/integrations/${match.category.slug}/${match.tool.slug}`,
     },

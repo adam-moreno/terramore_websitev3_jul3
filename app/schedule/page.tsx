@@ -5,15 +5,15 @@ import { Logo } from "@/components/logo"
 import { SiteFooter } from "@/components/site-footer"
 
 export const metadata: Metadata = {
-  title: "Book a call | Terramore",
+  title: "Book a call | Terramore.io",
   description:
     "The report showed the gaps, this call closes them. Free 30 minutes to discuss how we can work together.",
   alternates: { canonical: "https://www.terramore.io/schedule" },
   openGraph: {
-    title: "Book a call | Terramore",
+    title: "Book a call | Terramore.io",
     description: "The report showed the gaps, this call closes them. Free 30 minutes to discuss how we can work together.",
     url: "https://www.terramore.io/schedule",
-    siteName: "Terramore",
+    siteName: "Terramore.io",
     type: "website",
     images: [
       {
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Book a call | Terramore",
+    title: "Book a call | Terramore.io",
     description: "The report showed the gaps, this call closes them. Free 30 minutes to discuss how we can work together.",
     images: ["/share/terramore-share-schedule-og.png?v=3"],
   },

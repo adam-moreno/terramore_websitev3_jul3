@@ -1,10 +1,10 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Start here | Terramore',
+  title: 'Start here | Terramore.io',
   description: 'Every Terramore page in the order owners ask: what we do, what it costs, how the work happens, and how to start.',
   openGraph: {
-    title: 'Start here | Terramore',
+    title: 'Start here | Terramore.io',
     description: 'Every Terramore page in the order owners ask: what we do, what it costs, how the work happens, and how to start.',
     url: 'https://www.terramore.io/resources',
   },

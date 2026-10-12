@@ -4,7 +4,7 @@ import { PlainEmail } from "@/components/plain-email"
 import { SiteFooter } from "@/components/site-footer"
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | Terramore",
+  title: "Privacy Policy | Terramore.io",
   description:
     "How Terramore collects, uses, and shares personal information on terramore.io, including California privacy rights and how to contact us.",
   alternates: { canonical: "https://www.terramore.io/privacy" },
@@ -30,7 +30,7 @@ export default function PrivacyPolicyPage() {
             <div className="space-y-8">
               <section>
                 <p className="text-gray-700 leading-relaxed">
-                  Terramore.io, LLC ("Terramore," "us," "we," or "our") thanks you for visiting the online and mobile resources we
+                  Terramore LLC ("Terramore," "us," "we," or "our") thanks you for visiting the online and mobile resources we
                   publish. We use the words "you" and "your" to mean you, the reader, and other visitors to our online
                   and mobile resources who are, in all cases, 18 or older. Our privacy statement ("this
                   statement," "this privacy statement," and "our statement") informs you about from whom and the types
@@ -52,8 +52,8 @@ export default function PrivacyPolicyPage() {
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">WHO WE ARE</h2>
                 <p className="text-gray-700 leading-relaxed">
                   Terramore is a marketing services and software company. We run marketing for businesses (ads, content, websites and automation). We also offer software: the TerraIQ dashboard for clients and a free Growth Workspace for business owners. For residents from the GDPR Jurisdictions, as defined
-                  below, and some US state privacy laws, Terramore.io, LLC is the data controller responsible for your
-                  personal data. For residents of California, Terramore.io, LLC is a "Business."
+                  below, and some US state privacy laws, Terramore LLC is the data controller responsible for your
+                  personal data. For residents of California, Terramore LLC is a "Business."
                 </p>
               </section>
 
@@ -513,14 +513,14 @@ export default function PrivacyPolicyPage() {
                   <p className="text-gray-700 mb-2">
                     <strong>Attention Legal Department</strong>
                   </p>
-                  <p className="text-gray-700 mb-2">Terramore.io, LLC</p>
+                  <p className="text-gray-700 mb-2">Terramore LLC</p>
                   <p className="text-gray-700 mb-2">2108 N St Ste N</p>
                   <p className="text-gray-700 mb-2">Sacramento, CA 95816</p>
                   <p className="text-gray-700">
                     Email: <PlainEmail address="admin@terramore.io" />
                   </p>
                 </div>
-                <p className="text-gray-600 text-sm mt-6">© 2026 Terramore.io, LLC. Terramore is owned and operated by Adam Moreno.</p>
+                <p className="text-gray-600 text-sm mt-6">© 2026 Terramore LLC. Terramore is owned and operated by Adam Moreno.</p>
               </section>
             </div>
           </div>

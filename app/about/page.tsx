@@ -4,7 +4,7 @@ import { DualCtas } from "@/components/dual-ctas"
 import { SiteFooter } from "@/components/site-footer"
 
 export const metadata: Metadata = {
-  title: "About | Terramore",
+  title: "About | Terramore.io",
   description:
     "Adam Moreno spent a decade reading what people watch and buy for large advertisers. Terramore points that work at owners with a shop, a service, or a list.",
 }

@@ -4,7 +4,7 @@ import { PlainEmail } from "@/components/plain-email"
 import { SiteFooter } from "@/components/site-footer"
 
 export const metadata: Metadata = {
-  title: "Terms of Service | Terramore",
+  title: "Terms of Service | Terramore.io",
   description:
     "Terms that govern use of terramore.io and Terramore services, including billing, cancellation, text messages, disclaimers, and how to contact us.",
   alternates: { canonical: "https://www.terramore.io/terms" },
@@ -51,7 +51,7 @@ export default function TermsPage() {
             </div>
 
             <p className="text-gray-700 leading-relaxed mb-6">
-              www.terramore.io and its subdomains (the &ldquo;Website&rdquo;) are owned and run by Terramore.io, LLC
+              www.terramore.io and its subdomains (the &ldquo;Website&rdquo;) are owned and run by Terramore LLC
               (&ldquo;Terramore,&rdquo; &ldquo;we,&rdquo; &ldquo;our,&rdquo; &ldquo;us&rdquo;). These Terms cover the
               Website and everything we offer through it, including our software and our marketing services (together,
               the &ldquo;Services&rdquo;). By using the Services, you agree to these Terms for yourself and for the
@@ -620,7 +620,7 @@ export default function TermsPage() {
 
                 <div className="bg-white p-4 rounded border-l-4 border-blue-400">
                   <p className="font-medium text-gray-900">
-                    Terramore.io, LLC
+                    Terramore LLC
                     <br />
                     2108 N St Ste N
                     <br />
@@ -633,7 +633,7 @@ export default function TermsPage() {
             {/* Copyright */}
             <div className="text-center py-8 border-t border-gray-200">
               <p className="text-gray-600 font-medium">
-                © 2026 Terramore.io, LLC. Terramore is owned and operated by Adam Moreno.
+                © 2026 Terramore LLC. Terramore is owned and operated by Adam Moreno.
               </p>
             </div>
           </div>

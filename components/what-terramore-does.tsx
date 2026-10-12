@@ -133,7 +133,7 @@ export function WhatTerramoreDoes() {
             customers search and their demographics, for service businesses and product brands. Map your customer journey: search, a social post, reviews, emails, your landing
             page, then a booked call or an order. Create your content: social, video, drone and animation. We create and
             manage your ads across Google, Meta, TikTok, YouTube and PR. Revenue month by month from June to September.
-            We&rsquo;re your Growth Partner, not your agency. Get more. Earn more. Terramore.
+            We&rsquo;re your Growth Partner, not your agency. Get more. Earn more. Terramore.io.
           </p>
         </figure>
 

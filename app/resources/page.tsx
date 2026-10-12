@@ -3,7 +3,7 @@ import { LindyCard, LindyPage } from "@/components/lindy-page"
 import { DASHBOARD_LOGIN_URL } from "@/lib/dashboard"
 
 export const metadata: Metadata = {
-  title: "Start here | Terramore",
+  title: "Start here | Terramore.io",
   description:
     "Every Terramore page in the order owners ask about them: what we do, what it costs, how the work happens, and how to start.",
 }
