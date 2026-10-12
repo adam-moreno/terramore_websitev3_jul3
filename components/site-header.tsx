@@ -17,7 +17,7 @@ import { DASHBOARD_LOGIN_URL } from "@/lib/dashboard"
 const NAV_LINKS = [
   { href: "/marketing", label: "Marketing" },
   { href: "/solutions", label: "Solutions" },
-  { href: "/book", label: "How we work" },
+  { href: "/#how-we-work", label: "How we work" },
 ] as const
 
 /** On the booking pages the menu drops "Check my business": the visitor is already booking. */
@@ -69,7 +69,7 @@ export function SiteHeader() {
           />
 
           <div className="ml-auto flex items-center gap-1.5 lg:hidden">
-            <BookingLink label="Book your call" source="header" ctaId="header_book" className={`${PRIMARY_SM} max-[359px]:hidden`} />
+            <BookingLink label="Book a free call" source="header" ctaId="header_book" className={`${PRIMARY_SM} max-[359px]:hidden`} />
             <button
               type="button"
               className="rounded-lg p-1.5 text-ink"
@@ -98,7 +98,7 @@ export function SiteHeader() {
               <span>Log in</span>
               <span className="text-[10px] font-normal text-slate-500">Current clients</span>
             </a>
-            <BookingLink label="Book your call" source="header" ctaId="header_book" className={PRIMARY_LG} />
+            <BookingLink label="Book a free call" source="header" ctaId="header_book" className={PRIMARY_LG} />
           </div>
         </div>
 
@@ -126,7 +126,7 @@ export function SiteHeader() {
             <div className="py-4">
               {/* Under 360 px the bar has no room for the button; it leads the menu instead. */}
               <BookingLink
-                label="Book your call"
+                label="Book a free call"
                 source="header"
                 ctaId="header_book"
                 className="inline-flex min-h-11 items-center rounded-full bg-brand px-5 text-[16px] font-medium text-white min-[360px]:hidden"
@@ -161,7 +161,7 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
                 Log in
               </a>
               <BookingLink
-                label="Let's talk"
+                label="Book a free call"
                 source="report"
                 ctaId="report_header_book"
                 className="hidden h-9 items-center justify-center rounded-full border border-ink/20 px-4 text-[14px] font-medium text-ink hover:border-ink/40 sm:inline-flex"

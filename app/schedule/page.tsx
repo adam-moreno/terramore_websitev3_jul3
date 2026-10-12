@@ -57,8 +57,8 @@ export default async function SchedulePage({ searchParams }: { searchParams: Pro
               Pick a time. We&apos;ll look at what&apos;s holding growth back.
             </h1>
             <p className="mx-auto mt-4 max-w-lg text-[16px] leading-relaxed text-slate-600">
-              You talk directly with Adam — not a sales handoff. You leave with a clear sense of what we&apos;d fix
-              first. Times show in your time zone.
+              You talk with the person who&apos;d lead your work, not a sales rep. You leave with a clear sense of what
+              we&apos;d fix first. Times show in your time zone.
             </p>
           </div>
 

@@ -47,7 +47,7 @@ export function ExampleReportShell({
               shape while you wait.
             </p>
             <BookingLink
-              label="Talk through my report"
+              label="Book a free call"
               source="report"
               ctaId="report_sent_book"
               onClick={() => track("select_content", { content_type: "cta", cta_id: "report_sent_talk" })}

@@ -14,7 +14,6 @@ export default function EnterprisePage() {
       title="A growth team that can"
       accent="sit next to yours."
       subtitle="For brands that already have a marketing team and need more hands who know ads, operations, and automation. You get named people, not a rotating vendor."
-      ctaLabel="Let's talk"
     >
       <section className="pb-20">
         <div className="page-shell grid gap-5 md:grid-cols-3">

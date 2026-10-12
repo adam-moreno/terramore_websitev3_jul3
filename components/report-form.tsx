@@ -281,7 +281,7 @@ export function ReportForm({
             <>
               {" "}
               <BookingLink source="report" ctaId="report_duplicate_book" className="font-medium text-brand hover:text-brand-hover">
-                Talk with us
+                Book a free call
               </BookingLink>
               .
             </>

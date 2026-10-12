@@ -28,7 +28,7 @@ export function DualCtas({
       />
       <BookingLink className="inline-flex h-11 items-center justify-center gap-2 px-2 text-[15px] font-medium text-ink/70 underline-offset-4 hover:text-ink hover:underline">
         <CalendarDays aria-hidden className="h-4 w-4" />
-        Or talk with us
+        Or book a free call
       </BookingLink>
     </div>
   )

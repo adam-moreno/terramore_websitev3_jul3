@@ -6,7 +6,7 @@ import { DASHBOARD_LOGIN_URL } from "@/lib/dashboard"
 const FAQS = [
   {
     q: "How do we start?",
-    a: "Start with a free 30-minute call and tell us where the business is stuck. If you are not ready for a call, ask for the free Digital Footprint report: leave a name, an email, and your site. In your inbox in minutes.",
+    a: "Book a free 30-minute call and tell us where the business is stuck. Not ready for a call? Check your business for the free Digital Footprint report: leave a name, an email, and your site. In your inbox in minutes.",
   },
   {
     q: "What is the Digital Footprint report?",
@@ -26,11 +26,11 @@ const FAQS = [
   },
   {
     q: "Can I use the dashboard?",
-    a: "The client dashboard, Terra IQ, is for current clients. We send an invite after work starts. New here? Talk first, or ask for the free report.",
+    a: "The client dashboard, TerraIQ, is for current clients. We send an invite after work starts. New here? Talk first, or ask for the free report.",
   },
   {
     q: "What does the work cost?",
-    a: "The first call is free. After we agree on scope, a deposit starts the work. Jobs are priced by the job, and the number can change if the scope changes. The first stretch can be 90 days, or we keep going. Monthly is optional. Financing is available. You own the data and the assets. You never pay to find out what is broken.",
+    a: "The first call is free. We agree the scope and price before any work starts; if the scope changes, we agree the new price first. Month to month, no long contracts. Financing up to $10,000 through PayPal, subject to approval. Software on its own is monthly too. You own the data and the assets. You never pay to find out what is broken.",
   },
 ]
 

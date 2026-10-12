@@ -98,7 +98,7 @@ export default function ArticlePage() {
                 source="article"
                 className="inline-flex min-h-11 items-center text-[15px] font-medium text-ink/70 underline-offset-4 hover:text-ink hover:underline"
               >
-                Or book a demo
+                Or book a free call
               </BookingLink>
             </div>
           </div>

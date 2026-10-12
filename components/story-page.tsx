@@ -146,7 +146,7 @@ export function StoryCta({ mode = "cta" }: { mode?: "lookup" | "cta" }) {
           {mode === "lookup" ? (
             <>
               <p className="mt-4 max-w-xl text-[1.05rem] leading-relaxed text-ink/70">
-                Start with a free check of your website. Or talk with us and we map the work, the tools, and whether
+                Check your business for free below. Or book a free call and we map the work, the tools, and whether
                 Terramore is the right partner.
               </p>
               <div className="mt-7">
@@ -158,7 +158,7 @@ export function StoryCta({ mode = "cta" }: { mode?: "lookup" | "cta" }) {
                   helper="Free · No email needed to see the first results"
                   secondary={
                     <BookingLink
-                      label="Or talk with us"
+                      label="Or book a free call"
                       source="solutions"
                       ctaId="service_closing_book"
                       className="inline-flex min-h-11 items-center text-[15px] font-medium text-ink/70 underline-offset-4 hover:text-ink hover:underline"
@@ -176,8 +176,8 @@ export function StoryCta({ mode = "cta" }: { mode?: "lookup" | "cta" }) {
           ) : (
             <>
               <p className="mt-4 max-w-xl text-[1.05rem] leading-relaxed text-ink/70">
-                We map the work, the tools, and whether Terramore is the right partner. Or start with a free check of
-                your website.
+                We map the work, the tools, and whether Terramore is the right partner. Or check your business
+                for free.
               </p>
               <DualCtas ctaId="infopage_closing_report" className="mt-7" />
             </>

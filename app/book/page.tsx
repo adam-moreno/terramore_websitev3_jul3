@@ -22,9 +22,9 @@ export const metadata: Metadata = {
 
 /* Real, verifiable credibility only — no fabricated counts or results. */
 const TRUST_FACTS = [
-  { value: "10+ years", label: "In marketing, data, and measurement — including work behind Fortune 500 advertisers" },
+  { value: "10+ years", label: "Measuring what ads actually sell, for Fortune 500 brands at Samba TV and Kantar" },
   { value: "$0", label: "Your growth roadmap is built before you sign anything, and it's yours to keep" },
-  { value: "Month to month", label: "No long lock-ins — we keep the work by performing, not by contract" },
+  { value: "Month to month", label: "No long contracts. You stay because the work pays off, and financing is available" },
 ] as const
 
 /* Compact capability rows — editorial rhythm, not a service grid. */
@@ -52,7 +52,7 @@ const CAPABILITIES = [
   {
     id: "intelligence",
     label: "Intelligence",
-    body: "Analytics, attribution, and reporting through Terra IQ — so you can see what pays.",
+    body: "Analytics, attribution, and reporting through TerraIQ — so you can see what pays.",
   },
 ] as const
 
@@ -65,7 +65,7 @@ function BookCta({ className = "", ctaId }: { className?: string; ctaId?: CtaId 
       ctaId={ctaId}
       className={`inline-flex h-12 w-full items-center justify-center rounded-full bg-brand px-7 text-[16px] font-medium text-white transition hover:bg-brand-hover sm:w-auto ${className}`}
     >
-      Book a 30-minute conversation
+      Book a free call
     </BookingLink>
   )
 }
@@ -107,7 +107,7 @@ export default function BookPage() {
             ctaId="book_hero_report"
             className="text-[15px] font-medium text-ink/70 underline-offset-4 hover:text-ink hover:underline"
           >
-            Not ready? See your digital footprint first
+            Not ready? Check my business first
           </ReportPopupLink>
         </p>
 
@@ -136,13 +136,13 @@ export default function BookPage() {
                   See how your business shows up online.
                 </h2>
                 <p className="mt-3 max-w-sm text-[14px] leading-relaxed text-white/70">
-                  Search, maps, reviews, and social — your digital footprint in one report, on us.
+                  Your website and Google listing, read the way a customer sees them. Free, in minutes.
                 </p>
                 <ReportPopupLink
                   direct
                   className="mt-5 inline-flex items-center rounded-full bg-white px-5 py-2.5 text-[13px] font-semibold text-ink transition hover:bg-white/90"
                 >
-                  Get your free digital report →
+                  Check my business →
                 </ReportPopupLink>
               </div>
               <div className="mx-auto w-36 rotate-3 overflow-hidden rounded-lg shadow-[0_20px_50px_rgba(0,0,0,0.4)] sm:w-44">
@@ -253,17 +253,16 @@ export default function BookPage() {
               </div>
             </Reveal>
             <Reveal delay={140}>
-              <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-brand">Who you&apos;ll talk to</p>
+              <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-brand">Who you&apos;ll work with</p>
               <h2 className="mt-3 text-[1.7rem] font-bold leading-[1.15] tracking-[-0.02em] text-ink md:text-[2.2rem]">
-                You won&apos;t get handed off to a sales team.
+                A senior team, not a sales team.
               </h2>
               <p className="mt-4 max-w-lg text-[16px] leading-relaxed text-slate-600 md:text-[17px]">
-                You&apos;ll talk directly with Terramore about your business, where you&apos;re trying to go, and what
-                needs to change to get there. The work behind that conversation comes from a decade measuring
-                campaigns for large advertisers: at Samba TV, tying TV and streaming ads to who watched and what they
-                bought; at Kantar, writing brand reports across every social channel so brands knew what their ads
-                actually did. Terramore points that same craft at owners — what is working, what is leaking, and what
-                to fix first.
+                The person on your call is the person who leads your work. Terramore is led by Adam Moreno, who spent
+                ten years measuring whether ads actually sell: at Samba TV, tying TV and streaming ads to what
+                households bought; at Kantar, reporting on every social channel for Fortune 500 brands. Specialists in
+                ads, content, web and automation join when your plan needs them, so you get big-brand measurement
+                without big-agency overhead.
               </p>
               <p className="mt-4 max-w-lg text-[15px] leading-relaxed text-slate-600">
                 And whatever happens, you leave with a growth roadmap for your business —{" "}
@@ -307,7 +306,7 @@ export default function BookPage() {
                 source="book"
                 className="inline-flex h-12 items-center justify-center rounded-full bg-ink px-9 text-[16px] font-semibold text-white shadow-[0_16px_40px_rgba(15,30,46,0.3)] transition hover:bg-ink/90"
               >
-                Let&apos;s talk →
+                Book a free call
               </BookingLink>
             </div>
           </Reveal>

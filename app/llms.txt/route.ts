@@ -2,12 +2,12 @@ const LLMS_TXT = `# Terramore
 
 > A Growth Team for Owners. Terramore is a founder-led growth consultancy that works inside the store, ads, and email a business already pays for, finds where it loses sales, and fixes that step.
 
-Terramore serves owners with a shop, a service, or a customer list. Work starts with a free call. A free Digital Footprint report is the backup if they are not ready to talk. The client dashboard (Terra IQ) is invite only for current clients. The client owns the data and assets. Monthly work is optional.
+Terramore serves owners with a shop, a service, or a customer list. Work starts with a free call. A free Digital Footprint report is the backup if they are not ready to talk. The client dashboard (TerraIQ) is invite only for current clients. The client owns the data and assets. Monthly work is optional.
 
 ## Main
 
 - [Home](https://www.terramore.io): What Terramore does, how the work happens, use cases, and the free report
-- [Book a call](https://www.terramore.io/book): Pick a time for the free 30-minute call, shown in your time zone
+- [Book a free call](https://www.terramore.io/book): Pick a time for the free 30-minute call, shown in your time zone
 - [Pricing](https://www.terramore.io/pricing): Talk is free, Start is a deposit after scope, Stay is optional monthly
 - [Free Digital Footprint report](https://www.terramore.io/report): What is in the report, how long it takes, and how we send it
 - [Sample report](https://www.terramore.io/report/example): Ecommerce and service-business sample reports (illustrative demos)

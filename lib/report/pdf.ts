@@ -208,7 +208,7 @@ function cover(ctx: Ctx, report: ReportContent) {
   y -= 40
 
   const scoreLabel = report.overallScore == null ? "n/a" : `${report.overallScore}`
-  page.drawText("DIGITAL PRESENCE SCORE", { x: MARGIN, y, size: 8.5, font: ctx.regular, color: CREAM_DIM })
+  page.drawText("YOUR SCORE", { x: MARGIN, y, size: 8.5, font: ctx.regular, color: CREAM_DIM })
   page.drawText(scoreLabel, { x: MARGIN, y: y - 28, size: 32, font: ctx.bold, color: CREAM })
   page.drawText("/ 100", { x: MARGIN + ctx.bold.widthOfTextAtSize(scoreLabel, 32) + 8, y: y - 20, size: 12, font: ctx.regular, color: CREAM_DIM })
 
@@ -298,7 +298,7 @@ export async function renderReportPdf(report: ReportContent): Promise<Buffer> {
     ctx.y -= 8
   }
 
-  sectionTitle(ctx, "Digital Presence Score", "Deterministic factors from observed evidence.")
+  sectionTitle(ctx, "Your score", "Deterministic factors from observed evidence.")
   paragraph(
     ctx,
     `Overall ${report.overallScore ?? "n/a"} / 100 with ${report.evidenceCoverage}% evidence coverage. Missing factors are marked Not available; their weight is redistributed across measured factors.`,

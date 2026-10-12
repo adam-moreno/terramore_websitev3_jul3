@@ -16,11 +16,11 @@ const FOR_OWNERS = [
   },
   {
     title: "You see the problem before you pay to fix it",
-    body: "The first call is free. The deposit comes after we agree on scope. The price follows the job, not a menu.",
+    body: "The first call is free. We agree the scope and price before any work starts. The price follows the job, not a menu.",
   },
   {
     title: "You keep the work",
-    body: "You own the data and the assets. Work can be 90 days or continue. Monthly is optional. Specialists join when the scope needs them.",
+    body: "You own the data and the assets. Month to month, no long contracts, and financing is available. Specialists join when the scope needs them.",
   },
 ]
 

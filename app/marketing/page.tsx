@@ -59,19 +59,19 @@ const RELATED_ARTICLES = [
 const FAQ_ITEMS = [
   {
     q: "What exactly does Terramore do?",
-    a: "We run the full growth system for your business: marketing strategy, ad creative, paid campaigns on Google, Meta, and TikTok, landing pages, email and SMS follow-up, short-form content, automation, and analytics. One team, one connected system — instead of juggling separate freelancers and agencies.",
+    a: "We run the full growth system for your business: marketing strategy, ad creative, paid campaigns on Google, Meta, and TikTok, landing pages, email and SMS follow-up, short-form content, automation, and analytics. One senior team, one connected system — instead of juggling separate freelancers and agencies.",
   },
   {
     q: "How is this different from hiring an agency or a freelancer?",
     a: "Most agencies own one slice — ads, or creative, or a website — and hand you the rest. We own the whole path from strategy to measurement, so nothing falls between vendors. And unlike a freelancer, you get a system with process, tooling, and reporting behind it, not a single person's availability.",
   },
   {
-    q: "What does a demo look like?",
-    a: "It's a 30-minute call. We look at your current marketing together, show you how the Terramore system would map onto your business, and walk through Terra IQ — the dashboard where you'd see visits, leads, and revenue in one place. No pressure and no obligation; you'll leave with useful observations either way.",
+    q: "What happens on the free call?",
+    a: "It's a 30-minute call. We look at your current marketing together, show you how the Terramore system would map onto your business, and walk through TerraIQ — the dashboard where you'd see visits, leads, and revenue in one place. No pressure and no obligation; you'll leave with useful observations either way.",
   },
   {
     q: "How fast can we launch?",
-    a: "Kickoff usually takes a focused week of strategy and setup. From there we move channel by channel — creative, pages, and follow-up — so each piece is ready before we scale spend. We'll tell you the realistic timeline for your scope on the call.",
+    a: "Kickoff starts with a focused week of strategy and setup. From there we move channel by channel — creative, pages, and follow-up — so each piece is ready before we scale spend. We'll tell you the realistic timeline for your scope on the call.",
   },
   {
     q: "Do I need a big ad budget to work with you?",
@@ -83,7 +83,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "How do you measure results?",
-    a: "Terra IQ ties your traffic, leads, and revenue together so you can see what each channel returns — not just clicks and impressions. You get a live dashboard plus plain-language reporting on what we changed and why.",
+    a: "TerraIQ ties your traffic, leads, and revenue together so you can see what each channel returns — not just clicks and impressions. You get a live dashboard plus plain-language reporting on what we changed and why.",
   },
   {
     q: "Do you replace my existing marketing team?",
@@ -95,7 +95,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Is there a long-term contract?",
-    a: "No long lock-ins. Engagements are month to month after the initial setup period. We keep clients by performing, not by contract.",
+    a: "No. It's month to month, with the scope and price agreed up front. We keep clients by performing, not by contract. Financing up to $10,000 through PayPal is available, subject to approval.",
   },
   {
     q: "What do you need from me to get started?",
@@ -103,7 +103,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "How much does it cost?",
-    a: "It depends on scope — which channels, how much creative, and how much automation you need. Pricing is flat and agreed up front; see the pricing page or book a demo and we'll scope it live with you.",
+    a: "It depends on scope — which channels, how much creative, and how much automation you need. The price is agreed up front, before any work starts; see the pricing page or book a free call and we'll scope it live with you.",
   },
 ] as const
 
@@ -137,7 +137,7 @@ export default function MarketingPage() {
                   ctaId="marketing_hero_book"
                   className="inline-flex min-h-11 items-center justify-center text-[15px] font-medium text-ink underline underline-offset-4 hover:text-brand"
                 >
-                  Or book a demo
+                  Or book a free call
                 </BookingLink>
               </MarketingPrimaryAction>
             </div>
@@ -203,14 +203,14 @@ export default function MarketingPage() {
               Get ads people actually stop for.
             </h2>
             <p className="mt-3 max-w-md text-[15px] leading-relaxed text-white/75">
-              Strategy, creative, and campaigns from one team — book a demo and see what that looks like for your
-              business.
+              Strategy, creative, and campaigns from one senior team — book a free call and see what that looks like
+              for your business.
             </p>
             <BookingLink
               source="marketing"
               className="mt-7 inline-flex items-center rounded-full bg-white px-6 py-3 text-[14px] font-semibold text-ink transition hover:bg-white/90"
             >
-              Book a demo
+              Book a free call
             </BookingLink>
           </div>
         </div>
@@ -319,7 +319,7 @@ export default function MarketingPage() {
           <p className="mt-6 text-center text-[14px] text-slate-500">
             Still have a question?{" "}
             <BookingLink source="marketing" className="font-semibold text-brand underline-offset-4 hover:underline">
-              Book a demo
+              Book a free call
             </BookingLink>{" "}
             and ask us live.
           </p>

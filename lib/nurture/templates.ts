@@ -115,8 +115,8 @@ function bookCta(row: LeadNurtureRow): { text: string; buttonHtml: string } {
     }
   }
   return {
-    text: `Book a time: ${BOOK_URL}`,
-    buttonHtml: emailButton("Book a time", BOOK_URL),
+    text: `Book a free call: ${BOOK_URL}`,
+    buttonHtml: emailButton("Book a free call", BOOK_URL),
   }
 }
 
@@ -128,7 +128,7 @@ function buildStep1(row: LeadNurtureRow): NurtureEmail {
   const close =
     row.source === "book"
       ? "In the next few notes I will share how we put AI into that path, and where it usually helps first. No hard sell."
-      : "In the next few notes I will share how we put AI into that path, and where it usually helps first. No hard sell. If a call would help sooner, pick a time."
+      : "In the next few notes I will share how we put AI into that path, and where it usually helps first. No hard sell. If a call would help sooner, book a free call."
   const paras = [
     `Hi ${first},`,
     "",
@@ -207,7 +207,7 @@ function buildStep2(row: LeadNurtureRow): NurtureEmail {
       emailP(
         "How to maintain it after it is live: one owner on your side, a short weekly review, and human approval on outbound messages and price changes. You can turn a path off. We design for that.",
       ),
-      row.source === "book" ? emailP(walkLine) : emailButton("Book a time", BOOK_URL),
+      row.source === "book" ? emailP(walkLine) : emailButton("Book a free call", BOOK_URL),
       emailSignoff("Adam Moreno", "Terramore"),
       unsub.html,
     ].join(""),
@@ -251,7 +251,7 @@ function buildStep3(row: LeadNurtureRow): NurtureEmail {
       ...links.map((link) => emailButton(link.label, link.href)),
       row.source === "book"
         ? emailP(close)
-        : `${emailP("If a short call would help:")}${emailButton("Book a time", BOOK_URL)}`,
+        : `${emailP("If a short call would help:")}${emailButton("Book a free call", BOOK_URL)}`,
       emailSignoff("Adam Moreno", "Terramore"),
       unsub.html,
     ].join(""),

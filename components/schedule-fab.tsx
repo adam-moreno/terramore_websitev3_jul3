@@ -8,7 +8,7 @@ import { LOOKUP_ANCHOR } from "@/components/business-lookup"
 
 /**
  * Sitewide floating Schedule control.
- * In the first viewport (hero): calendar + "Schedule".
+ * In the first viewport (hero): calendar + "Book a free call".
  * After scrolling past the hero: calendar icon only.
  * Search-first: below lg it steps aside while the page's business lookup (#check-my-business) is on screen, so the
  * secondary booking action never covers the primary field, button or results.
@@ -47,13 +47,13 @@ export function ScheduleFab() {
       <BookingLink
         source="floating_cta"
         ctaId="floating_book"
-        aria-label="Schedule"
+        aria-label="Book a free call"
         className={`inline-flex items-center justify-center rounded-full bg-brand text-white shadow-lg transition-colors hover:bg-brand-hover hover:shadow-xl ${
           inHero ? "h-9 gap-1.5 px-3.5" : "h-9 w-9"
         }`}
       >
         <Calendar className="h-3.5 w-3.5 shrink-0" aria-hidden strokeWidth={2.25} />
-        {inHero ? <span className="text-[12px] font-medium">Schedule</span> : null}
+        {inHero ? <span className="text-[12px] font-medium">Book a free call</span> : null}
       </BookingLink>
     </div>
   )

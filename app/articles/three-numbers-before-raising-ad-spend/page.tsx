@@ -84,7 +84,7 @@ export default function ArticlePage() {
           </div>
           <div className="mt-12 rounded-[1.5rem] bg-white p-6 shadow-[0_8px_30px_rgba(15,30,46,0.05)] sm:p-8">
             <p className="text-[15px] leading-relaxed text-slate-600">
-              Terra IQ ties spend, leads, and revenue together so these three numbers are on one screen — not spread
+              TerraIQ ties spend, leads, and revenue together so these three numbers are on one screen — not spread
               across five logins.
             </p>
             <div className="mt-4 flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-4">
@@ -96,7 +96,7 @@ export default function ArticlePage() {
                 source="article"
                 className="inline-flex min-h-11 items-center text-[15px] font-medium text-ink/70 underline-offset-4 hover:text-ink hover:underline"
               >
-                Or book a demo
+                Or book a free call
               </BookingLink>
             </div>
           </div>

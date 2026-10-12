@@ -100,7 +100,7 @@ export function ManageBooking() {
         <p className="text-[1.2rem] font-semibold tracking-tight text-ink">We could not find that call.</p>
         <p className="mt-2 text-[14px] text-slate-600">The link may be old. Book again or reply to the confirmation email.</p>
         <Link href="/book" className="mt-5 inline-flex h-11 items-center rounded-full bg-brand px-5 text-[15px] font-medium text-white hover:bg-brand-hover">
-          Book a call
+          Book a free call
         </Link>
       </div>
     )
@@ -111,7 +111,7 @@ export function ManageBooking() {
       <BookingFallback
         reason="We couldn’t load your call."
         detail="Your booking is unchanged. Try again in a moment, or book a new time."
-        route={{ label: "Book a time", href: "/book" }}
+        route={{ label: "Book a free call", href: "/book" }}
       />
     )
   }

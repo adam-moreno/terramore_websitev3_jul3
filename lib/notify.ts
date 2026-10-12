@@ -438,7 +438,7 @@ export async function confirmLeadToUser(lead: Lead): Promise<SendResult[]> {
         `Hi ${first},`,
         "",
         "We got it. We read the site before we reply, usually within one business day.",
-        `Want to skip the wait? Pick a time: ${BOOK_URL}`,
+        `Want to skip the wait? Book a free call: ${BOOK_URL}`,
         "",
         "Adam Moreno",
         "Terramore",
@@ -460,7 +460,7 @@ export async function confirmLeadToUser(lead: Lead): Promise<SendResult[]> {
           emailP("While you wait, a sample shows the shape:"),
           emailButton("See a sample report", `${SITE}/report/example`),
           emailP("When you have it, you can talk through what we would prioritize:"),
-          emailButton("Talk through my report", BOOK_URL),
+          emailButton("Book a free call", BOOK_URL),
           emailSignoff("Adam Moreno", "Terramore"),
         ].join(""),
       })
@@ -470,8 +470,8 @@ export async function confirmLeadToUser(lead: Lead): Promise<SendResult[]> {
         bodyHtml: [
           emailP(`Hi ${first},`),
           emailP("We got it. We read the site before we reply, usually within one business day."),
-          emailP("Want to skip the wait? Pick a time:"),
-          emailButton("Book a time", BOOK_URL),
+          emailP("Want to skip the wait?"),
+          emailButton("Book a free call", BOOK_URL),
           emailSignoff("Adam Moreno", "Terramore"),
         ].join(""),
       })

@@ -126,7 +126,7 @@ export function WhatTerramoreDoes() {
             Illustrative: example businesses and sample data.
           </figcaption>
           <p id="terramore-film-description" className="sr-only">
-            A silent film. We diagnose your business: a website check scores digital experience, discoverability, trust,
+            A silent film. We diagnose your business: a Digital Footprint report scores digital experience, discoverability, trust,
             conversion readiness and technical health. Integrate with your existing tools: Google, Meta, Shopify, HubSpot
             and Mailchimp connect to the Growth Workspace. One intelligence layer: find your customers, where your
             customers are, where your buyers are (the states with your repeat customers and deal seekers), what your

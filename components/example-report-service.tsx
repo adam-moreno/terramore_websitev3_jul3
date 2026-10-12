@@ -212,13 +212,13 @@ export function ExampleReportService({ hideDisclosure = false }: { hideDisclosur
               href="/report"
               className="inline-flex h-11 items-center justify-center rounded-full bg-brand px-5 text-[15px] font-medium text-white hover:bg-brand-hover"
             >
-              Get my free Digital Footprint report
+              Check my business
             </Link>
           </p>
           <p className="mt-5 text-[14px] text-slate-500">
             Prefer to talk first?{" "}
             <Link href="/book" className="font-medium text-brand hover:text-brand-hover">
-              Book a call
+              Book a free call
             </Link>
             .
           </p>

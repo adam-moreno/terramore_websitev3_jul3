@@ -197,7 +197,7 @@ export default function SolutionsPage() {
             href="/report"
             className="mt-8 inline-flex h-11 items-center justify-center rounded-full bg-brand px-6 text-[15px] font-medium text-white hover:bg-brand-hover"
           >
-            Get my free report
+            Check my business
           </Link>
         </div>
       </section>

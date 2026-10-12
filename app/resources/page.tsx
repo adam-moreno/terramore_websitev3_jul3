@@ -14,7 +14,6 @@ export default function ResourcesPage() {
       title="Start here."
       accent="Every page, in order."
       subtitle="The questions owners ask first, and the page that answers each one."
-      ctaLabel="Let's talk"
     >
       <section className="pb-20">
         <div className="page-shell grid gap-5 md:grid-cols-2">
@@ -34,7 +33,7 @@ export default function ResourcesPage() {
             href="/#use-cases"
           />
           <LindyCard
-            title="What is the free report?"
+            title="What is the Digital Footprint report?"
             body="We read your site, ads, Maps, and listings and write what is working, what is leaking, and what we would fix first. In your inbox in minutes."
             href="/report"
           />

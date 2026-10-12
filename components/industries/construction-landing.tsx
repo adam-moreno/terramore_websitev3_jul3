@@ -94,7 +94,7 @@ const STAGES = [
 ] as const
 
 function TalkCta({
-  children = "Let's Talk",
+  children = "Book a free call",
   className = CTA_PRIMARY,
   ctaId,
 }: {
@@ -143,7 +143,7 @@ export function ConstructionLanding() {
               a steady flow of inquiries, estimates, and booked work.
             </p>
             <div className="mt-6 flex flex-col items-stretch gap-3 sm:mt-8 sm:flex-row sm:items-center">
-              <FootprintCta ctaId="construction_hero_report">See Your Digital Footprint</FootprintCta>
+              <FootprintCta ctaId="construction_hero_report">Check my business</FootprintCta>
               <TalkCta ctaId="construction_hero_book" className="inline-flex h-11 items-center justify-center rounded-full border border-white/25 bg-white/10 px-6 text-[15px] font-medium text-cream backdrop-blur hover:border-white/40 hover:bg-white/15 lg:border-ink/15 lg:bg-white/80 lg:text-ink lg:hover:border-ink/30 lg:hover:bg-white" />
             </div>
             <p className="mt-4 text-[13px] leading-relaxed text-cream/60 sm:mt-5 lg:text-ink/70">
@@ -288,7 +288,7 @@ export function ConstructionLanding() {
           </div>
 
           <div className="mt-10 flex flex-col items-center gap-3 text-center">
-            <TalkCta>Build My Growth Plan</TalkCta>
+            <TalkCta>Book a free call</TalkCta>
             <p className="max-w-md text-[13px] leading-relaxed text-slate-500">
               We scope around your business, market, and growth stage—not a generic marketing package.
             </p>
@@ -302,11 +302,11 @@ export function ConstructionLanding() {
           Let&apos;s find the biggest growth opportunity in your construction business.
         </h2>
         <p className="mx-auto mt-5 max-w-lg text-[16px] leading-relaxed text-slate-600">
-          Start with a free Digital Footprint report: how homeowners find, evaluate, and contact your business. Or talk
-          it through with us directly.
+          Start with a free Digital Footprint report: how homeowners find, evaluate, and contact your business. Or book
+          a free call.
         </p>
         <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <FootprintCta>Get Your Digital Footprint Report</FootprintCta>
+          <FootprintCta>Check my business</FootprintCta>
           <TalkCta className="inline-flex h-11 items-center justify-center rounded-full border border-ink/15 bg-transparent px-6 text-[15px] font-medium text-ink hover:border-ink/30 hover:bg-white" />
         </div>
         <p className="mt-5 text-[13px] text-slate-500">No generic pitch. We&apos;ll look at the business first.</p>

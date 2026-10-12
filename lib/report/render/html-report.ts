@@ -80,7 +80,7 @@ export function renderReportHtml(report: ReportContent): string {
   <p class="muted">${esc(report.website || "Website not given")} · ${esc(report.readDate)}</p>
   <p>${esc(report.headline)}</p>
   <div class="scores">
-    <div class="score"><div class="muted">Digital Presence Score</div><big>${report.overallScore ?? "n/a"}</big><span class="muted"> / 100</span></div>
+    <div class="score"><div class="muted">Your score</div><big>${report.overallScore ?? "n/a"}</big><span class="muted"> / 100</span></div>
     <div class="score"><div class="muted">Evidence Coverage</div><big>${report.evidenceCoverage}%</big></div>
   </div>
   <h2>Executive summary</h2>

@@ -135,7 +135,7 @@ export async function runReportPipeline(request: ReportRequest): Promise<Pipelin
         scopeLine,
         "",
         ...(workspaceUrl ? [workspaceLine, `Open my Growth Workspace: ${workspaceUrl}`, ""] : []),
-        `Talk through my report: ${BOOK_URL}`,
+        `Book a free call: ${BOOK_URL}`,
         "",
         "Adam Moreno",
         "Terramore",
@@ -148,8 +148,8 @@ export async function runReportPipeline(request: ReportRequest): Promise<Pipelin
           emailP(`Your Digital Footprint report for ${subjectName} is attached as a PDF.`),
           emailP(scopeLine),
           ...(workspaceUrl
-            ? [emailP(workspaceLine), emailButton("Open my Growth Workspace", workspaceUrl), emailTextLink("Talk through my report", BOOK_URL)]
-            : [emailButton("Talk through my report", BOOK_URL)]),
+            ? [emailP(workspaceLine), emailButton("Open my Growth Workspace", workspaceUrl), emailTextLink("Or book a free call", BOOK_URL)]
+            : [emailButton("Book a free call", BOOK_URL)]),
           emailSignoff("Adam Moreno", "Terramore"),
         ].join(""),
       }),

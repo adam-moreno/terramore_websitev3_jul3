@@ -530,10 +530,10 @@ function ScoreCard({
   return (
     <section
       id="lookup-score"
-      aria-label="Your Digital Presence Score"
+      aria-label="Your score"
       className={`relative mt-8 scroll-mt-28 [@media(min-width:768px)_and_(max-height:820px)]:mt-5 overflow-hidden rounded-2xl border border-ink/10 bg-white p-5 text-left md:px-8 md:pb-8 md:pt-6 ${idle ? "hidden md:block" : ""}`}
     >
-      <p className="text-[18px] font-semibold text-ink md:text-[20px]">Your Digital Presence Score</p>
+      <p className="text-[18px] font-semibold text-ink md:text-[20px]">Your score</p>
       {idle ? (
         <p className="mt-1 text-[15px] leading-snug text-slate-600">
           Scored 0 to 100 with the same method as our full Digital Footprint report. Your scores fill in here when the
@@ -1359,7 +1359,7 @@ function LookupResults({
             </div>
           ) : null}
           <p className="mt-4 text-[13px] leading-snug text-slate-600">
-            This free check reads your public pages and, when we can confirm it, your Google listing. Search rankings and ad activity aren&apos;t part of it.
+            Your free score reads your public pages and, when we can confirm it, your Google listing. Search rankings and ad activity aren&apos;t part of it.
           </p>
           {next ? (
             <div className="mt-4 flex flex-col items-stretch gap-x-5 gap-y-2 sm:flex-row sm:flex-wrap sm:items-center">
@@ -1411,7 +1411,7 @@ export function LookupBookButton({ ctaId }: { ctaId: CtaId }) {
       ctaId={ctaId}
       className="inline-flex min-h-11 items-center justify-center text-[16px] font-medium text-ink underline underline-offset-4 hover:text-brand"
     >
-      Or book a 30-minute call
+      Or book a free call
     </BookingLink>
   )
 }

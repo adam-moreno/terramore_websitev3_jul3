@@ -14,7 +14,7 @@ import { DASHBOARD_LOGIN_URL } from "@/lib/dashboard"
 const EXPLORE = [
   { href: "/marketing", label: "Marketing" },
   { href: "/solutions", label: "Solutions" },
-  { href: "/book", label: "How we work" },
+  { href: "/#how-we-work", label: "How we work" },
 ]
 
 const LEGAL = [
@@ -61,7 +61,7 @@ export function SiteFooter({
                 source="footer"
                 className="inline-flex h-11 items-center justify-center rounded-full bg-white px-7 text-[14px] font-semibold text-ink transition hover:bg-white/90"
               >
-                Book a demo
+                Book a free call
               </BookingLink>
             </div>
           </div>
@@ -79,7 +79,7 @@ export function SiteFooter({
               ))}
               <li>
                 <BookingLink source="footer" className="text-[13px] text-white/60 transition hover:text-white">
-                  Talk with us
+                  Book a free call
                 </BookingLink>
               </li>
               <li>
@@ -149,7 +149,7 @@ export function SiteFooter({
               ))}
               <li>
                 <BookingLink source="footer" className="text-[14px] text-slate-600 hover:text-ink">
-                  Talk with us
+                  Book a free call
                 </BookingLink>
               </li>
               <li>

@@ -295,7 +295,7 @@ export function FunnelStory() {
             />
             <polygon points="490,34 505,29 500,42" fill="var(--brand)" />
             <text x="690" y="190" fontWeight="600" fill="var(--brand)" transform="rotate(90 690 190)" textAnchor="middle" className="solutions-funnel-loop-label">
-              Terra IQ feedback loop
+              TerraIQ feedback loop
             </text>
           </g>
         </svg>
@@ -334,7 +334,7 @@ const PILLARS_DATA = [
     icon: BarChart3,
     ring: "border-brand/25 text-brand",
     dot: "bg-brand",
-    title: "Terra IQ intelligence",
+    title: "TerraIQ intelligence",
     heading: "Decisions backed by your own data.",
     body: "Attribution, dashboards, and reporting read what is actually happening across your site, ads, and follow-up, so the next move is based on evidence instead of feel.",
     chips: ["Analytics", "Attribution", "Dashboards", "Reporting"],
@@ -455,7 +455,7 @@ export function HeroWebsiteInput() {
             ctaId="solutions_hero_book"
             className="inline-flex min-h-11 items-center whitespace-nowrap font-medium text-brand underline-offset-4 hover:text-brand-hover hover:underline"
           >
-            Book a call →
+            Book a free call →
           </BookingLink>
         </p>
       }

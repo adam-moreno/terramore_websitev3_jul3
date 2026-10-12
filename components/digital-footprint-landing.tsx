@@ -264,7 +264,7 @@ export function DigitalFootprintLanding() {
             className="mt-8 inline-flex h-12 items-center justify-center rounded-full bg-brand px-7 text-[16px] font-medium text-white hover:bg-brand-hover"
           />
           <BookingLink
-            label="Or talk through a report with us"
+            label="Or book a free call"
             source="report"
             ctaId="report_closing_book"
             onClick={() => {

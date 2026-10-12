@@ -47,7 +47,7 @@ export function MarketingSecondaryAction({ ctaId }: { ctaId: CtaId }) {
       ctaId={ctaId}
       className="inline-flex min-h-11 items-center justify-center text-[16px] font-medium text-ink underline underline-offset-4 hover:text-brand"
     >
-      Or book a 30-minute call
+      Or book a free call
     </BookingLink>
   )
 }

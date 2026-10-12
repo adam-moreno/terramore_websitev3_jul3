@@ -18,7 +18,7 @@ export function LindyPage({
   accent,
   subtitle,
   children,
-  ctaLabel = "Let's talk",
+  ctaLabel = "Book a free call",
   primary = "check",
 }: LindyPageProps) {
   return (

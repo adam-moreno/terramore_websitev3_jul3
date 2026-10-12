@@ -29,14 +29,14 @@ export function ReportBand() {
                 ctaId="home_band_report"
                 className="inline-flex h-12 items-center justify-center rounded-full bg-brand px-6 text-[16px] font-medium text-white hover:bg-brand-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
               >
-                Check my business score
+                Check my business
               </CheckMyBusinessLink>
               <BookingLink
                 source="homepage"
                 className="inline-flex h-11 items-center justify-center gap-2 px-2 text-[15px] font-medium text-cream/80 underline-offset-4 hover:text-cream hover:underline"
               >
                 <CalendarDays aria-hidden className="h-4 w-4" />
-                Or talk with us
+                Or book a free call
               </BookingLink>
             </div>
           </div>

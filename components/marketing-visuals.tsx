@@ -49,7 +49,7 @@ export function MarketingHeroVisual() {
         <div className="overflow-hidden rounded-[1.55rem] bg-white">
           {/* Status area */}
           <div className="flex items-center justify-between bg-ink px-4 pb-2.5 pt-2">
-            <p className="text-[10px] font-semibold text-cream">Terra IQ</p>
+            <p className="text-[10px] font-semibold text-cream">TerraIQ</p>
             <Bell className="h-3 w-3 text-cream/60" strokeWidth={2.5} />
           </div>
 
@@ -134,7 +134,7 @@ const SERVICES = [
   { id: "email", label: "Email & SMS", note: "Follow-up that runs itself" },
   { id: "video", label: "Short-form content", note: "Video cut for social" },
   { id: "automation", label: "Automation", note: "CRM, routing, nurture" },
-  { id: "analytics", label: "Analytics & attribution", note: "Terra IQ shows what pays" },
+  { id: "analytics", label: "Analytics & attribution", note: "TerraIQ shows what pays" },
 ] as const
 
 /** Real photo example for each service (generated stills in the brand palette). */
@@ -513,14 +513,14 @@ export function CreativeCtaCard() {
           Get ads people actually stop for.
         </h3>
         <p className="mt-3 max-w-md text-[15px] leading-relaxed text-white/75">
-          Strategy, creative, and campaigns from one team — book a demo and see what that looks like for your business.
+          Strategy, creative, and campaigns from one team. Book a free call and see what that looks like for your business.
         </p>
         <div className="mt-7 flex flex-wrap items-center gap-4">
           <BookingLink
             source="marketing"
             className="inline-flex items-center rounded-full bg-white px-6 py-3 text-[14px] font-semibold text-ink transition hover:bg-white/90"
           >
-            Book a demo
+            Book a free call
           </BookingLink>
         </div>
       </div>

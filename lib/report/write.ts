@@ -290,7 +290,7 @@ export function reportToText(report: ReportContent): string {
     `Digital Footprint report: ${report.businessName}`,
     report.website ? `Site: ${report.website}` : "",
     `Read date: ${report.readDate}`,
-    `Digital Presence Score: ${report.overallScore ?? "n/a"} / 100`,
+    `Your score: ${report.overallScore ?? "n/a"} / 100`,
     `Evidence Coverage: ${report.evidenceCoverage}%`,
     "",
     report.headline,

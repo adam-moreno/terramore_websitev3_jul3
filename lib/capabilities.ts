@@ -521,7 +521,7 @@ export const CAPABILITIES: Capability[] = [
           },
           {
             title: "The client dashboard comes after we start",
-            body: "Our client dashboard, Terra IQ, is set up for you after work starts. It is not a public sign-up.",
+            body: "Our client dashboard, TerraIQ, is set up for you after work starts. It is not a public sign-up.",
           },
         ],
       },
@@ -1119,7 +1119,7 @@ export const CAPABILITIES: Capability[] = [
       },
       {
         title: "The dashboard comes after we start",
-        body: "Our client dashboard, Terra IQ, is for current clients. New work starts with a talk.",
+        body: "Our client dashboard, TerraIQ, is for current clients. New work starts with a talk.",
       },
     ],
     workTitle: "What It Looks Like for Clients",

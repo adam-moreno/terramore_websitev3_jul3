@@ -132,7 +132,7 @@ const DECK_STAGES: DeckStage[] = [
   {
     id: "intelligence",
     label: "Intelligence",
-    title: "Terra IQ · revenue by source",
+    title: "TerraIQ · revenue by source",
     pops: [
       { label: "Revenue attributed", value: "$12,480", delta: "+18%", deltaTone: "up", position: POP_TOP },
       { label: "Best return", value: "Brand search", delta: "3.1×", deltaTone: "gold", position: POP_BOTTOM },
@@ -192,7 +192,7 @@ const SM_COL = "hidden sm:block"
 
 /* Six report screens — one per stage. They read as Terramore's own product
    surfaces (roadmap doc, campaign dashboard, page analytics, follow-up log,
-   Terra IQ, revenue summary). Figures are plausible working data; no client
+   TerraIQ, revenue summary). Figures are plausible working data; no client
    is named. */
 function DeckCardArt({ id }: { id: string }) {
   switch (id) {
@@ -926,7 +926,7 @@ const SHOWCASE_STAGES: ShowcaseStage[] = [
         kind: "gold",
         title: "Booking built in",
         body: "A visitor can go from your ad to a confirmed time on your calendar without anyone touching it. You just show up to the call.",
-        cta: { label: "Book a demo →", href: "#calendar" },
+        cta: { label: "Book a free call →", href: "#calendar" },
       },
     ],
   },
@@ -936,13 +936,13 @@ const SHOWCASE_STAGES: ShowcaseStage[] = [
     persona: {
       name: "Terramore",
       role: "On measurement",
-      quote: "If you can't trace a sale back to its source, you're guessing. Terra IQ takes the guessing out.",
+      quote: "If you can't trace a sale back to its source, you're guessing. TerraIQ takes the guessing out.",
     },
     tiles: [
       {
         kind: "dark",
         art: "chart",
-        title: "Terra IQ ties revenue to its source",
+        title: "TerraIQ ties revenue to its source",
         body: "Campaigns, leads, and sales in one picture — so budget moves toward what pays.",
       },
       {
@@ -954,7 +954,7 @@ const SHOWCASE_STAGES: ShowcaseStage[] = [
         kind: "gold",
         title: "Your roadmap costs $0",
         body: "We build your growth roadmap before you sign anything — and it's yours to keep either way.",
-        cta: { label: "Get your roadmap →", href: "#calendar" },
+        cta: { label: "Book a free call →", href: "#calendar" },
       },
     ],
   },
@@ -1229,7 +1229,7 @@ export function TerraIQTile() {
       <div className="grid items-center gap-8 overflow-hidden rounded-[2rem] bg-gradient-to-br from-ink to-[#1c3350] p-7 shadow-[0_24px_70px_rgba(15,30,46,0.25)] md:grid-cols-[0.9fr_1.1fr] md:p-10">
         {/* Copy side */}
         <div>
-          <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-gold-from">Terra IQ</p>
+          <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-gold-from">TerraIQ</p>
           <h2 className="mt-3 text-[1.6rem] font-bold leading-[1.15] tracking-[-0.02em] text-white md:text-[2rem]">
             One report that ties every channel back to revenue.
           </h2>
@@ -1241,7 +1241,7 @@ export function TerraIQTile() {
             source="book"
             className="mt-6 inline-flex items-center rounded-full bg-white px-6 py-3 text-[14px] font-semibold text-ink transition hover:bg-white/90"
           >
-            See it on your numbers →
+            Book a free call →
           </BookingLink>
         </div>
 

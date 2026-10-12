@@ -65,7 +65,7 @@ export default function TerramoreHomepage() {
                   anchor
                   secondary={
                     <BookingLink
-                      label="Or book a free 30-minute call"
+                      label="Or book a free call"
                       source="homepage"
                       ctaId="home_hero_book"
                       className="inline-flex min-h-11 items-center justify-center text-[14px] font-medium text-ink/70 underline underline-offset-4 hover:text-ink"

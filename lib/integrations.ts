@@ -233,30 +233,6 @@ export const INTEGRATION_CATEGORIES: IntegrationCategory[] = [
           },
         ],
       },
-      {
-        slug: "gmail",
-        title: "Gmail",
-        icon: "gmail",
-        deck: "Email replies sit next to texts and chat so the same customer is not split across inboxes.",
-        story: [
-          "Communications is not only SMS. Gmail is still how many customers write back. We keep it in the same path.",
-          "If the inbox is chaos, we do not replace Gmail. We attach it to the CRM and the calendar so a reply has an owner.",
-        ],
-        help: [
-          {
-            title: "Same customer across channels",
-            body: "A WhatsApp yes and a Gmail question should point at one record.",
-          },
-          {
-            title: "Add chat only when email is not the door",
-            body: "Some buyers will only text. We add that channel. We do not force everyone into one app.",
-          },
-          {
-            title: "A reply with a next step",
-            body: "Every thread gets a hold, an invoice, or a clear no.",
-          },
-        ],
-      },
     ],
     connectTitle: "How We Connect It",
     connect: [

@@ -24,6 +24,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/terms',
     '/disclosure',
     '/dmca',
+    '/articles/three-numbers-before-raising-ad-spend',
+    '/articles/why-your-best-ad-stops-working',
+    '/articles/your-landing-page-is-the-problem',
   ]
 
   const capabilityRoutes = CAPABILITIES.flatMap((capability) => [
