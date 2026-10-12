@@ -295,6 +295,7 @@ export function BookingFlow({
   source,
   startAtSchedule = false,
   entry = "inline",
+  initialStartIso,
 }: {
   mode?: "book" | "pick"
   /** "pick" mode: called with the chosen start; the caller reschedules. */
@@ -306,6 +307,8 @@ export function BookingFlow({
   startAtSchedule?: boolean
   /** Popup or on-page flow, for the V2A booking_* events. */
   entry?: BookingEntry
+  /** A time already chosen elsewhere (the phone line's text link): opens on details if it's still free. */
+  initialStartIso?: string
 }) {
   const isPick = mode === "pick"
   const skipQualifiers = startAtSchedule && !isPick
@@ -426,6 +429,27 @@ export function BookingFlow({
 
   const days = useMemo(() => (slots ? groupSlotsByDay(slots, tz) : []), [slots, tz])
   const availableKeys = useMemo(() => new Set(days.map((d) => d.key)), [days])
+
+  // Preselect the phone line's time once availability is in. Still free → straight to details; taken → that day.
+  const preselectedRef = useRef(false)
+  useEffect(() => {
+    if (!initialStartIso || isPick || preselectedRef.current || !slots || days.length === 0) return
+    preselectedRef.current = true
+    const wanted = Date.parse(initialStartIso)
+    if (!Number.isFinite(wanted)) return
+    const match = slots.find((iso) => Date.parse(iso) === wanted)
+    const sameDay = days.find((d) => d.slots.some((iso) => Date.parse(iso) === wanted)) ?? null
+    if (match && sameDay) {
+      setDayKey(sameDay.key)
+      setSlot(match)
+      setStep(detailsStep)
+      return
+    }
+    const fallbackDay = days.find((d) => d.slots.some((iso) => new Date(iso).toDateString() === new Date(wanted).toDateString()))
+    if (fallbackDay) setDayKey(fallbackDay.key)
+    setError("That time was just taken. Pick another below.")
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once, after availability loads
+  }, [slots, days])
   const day = days.find((d) => d.key === dayKey) || null
   const zone = tzLabel(tz, slot || undefined)
 

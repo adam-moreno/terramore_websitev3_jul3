@@ -38,7 +38,11 @@ export const metadata: Metadata = {
  * Skips qualifier steps (same startAtSchedule pattern as /solutions).
  * Share: https://www.terramore.io/schedule
  */
-export default function SchedulePage() {
+export default async function SchedulePage({ searchParams }: { searchParams: Promise<{ start?: string }> }) {
+  // ?start=<ISO> comes from the phone line's text: the time the caller picked on the call. Nothing personal is in it.
+  const { start } = await searchParams
+  const initialStartIso = start && Number.isFinite(Date.parse(start)) ? new Date(start).toISOString() : undefined
+
   return (
     <div className="min-h-screen bg-cream">
       <section className="relative overflow-hidden pb-10 pt-10 md:pb-14 md:pt-14">
@@ -75,7 +79,7 @@ export default function SchedulePage() {
             </div>
 
             <div className="rounded-[1.75rem] bg-white p-5 shadow-[0_16px_50px_rgba(15,30,46,0.08)] md:p-8">
-              <BookingFlow source="schedule" startAtSchedule />
+              <BookingFlow source={initialStartIso ? "phone_line" : "schedule"} startAtSchedule initialStartIso={initialStartIso} />
             </div>
           </div>
         </div>
