@@ -1,6 +1,7 @@
 "use client"
 
 import Image from "next/image"
+import { PlainEmail } from "@/components/plain-email"
 import Link from "next/link"
 import { BookingLink } from "@/components/booking-popup"
 import { DualCtas } from "@/components/dual-ctas"
@@ -98,7 +99,7 @@ export function SiteFooter({
                   &copy; {new Date().getFullYear()} Terramore LLC. All rights reserved.
                 </p>
                 <p className="mt-1 text-[12px] text-white/70">
-                  <a href="mailto:hello@terramore.io" className="underline-offset-4 hover:text-white hover:underline">hello@terramore.io</a>
+                  <a href="mailto:hello@terramore.io" className="underline-offset-4 hover:text-white hover:underline"><PlainEmail address="hello@terramore.io" /></a>
                 </p>
               </div>
               <ul className="flex flex-wrap items-center gap-x-5 gap-y-2">
@@ -183,7 +184,7 @@ export function SiteFooter({
             Results mentioned on this website are not typical and are not a guarantee of your success. Individual
             results vary. Terramore.io is owned and operated by Adam Moreno. Copyright &copy;{" "}
             {new Date().getFullYear()} Terramore LLC. All rights reserved.{" "}
-            <a href="mailto:hello@terramore.io" className="underline underline-offset-2 hover:text-ink">hello@terramore.io</a>
+            <a href="mailto:hello@terramore.io" className="underline underline-offset-2 hover:text-ink"><PlainEmail address="hello@terramore.io" /></a>
           </p>
         </div>
       </div>
