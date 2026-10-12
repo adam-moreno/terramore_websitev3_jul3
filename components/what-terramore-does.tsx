@@ -21,8 +21,8 @@ import { MotionToggle } from "@/components/motion-toggle"
 
 /** Landscape (16:9) from md up; the 4:5 portrait cut on phones (film repo: TerramoreBrandFilmPortrait). */
 const CUTS = {
-  landscape: { src: "/marketing/film/terramore-brand-film.mp4", poster: "/marketing/film/terramore-brand-film-poster.jpg", aspect: "aspect-video" },
-  portrait: { src: "/marketing/film/terramore-brand-film-portrait.mp4", poster: "/marketing/film/terramore-brand-film-portrait-poster.jpg", aspect: "aspect-[4/5]" },
+  landscape: { src: "/marketing/film/terramore-brand-film.mp4?v=20261011b", poster: "/marketing/film/terramore-brand-film-poster.jpg", aspect: "aspect-video" },
+  portrait: { src: "/marketing/film/terramore-brand-film-portrait.mp4?v=20261011b", poster: "/marketing/film/terramore-brand-film-portrait-poster.jpg", aspect: "aspect-[4/5]" },
 } as const
 const PHONE = "(max-width: 767px)"
 
