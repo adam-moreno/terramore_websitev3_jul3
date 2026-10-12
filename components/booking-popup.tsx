@@ -49,7 +49,7 @@ export function BookingPopup({
           <div>
             <p className="text-[12px] font-medium uppercase tracking-[0.16em] text-ink/70">Book a call</p>
             <p className="mt-2 text-[15px] leading-relaxed text-ink/75">
-              Free 30 minutes. A few questions, then a time that works — invite in your inbox.
+              Free 30 minutes. Pick a time that works; the invite lands in your inbox.
             </p>
           </div>
           <button type="button" onClick={onClose} className="shrink-0 text-[13px] font-medium text-ink/70 hover:text-ink">
@@ -57,7 +57,7 @@ export function BookingPopup({
           </button>
         </div>
         <div className="px-7 pb-7 pt-5 md:px-9 md:pb-9">
-          <BookingFlow compact source={source} entry="popup" />
+          <BookingFlow compact source={source} entry="popup" startAtSchedule />
         </div>
       </div>
     </div>,

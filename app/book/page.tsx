@@ -70,14 +70,7 @@ function BookCta({ className = "", ctaId }: { className?: string; ctaId?: CtaId 
   )
 }
 
-export default async function BookPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ schedule?: string }>
-}) {
-  const params = await searchParams
-  const startAtSchedule = params.schedule === "1" || params.schedule === "true"
-
+export default function BookPage() {
   return (
     <div className="min-h-screen bg-cream">
       {/* HERO — centered editorial headline over the animated system deck.
@@ -99,20 +92,24 @@ export default async function BookPage({
             Let&apos;s figure out what&apos;s actually holding your growth back.
           </h1>
           <p className="mx-auto mt-5 max-w-xl text-[17px] leading-relaxed text-slate-600 md:text-[18px]">
-            A 30-minute working session to look at your business, your current marketing system, and where we see the
-            biggest opportunities to grow.
+            A free 30-minute working session on your business and where the biggest opportunities are. Pick a time
+            below; times show in your time zone.
           </p>
-          <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
-            <BookCta ctaId="book_hero_book" />
-            <ReportPopupLink
-              direct
-              ctaId="book_hero_report"
-              className="text-center text-[15px] font-medium text-ink/70 underline-offset-4 hover:text-ink hover:underline"
-            >
-              See your digital footprint
-            </ReportPopupLink>
-          </div>
         </div>
+
+        {/* CALENDAR FIRST (owner direction 2026-10-11): the calendar is the page's job, so it sits under the headline. */}
+        <div id="calendar" className="mx-auto mt-8 max-w-3xl scroll-mt-20 rounded-[1.75rem] bg-white p-5 shadow-[0_16px_50px_rgba(15,30,46,0.08)] md:p-9">
+          <BookingFlow source="book" startAtSchedule />
+        </div>
+        <p className="mt-5 text-center">
+          <ReportPopupLink
+            direct
+            ctaId="book_hero_report"
+            className="text-[15px] font-medium text-ink/70 underline-offset-4 hover:text-ink hover:underline"
+          >
+            Not ready? See your digital footprint first
+          </ReportPopupLink>
+        </p>
 
         {/* The deck: the same methodology we'd instill in your business. */}
         <div className="mx-auto mt-12 max-w-5xl md:mt-16">
@@ -281,23 +278,6 @@ export default async function BookPage({
               </div>
             </Reveal>
           </div>
-        </div>
-      </section>
-
-      {/* BOOKING — the primary conversion section */}
-      <section id="calendar" className="page-shell scroll-mt-20 pb-16 md:pb-24">
-        <Reveal className="mx-auto max-w-2xl text-center">
-          <p className="section-eyebrow">Pick a time</p>
-          <h2 className="mt-3 text-[1.9rem] font-bold leading-[1.12] tracking-[-0.02em] text-ink md:text-[2.4rem]">
-            Let&apos;s talk about your business.
-          </h2>
-          <p className="mt-4 text-[16px] leading-relaxed text-slate-600">
-            Bring us the business you&apos;re trying to grow. We&apos;ll bring the questions, the analysis, and a clear
-            conversation about what we&apos;d do next. Free 30 minutes — times show in your time zone.
-          </p>
-        </Reveal>
-        <div className="mt-10 rounded-[1.75rem] bg-white p-5 shadow-[0_16px_50px_rgba(15,30,46,0.08)] md:p-9">
-          <BookingFlow source="book" startAtSchedule={startAtSchedule} />
         </div>
       </section>
 
