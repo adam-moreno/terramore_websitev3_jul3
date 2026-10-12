@@ -99,7 +99,7 @@ export default function TermsPage() {
             </div>
 
             {/* Section 1 */}
-            <section id="website-use" className="mb-8">
+            <section id="website-use" className="mb-8 scroll-mt-28">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">1. WEBSITE USE</h2>
 
               <div className="space-y-4">
@@ -121,7 +121,7 @@ export default function TermsPage() {
             </section>
 
             {/* Section 2 */}
-            <section id="conduct" className="mb-8">
+            <section id="conduct" className="mb-8 scroll-mt-28">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">2. USER CONDUCT AND INTELLECTUAL PROPERTY</h2>
 
               <div className="space-y-4">
@@ -157,7 +157,7 @@ export default function TermsPage() {
             </section>
 
             {/* Section 3 */}
-            <section id="results" className="mb-8">
+            <section id="results" className="mb-8 scroll-mt-28">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">3. YOUR RESULTS WILL VARY</h2>
 
               <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
@@ -186,7 +186,7 @@ export default function TermsPage() {
             </section>
 
             {/* Section 4 */}
-            <section id="google-maps" className="mb-8">
+            <section id="google-maps" className="mb-8 scroll-mt-28">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">4. GOOGLE MAPS</h2>
               <p className="text-gray-700 leading-relaxed">
                 Some Services, including the Digital Footprint report, use Google Maps features and content. Use of
@@ -213,7 +213,7 @@ export default function TermsPage() {
             </section>
 
             {/* Section 5 */}
-            <section id="software" className="mb-8">
+            <section id="software" className="mb-8 scroll-mt-28">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">5. SOFTWARE: GROWTH WORKSPACE AND TERRAIQ</h2>
               <p className="text-gray-700 leading-relaxed mb-4">
                 We offer software as part of the Services. TerraIQ is a dashboard for our clients. The Growth Workspace
@@ -252,7 +252,7 @@ export default function TermsPage() {
             </section>
 
             {/* Section 6 */}
-            <section id="subscriptions" className="mb-8">
+            <section id="subscriptions" className="mb-8 scroll-mt-28">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">6. SOFTWARE SUBSCRIPTIONS AND BILLING</h2>
               <p className="text-gray-700 leading-relaxed mb-4">
                 <strong>The Growth Workspace is free.</strong> We don&apos;t ask for a card, and it never turns into a
@@ -294,7 +294,7 @@ export default function TermsPage() {
             </section>
 
             {/* Section 7 */}
-            <section id="services-contracts" className="mb-8">
+            <section id="services-contracts" className="mb-8 scroll-mt-28">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">7. MARKETING SERVICES</h2>
               <p className="text-gray-700 leading-relaxed mb-4">
                 We also provide done-for-you marketing: ads, content, websites and automation. The first call is free.
@@ -338,7 +338,7 @@ export default function TermsPage() {
             </section>
 
             {/* Section 8 */}
-            <section id="financing" className="mb-8">
+            <section id="financing" className="mb-8 scroll-mt-28">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">8. FINANCING</h2>
               <p className="text-gray-700 leading-relaxed mb-4">
                 You may be able to pay for services over time through PayPal, using PayPal Pay Later or PayPal Credit,
@@ -352,7 +352,7 @@ export default function TermsPage() {
             </section>
 
             {/* Section 9 — id must stay "text-messages"; forms link to /terms#text-messages */}
-            <section id="text-messages" className="mb-8">
+            <section id="text-messages" className="mb-8 scroll-mt-28">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">9. TEXT MESSAGE TERMS</h2>
               <p className="text-gray-700 leading-relaxed mb-4">
                 <strong>Program.</strong> If you give us your mobile number and agree to receive texts, Terramore will
@@ -387,7 +387,7 @@ export default function TermsPage() {
             </section>
 
             {/* Section 10 */}
-            <section id="ai-phone-assistant" className="mb-8">
+            <section id="ai-phone-assistant" className="mb-8 scroll-mt-28">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">10. AI PHONE ASSISTANT</h2>
               <p className="text-gray-700 leading-relaxed">
                 Our phone line may be answered by an AI assistant. It will tell you it is an AI. At the start of each
@@ -398,7 +398,7 @@ export default function TermsPage() {
             </section>
 
             {/* Section 11 */}
-            <section id="indemnification" className="mb-8">
+            <section id="indemnification" className="mb-8 scroll-mt-28">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">11. YOUR CONTENT AND INDEMNIFICATION</h2>
               <p className="text-gray-700 leading-relaxed mb-4">
                 You keep ownership of the content and data you give us, such as logos, photos, product details and
@@ -420,7 +420,7 @@ export default function TermsPage() {
             </section>
 
             {/* Section 12 */}
-            <section id="warranties" className="mb-8">
+            <section id="warranties" className="mb-8 scroll-mt-28">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">12. DISCLAIMER OF WARRANTIES</h2>
               <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
                 <p className="text-gray-700 leading-relaxed mb-4">
@@ -444,7 +444,7 @@ export default function TermsPage() {
             </section>
 
             {/* Section 13 */}
-            <section id="liability" className="mb-8">
+            <section id="liability" className="mb-8 scroll-mt-28">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">13. LIMITATION OF LIABILITY</h2>
               <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
                 <div className="space-y-4">
@@ -480,7 +480,7 @@ export default function TermsPage() {
             </section>
 
             {/* Section 14 */}
-            <section id="termination" className="mb-8">
+            <section id="termination" className="mb-8 scroll-mt-28">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">14. SUSPENSION AND TERMINATION</h2>
               <p className="text-gray-700 leading-relaxed mb-4">
                 We may suspend or end your access to all or part of the Services if:
@@ -500,7 +500,7 @@ export default function TermsPage() {
             </section>
 
             {/* Section 15 */}
-            <section id="disputes" className="mb-8">
+            <section id="disputes" className="mb-8 scroll-mt-28">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">15. DISPUTE RESOLUTION AND ARBITRATION</h2>
               <div className="space-y-4">
                 <div>
@@ -554,7 +554,7 @@ export default function TermsPage() {
             </section>
 
             {/* Section 16 */}
-            <section id="governing-law" className="mb-8">
+            <section id="governing-law" className="mb-8 scroll-mt-28">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">16. GOVERNING LAW AND VENUE</h2>
               <p className="text-gray-700 leading-relaxed">
                 California law governs these Terms, without regard to its conflict of law rules. The Federal
@@ -565,7 +565,7 @@ export default function TermsPage() {
             </section>
 
             {/* Section 17 */}
-            <section id="changes" className="mb-8">
+            <section id="changes" className="mb-8 scroll-mt-28">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">17. CHANGES TO THESE TERMS</h2>
               <p className="text-gray-700 leading-relaxed">
                 We may update these Terms from time to time. We post the new version on this page and change the
@@ -577,7 +577,7 @@ export default function TermsPage() {
             </section>
 
             {/* Section 18 */}
-            <section id="general" className="mb-8">
+            <section id="general" className="mb-8 scroll-mt-28">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">18. GENERAL TERMS</h2>
               <ul className="list-disc pl-6 space-y-2 text-gray-700">
                 <li>
@@ -608,7 +608,7 @@ export default function TermsPage() {
             </section>
 
             {/* Section 19 */}
-            <section id="contact" className="mb-8">
+            <section id="contact" className="mb-8 scroll-mt-28">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">19. CONTACTING US</h2>
 
               <div className="bg-blue-50 p-6 rounded-lg">
