@@ -1,5 +1,14 @@
 # Development Log - Terramore Website
 
+## 2026-10-12 — Call-consent box on the report form (branch `feature/call-consent`, owner approved straight to production)
+
+**Owner ask (Adam, 2026-10-12):** add a consent-to-call checkbox so a prospect who asks for a report can be called within minutes, including by the AI phone agent.
+
+- **Form (`components/report-form.tsx`):** a second optional box under the phone field, unchecked, shown only once a phone is typed, next to the existing text box. Words in one place, `lib/consent/call-consent.ts` (`CALL_CONSENT_TEXT`, version `call-consent-2026-10-12`): calls and texts from Terramore at that number about the report and Terramore's services, including automated technology and an AI or prerecorded voice; calls recorded; not a condition of purchase; opt out by saying "stop calling" or replying STOP. Links to the phone terms (Terms §10) and the privacy statement. Written for Terramore from the standard elements in published TCPA guidance, not copied from another company.
+- **Record (`app/api/report/route.ts`):** with the box and a phone, `qualifier_answers` gets `call_consent`, `call_consent_at`, `call_consent_version`, `call_consent_page`, `call_consent_ip`, `call_consent_ua` (the proof of consent). No migration: the existing jsonb column. The admin alert shows the phone as "(OK to call)".
+- **Not done:** nothing calls these prospects yet. The 5-minute follow-up (human first, then the Retell Report Follow-Up agent) reads `call_consent = yes`. Counsel review of the wording is still open.
+- **Checks:** `scripts/verify-report-accuracy.mjs` adds 5 consent checks (34 total); all website verify scripts pass; `tsc` unchanged (16).
+
 ## 2026-10-12 — Report accuracy: footers, page names, next step per business, measurement (branch `fix/report-accuracy`, preview only)
 
 **Owner ask (Adam, 2026-10-12):** fix the four wrong-fact problems found in the owner-journey audit, where the free check and the report told real businesses something untrue or irrelevant.

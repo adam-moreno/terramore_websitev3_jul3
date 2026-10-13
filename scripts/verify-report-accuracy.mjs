@@ -101,4 +101,16 @@ assert(
   "an order form counts as a way to reach the business",
 )
 
+// 5. Call consent (lib/consent/call-consent.ts): the form shows the shared wording, the API records its version.
+const fs = await import("node:fs")
+const { CALL_CONSENT_TEXT, CALL_CONSENT_VERSION, callConsentRecord } = await import("../lib/consent/call-consent.ts")
+const form = fs.readFileSync(path.join(root, "components/report-form.tsx"), "utf8")
+const api = fs.readFileSync(path.join(root, "app/api/report/route.ts"), "utf8")
+assert(/\bAI or prerecorded voice\b/.test(CALL_CONSENT_TEXT) && /isn't required to buy/.test(CALL_CONSENT_TEXT) && /stop calling/.test(CALL_CONSENT_TEXT), "consent names AI voice, not a condition of purchase, how to opt out")
+assert(/useState\(false\)[^\n]*\n?[\s\S]{0,40}/.test(form) && /const \[callConsent, setCallConsent\] = useState\(false\)/.test(form), "call box unchecked by default")
+assert(/\{CALL_CONSENT_TEXT\}/.test(form), "form shows the shared wording")
+assert(/body\.callConsent === true && Boolean\(phone\)/.test(api), "API needs the box and a phone")
+const rec = callConsentRecord({ at: "2026-10-12T20:00:00.000Z", page: "https://www.terramore.io/report", ip: "203.0.113.5", userAgent: "x".repeat(500) })
+assert(rec.call_consent === "yes" && rec.call_consent_version === CALL_CONSENT_VERSION && rec.call_consent_ua.length === 200, "record carries version, time, page, IP, trimmed browser")
+
 console.log(`report accuracy: ok (${checks} checks)`)

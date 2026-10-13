@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { after } from "next/server"
+import { callConsentRecord } from "@/lib/consent/call-consent"
 import { analyticsRef } from "@/lib/analytics-ref"
 import { getServerSupabase, isMissingColumnError, supabaseTableUrl } from "@/lib/supabase-server"
 import { confirmLeadToUser, notifyAdminOfLead } from "@/lib/notify"
@@ -96,6 +97,17 @@ export async function POST(request: NextRequest) {
     // Texts only with the separate, unticked-by-default SMS box (TCPA). The phone alone still lets the team call back.
     const smsConsent = body.smsConsent === true && Boolean(phone)
     const smsConsentAt = smsConsent ? new Date().toISOString() : null
+    // Calls only with the separate, unticked call box (lib/consent/call-consent.ts): recorded with the wording version,
+    // time, page, IP and browser as the proof of consent.
+    const callConsent = body.callConsent === true && Boolean(phone)
+    const callConsentFields = callConsent
+      ? callConsentRecord({
+          at: new Date().toISOString(),
+          page: typeof body.page === "string" ? body.page : request.headers.get("referer"),
+          ip: request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || request.headers.get("x-real-ip"),
+          userAgent: request.headers.get("user-agent"),
+        })
+      : null
     const website = String(body.website || "").trim()
     const socials = String(body.socials || "").trim()
     const businessName = String(body.businessName || "").trim()
@@ -236,6 +248,7 @@ export async function POST(request: NextRequest) {
             qualifier_answers: {
               ...Object.fromEntries(Object.entries(rawAnswers).filter(([, value]) => typeof value === "string").map(([key, value]) => [key.slice(0, 20), String(value).slice(0, 40)])),
               ...(smsConsentAt ? { sms_consent: "yes", sms_consent_at: smsConsentAt } : {}),
+              ...(callConsentFields ?? {}),
             },
           })
           .eq("id", rowId)
@@ -260,7 +273,7 @@ export async function POST(request: NextRequest) {
         kind: "report" as const,
         name,
         email,
-        phone: phone || null,
+        phone: phone ? (callConsent ? `${phone} (OK to call)` : phone) : null,
         business: businessName || null,
         website: website || null,
         details: {

@@ -1,6 +1,7 @@
 "use client"
 
 import { FormEvent, useEffect, useRef, useState } from "react"
+import { CALL_CONSENT_TEXT } from "@/lib/consent/call-consent"
 import { BookingLink } from "@/components/booking-popup"
 import {
   trackEvent,
@@ -49,6 +50,8 @@ export function ReportForm({
   const [consent, setConsent] = useState(false)
   /** Separate, optional, unchecked: texts only go to people who tick it (TCPA). */
   const [smsConsent, setSmsConsent] = useState(false)
+  /** Separate, optional, unchecked: the only path to an automated or AI call (lib/consent/call-consent.ts). */
+  const [callConsent, setCallConsent] = useState(false)
   const [error, setError] = useState("")
   const [busy, setBusy] = useState(false)
   const [started, setStarted] = useState(false)
@@ -126,6 +129,8 @@ export function ReportForm({
           email,
           phone: phone.trim() || undefined,
           smsConsent: Boolean(phone.trim()) && smsConsent,
+          callConsent: Boolean(phone.trim()) && callConsent,
+          page: typeof window !== "undefined" ? window.location.href : undefined,
           website,
           socials: socials.trim() || undefined,
           businessName,
@@ -284,6 +289,21 @@ export function ReportForm({
             Text me about my report and booking. Optional. Message frequency varies; msg &amp; data rates may apply. Reply
             STOP to opt out, HELP for help. Consent isn&apos;t required to buy anything. See our{" "}
             <a href="/terms#text-messages" className="underline underline-offset-2 hover:text-ink">text terms</a> and{" "}
+            <a href="/privacy" className="underline underline-offset-2 hover:text-ink">privacy policy</a>.
+          </span>
+        </label>
+      ) : null}
+      {phone.trim() ? (
+        <label className="flex items-start gap-3 text-[14px] leading-relaxed text-ink/70">
+          <input
+            type="checkbox"
+            checked={callConsent}
+            onChange={(event) => setCallConsent(event.target.checked)}
+            className="mt-1"
+          />
+          <span>
+            {CALL_CONSENT_TEXT} See our{" "}
+            <a href="/terms#ai-phone-assistant" className="underline underline-offset-2 hover:text-ink">phone terms</a> and{" "}
             <a href="/privacy" className="underline underline-offset-2 hover:text-ink">privacy policy</a>.
           </span>
         </label>
