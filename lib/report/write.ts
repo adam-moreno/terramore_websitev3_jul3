@@ -38,6 +38,8 @@ export type ReportContent = {
   diagnostic: DiagnosticBundle
   /** Where "Fix it for me" opens (the Growth Workspace). Unset: the report doesn't offer it. */
   fixItUrl?: string | null
+  /** The fix the owner asked about first ("Fix this" on the website check), when the report lists it as fixable. */
+  startFix?: string | null
 }
 
 /** The "Fix it for me" line under an action Terramore can take on (the owner allows access first). */
@@ -289,6 +291,8 @@ export function buildReportJson(report: ReportContent) {
     diagnostic: report.diagnostic,
     model: report.model,
     readAt: report.diagnostic.readAt,
+    // The fix the owner tapped "Fix this" on before asking for the report; the Growth Workspace opens on it.
+    startFix: report.startFix ?? null,
   }
 }
 

@@ -70,6 +70,26 @@ for (const raw of ["", "not a site", "localhost", "http://", "a b.com", 42, null
   assert(normalizeLookupWebsite(raw) === null, `reject ${String(raw).slice(0, 20)}`)
 }
 
+// 3b. "Fix this" (2026-10-13): each mapped gap is a real finding id, maps to a fixable report action, and the
+// browser's value is never trusted.
+{
+  const fs = await import("node:fs")
+  const { FIX_FOR_FINDING, parseStartFix } = await load("lib/report/start-fix.ts")
+  const runSrc = fs.readFileSync(path.join(root, "lib/lookup/run.ts"), "utf8")
+  const recSrc = fs.readFileSync(path.join(root, "lib/report/recommend.ts"), "utf8")
+  const fixable = new Set([...(recSrc.match(/const FIXABLE = new Set\(\[([^\]]+)\]\)/)?.[1] ?? "").matchAll(/"([a-z0-9_]+)"/g)].map((m) => m[1]))
+  for (const [findingId, fix] of Object.entries(FIX_FOR_FINDING)) {
+    const [source, id] = findingId.split(".")
+    assert(new RegExp(`finding\\(\\s*"${source}",\\s*"${id}"`).test(runSrc), `Fix this: ${findingId} is a finding the check makes`)
+    assert(fixable.has(fix), `Fix this: ${fix} is fixable in the report`)
+  }
+  assert(parseStartFix("missing_meta") === "missing_meta" && parseStartFix("placeholder_page") === null && parseStartFix({}) === null && parseStartFix("__proto__") === null, "Fix this: only known fixes are accepted")
+  const ui = fs.readFileSync(path.join(root, "components/business-lookup.tsx"), "utf8")
+  assert(ui.indexOf("{next}</div>") > -1 && ui.indexOf("{next}</div>") < ui.indexOf("LOOKUP_SOURCES.map"), "the next step sits above the findings")
+  const pipe = fs.readFileSync(path.join(root, "lib/report/pipeline.ts"), "utf8")
+  assert(/r\.id === request\.startFix && r\.fixable/.test(pipe), "the start fix is kept only when the report lists it as fixable")
+}
+
 // 4. A stubbed lookup: findings are observed facts; the first look is the booking gap; Places stays out.
 const HOME = `<html><head><title>Example Remodeling | Kitchens</title><meta name="viewport" content="width=device-width">
 <script src="https://connect.facebook.net/en_US/fbevents.js"></script></head>

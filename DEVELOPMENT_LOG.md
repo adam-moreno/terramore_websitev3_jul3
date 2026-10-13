@@ -1,5 +1,14 @@
 # Development Log - Terramore Website
 
+## 2026-10-13 — Website check: the next step sits above the findings, and "Fix this" on each fixable gap
+
+**Owner direction (Adam):** owners shouldn't scroll the whole list to find the next step, and each gap should lead to doing it.
+
+- `components/business-lookup.tsx`: when the check finishes, the next step (Email me the full report, Or book a free call) sits above the findings with one line on what the report gives: "The full report lists each fix step by step, with the time it takes. Most can be done for you." The repeat at the bottom is gone (one view per CTA id, so tracking is unchanged).
+- **Fix this** on gaps the report can fix (`lib/report/start-fix.ts`: description, sitemap, measurement, call to action, phone, social links): opens the same report request and sends `fix`. `/api/report` accepts only known ids; the pipeline keeps it as `report_json.startFix` only when the report lists that fix as fixable. The Growth Workspace leads with it (dashboard UX-039). No new analytics events.
+- The link stays inline so sentences keep their line height; a `::after` box gives it a 44 px tap area (measured in headless Chrome at 390 and 320 px; no horizontal overflow).
+- Checks: lookup 137 (new: every mapped gap is a real finding and a fixable action; only known ids accepted; next step above the findings; start fix kept only when fixable), report-accuracy 61, funnel 79, v1-release, visual, conversion tracking, dedupe pass; `tsc` unchanged (16).
+
 ## 2026-10-13 — The website check keeps the site's path on free Wix, Google Sites and GitHub Pages
 
 **Found while testing (Adam):** "We couldn't reach that website" for `https://adamrafamoreno.wixsite.com/buynest`. `normalizeLookupWebsite` cut every address to its domain, and `adamrafamoreno.wixsite.com` is a 404: on these hosts the path *is* the site.

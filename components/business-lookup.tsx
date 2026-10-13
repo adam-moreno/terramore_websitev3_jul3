@@ -16,6 +16,7 @@ import {
 } from "lucide-react"
 import { BookingLink } from "@/components/booking-popup"
 import { ReportPopup } from "@/components/report-popup"
+import { FIX_FOR_FINDING } from "@/lib/report/start-fix"
 import { useCtaView } from "@/hooks/use-cta-view"
 import { trackCtaClick, trackFunnelEvent } from "@/lib/analytics"
 import type { CtaId, LookupOutcome } from "@/lib/funnel-taxonomy"
@@ -76,7 +77,7 @@ const EMPTY: LookupState = {
   error: null,
 }
 
-type LookupContextValue = { website: string | null; lookupId: string | null; source: string; openReport: () => void }
+type LookupContextValue = { website: string | null; lookupId: string | null; source: string; openReport: (startFix?: string | null) => void }
 const LookupContext = createContext<LookupContextValue | null>(null)
 
 /** Rough client-side check so obvious typos get an inline error before any request. The server validates again. */
@@ -178,6 +179,7 @@ export function BusinessLookup({
   const [inputError, setInputError] = useState<string | null>(null)
   const [state, setState] = useState<LookupState>(EMPTY)
   const [reportOpen, setReportOpen] = useState(false)
+  const [startFix, setStartFix] = useState<string | null>(null)
   const runRef = useRef(0)
   const viewRef = useCtaView<HTMLButtonElement>(ctaId)
   const [journey, setJourney] = useState<Journey>("socials")
@@ -296,10 +298,15 @@ export function BusinessLookup({
   }
 
   const showResults = state.phase !== "idle" && !(state.phase === "error" && state.error === "invalid_website")
+  // "Fix this" on a gap opens the same report request, remembering the gap so the report opens on that fix.
+  const openReport = (fix?: string | null) => {
+    setStartFix(fix ?? null)
+    setReportOpen(true)
+  }
 
   return (
     <LookupContext.Provider
-      value={{ website: state.website, lookupId: state.lookupId, source, openReport: () => setReportOpen(true) }}
+      value={{ website: state.website, lookupId: state.lookupId, source, openReport }}
     >
       <div
         id={anchor ? LOOKUP_ANCHOR : undefined}
@@ -414,12 +421,12 @@ export function BusinessLookup({
                   next={next}
                 />
                 <ScoreFactors score={state.score} />
-                <LookupResults state={state} onReset={reset} detail />
+                <LookupResults state={state} onReset={reset} detail onFix={openReport} />
               </>
             ) : null}
           </>
         ) : showResults ? (
-          <LookupResults state={state} next={next} onReset={reset} />
+          <LookupResults state={state} next={next} onReset={reset} onFix={openReport} />
         ) : null}
       </div>
       <ReportPopup
@@ -427,6 +434,7 @@ export function BusinessLookup({
         onClose={() => setReportOpen(false)}
         direct
         entry="popup_lookup"
+        startFix={startFix}
         website={state.website ?? undefined}
         description={
           state.domain ? `We'll finish the review of ${state.domain} and email you the full report.` : undefined
@@ -1286,11 +1294,14 @@ function LookupResults({
   state,
   next,
   onReset,
+  onFix,
   detail = false,
 }: {
   state: LookupState
   next?: React.ReactNode
   onReset: () => void
+  /** "Fix this" on a gap the report can fix: opens the report request on that fix. */
+  onFix?: (fix: string) => void
   /** Under the hero score card: the card carries the progress status and next steps, so this is the findings only. */
   detail?: boolean
 }) {
@@ -1314,6 +1325,16 @@ function LookupResults({
       )}
       {state.name && state.phase !== "error" ? <p className="mt-0.5 text-[14px] text-slate-600">{state.name}</p> : null}
 
+      {/* The next step sits above the findings (owner, 2026-10-13): nobody should scroll the whole list to find it. */}
+      {state.phase === "done" && next ? (
+        <div className="mt-4 rounded-xl bg-cream p-4">
+          <p className="text-[15px] leading-snug text-ink">
+            The full report lists each fix step by step, with the time it takes. Most can be done for you.
+          </p>
+          <div className="mt-3 flex flex-col items-stretch gap-x-5 gap-y-2 sm:flex-row sm:flex-wrap sm:items-center">{next}</div>
+        </div>
+      ) : null}
+
       {state.phase !== "error" ? (
         <ul className="mt-4 divide-y divide-ink/[0.07]">
           {LOOKUP_SOURCES.map(({ id, label }) => {
@@ -1331,15 +1352,31 @@ function LookupResults({
                 </div>
                 {result?.findings.length ? (
                   <ul className="mt-1.5 space-y-1 pl-[26px]">
-                    {result.findings.map((f) => (
-                      <li key={f.id} className="flex gap-2 text-[14px] leading-snug text-slate-700">
-                        <FindingIcon tone={f.tone} />
-                        <span>
-                          <span className="sr-only">{TONE_LABEL[f.tone]}: </span>
-                          {withStop(f.text)} <span className="text-slate-500">({f.evidence})</span>
-                        </span>
-                      </li>
-                    ))}
+                    {result.findings.map((f) => {
+                      const fix = f.tone === "gap" && onFix && state.phase === "done" ? FIX_FOR_FINDING[f.id] : undefined
+                      return (
+                        <li key={f.id} className="flex gap-2 text-[14px] leading-snug text-slate-700">
+                          <FindingIcon tone={f.tone} />
+                          <span>
+                            <span className="sr-only">{TONE_LABEL[f.tone]}: </span>
+                            {withStop(f.text)} <span className="text-slate-500">({f.evidence})</span>
+                            {fix ? (
+                              <>
+                                {" "}
+                                {/* Inline so the sentence keeps its line height; the ::after box gives a 44px tap target. */}
+                                <button
+                                  type="button"
+                                  onClick={() => onFix?.(fix)}
+                                  className="relative inline font-semibold text-brand underline underline-offset-4 after:absolute after:-inset-x-2 after:-inset-y-3 after:content-[''] hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40"
+                                >
+                                  Fix this
+                                </button>
+                              </>
+                            ) : null}
+                          </span>
+                        </li>
+                      )
+                    })}
                   </ul>
                 ) : null}
               </li>
@@ -1361,11 +1398,6 @@ function LookupResults({
           <p className="mt-4 text-[13px] leading-snug text-slate-600">
             Your free score reads your public pages and, when we can confirm it, your Google listing. Search rankings and ad activity aren&apos;t part of it.
           </p>
-          {next ? (
-            <div className="mt-4 flex flex-col items-stretch gap-x-5 gap-y-2 sm:flex-row sm:flex-wrap sm:items-center">
-              {next}
-            </div>
-          ) : null}
         </>
       ) : null}
 
@@ -1393,7 +1425,7 @@ export function LookupReportButton({ ctaId }: { ctaId: CtaId }) {
       type="button"
       onClick={() => {
         trackCtaClick(ctaId)
-        lookup.openReport()
+        lookup.openReport(null)
       }}
       className={PRIMARY}
     >

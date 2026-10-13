@@ -18,6 +18,8 @@ export type ReportRequest = {
   answers?: string | null
   /** The requester ticked the SMS box. Re-runs without it read the saved consent instead. */
   smsConsent?: boolean
+  /** The gap they tapped "Fix this" on (lib/report/start-fix.ts). Kept only when the report lists it as fixable. */
+  startFix?: string | null
 }
 
 export type ReportStatus = "needs_keys" | "generating" | "sent" | "failed"
@@ -115,7 +117,9 @@ export async function runReportPipeline(request: ReportRequest): Promise<Pipelin
     const diagnostic = await collectDiagnostic(request.businessName, request.website, { siteManager: siteManagerFrom(request.answers) })
     // "Fix it for me" opens in the Growth Workspace, so the report offers it only when the workspace link is set.
     const workspaceUrl = growthWorkspaceUrlFor("report_email")
-    const report = { ...(await writeReportFromDiagnostic(diagnostic)), fixItUrl: workspaceUrl }
+    const written = await writeReportFromDiagnostic(diagnostic)
+    const startFix = request.startFix && written.recommendations.some((r) => r.id === request.startFix && r.fixable) ? request.startFix : null
+    const report = { ...written, fixItUrl: workspaceUrl, startFix }
     const text = reportToText(report)
     const pdf = await renderReportPdf(report)
     const fixable = report.recommendations.filter((r) => r.fixable).length

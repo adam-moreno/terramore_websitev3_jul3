@@ -28,6 +28,7 @@ export function ReportForm({
   plain = false,
   initialWebsite,
   entry = "popup_questions",
+  startFix,
 }: {
   className?: string
   onCancel?: () => void
@@ -39,6 +40,8 @@ export function ReportForm({
   initialWebsite?: string
   /** How the popup opened, for the V2A report_progress / report_validation_error events. */
   entry?: ReportEntry
+  /** The gap the visitor tapped "Fix this" on (lib/report/start-fix.ts); the report opens on it. */
+  startFix?: string | null
 }) {
   const [firstName, setFirstName] = useState("")
   const [lastName, setLastName] = useState("")
@@ -136,6 +139,7 @@ export function ReportForm({
           businessName,
           answers,
           attribution,
+          ...(startFix ? { fix: startFix } : {}),
         }),
       })
 

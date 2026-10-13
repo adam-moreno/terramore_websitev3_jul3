@@ -1,3 +1,4 @@
+import { parseStartFix } from "@/lib/report/start-fix"
 import { NextRequest, NextResponse } from "next/server"
 import { after } from "next/server"
 import { callConsentRecord } from "@/lib/consent/call-consent"
@@ -114,6 +115,7 @@ export async function POST(request: NextRequest) {
     const website = String(body.website || "").trim()
     const socials = String(body.socials || "").trim()
     const businessName = String(body.businessName || "").trim()
+    const startFix = parseStartFix(body.fix)
 
     const rawAnswers = body.answers && typeof body.answers === "object" ? (body.answers as Record<string, unknown>) : {}
     const answerSummary = Object.entries(rawAnswers)
@@ -324,6 +326,7 @@ export async function POST(request: NextRequest) {
         businessName,
         website: website || null,
         answers: answerSummary || null,
+        startFix,
       })
     })
 

@@ -86,6 +86,7 @@ export function ReportPopup({
   direct = false,
   description,
   entry: entryOverride,
+  startFix,
 }: {
   open: boolean
   onClose: () => void
@@ -99,6 +100,8 @@ export function ReportPopup({
   description?: string
   /** Funnel entry when it isn't implied by `direct`, e.g. "popup_lookup" after a business lookup. */
   entry?: ReportEntry
+  /** The gap the visitor tapped "Fix this" on; sent with the request so the report opens on it. */
+  startFix?: string | null
 }) {
   const router = useRouter()
   /** Every report entry, direct ones included, hands off to the Growth Workspace when it's configured. */
@@ -325,7 +328,7 @@ export function ReportPopup({
                     <p className="mt-2 text-[1.2rem] font-semibold tracking-tight text-ink">Where should the report go?</p>
                   </>
                 )}
-                <ReportForm plain className={direct ? "" : "mt-4"} answers={answers} initialWebsite={website} entry={entry} onSuccess={() => setSuccess(true)} />
+                <ReportForm plain className={direct ? "" : "mt-4"} answers={answers} initialWebsite={website} entry={entry} startFix={startFix} onSuccess={() => setSuccess(true)} />
               </div>
             )}
           </>
