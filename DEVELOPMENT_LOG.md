@@ -1,5 +1,9 @@
 # Development Log - Terramore Website
 
+## 2026-10-12 — Price for scale set against the effort (branch `fix/scale-effort`)
+
+**Owner feedback (Adam):** "one more job is $3,800" is obvious on its own. The line now sets the owner's listed price against the effort of the top action: "For scale: your site lists "Spray-finished cabinets starting at $3,800 for a standard kitchen". This takes an afternoon; even one more job like that is $3,800." `effortPhrase` (lib/report/recommend.ts) takes the main step's time ("an afternoon", "about 15 minutes"); actions without a time ("A decision, not a task") skip the clause. Still the owner's own number, never a loss estimate. Checks: `verify-report-accuracy.mjs` 51.
+
 ## 2026-10-12 — Phone number on the site (branch `feature/site-phone`)
 
 **Owner decision (Adam, 2026-10-12):** show Terramore's line, (818) 699-9217, now answered by the Retell Terramore line (essentials, then a warm transfer 8am to 6pm Pacific or a booked call). Reverses the earlier deferral of a phone number beside "Book a free call".

@@ -233,11 +233,25 @@ export function buildRecommendations(input: {
     const noun = { store: "sale", order: "order", quote: "job", booking: "booking" }[input.nextStep?.path ?? "booking"]
     recommendations[0] = {
       ...recommendations[0],
-      impact: `${recommendations[0].impact} For scale: your site lists "${input.priceAnchor.context.replace(/[.!?]$/, "")}". One more ${noun} like that is ${input.priceAnchor.amount}.`,
+      impact: `${recommendations[0].impact} For scale: your site lists "${input.priceAnchor.context.replace(/[.!?]$/, "")}".${
+        effortPhrase(recommendations[0].effort) ? ` This takes ${effortPhrase(recommendations[0].effort)};` : ""
+      } even one more ${noun} like that is ${input.priceAnchor.amount}.`,
     }
   }
 
   return { findings: sorted, recommendations }
+}
+
+/**
+ * The effort of the action's main step, as a phrase that fits "This takes …": "an afternoon", "about 15 minutes".
+ * Two-step efforts use the last step (the real work); "or we can set it up" is left out of the sentence.
+ */
+export function effortPhrase(effort: string | undefined): string | null {
+  if (!effort) return null
+  const steps = effort.split(/Step \d+:/i).map((p) => p.trim()).filter(Boolean)
+  const main = (steps.at(-1) ?? effort).toLowerCase()
+  const m = main.match(/\b(an afternoon|a day|about \d+ (?:minutes|hours?))\b/)
+  return m ? m[1] : null
 }
 
 /** Plain effort for each action, so owners can pick the easy wins first. Rules may set their own (measurement). */

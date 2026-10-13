@@ -126,7 +126,14 @@ assert(ph.length === 1 && ph[0].phrase === "Photos coming soon!" && ph[0].isWork
 const value = buildRecommendations({ ...recInput, pages: [home, gallery], pixels: [], nextStep: quote, priceAnchor: anchor })
 const top = value.recommendations[0]
 assert(top.id === "no_measurement" && top.action.startsWith("Step 1:") && /an afternoon, or we can set it up/.test(top.effort), "measurement: benefit, two steps, effort")
-assert(/For scale: your site lists "Spray-finished cabinets starting at \$3,800 for a standard kitchen"\. One more job like that is \$3,800\./.test(top.impact), "price for scale on the top action, in the owner's words")
+assert(
+  /For scale: your site lists "Spray-finished cabinets starting at \$3,800 for a standard kitchen"\. This takes an afternoon; even one more job like that is \$3,800\./.test(top.impact),
+  `price set against the effort, in the owner's words (${top.impact})`,
+)
+const { effortPhrase } = await import("../lib/report/recommend.ts")
+assert(effortPhrase("Step 1: about 10 minutes, and you can start today. Step 2: an afternoon, or we can set it up for you.") === "an afternoon", "two-step effort: the main step")
+assert(effortPhrase("About 15 minutes; often a setting in your site builder.") === "about 15 minutes", "one-step effort")
+assert(effortPhrase("A decision, not a task.") === null, "no time, no 'This takes' clause")
 assert(value.recommendations.some((r) => r.id === "placeholder_page" && /phone camera/.test(r.effort)), "placeholder action with effort")
 assert(value.recommendations.every((r) => r.effort), "every action has an effort")
 const bakerRecs = buildRecommendations({ ...recInput, pages: [bakerHome], pixels: [], nextStep: baker })
