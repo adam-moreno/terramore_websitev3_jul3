@@ -72,6 +72,7 @@ export async function collectDiagnostic(businessName: string, rawWebsite: string
     competitiveAvailable: competitive.available,
     pixels: site.pixels,
     nextStep: site.nextStep,
+    priceAnchor: site.priceAnchor,
   })
 
   return {

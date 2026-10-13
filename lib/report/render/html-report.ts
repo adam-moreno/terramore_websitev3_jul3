@@ -29,6 +29,7 @@ export function renderReportHtml(report: ReportContent): string {
   <p><strong>Evidence.</strong> ${esc(r.evidence)}</p>
   <p><strong>Impact.</strong> ${esc(r.impact)}</p>
   <p><strong>Action.</strong> ${esc(r.action)}</p>
+  ${r.effort ? `<p><strong>Effort.</strong> ${esc(r.effort)}</p>` : ""}
 </article>`,
     )
     .join("")

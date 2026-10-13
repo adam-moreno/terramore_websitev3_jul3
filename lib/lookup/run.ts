@@ -4,7 +4,7 @@ import { collectDirectories } from "@/lib/report/collect/directories"
 import { fetchText, pickAttr } from "@/lib/report/collect/fetch"
 import { collectLocations } from "@/lib/report/collect/locations"
 import { assertPublicUrl, BlockedUrlError } from "@/lib/report/collect/public-url"
-import { collectSiteExperience, type BookingCheck } from "@/lib/report/collect/site-experience"
+import { collectSiteExperience, placeholderPages, type BookingCheck } from "@/lib/report/collect/site-experience"
 import { collectTechnical } from "@/lib/report/collect/technical"
 import { normalizeWebsite } from "@/lib/report/footprint"
 import type { NextStep, NextStepPath } from "@/lib/report/collect/next-step"
@@ -358,6 +358,8 @@ export async function runLookup(
   )
   if (site.prices.length)
     websiteFindings.push(finding("website", "prices", "working", "Prices are shown on the site", where))
+  for (const page of placeholderPages(pages).slice(0, 1))
+    websiteFindings.push(finding("website", "placeholder", "gap", `Your "${page.name}" page says "${page.phrase}"`, page.url))
   report("website", "done", websiteFindings)
 
   const booking = site.booking
@@ -441,7 +443,7 @@ export async function runLookup(
   }
   if (measurementFindings.length === 0) {
     measurementFindings.push(
-      finding("measurement", "none", "gap", "We didn't find analytics or ad tracking on the homepage", "Homepage code"),
+      finding("measurement", "none", "gap", "Nothing on your site shows where your visitors come from (no analytics or ad tags found)", "Homepage code"),
     )
   }
   report("measurement", "done", measurementFindings)

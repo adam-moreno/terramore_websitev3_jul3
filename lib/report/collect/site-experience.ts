@@ -54,7 +54,17 @@ function extractCtas(html: string): string[] {
   const candidates = Array.from(source.matchAll(/<(a|button)\b([^>]*)>([\s\S]*?)<\/\1>/gi))
     .filter((m) => !isStateToggle(m[2]))
     .map((m) => stripToText(m[3]))
-  return Array.from(new Set(candidates.filter((t) => t && CTA_HINT.test(t) && t.length < 60))).slice(0, 12)
+  // "Request A Quote" and "REQUEST A QUOTE!" are one button: dedupe on letters and digits, keep the first label.
+  const seen = new Set<string>()
+  const out: string[] = []
+  for (const t of candidates) {
+    if (!t || !CTA_HINT.test(t) || t.length >= 60) continue
+    const key = t.toLowerCase().replace(/[^a-z0-9]/g, "")
+    if (seen.has(key)) continue
+    seen.add(key)
+    out.push(t)
+  }
+  return out.slice(0, 12)
 }
 
 function attributeUrls(html: string, baseUrl: string): string[] {
@@ -113,6 +123,62 @@ const PRICE_BEFORE =
 const PRICE_AFTER =
   /^\s*(?:\/\s?(?:mo|month|hr|hour|yr|year|wk|week|day|night|visit|session|person|class)\b|(?:per|a|an) (?:month|hour|year|week|day|night|visit|session|person|class)\b|each\b)/i
 const STRUCTURED_PRICE = /"price"\s*:\s*"?\d|\bitemprop=["']price["']|\bproperty=["'](?:product|og):price:amount["']/i
+
+/** A price the business lists, with the sentence it sits in ("Spray-finished cabinets starting at $3,800…"). */
+export type PriceAnchor = { amount: string; value: number; context: string; url: string }
+
+/**
+ * The highest price stated as an offer across the pages read, for scale in the report ("one more job like that is
+ * $3,800"). The owner's own number, never an estimate. Amounts over $1,000,000 are ignored as not a single job.
+ */
+export function priceAnchor(pageHtml: Array<{ url: string; html: string }>): PriceAnchor | null {
+  let best: PriceAnchor | null = null
+  for (const page of pageHtml) {
+    const html = page.html.replace(/<script[\s\S]*?<\/script>/gi, " ").replace(/<style[\s\S]*?<\/style>/gi, " ")
+    // Each text run between tags, so a heading never runs into the sentence that holds the price.
+    for (const node of html.matchAll(/>([^<>]*\$\s?\d[^<>]*)</g)) {
+      const text = stripToText(node[1])
+      for (const m of text.matchAll(PRICE_AMOUNT)) {
+        const at = m.index ?? 0
+        const offered =
+          PRICE_BEFORE.test(text.slice(Math.max(0, at - 24), at)) || PRICE_AFTER.test(text.slice(at + m[0].length, at + m[0].length + 24))
+        if (!offered) continue
+        const value = Number(m[0].replace(/[^\d.]/g, ""))
+        if (!Number.isFinite(value) || value <= 0 || value > 1_000_000) continue
+        if (best && value <= best.value) continue
+        let context = text.trim()
+        if (context.length > 110) context = `${context.slice(0, 109).trimEnd()}…`
+        best = { amount: m[0].replace(/\s/g, ""), value, context, url: page.url }
+      }
+    }
+  }
+  return best
+}
+
+/** Pages that say they aren't finished ("Photos coming soon!"): the words and the page they're on. */
+export type PlaceholderPage = { url: string; name: string; phrase: string; isWorkPage: boolean }
+
+const PLACEHOLDER = /[^.!?]*\b(?:coming soon|under construction|check back soon|page coming)\b[^.!?]*[.!?]?/i
+
+export function placeholderPages(pages: PageSnapshot[]): PlaceholderPage[] {
+  return pages
+    .filter((p) => p.status !== null && p.status < 400)
+    .map((p) => {
+      let phrase = p.excerpt.match(PLACEHOLDER)?.[0]?.trim()
+      if (!phrase) return null
+      // The excerpt runs the title and heading into the first sentence ("Gallery Recent Projects Photos coming soon!").
+      for (let pass = 0; pass < 2; pass++) {
+        for (const lead of [p.title, ...p.h1]) {
+          if (lead && phrase.toLowerCase().startsWith(lead.toLowerCase())) phrase = phrase.slice(lead.length).trim()
+        }
+      }
+      if (!phrase || phrase.length > 120) return null
+      const name = p.h1[0] || p.title?.split(/[|–-]/)[0]?.trim() || "A page"
+      const isWorkPage = /gallery|portfolio|projects|our-work|\/work\b/i.test(p.url) || /gallery|portfolio|projects|our work/i.test(name)
+      return { url: p.url, name, phrase, isWorkPage }
+    })
+    .filter((p): p is PlaceholderPage => Boolean(p))
+}
 
 /**
  * Prices offered to customers: product or offer markup, or a dollar amount stated as a price ("from $49", "$120/hr",
@@ -244,6 +310,8 @@ export async function collectSiteExperience(
   booking: BookingCheck
   /** How the business takes its next customer step (store, order form, quote, booking). */
   nextStep: NextStep
+  /** The highest listed price across the pages read, with its sentence, or null. */
+  priceAnchor: PriceAnchor | null
 }> {
   if (!website) {
     return {
@@ -258,6 +326,7 @@ export async function collectSiteExperience(
       pageHtml: [],
       booking: { status: "none", via: null, url: null },
       nextStep: BOOKING_PATH_STEP,
+      priceAnchor: null,
     }
   }
 
@@ -290,6 +359,7 @@ export async function collectSiteExperience(
       pageHtml: home?.text ? [{ url: home.finalUrl, html: home.text }] : [],
       booking: { status: "none", via: null, url: null },
       nextStep: BOOKING_PATH_STEP,
+      priceAnchor: null,
     }
   }
 
@@ -353,5 +423,6 @@ export async function collectSiteExperience(
       pageUrls: pages.map((p) => p.url),
       pageHtml,
     }),
+    priceAnchor: priceAnchor(pageHtml),
   }
 }

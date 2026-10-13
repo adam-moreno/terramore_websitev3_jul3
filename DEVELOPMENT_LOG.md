@@ -1,5 +1,17 @@
 # Development Log - Terramore Website
 
+## 2026-10-12 — Report value: benefit-first measurement with effort, unfinished pages, prices for scale, duplicate buttons (branch `fix/report-value`)
+
+**Owner direction (Adam, 2026-10-12):** advice like "add a 'How did you hear about us?' question" reads as trivial; lead with what the owner gets, say how hard each step is, keep it plain.
+
+- **Effort on every action.** `Finding.effort` (plain words: "About 10 minutes", "An afternoon with your phone camera", "an afternoon, or we can set it up for you"), shown in the PDF card ("EFFORT"), the HTML report and the text copy. Rules set their own or take it from `EFFORT` in `lib/report/recommend.ts`.
+- **Measurement, benefit first, two steps.** "You can't see where your customers come from. So you can't tell which marketing is working, or spot a slowdown in inquiries before it shows up in sales." Step 1 ask how they heard (about 10 minutes, start today), Step 2 Google Analytics counting calls and quote/contact requests (an afternoon, or we set it up). Order businesses (link pages): the question on the order form, then a separate form link per place they post. The free check says "Nothing on your site shows where your visitors come from (no analytics or ad tags found)".
+- **Unfinished pages.** `placeholderPages` finds "coming soon / under construction / check back soon" on pages read; the free check names it and the report ranks it high (work pages: "Add 6 to 10 photos of finished jobs…", an afternoon with your phone camera).
+- **Prices for scale.** `priceAnchor` reads the highest listed offer price across all pages read (was homepage only) with its own sentence; the top action's impact ends "For scale: your site lists "…". One more job like that is $3,800." (sale / order / job / booking by business type). The owner's own number, never a loss estimate. The writer prompt keeps that sentence and the steps as written.
+- **Duplicate buttons.** Calls to action dedupe on letters and digits ("Request A Quote" = "REQUEST A QUOTE!"), which removed a false "too many competing buttons" on Aztec Paving.
+- **Effect (local run):** Halcyon test site's report now opens with measurement plus "$3,800 for a standard kitchen" and "Your "Recent Projects" page says "Photos coming soon!""; Little Fern gets order-form steps, not Google Analytics; Aztec Paving 66 → 70.
+- **Checks:** `verify-report-accuracy.mjs` 42 checks; lookup, funnel, v1-release pass; `tsc` unchanged (16).
+
 ## 2026-10-12 — Call-consent box on the report form (branch `feature/call-consent`, owner approved straight to production)
 
 **Owner ask (Adam, 2026-10-12):** add a consent-to-call checkbox so a prospect who asks for a report can be called within minutes, including by the AI phone agent.

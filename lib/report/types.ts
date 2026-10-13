@@ -70,6 +70,8 @@ export type Finding = {
   priority: Priority
   confidence: Confidence
   evidenceIds?: string[]
+  /** How much work the action is, in plain words ("About 10 minutes", "An afternoon, or we can set it up"). */
+  effort?: string
 }
 
 export type Recommendation = Finding & {

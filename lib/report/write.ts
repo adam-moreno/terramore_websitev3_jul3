@@ -63,6 +63,8 @@ Truth rules (critical):
 - If something is missing, write exactly: Not found in sources checked
 - Never say "This business does not have X." Say it was not found in sources checked.
 - Rephrase the provided Top recommendations; do not reorder priorities or invent new top actions.
+- Keep "Step 1" and "Step 2" in an action when they are there, in that order. Don't add time estimates (effort is shown separately).
+- If an impact contains a sentence starting "For scale:", keep that sentence word for word.
 - Google Maps and Google Business Profile listings, ratings, reviews, review counts, and addresses are not part of your input. Do not mention them, estimate them, or say they were not found.
 
 Output. Return one JSON object only:
@@ -324,6 +326,7 @@ export function reportToText(report: ReportContent): string {
       lines.push(`   Evidence: ${r.evidence}`)
       lines.push(`   Impact: ${r.impact}`)
       lines.push(`   Action: ${r.action}`)
+      if (r.effort) lines.push(`   Effort: ${r.effort}`)
       lines.push("")
     }
   }

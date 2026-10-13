@@ -113,4 +113,24 @@ assert(/body\.callConsent === true && Boolean\(phone\)/.test(api), "API needs th
 const rec = callConsentRecord({ at: "2026-10-12T20:00:00.000Z", page: "https://www.terramore.io/report", ip: "203.0.113.5", userAgent: "x".repeat(500) })
 assert(rec.call_consent === "yes" && rec.call_consent_version === CALL_CONSENT_VERSION && rec.call_consent_ua.length === 200, "record carries version, time, page, IP, trimmed browser")
 
+// 6. Value fixes: price for scale, unfinished pages, effort on every action, measurement by business.
+const { priceAnchor, placeholderPages } = await import("../lib/report/collect/site-experience.ts")
+const anchor = priceAnchor([
+  { url: "https://p.example/services.html", html: "<h2>Cabinet refinishing</h2><p>Spray-finished cabinets starting at $3,800 for a standard kitchen.</p><p>Interior rooms from $450.</p><p>Since 2019 we've saved homeowners $2,000,000.</p>" },
+])
+assert(anchor?.amount === "$3,800" && anchor.context.startsWith("Spray-finished cabinets"), "highest listed price, its own sentence, no heading run-in")
+assert(priceAnchor([{ url: "x", html: "<p>Over $5,000 saved by clients</p>" }]) === null, "amounts that aren't prices are ignored")
+const gallery = { ...home, url: "https://p.example/gallery.html", title: "Gallery", h1: ["Recent Projects"], excerpt: "Gallery Recent Projects Photos coming soon!" }
+const ph = placeholderPages([home, gallery])
+assert(ph.length === 1 && ph[0].phrase === "Photos coming soon!" && ph[0].isWorkPage, "unfinished work page found, phrase without title run-in")
+const value = buildRecommendations({ ...recInput, pages: [home, gallery], pixels: [], nextStep: quote, priceAnchor: anchor })
+const top = value.recommendations[0]
+assert(top.id === "no_measurement" && top.action.startsWith("Step 1:") && /an afternoon, or we can set it up/.test(top.effort), "measurement: benefit, two steps, effort")
+assert(/For scale: your site lists "Spray-finished cabinets starting at \$3,800 for a standard kitchen"\. One more job like that is \$3,800\./.test(top.impact), "price for scale on the top action, in the owner's words")
+assert(value.recommendations.some((r) => r.id === "placeholder_page" && /phone camera/.test(r.effort)), "placeholder action with effort")
+assert(value.recommendations.every((r) => r.effort), "every action has an effort")
+const bakerRecs = buildRecommendations({ ...recInput, pages: [bakerHome], pixels: [], nextStep: baker })
+const bakerMeasure = bakerRecs.findings.find((f) => f.id === "no_measurement")
+assert(bakerMeasure && /order form/.test(bakerMeasure.action) && !/Google Analytics/.test(bakerMeasure.action), "order business: order-form steps, not Google Analytics")
+
 console.log(`report accuracy: ok (${checks} checks)`)

@@ -149,12 +149,14 @@ function findingCard(
   evidence: string,
   impact: string,
   action: string,
+  effort?: string,
 ) {
   const blocks = [
     `FINDING  ${finding}`,
     `EVIDENCE  ${evidence}`,
     `IMPACT  ${impact}`,
     `ACTION  ${action}`,
+    ...(effort ? [`EFFORT  ${effort}`] : []),
   ]
   const lineSets = blocks.map((b) => wrap(b, ctx.regular, 10, CONTENT_WIDTH - 28))
   const height = 22 + lineSets.reduce((s, ls) => s + ls.length * 13, 0) + 16
@@ -328,7 +330,7 @@ export async function renderReportPdf(report: ReportContent): Promise<Buffer> {
 
   sectionTitle(ctx, "Top 5 actions", "Prioritized from evidence.")
   for (const r of report.recommendations) {
-    findingCard(ctx, r.rank, r.priority, r.finding, r.evidence, r.impact, r.action)
+    findingCard(ctx, r.rank, r.priority, r.finding, r.evidence, r.impact, r.action, r.effort)
   }
 
   if (report.moves.length) {

@@ -8,6 +8,7 @@ import type {
   TechnicalSnapshot,
 } from "@/lib/report/types"
 import type { NextStep } from "@/lib/report/collect/next-step"
+import { placeholderPages, type PriceAnchor } from "@/lib/report/collect/site-experience"
 
 function finding(
   id: string,
@@ -32,6 +33,8 @@ export function buildRecommendations(input: {
   /** Analytics and ad tags found in the homepage code. Omitted means not checked, so no measurement finding. */
   pixels?: string[]
   nextStep?: NextStep
+  /** The highest price the site lists, used for scale on the top action ("one more job like that is $3,800"). */
+  priceAnchor?: PriceAnchor | null
 }): { findings: Finding[]; recommendations: Recommendation[] } {
   const home = input.pages[0]
   const findings: Finding[] = []
@@ -95,17 +98,43 @@ export function buildRecommendations(input: {
         }),
       )
     }
-    // Without any measurement the owner can't see where customers come from, or whether that is changing. For an
-    // established business that has never marketed, this is often the most important fact on the page.
+    // Without any measurement the owner can't see where customers come from, or whether that is changing. Benefit
+    // first, in two steps with plain effort, so the easy start doesn't read as trivial and the real setup isn't scary.
     if (input.pixels && input.pixels.length === 0) {
+      const orderBusiness = input.nextStep?.path === "order"
       findings.push(
         finding("no_measurement", "Conversion", {
-          finding: "Nothing on the site measures where customers come from.",
+          finding: "You can't see where your customers come from.",
           evidence: `${home.url} code: Google Analytics, Google Tag Manager, Google Ads, Meta Pixel and TikTok Pixel not found in sources checked`,
-          impact: "You can't see which channels bring inquiries, or whether that is growing or shrinking month to month.",
-          action: "Install Google Analytics 4 (free) and count calls and quote or contact requests as conversions, so every month shows where inquiries came from.",
+          impact: orderBusiness
+            ? "So you can't tell which posts and places bring orders, or notice when orders start slowing down."
+            : "So you can't tell which marketing is working, or spot a slowdown in inquiries before it shows up in sales.",
+          action: orderBusiness
+            ? "Step 1: add a \"How did you hear about us?\" question to your order form. Step 2: share a different link to the form in each place you post it (Instagram bio, Facebook, texts), so every order shows where it came from."
+            : "Step 1: ask every new customer how they heard about you and keep a simple tally. Step 2: add Google Analytics, so your website counts calls and quote or contact requests by where each visitor came from.",
           priority: "high",
           confidence: "high",
+          effort: orderBusiness
+            ? "Step 1: about 5 minutes. Step 2: about 30 minutes."
+            : "Step 1: about 10 minutes, and you can start today. Step 2: an afternoon, or we can set it up for you.",
+        }),
+      )
+    }
+    // A page that says it isn't finished ("Photos coming soon!") is a dead end at the moment a visitor checks your work.
+    for (const page of placeholderPages(input.pages).slice(0, 1)) {
+      findings.push(
+        finding("placeholder_page", "Trust", {
+          finding: `Your "${page.name}" page says "${page.phrase}"`,
+          evidence: `Read on ${page.url}`,
+          impact: page.isWorkPage
+            ? "People who click to see your work find nothing, right when they're deciding whether to trust you."
+            : "Visitors who open this page hit a dead end and may leave.",
+          action: page.isWorkPage
+            ? "Add 6 to 10 photos of finished jobs, each with the town and the type of job."
+            : "Finish the page, or remove the link to it until it's ready.",
+          priority: "high",
+          confidence: "high",
+          effort: page.isWorkPage ? "An afternoon with your phone camera." : "About 30 minutes.",
         }),
       )
     }
@@ -195,10 +224,35 @@ export function buildRecommendations(input: {
   }
 
   const priorityRank: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 }
-  const sorted = [...findings].sort((a, b) => priorityRank[a.priority] - priorityRank[b.priority])
+  const sorted = [...findings]
+    .map((f) => ({ ...f, effort: f.effort ?? EFFORT[f.id] }))
+    .sort((a, b) => priorityRank[a.priority] - priorityRank[b.priority])
   const recommendations: Recommendation[] = sorted.slice(0, 5).map((f, index) => ({ ...f, rank: index + 1 }))
+  // For scale, on the top action only: the owner's own listed price, never an estimate of what they're losing.
+  if (recommendations[0] && input.priceAnchor) {
+    const noun = { store: "sale", order: "order", quote: "job", booking: "booking" }[input.nextStep?.path ?? "booking"]
+    recommendations[0] = {
+      ...recommendations[0],
+      impact: `${recommendations[0].impact} For scale: your site lists "${input.priceAnchor.context.replace(/[.!?]$/, "")}". One more ${noun} like that is ${input.priceAnchor.amount}.`,
+    }
+  }
 
   return { findings: sorted, recommendations }
+}
+
+/** Plain effort for each action, so owners can pick the easy wins first. Rules may set their own (measurement). */
+const EFFORT: Record<string, string> = {
+  site_unreachable: "Needs whoever hosts your website.",
+  missing_h1: "About 15 minutes.",
+  no_cta: "About 30 minutes.",
+  many_ctas: "About 30 minutes.",
+  weak_contact: "About 15 minutes.",
+  missing_meta: "About 10 minutes.",
+  missing_sitemap: "About 15 minutes; often a setting in your site builder.",
+  no_social_links: "About 10 minutes.",
+  thin_trust: "An afternoon.",
+  variant_heavy: "An afternoon.",
+  hold_paid: "A decision, not a task.",
 }
 
 export const REPORT_DISCLAIMERS = [
