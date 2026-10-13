@@ -7,7 +7,7 @@ Terramore is based in Los Angeles and serves owners with a shop, a service, or a
 - Growth Workspace: after the check, connect two tools (Shopify, Square, Instagram, Facebook, Google Ads, Meta Ads, Google Analytics) and get a plan from your own numbers.
 - Book a free 30-minute call with the team.
 
-Contact: hello@terramore.io.
+Contact: (818) 699-9217 or hello@terramore.io.
 
 Terms: scope and price agreed before work starts; month to month or a year paid up front; financing up to $10,000 through PayPal, subject to approval. Software has a free start and monthly plans. The client owns the data and assets.
 

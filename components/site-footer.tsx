@@ -2,6 +2,7 @@
 
 import Image from "next/image"
 import { PlainEmail } from "@/components/plain-email"
+import { PHONE_DISPLAY, PHONE_HREF } from "@/lib/contact"
 import Link from "next/link"
 import { BookingLink } from "@/components/booking-popup"
 import { DualCtas } from "@/components/dual-ctas"
@@ -99,6 +100,8 @@ export function SiteFooter({
                   &copy; {new Date().getFullYear()} Terramore LLC. All rights reserved.
                 </p>
                 <p className="mt-1 text-[12px] text-white/70">
+                  <a href={PHONE_HREF} className="underline-offset-4 hover:text-white hover:underline">{PHONE_DISPLAY}</a>
+                  {" · "}
                   <a href="mailto:hello@terramore.io" className="underline-offset-4 hover:text-white hover:underline"><PlainEmail address="hello@terramore.io" /></a>
                 </p>
               </div>
@@ -184,6 +187,8 @@ export function SiteFooter({
             Results mentioned on this website are not typical and are not a guarantee of your success. Individual
             results vary. Terramore.io is owned and operated by Adam Moreno. Copyright &copy;{" "}
             {new Date().getFullYear()} Terramore LLC. All rights reserved.{" "}
+            <a href={PHONE_HREF} className="underline underline-offset-2 hover:text-ink">{PHONE_DISPLAY}</a>
+            {" · "}
             <a href="mailto:hello@terramore.io" className="underline underline-offset-2 hover:text-ink"><PlainEmail address="hello@terramore.io" /></a>
           </p>
         </div>

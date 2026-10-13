@@ -1,5 +1,15 @@
 # Development Log - Terramore Website
 
+## 2026-10-12 — Phone number on the site (branch `feature/site-phone`)
+
+**Owner decision (Adam, 2026-10-12):** show Terramore's line, (818) 699-9217, now answered by the Retell Terramore line (essentials, then a warm transfer 8am to 6pm Pacific or a booked call). Reverses the earlier deferral of a phone number beside "Book a free call".
+
+- One source: `lib/contact.ts` (`PHONE_DISPLAY`, `PHONE_E164`, `PHONE_HREF`).
+- **Header:** desktop shows the number as a text link left of "Book a free call" (still the one filled button); the phone bar adds a 44 px call icon at 390 px and wider; the open menu leads with "Call (818) 699-9217" at every width.
+- **Footer:** both contact lines read "(818) 699-9217 · hello@terramore.io". **/book:** "Prefer to talk now? Call (818) 699-9217" under the calendar.
+- **Structured data** (`app/layout.tsx` ProfessionalService) gains `telephone`; `llms.txt` contact line includes the number. The Google tag config is untouched.
+- No click event added (would change analytics; ask first). **Browser pass still open** at 360 and 390 px: the window couldn't be resized in this session; the icon is hidden below 390 px as a precaution.
+- Checks: visual, v1-release, funnel, lookup pass; `tsc` unchanged (16).
 ## 2026-10-12 — Report value: benefit-first measurement with effort, unfinished pages, prices for scale, duplicate buttons (branch `fix/report-value`)
 
 **Owner direction (Adam, 2026-10-12):** advice like "add a 'How did you hear about us?' question" reads as trivial; lead with what the owner gets, say how hard each step is, keep it plain.

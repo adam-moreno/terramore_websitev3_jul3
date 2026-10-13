@@ -125,6 +125,7 @@ export default function RootLayout({
                   alternateName: 'Terramore',
                   legalName: 'Terramore LLC',
                   email: 'hello@terramore.io',
+                  telephone: '+1-818-699-9217',
                   url: 'https://www.terramore.io',
                   description:
                     'Terramore.io is a growth partner for small businesses: it finds where a business loses customers, fixes it, and runs the marketing (ads, content, web, automation), measured in its TerraIQ software. Free Digital Footprint report and a free Growth Workspace.',

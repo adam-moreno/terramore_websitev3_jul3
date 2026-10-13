@@ -1,6 +1,7 @@
 "use client"
 
-import { Menu, X } from "lucide-react"
+import { Menu, Phone, X } from "lucide-react"
+import { PHONE_DISPLAY, PHONE_HREF } from "@/lib/contact"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -69,6 +70,13 @@ export function SiteHeader() {
           />
 
           <div className="ml-auto flex items-center gap-1.5 lg:hidden">
+            <a
+              href={PHONE_HREF}
+              aria-label={`Call Terramore at ${PHONE_DISPLAY}`}
+              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-ink hover:bg-black/[0.04] max-[389px]:hidden"
+            >
+              <Phone aria-hidden className="h-5 w-5" />
+            </a>
             <BookingLink label="Book a free call" source="header" ctaId="header_book" className={`${PRIMARY_SM} max-[359px]:hidden`} />
             <button
               type="button"
@@ -104,6 +112,9 @@ export function SiteHeader() {
               <span>Log in</span>
               <span className="text-[10px] font-normal text-slate-500">Clients and workspace</span>
             </a>
+            <a href={PHONE_HREF} className="whitespace-nowrap px-3 py-1 text-[13px] font-medium text-ink underline-offset-4 hover:underline">
+              {PHONE_DISPLAY}
+            </a>
             <BookingLink label="Book a free call" source="header" ctaId="header_book" className={PRIMARY_LG} />
           </div>
         </div>
@@ -120,6 +131,13 @@ export function SiteHeader() {
                 {item.label}
               </Link>
             ))}
+            <a
+              href={PHONE_HREF}
+              className="flex min-h-11 items-center gap-2 border-b border-black/[0.04] py-4 text-[17px] font-medium text-ink"
+            >
+              <Phone aria-hidden className="h-5 w-5" />
+              Call {PHONE_DISPLAY}
+            </a>
             <div className="py-4">
               {/* Under 360 px the bar has no room for the button; it leads the menu instead. */}
               <BookingLink
