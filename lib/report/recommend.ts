@@ -35,6 +35,10 @@ export function buildRecommendations(input: {
   nextStep?: NextStep
   /** The highest price the site lists, used for scale on the top action ("one more job like that is $3,800"). */
   priceAnchor?: PriceAnchor | null
+  /** Who updates the website, from the report form ("Who updates your website?"). */
+  siteManager?: SiteManager
+  /** Site builder detected in the homepage code (WordPress, Wix, Squarespace, Shopify, Webflow…), or null. */
+  platform?: string | null
 }): { findings: Finding[]; recommendations: Recommendation[] } {
   const home = input.pages[0]
   const findings: Finding[] = []
@@ -225,7 +229,7 @@ export function buildRecommendations(input: {
 
   const priorityRank: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 }
   const sorted = [...findings]
-    .map((f) => ({ ...f, effort: f.effort ?? EFFORT[f.id] }))
+    .map((f) => fitToWhoDoesIt({ ...f, effort: f.effort ?? EFFORT[f.id] }, input.siteManager ?? "unsure", input.platform ?? null))
     .sort((a, b) => priorityRank[a.priority] - priorityRank[b.priority])
   const recommendations: Recommendation[] = sorted.slice(0, 5).map((f, index) => ({ ...f, rank: index + 1 }))
   // For scale, on the top action only: the owner's own listed price, never an estimate of what they're losing.
@@ -250,8 +254,69 @@ export function effortPhrase(effort: string | undefined): string | null {
   if (!effort) return null
   const steps = effort.split(/Step \d+:/i).map((p) => p.trim()).filter(Boolean)
   const main = (steps.at(-1) ?? effort).toLowerCase()
-  const m = main.match(/\b(an afternoon|a day|about \d+ (?:minutes|hours?))\b/)
+  const m = main.match(/\b(an afternoon|a day or two|a day|about \d+ (?:minutes|hours?))\b/)
   return m ? m[1] : null
+}
+
+export type SiteManager = "self" | "someone" | "unsure"
+
+export function siteManagerFrom(answers: string | null | undefined): SiteManager {
+  const m = (answers ?? "").match(/(?:^|;\s*)site=(self|someone|unsure)\b/)
+  return (m?.[1] as SiteManager | undefined) ?? "unsure"
+}
+
+/** Actions that change the website itself (the rest are decisions or work off the site). */
+const WEBSITE_CHANGE = new Set(["missing_h1", "no_cta", "many_ctas", "weak_contact", "missing_meta", "missing_sitemap", "no_social_links", "thin_trust", "placeholder_page", "no_measurement"])
+
+/** What "Fix it for me" can take on once the owner allows it. Photos and decisions stay with the owner. */
+const FIXABLE = new Set(["no_measurement", "missing_meta", "missing_sitemap", "missing_h1", "no_cta", "many_ctas", "weak_contact", "no_social_links", "thin_trust"])
+
+/** A note to forward to whoever runs the site, in the owner's voice. */
+const HANDOFF: Record<string, string> = {
+  no_measurement: "Hi, could you add Google Analytics 4 to our website, and count phone-number taps and contact or quote form submissions as key events? Thanks.",
+  missing_meta: "Hi, could you add a meta description to our homepage: one sentence on what we do and where? Thanks.",
+  missing_sitemap: "Hi, could you publish a sitemap.xml for our site and submit it in Google Search Console? Thanks.",
+  missing_h1: "Hi, could you give our homepage one main heading (H1) that says what we do and where? Thanks.",
+  no_cta: "Hi, could you put one clear button near the top of our homepage, for example \"Get a free estimate\"? Thanks.",
+  many_ctas: "Hi, could you keep one main button near the top of our homepage and make the others plain links? Thanks.",
+  weak_contact: "Hi, could you add our phone number and a short contact form to the top of the homepage? Thanks.",
+  no_social_links: "Hi, could you link our social media profiles from the website footer? Thanks.",
+  thin_trust: "Hi, could you add a few customer reviews and our license and insurance details near the main button on the homepage? Thanks.",
+  placeholder_page: "Hi, I'll send you photos of recent jobs. Could you put them on the projects page with the town and type of job? Thanks.",
+}
+
+/** How long installing Google Analytics takes on the builders we detect (owner with the login). */
+const ANALYTICS_INSTALL: Record<string, string> = {
+  Wix: "about 15 minutes in your Wix settings",
+  Squarespace: "about 15 minutes in your Squarespace settings",
+  Webflow: "about 15 minutes in your Webflow project settings",
+  Shopify: "about 20 minutes with Shopify's free Google app",
+  WordPress: "about 30 minutes with Google's free Site Kit plugin",
+  WooCommerce: "about 30 minutes with Google's free Site Kit plugin",
+}
+
+/**
+ * Effort and who does it, per the "Who updates your website?" answer: the owner gets builder-specific times; someone
+ * else gets a note to forward and an honest "a day or two"; not sure gets the times plus the note.
+ */
+function fitToWhoDoesIt(f: Finding, who: SiteManager, platform: string | null): Finding {
+  // An order business measures through its order form, not the website, so that action stays with the owner.
+  const orderForm = f.id === "no_measurement" && /order form/.test(f.action)
+  const out: Finding = { ...f, fixable: FIXABLE.has(f.id) && !orderForm }
+  if (!WEBSITE_CHANGE.has(f.id) || orderForm) return out
+  const twoStep = f.id === "no_measurement" && Boolean(f.effort?.includes("Step 2"))
+  if (twoStep && platform && ANALYTICS_INSTALL[platform] && who !== "someone") {
+    out.effort = `Step 1: about 10 minutes, and you can start today. Step 2: ${ANALYTICS_INSTALL[platform]}, or we can set it up for you.`
+  }
+  if (who === "someone") {
+    out.effort = twoStep
+      ? "Step 1: about 10 minutes, and you can start today. Step 2: your web person, usually a day or two to fit it in."
+      : f.id === "placeholder_page" && f.effort?.includes("phone camera")
+        ? "An afternoon with your phone camera, then your web person adds them (usually a day or two)."
+        : "Your web person: usually a day or two to fit it in."
+  }
+  if (who !== "self" && HANDOFF[f.id]) out.handoff = HANDOFF[f.id]
+  return out
 }
 
 /** Plain effort for each action, so owners can pick the easy wins first. Rules may set their own (measurement). */

@@ -36,7 +36,12 @@ export type ReportContent = {
   competitiveNote: string
   disclaimers: string[]
   diagnostic: DiagnosticBundle
+  /** Where "Fix it for me" opens (the Growth Workspace). Unset: the report doesn't offer it. */
+  fixItUrl?: string | null
 }
+
+/** The "Fix it for me" line under an action Terramore can take on (the owner allows access first). */
+export const FIX_IT_LINE = "Prefer we do it? Open Fixes in your Growth Workspace and choose Fix it for me."
 
 const CHAPTERS = [
   { kicker: "01 · First impression", title: "What a customer understands first." },
@@ -327,6 +332,8 @@ export function reportToText(report: ReportContent): string {
       lines.push(`   Impact: ${r.impact}`)
       lines.push(`   Action: ${r.action}`)
       if (r.effort) lines.push(`   Effort: ${r.effort}`)
+      if (r.handoff) lines.push(`   Send to your web person: "${r.handoff}"`)
+      if (r.fixable && report.fixItUrl) lines.push(`   Fix it for me: ${FIX_IT_LINE}`)
       lines.push("")
     }
   }

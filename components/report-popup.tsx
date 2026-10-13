@@ -41,7 +41,7 @@ const QUESTIONS = [
 /**
  * Readiness (owner decision 2026-10-11): how soon, and how they'd like to get there. Asked on every entry, so the team
  * can call people who want results now first. Visitors from the instant check skip the two business questions above
- * (the check already knows the business), so they answer two taps; everyone else answers four.
+ * (the check already knows the business), so they answer three taps; everyone else answers five.
  */
 const READINESS = [
   {
@@ -63,6 +63,17 @@ const READINESS = [
       { value: "done", label: "Have it done for me" },
     ],
     reassure: "Thanks. Your plan will fit how you like to work.",
+  },
+  {
+    // Owner decision 2026-10-12: the report's effort and "who does it" depend on who can change the website.
+    key: "site",
+    prompt: "Who updates your website?",
+    options: [
+      { value: "self", label: "I do" },
+      { value: "someone", label: "Someone else does" },
+      { value: "unsure", label: "Not sure" },
+    ],
+    reassure: "Got it. Every fix in your report will say who can do it and how long it takes.",
   },
 ] as const
 
@@ -257,8 +268,8 @@ export function ReportPopup({
                 <p className="mt-2 text-[15px] leading-relaxed text-ink/75">
                   {description ??
                     (direct
-                      ? "Two quick taps, then your details. In your inbox in minutes."
-                      : "Four quick taps, then your details. In your inbox in minutes.")}
+                      ? "Three quick taps, then your details. In your inbox in minutes."
+                      : "Five quick taps, then your details. In your inbox in minutes.")}
                 </p>
               </div>
               <button type="button" onClick={onClose} className="shrink-0 text-[13px] font-medium text-ink/70 hover:text-ink">

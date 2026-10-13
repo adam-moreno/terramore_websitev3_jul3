@@ -72,6 +72,10 @@ export type Finding = {
   evidenceIds?: string[]
   /** How much work the action is, in plain words ("About 10 minutes", "An afternoon, or we can set it up"). */
   effort?: string
+  /** A short note the owner can forward to whoever runs their website, when that isn't them. */
+  handoff?: string
+  /** True when "Fix it for me" applies (Terramore can do it once the owner allows it). */
+  fixable?: boolean
 }
 
 export type Recommendation = Finding & {

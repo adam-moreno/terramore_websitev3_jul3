@@ -1,5 +1,14 @@
 # Development Log - Terramore Website
 
+## 2026-10-12 — "Who updates your website?" and Fix it for me in the report (branch `feature/fix-it-for-me`)
+
+**Owner direction (Adam, 2026-10-12):** own the timing: can the owner really do a fix in an afternoon, or does someone else run the site? Offer "Fix it for me" so owners get over the hump of doing nothing; service stays an upsell, the software does the work.
+
+- **New readiness question** (`components/report-popup.tsx`): "Who updates your website?" I do / Someone else does / Not sure. Three taps from the check, five otherwise. The answer travels as `site=` in the answers (summary widened to 160 characters so it isn't cut).
+- **Effort by who does it** (`fitToWhoDoesIt`, `lib/report/recommend.ts`): owner on a detected builder gets the builder's time for Google Analytics (Wix/Squarespace/Webflow about 15 minutes, Shopify 20, WordPress 30 with Site Kit); "someone else" gets "Your web person: usually a day or two to fit it in" and a one-sentence note to forward ("Send to your web person"); "not sure" gets both. Photos stay with the owner first. Order-form measurement stays with the owner.
+- **Fix it for me** (`Finding.fixable`): measurement, meta description, sitemap, heading, buttons, contact, social links and trust get a line pointing to Fixes in the Growth Workspace, only when the workspace link is configured. The report email counts them ("2 fixes in it can be done for you there"). The dashboard side is the Fixes page (dashboard DOCUMENTATION.md, same date).
+- Checks: `verify-report-accuracy.mjs` 61, lookup 118, funnel 79, v1-release, visual, conversion tracking, dedupe pass; `tsc` unchanged (16).
+
 ## 2026-10-12 — Report follow-up hand-off to TerraIQ (branch `feature/report-follow-up`, not deployed)
 
 A report request with the call-consent box ticked is posted to TerraIQ's 5-minute follow-up (`lib/report/follow-up.ts`, from `app/api/report/route.ts` after the save, alongside the admin alert): signup id, name, phone, business, site, the visitor's time zone (`x-vercel-ip-timezone`) and the consent version and time. Bearer `TERRAMORE_FOLLOW_UP_SECRET` (same value in the dashboard project); without it, nothing is sent and a warning is logged. TerraIQ texts the owner at once and may place the AI call (dashboard DOCUMENTATION.md, same date). Checks pass; `tsc` unchanged.

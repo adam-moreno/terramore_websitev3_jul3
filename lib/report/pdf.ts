@@ -1,5 +1,5 @@
 import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage } from "pdf-lib"
-import type { ReportContent } from "@/lib/report/write"
+import { FIX_IT_LINE, type ReportContent } from "@/lib/report/write"
 
 /* Brand colors from tailwind.config.ts */
 const INK = rgb(15 / 255, 30 / 255, 46 / 255)
@@ -150,6 +150,8 @@ function findingCard(
   impact: string,
   action: string,
   effort?: string,
+  handoff?: string,
+  fixIt?: string,
 ) {
   const blocks = [
     `FINDING  ${finding}`,
@@ -157,6 +159,8 @@ function findingCard(
     `IMPACT  ${impact}`,
     `ACTION  ${action}`,
     ...(effort ? [`EFFORT  ${effort}`] : []),
+    ...(handoff ? [`SEND TO YOUR WEB PERSON  "${handoff}"`] : []),
+    ...(fixIt ? [`FIX IT FOR ME  ${fixIt}`] : []),
   ]
   const lineSets = blocks.map((b) => wrap(b, ctx.regular, 10, CONTENT_WIDTH - 28))
   const height = 22 + lineSets.reduce((s, ls) => s + ls.length * 13, 0) + 16
@@ -330,7 +334,7 @@ export async function renderReportPdf(report: ReportContent): Promise<Buffer> {
 
   sectionTitle(ctx, "Top 5 actions", "Prioritized from evidence.")
   for (const r of report.recommendations) {
-    findingCard(ctx, r.rank, r.priority, r.finding, r.evidence, r.impact, r.action, r.effort)
+    findingCard(ctx, r.rank, r.priority, r.finding, r.evidence, r.impact, r.action, r.effort, r.handoff, r.fixable && report.fixItUrl ? FIX_IT_LINE.replace("Prefer we do it? ", "") : undefined)
   }
 
   if (report.moves.length) {

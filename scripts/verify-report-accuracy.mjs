@@ -140,6 +140,27 @@ const bakerRecs = buildRecommendations({ ...recInput, pages: [bakerHome], pixels
 const bakerMeasure = bakerRecs.findings.find((f) => f.id === "no_measurement")
 assert(bakerMeasure && /order form/.test(bakerMeasure.action) && !/Google Analytics/.test(bakerMeasure.action), "order business: order-form steps, not Google Analytics")
 
+// 8. "Who updates your website?" sets who does each fix, how long it takes, and the note to forward.
+const { siteManagerFrom } = await import("../lib/report/recommend.ts")
+assert(siteManagerFrom("when=month; how=self; site=someone") === "someone" && siteManagerFrom("site=self") === "self", "site answer read")
+assert(siteManagerFrom("type=x") === "unsure" && siteManagerFrom(null) === "unsure", "no answer → not sure")
+const mine = buildRecommendations({ ...recInput, pages: [home], pixels: [], nextStep: quote, siteManager: "self", platform: "Wix" })
+const mineM = mine.findings.find((f) => f.id === "no_measurement")
+assert(/Step 2: about 15 minutes in your Wix settings/.test(mineM.effort) && !mineM.handoff && mineM.fixable, `owner on Wix: builder time, no note (${mineM.effort})`)
+const theirs = buildRecommendations({ ...recInput, pages: [home], pixels: [], nextStep: quote, siteManager: "someone", platform: "WordPress" })
+const theirsM = theirs.findings.find((f) => f.id === "no_measurement")
+assert(/your web person, usually a day or two/.test(theirsM.effort) && /Google Analytics 4/.test(theirsM.handoff), "web person: honest time and a note to forward")
+assert(theirs.findings.filter((f) => f.id !== "no_measurement" && f.handoff).every((f) => /^Your web person/.test(f.effort)), "every website change says who does it")
+const unsure = buildRecommendations({ ...recInput, pages: [home], pixels: [], nextStep: quote, platform: "Shopify" })
+assert(unsure.findings.find((f) => f.id === "no_measurement").handoff && /Shopify/.test(unsure.findings.find((f) => f.id === "no_measurement").effort), "not sure: builder time and the note")
+const bakerTheirs = buildRecommendations({ ...recInput, pages: [bakerHome], pixels: [], nextStep: baker, siteManager: "someone" }).findings.find((f) => f.id === "no_measurement")
+assert(bakerTheirs && !bakerTheirs.handoff && !bakerTheirs.fixable && /5 minutes/.test(bakerTheirs.effort), "order form stays with the owner")
+assert(effortPhrase("Step 1: about 10 minutes. Step 2: your web person, usually a day or two to fit it in.") === "a day or two", "web-person effort phrase")
+const { FIX_IT_LINE } = await import("../lib/report/write.ts")
+assert(typeof FIX_IT_LINE === "string" && /Fix it for me/.test(FIX_IT_LINE), "Fix it for me line")
+const popupSrc = fs.readFileSync(path.join(root, "components/report-popup.tsx"), "utf8")
+assert(/key: "site"/.test(popupSrc) && /Who updates your website\?/.test(popupSrc), "report form asks who updates the website")
+
 // 7. Phone clicks: placement and page only, never the number or the visitor (lib/funnel-taxonomy.ts).
 const { sanitizeFunnelParams } = await import("../lib/funnel-taxonomy.ts")
 const clean = sanitizeFunnelParams("phone_click", { placement: "header", page_path: "/book", phone: "+18186999217", email: "a@b.co" })

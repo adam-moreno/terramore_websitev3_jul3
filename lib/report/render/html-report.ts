@@ -2,7 +2,7 @@
  * Optional HTML render of the diagnostic report (consulting layout).
  * PDF remains the emailed deliverable; this supports preview / future web delivery.
  */
-import type { ReportContent } from "@/lib/report/write"
+import { FIX_IT_LINE, type ReportContent } from "@/lib/report/write"
 
 function esc(value: string): string {
   return value
@@ -30,6 +30,8 @@ export function renderReportHtml(report: ReportContent): string {
   <p><strong>Impact.</strong> ${esc(r.impact)}</p>
   <p><strong>Action.</strong> ${esc(r.action)}</p>
   ${r.effort ? `<p><strong>Effort.</strong> ${esc(r.effort)}</p>` : ""}
+  ${r.handoff ? `<p><strong>Send to your web person.</strong> &ldquo;${esc(r.handoff)}&rdquo;</p>` : ""}
+  ${r.fixable && report.fixItUrl ? `<p><strong>Fix it for me.</strong> <a href="${esc(report.fixItUrl)}">${esc(FIX_IT_LINE)}</a></p>` : ""}
 </article>`,
     )
     .join("")

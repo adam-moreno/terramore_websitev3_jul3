@@ -1,4 +1,5 @@
 import { getServerSupabase, isMissingColumnError } from "@/lib/supabase-server"
+import { siteManagerFrom } from "@/lib/report/recommend"
 import { SITE_URL } from "@/lib/booking-api"
 import { emailButton, emailP, emailShell, emailSignoff, emailTextLink } from "@/lib/email-template"
 import { growthWorkspaceUrlFor } from "@/lib/growth-workspace"
@@ -111,17 +112,19 @@ export async function runReportPipeline(request: ReportRequest): Promise<Pipelin
   const started = Date.now()
 
   try {
-    const diagnostic = await collectDiagnostic(request.businessName, request.website)
-    const report = await writeReportFromDiagnostic(diagnostic)
+    const diagnostic = await collectDiagnostic(request.businessName, request.website, { siteManager: siteManagerFrom(request.answers) })
+    // "Fix it for me" opens in the Growth Workspace, so the report offers it only when the workspace link is set.
+    const workspaceUrl = growthWorkspaceUrlFor("report_email")
+    const report = { ...(await writeReportFromDiagnostic(diagnostic)), fixItUrl: workspaceUrl }
     const text = reportToText(report)
     const pdf = await renderReportPdf(report)
+    const fixable = report.recommendations.filter((r) => r.fixable).length
 
     const first = request.name.split(/\s+/)[0] || "there"
     const subjectName = report.businessName
     const scopeLine = "It only says what we could see on the public web. If a chapter is thin, reply with a link and we read it."
     // The Growth Workspace is the next step after the report; booking stays available as a plain link.
-    const workspaceUrl = growthWorkspaceUrlFor("report_email")
-    const workspaceLine = "Your Growth Workspace picks up from this report. Use this email address when you create your account."
+    const workspaceLine = `Your Growth Workspace picks up from this report.${fixable ? ` ${fixable === 1 ? "One fix in it" : `${fixable} fixes in it`} can be done for you there: choose Fix it for me.` : ""} Use this email address when you create your account.`
     // The PDF is the deliverable; the report text stays on the Supabase row, not in the email body.
     const emailResult = await sendEmail({
       to: request.email,

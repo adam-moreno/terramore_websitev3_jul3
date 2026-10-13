@@ -1,4 +1,5 @@
 import { collectCatalog } from "@/lib/report/collect/catalog"
+import type { SiteManager } from "@/lib/report/recommend"
 import { collectDirectories } from "@/lib/report/collect/directories"
 import { collectLocations, toLocationSnapshot } from "@/lib/report/collect/locations"
 import { collectCompetitors } from "@/lib/report/collect/competitors"
@@ -15,7 +16,11 @@ import type { DiagnosticBundle } from "@/lib/report/types"
  * Orchestrates MVP collectors → facts → deterministic scores → recommendations.
  * Extends the existing report pipeline; does not replace lead intake.
  */
-export async function collectDiagnostic(businessName: string, rawWebsite: string | null | undefined): Promise<DiagnosticBundle> {
+export async function collectDiagnostic(
+  businessName: string,
+  rawWebsite: string | null | undefined,
+  options: { siteManager?: SiteManager } = {},
+): Promise<DiagnosticBundle> {
   const website = normalizeWebsite(rawWebsite)
   const readAt = new Date().toISOString()
 
@@ -73,6 +78,8 @@ export async function collectDiagnostic(businessName: string, rawWebsite: string
     pixels: site.pixels,
     nextStep: site.nextStep,
     priceAnchor: site.priceAnchor,
+    siteManager: options.siteManager,
+    platform: site.platform,
   })
 
   return {

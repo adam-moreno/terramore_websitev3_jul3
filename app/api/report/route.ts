@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
       .filter(([, value]) => typeof value === "string" && value)
       .map(([key, value]) => `${key}=${String(value)}`.replace(/[^a-z0-9_=]/gi, ""))
       .join("; ")
-      .slice(0, 100)
+      .slice(0, 160)
 
     const rawAttribution =
       body.attribution && typeof body.attribution === "object" ? (body.attribution as Record<string, unknown>) : {}
