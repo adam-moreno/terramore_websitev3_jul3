@@ -48,6 +48,7 @@ export async function collectDiagnostic(businessName: string, rawWebsite: string
     places,
     catalog,
     hasCheckout: site.hasCheckout,
+    nextStep: site.nextStep,
   })
 
   const facts = buildFacts({
@@ -69,6 +70,8 @@ export async function collectDiagnostic(businessName: string, rawWebsite: string
     catalog,
     hasCheckout: site.hasCheckout,
     competitiveAvailable: competitive.available,
+    pixels: site.pixels,
+    nextStep: site.nextStep,
   })
 
   return {

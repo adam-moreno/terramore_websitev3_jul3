@@ -7,6 +7,7 @@ import type {
   Recommendation,
   TechnicalSnapshot,
 } from "@/lib/report/types"
+import type { NextStep } from "@/lib/report/collect/next-step"
 
 function finding(
   id: string,
@@ -28,6 +29,9 @@ export function buildRecommendations(input: {
   catalog: CatalogSnapshot
   hasCheckout: boolean
   competitiveAvailable: boolean
+  /** Analytics and ad tags found in the homepage code. Omitted means not checked, so no measurement finding. */
+  pixels?: string[]
+  nextStep?: NextStep
 }): { findings: Finding[]; recommendations: Recommendation[] } {
   const home = input.pages[0]
   const findings: Finding[] = []
@@ -79,13 +83,27 @@ export function buildRecommendations(input: {
         }),
       )
     }
-    if (!home.hasPhone && !home.hasEmail && home.formCount === 0 && !home.hasBookingLink && !input.hasCheckout) {
+    if (!home.hasPhone && !home.hasEmail && home.formCount === 0 && !home.hasBookingLink && !input.hasCheckout && !input.nextStep?.orderForm && !input.nextStep?.externalForm) {
       findings.push(
         finding("weak_contact", "Conversion", {
           finding: "Contact and conversion paths are weak on the homepage.",
           evidence: "No phone, email, form, booking, or checkout signal detected on the homepage.",
           impact: "Interested visitors may leave before finding a way to engage.",
           action: "Surface phone or a short contact/booking form in the header and hero.",
+          priority: "high",
+          confidence: "high",
+        }),
+      )
+    }
+    // Without any measurement the owner can't see where customers come from, or whether that is changing. For an
+    // established business that has never marketed, this is often the most important fact on the page.
+    if (input.pixels && input.pixels.length === 0) {
+      findings.push(
+        finding("no_measurement", "Conversion", {
+          finding: "Nothing on the site measures where customers come from.",
+          evidence: `${home.url} code: Google Analytics, Google Tag Manager, Google Ads, Meta Pixel and TikTok Pixel not found in sources checked`,
+          impact: "You can't see which channels bring inquiries, or whether that is growing or shrinking month to month.",
+          action: "Install Google Analytics 4 (free) and count calls and quote or contact requests as conversions, so every month shows where inquiries came from.",
           priority: "high",
           confidence: "high",
         }),

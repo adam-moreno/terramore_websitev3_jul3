@@ -15,6 +15,7 @@ import {
   sameOrigin,
   stripToText,
 } from "@/lib/report/collect/fetch"
+import { BOOKING_PATH_STEP, keyPageRank, readNextStep, type NextStep } from "@/lib/report/collect/next-step"
 
 /**
  * Whether visitors can book a time online, and where that was confirmed.
@@ -146,7 +147,12 @@ function extractInternalLinks(html: string, baseUrl: string): string[] {
     const normalized = abs.split("#")[0].replace(/\/$/, "") || abs
     urls.push(normalized)
   }
-  return Array.from(new Set(urls)).slice(0, 8)
+  // Contact, quote and booking pages first: with only a few extra pages read, those hold the way to reach the business.
+  return Array.from(new Set(urls))
+    .map((u, i) => ({ u, i, r: keyPageRank(u) }))
+    .sort((a, b) => a.r - b.r || a.i - b.i)
+    .map((x) => x.u)
+    .slice(0, 8)
 }
 
 function parsePage(url: string, status: number | null, html: string): PageSnapshot {
@@ -236,6 +242,8 @@ export async function collectSiteExperience(
   homeFinalUrl: string | null
   pageHtml: Array<{ url: string; html: string }>
   booking: BookingCheck
+  /** How the business takes its next customer step (store, order form, quote, booking). */
+  nextStep: NextStep
 }> {
   if (!website) {
     return {
@@ -249,6 +257,7 @@ export async function collectSiteExperience(
       homeFinalUrl: null,
       pageHtml: [],
       booking: { status: "none", via: null, url: null },
+      nextStep: BOOKING_PATH_STEP,
     }
   }
 
@@ -280,6 +289,7 @@ export async function collectSiteExperience(
       homeFinalUrl: home?.finalUrl ?? null,
       pageHtml: home?.text ? [{ url: home.finalUrl, html: home.text }] : [],
       booking: { status: "none", via: null, url: null },
+      nextStep: BOOKING_PATH_STEP,
     }
   }
 
@@ -322,16 +332,26 @@ export async function collectSiteExperience(
   ]
 
   const text = stripToText(home.text)
+  const platform = platforms.find(([, re]) => re.test(home.text))?.[0] || null
+  const hasCheckout = /\/cart|\/checkout|add[-_ ]to[-_ ]cart|Add to bag/i.test(home.text)
+  const pages = [homePage, ...extraPages]
   return {
-    pages: [homePage, ...extraPages],
-    platform: platforms.find(([, re]) => re.test(home.text))?.[0] || null,
+    pages,
+    platform,
     pixels: pixelsList.filter(([, re]) => re.test(home.text)).map(([n]) => n),
     emailTools: emailList.filter(([, re]) => re.test(home.text)).map(([n]) => n),
-    hasCheckout: /\/cart|\/checkout|add[-_ ]to[-_ ]cart|Add to bag/i.test(home.text),
+    hasCheckout,
     prices: extractPrices(home.text, text),
     homeHtml: home.text,
     homeFinalUrl: home.finalUrl,
     pageHtml,
     booking,
+    nextStep: readNextStep({
+      hasCheckout,
+      catalogKind: platform === "Shopify" || platform === "WooCommerce" ? "ecommerce" : null,
+      ctaTexts: pages.flatMap((p) => p.ctaTexts),
+      pageUrls: pages.map((p) => p.url),
+      pageHtml,
+    }),
   }
 }

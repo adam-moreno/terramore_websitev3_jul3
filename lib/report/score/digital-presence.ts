@@ -9,6 +9,7 @@ import type {
   ScoreFactor,
   TechnicalSnapshot,
 } from "@/lib/report/types"
+import type { NextStep } from "@/lib/report/collect/next-step"
 
 const WEIGHTS = {
   digitalExperience: 0.25,
@@ -252,7 +253,7 @@ function scoreTrust(home: PageSnapshot | undefined, pages: PageSnapshot[], place
   }
 }
 
-function scoreConversion(home: PageSnapshot | undefined, hasCheckout: boolean, catalog: CatalogSnapshot): ScoreFactor {
+function scoreConversion(home: PageSnapshot | undefined, hasCheckout: boolean, catalog: CatalogSnapshot, nextStep?: NextStep): ScoreFactor {
   if (!home) {
     return {
       id: "conversion",
@@ -270,14 +271,22 @@ function scoreConversion(home: PageSnapshot | undefined, hasCheckout: boolean, c
     score += 15
     evidence.push(`CTA present: ${home.ctaTexts.slice(0, 3).join(", ")}`)
   } else evidence.push("CTA: Not found in sources checked")
-  if (home.hasPhone || home.hasEmail || home.formCount > 0) {
+  if (home.hasPhone || home.hasEmail || home.formCount > 0 || nextStep?.externalForm || nextStep?.orderForm) {
     score += 15
     evidence.push(`Contact path: phone=${home.hasPhone} email=${home.hasEmail} forms=${home.formCount}`)
   } else evidence.push("Contact path weak: phone/email/form not found on homepage")
+  // The step the business actually offers: booking for appointment work, a quote request for contractors and B2B,
+  // an order form for makers. Each is scored the same, so quote-based businesses aren't marked down for not booking.
   if (home.hasBookingLink) {
     score += 15
     evidence.push("Booking path signal found")
-  } else evidence.push("Booking path: Not found in sources checked")
+  } else if (nextStep?.quoteRequest) {
+    score += 15
+    evidence.push("Quote request path found")
+  } else if (nextStep?.orderForm) {
+    score += 15
+    evidence.push("Order form linked")
+  } else evidence.push("Booking, quote or order path: Not found in sources checked")
   if (hasCheckout) {
     score += 15
     evidence.push("Checkout/cart signal found")
@@ -363,13 +372,15 @@ export function scoreDigitalPresence(input: {
   places: PlacesLookup
   catalog: CatalogSnapshot
   hasCheckout: boolean
+  /** How the business takes its next step. A quote request or order form counts like a booking path. */
+  nextStep?: NextStep
 }): ScoreBreakdown {
   const home = input.pages[0]
   const factors: ScoreFactor[] = [
     scoreDigitalExperience(home, input.pages),
     scoreDiscoverability(input.technical, input.directories, input.places, home),
     scoreTrust(home, input.pages, input.places),
-    scoreConversion(home, input.hasCheckout, input.catalog),
+    scoreConversion(home, input.hasCheckout, input.catalog, input.nextStep),
     scoreTechnical(input.technical, home),
   ]
 

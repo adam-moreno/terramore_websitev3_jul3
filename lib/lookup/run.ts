@@ -7,6 +7,7 @@ import { assertPublicUrl, BlockedUrlError } from "@/lib/report/collect/public-ur
 import { collectSiteExperience, type BookingCheck } from "@/lib/report/collect/site-experience"
 import { collectTechnical } from "@/lib/report/collect/technical"
 import { normalizeWebsite } from "@/lib/report/footprint"
+import type { NextStep, NextStepPath } from "@/lib/report/collect/next-step"
 import { scoreDigitalPresence } from "@/lib/report/score/digital-presence"
 import type { CatalogSnapshot, DirectoryProfile, PageSnapshot, PlacesLookup, TechnicalSnapshot } from "@/lib/report/types"
 import { readAeo } from "@/lib/lookup/aeo"
@@ -29,6 +30,8 @@ export type ScoreInputs = {
   places: PlacesLookup
   catalog: CatalogSnapshot
   hasCheckout: boolean
+  /** How the business takes its next step; a quote request or order form scores like booking. */
+  nextStep?: NextStep
   where: string
   pagesRead: number
 }
@@ -83,6 +86,7 @@ export function socialAndScore(inputs: ScoreInputs, socials: AddedSocial[]) {
     places: inputs.places,
     catalog: inputs.catalog,
     hasCheckout: inputs.hasCheckout,
+    nextStep: inputs.nextStep,
   })
   // Numbers and labels only: factor evidence stays server-side, and Places values never leave memory.
   const score: LookupScore = {
@@ -151,20 +155,29 @@ const PLACES_NOT_CHECKED: PlacesLookup = {
   hasAddress: false,
 }
 
-/** Gaps in the order a first look should surface them: the ones closest to a lost customer first. */
-const FIRST_LOOK_ORDER = [
-  "contact.no_booking",
-  "contact.booking_unreachable",
-  "website.no_cta",
-  "contact.no_contact",
-  "contact.no_phone",
-  "contact.no_message",
-  "measurement.none",
-  "search_basics.no_title",
-  "search_basics.no_sitemap",
-  "google_maps.unconfirmed",
-  "search_basics.no_description",
-]
+/**
+ * Gaps in the order a first look should surface them: the ones closest to a lost customer first, for the way this
+ * business takes its next step. No way to reach the business at all always comes first. Online booking only leads
+ * for appointment-style businesses; a contractor who quotes, a store or a maker is never told to "book a time online".
+ */
+const LATER_GAPS = ["search_basics.no_title", "search_basics.no_sitemap", "google_maps.unconfirmed", "search_basics.no_description"]
+export const FIRST_LOOK_ORDER: Record<NextStepPath, string[]> = {
+  // A business people can already call or write to loses more to not knowing where customers come from than to the
+  // lack of online booking, so the measurement gap comes first once contact basics are in place.
+  booking: [
+    "contact.no_contact",
+    "contact.booking_unreachable",
+    "website.no_cta",
+    "measurement.none",
+    "contact.no_booking",
+    "contact.no_phone",
+    "contact.no_message",
+    ...LATER_GAPS,
+  ],
+  quote: ["contact.no_contact", "website.no_cta", "contact.no_phone", "contact.no_message", "measurement.none", ...LATER_GAPS],
+  store: ["website.no_cta", "contact.no_contact", "measurement.none", "contact.no_message", "contact.no_phone", ...LATER_GAPS],
+  order: ["contact.no_contact", "website.no_cta", "measurement.none", "contact.no_message", "contact.no_phone", ...LATER_GAPS],
+}
 
 function finding(
   source: LookupSourceId,
@@ -348,8 +361,10 @@ export async function runLookup(
   report("website", "done", websiteFindings)
 
   const booking = site.booking
+  const nextStep = site.nextStep
   const phone = pages.some((p) => p.hasPhone)
-  const forms = pages.some((p) => p.formCount > 0)
+  const onSiteForm = pages.some((p) => p.formCount > 0)
+  const forms = onSiteForm || Boolean(nextStep.externalForm) || Boolean(nextStep.orderForm)
   const email = pages.some((p) => p.hasEmail)
   const contactFindings: LookupFinding[] = []
   if (booking.status === "found") {
@@ -368,13 +383,17 @@ export async function runLookup(
         booking.url ? bookingEvidence(booking, website) : where,
       ),
     )
-  } else {
+  } else if (nextStep.path === "booking") {
     contactFindings.push(
       finding("contact", "no_booking", "gap", "There's no way to book a time online on the pages we read", where),
     )
+  } else if (nextStep.quoteRequest) {
+    contactFindings.push(finding("contact", "quote", "working", "Visitors can ask for a quote or estimate", where))
   }
   if (phone) contactFindings.push(finding("contact", "phone", "working", "A phone number is listed", where))
-  if (forms) contactFindings.push(finding("contact", "form", "working", "There's a form to get in touch", where))
+  if (nextStep.orderForm)
+    contactFindings.push(finding("contact", "order_form", "working", "Visitors can order through a form linked from the site", where))
+  if (onSiteForm || nextStep.externalForm) contactFindings.push(finding("contact", "form", "working", "There's a form to get in touch", where))
   if (email) contactFindings.push(finding("contact", "email", "working", "An email address is listed", where))
   if (booking.status === "none" && !phone && !forms && !email) {
     contactFindings.push(
@@ -505,6 +524,7 @@ export async function runLookup(
       places: places ?? PLACES_NOT_CHECKED,
       catalog,
       hasCheckout: site.hasCheckout,
+      nextStep,
       where,
       pagesRead: pages.length,
     }
@@ -534,6 +554,6 @@ export async function runLookup(
   }
 
   const gaps = found.filter((f) => f.tone === "gap")
-  const firstLook = FIRST_LOOK_ORDER.map((id) => gaps.find((g) => g.id === id)).find(Boolean) ?? gaps[0] ?? null
+  const firstLook = FIRST_LOOK_ORDER[nextStep.path].map((id) => gaps.find((g) => g.id === id)).find(Boolean) ?? gaps[0] ?? null
   emit({ type: "done", firstLook, checked: 6, score })
 }

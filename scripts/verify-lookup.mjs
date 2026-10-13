@@ -89,10 +89,25 @@ const sources = Object.fromEntries(events.filter((e) => e.type === "source").map
 for (const id of ["website", "contact", "measurement", "search_basics", "social", "google_maps"]) assert(sources[id], `source ${id} reported`)
 assert(sources.google_maps.status === "unavailable", "Google Maps unconfigured is 'unavailable', not a gap")
 const ids = events.filter((e) => e.type === "source").flatMap((e) => e.findings.map((f) => f.id))
-assert(ids.includes("contact.no_booking") && ids.includes("contact.phone"), "contact findings observed")
+// A remodeler that asks for quotes is not told to book online (owner decision 2026-10-12, lib/report/collect/next-step.ts).
+assert(ids.includes("contact.quote") && ids.includes("contact.phone") && !ids.includes("contact.no_booking"), "quote business: quote path, no booking gap")
 assert(ids.includes("measurement.meta") && !ids.includes("measurement.none"), "Meta Pixel detected, not 'none'")
 assert(ids.includes("search_basics.no_sitemap"), "missing sitemap reported")
-assert(events.at(-1).firstLook?.id === "contact.no_booking", "first look is the booking gap")
+assert(events.at(-1).firstLook?.id === "contact.no_message", `first look is the missing form or email (${events.at(-1).firstLook?.id})`)
+
+// 4b. An appointment-style business (no quote, store or order path) still leads with the booking gap.
+const SALON = `<html><head><title>Example Hair Studio</title><meta name="viewport" content="width=device-width">
+<script src="https://connect.facebook.net/en_US/fbevents.js"></script></head>
+<body><h1>Cuts and color in Silver Lake</h1><a href="tel:+12135550142">Call us</a><a href="mailto:hi@example.com">Email</a></body></html>`
+globalThis.fetch = async (url) => {
+  const u = String(url)
+  if (u.endsWith("/robots.txt") || u.endsWith("/sitemap.xml")) return new Response("not found", { status: 404 })
+  if (u === "http://93.184.216.34/") return new Response(SALON, { status: 200 })
+  return new Response("<html><body><p>Page</p></body></html>", { status: 200 })
+}
+const salonEvents = []
+await runLookup("http://93.184.216.34/", "b".repeat(32), (e) => salonEvents.push(e), Date.now() + 30_000)
+assert(salonEvents.at(-1).firstLook?.id === "contact.no_booking", `appointment business: first look is the booking gap (${salonEvents.at(-1).firstLook?.id})`)
 assert(events.every((e) => !e.findings || e.findings.every((f) => f.text && f.evidence)), "every finding names its evidence")
 assert(!JSON.stringify(events).match(/rating|review count|\d+(\.\d)? stars?/i), "no ratings or review counts in events")
 

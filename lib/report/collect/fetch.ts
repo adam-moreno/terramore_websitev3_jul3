@@ -37,7 +37,7 @@ export async function fetchText(
         continue
       }
       const text = await response.text()
-      return { status: response.status, text: text.slice(0, 600_000), finalUrl: current }
+      return { status: response.status, text: boundedText(text), finalUrl: current }
     }
     return null
   } catch {
@@ -91,8 +91,25 @@ export function sameOrigin(a: string, b: string): boolean {
   }
 }
 
+/**
+ * Page bodies are capped to keep parsing cheap. Site builders (GoDaddy, Brizy, Wix) put the phone, address and social
+ * links in a footer that can sit past the first 600,000 characters, so a long page keeps its head and its last
+ * 400,000 characters: the cut falls in the middle, never on the footer.
+ */
+export const HEAD_CHARS = 600_000
+export const TAIL_CHARS = 400_000
+
+export function boundedText(text: string): string {
+  if (text.length <= HEAD_CHARS + TAIL_CHARS) return text
+  return `${text.slice(0, HEAD_CHARS)}\n<!-- middle omitted -->\n${text.slice(-TAIL_CHARS)}`
+}
+
+/**
+ * Pages worth reading after the homepage. Matches "/contact", "/contact-us", "/contact.html", "/our-services.php",
+ * "/free-estimate/" and the like: older and site-builder sites name pages with a suffix or a file extension.
+ */
 export const KEY_PAGE_HINTS =
-  /\/(about|contact|service|services|shop|store|product|products|collections|menu|locations?|book|appointment|quote|estimate|pricing|team|our-story|work|portfolio|faq)(\/|$|\?)/i
+  /\/(?:our-|free-|get-a-|request-a-)?(about|contact|service|services|shop|store|product|products|collections|menu|locations?|book|booking|appointment|schedule|quote|estimate|pricing|team|our-story|work|portfolio|gallery|projects|faq|order)(?:[-_][a-z0-9-]*)?(?:\.(?:html?|php|aspx?))?(\/|$|\?|#)/i
 
 export const STATIC_ASSET = /\.(css|js|mjs|map|png|jpe?g|gif|svg|webp|ico|woff2?|ttf|eot|pdf|mp4|webm)(\?|$)/i
 export const CDN_PATH = /\/cdn\/|\/assets\/|_next\/static|\/static\//i
