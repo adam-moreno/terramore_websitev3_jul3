@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { after } from "next/server"
 import { callConsentRecord } from "@/lib/consent/call-consent"
+import { requestFollowUp } from "@/lib/report/follow-up"
 import { analyticsRef } from "@/lib/analytics-ref"
 import { getServerSupabase, isMissingColumnError, supabaseTableUrl } from "@/lib/supabase-server"
 import { confirmLeadToUser, notifyAdminOfLead } from "@/lib/notify"
@@ -108,6 +109,8 @@ export async function POST(request: NextRequest) {
           userAgent: request.headers.get("user-agent"),
         })
       : null
+    // The visitor's time zone (Vercel geo header), for calling hours on the follow-up.
+    const visitorTimeZone = request.headers.get("x-vercel-ip-timezone")
     const website = String(body.website || "").trim()
     const socials = String(body.socials || "").trim()
     const businessName = String(body.businessName || "").trim()
@@ -290,6 +293,19 @@ export async function POST(request: NextRequest) {
         notifyAdminOfLead(lead),
         confirmLeadToUser(lead),
         isHotLead(readiness) ? alertHotLead({ name, email, phone: phone || null, business: businessName || null, website: website || null }) : Promise.resolve(),
+        callConsentFields && rowId && phone
+          ? requestFollowUp({
+              signupId: rowId,
+              firstName,
+              name,
+              phone,
+              business: businessName || null,
+              website: website || null,
+              timeZone: visitorTimeZone,
+              consentVersion: callConsentFields.call_consent_version,
+              consentAt: callConsentFields.call_consent_at,
+            })
+          : Promise.resolve(),
       ])
       if (smsConsent) await sendReportAcceptSms({ email, name, phone: phone || null })
       await enrollLead({

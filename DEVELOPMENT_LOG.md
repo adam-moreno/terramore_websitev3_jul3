@@ -1,5 +1,9 @@
 # Development Log - Terramore Website
 
+## 2026-10-12 — Report follow-up hand-off to TerraIQ (branch `feature/report-follow-up`, not deployed)
+
+A report request with the call-consent box ticked is posted to TerraIQ's 5-minute follow-up (`lib/report/follow-up.ts`, from `app/api/report/route.ts` after the save, alongside the admin alert): signup id, name, phone, business, site, the visitor's time zone (`x-vercel-ip-timezone`) and the consent version and time. Bearer `TERRAMORE_FOLLOW_UP_SECRET` (same value in the dashboard project); without it, nothing is sent and a warning is logged. TerraIQ texts the owner at once and may place the AI call (dashboard DOCUMENTATION.md, same date). Checks pass; `tsc` unchanged.
+
 ## 2026-10-12 — Price for scale set against the effort (branch `fix/scale-effort`)
 
 **Owner feedback (Adam):** "one more job is $3,800" is obvious on its own. The line now sets the owner's listed price against the effort of the top action: "For scale: your site lists "Spray-finished cabinets starting at $3,800 for a standard kitchen". This takes an afternoon; even one more job like that is $3,800." `effortPhrase` (lib/report/recommend.ts) takes the main step's time ("an afternoon", "about 15 minutes"); actions without a time ("A decision, not a task") skip the clause. Still the owner's own number, never a loss estimate. Checks: `verify-report-accuracy.mjs` 51.
