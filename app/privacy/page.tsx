@@ -1,4 +1,4 @@
-// Updated 2026-10-11 for SMS, connected data, billing and financing. Plain-language draft; have counsel review before relying on it.
+// Updated 2026-10-12 for the AI phone assistant (disclosure on request, call transfer, caller lookup, training use). Updated 2026-10-11 for SMS, connected data, billing and financing. Plain-language draft; have counsel review before relying on it.
 import type { Metadata } from "next"
 import { PlainEmail } from "@/components/plain-email"
 import { SiteFooter } from "@/components/site-footer"
@@ -24,7 +24,7 @@ export default function PrivacyPolicyPage() {
           <div className="prose prose-lg max-w-none">
             <div className="bg-gray-50 p-6 rounded-lg mb-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">PRIVACY STATEMENT</h2>
-              <p className="text-gray-600 mb-0">Last Updated October 11, 2026</p>
+              <p className="text-gray-600 mb-0">Last Updated October 12, 2026</p>
             </div>
 
             <div className="space-y-8">
@@ -382,9 +382,15 @@ export default function PrivacyPolicyPage() {
               <section>
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">PHONE CALLS</h2>
                 <p className="text-gray-700 leading-relaxed">
-                  When you call us, an AI assistant may answer. It will tell you it is an AI. At the start of each call,
-                  we tell you that the call is recorded. Calls are recorded and transcribed. We use the recording and transcript to take your message, book a call with you and
-                  improve our service. Our phone and AI assistant provider is Retell AI.
+                  When you call us, an automated assistant that uses AI may answer. If you ask whether you are speaking
+                  with an AI, it will tell you. At the start of each call, we tell you that the call is recorded. Calls are
+                  recorded and transcribed. We use the recording and transcript to take your message, connect you with our
+                  team, book a call with you and improve our service, including training and evaluating the assistant. If
+                  the assistant transfers your call, the team member may hear a short summary of what you told it. To
+                  prepare our team for the call, we may match the number you call from to information we already hold
+                  about you, such as a report you requested or an earlier call, and look up the caller name your phone
+                  carrier provides and public information about your business, such as its Google listing. We do not buy
+                  personal data about callers. Our phone and AI assistant provider is Retell AI.
                 </p>
               </section>
 
@@ -493,7 +499,7 @@ export default function PrivacyPolicyPage() {
               <section>
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">CHANGES TO THIS PRIVACY STATEMENT</h2>
                 <p className="text-gray-700 leading-relaxed">
-                  This privacy statement was last updated on October 11, 2026, and is effective as of that date. The
+                  This privacy statement was last updated on October 12, 2026, and is effective as of that date. The
                   English language version of this privacy statement is the controlling version regardless of any
                   translation you may attempt.
                 </p>

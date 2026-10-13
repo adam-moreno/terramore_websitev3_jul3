@@ -1,5 +1,14 @@
 # Development Log - Terramore Website
 
+## 2026-10-12 — AI phone assistant wording in Terms, Privacy and Disclosure (branch `legal/ai-phone-terms` from production `6bea925`, local only)
+
+**Owner decision (Adam, 2026-10-12):** the Terramore line greeting no longer says it is an AI ("Thanks for calling Terramore in Los Angeles. This call is recorded. How can I help you today?"). The assistant still says it is an AI whenever asked. The recording notice stays at the start of every call (California all-party consent, Penal Code 632).
+
+- **Terms §10, Privacy "Phone calls", Disclosure "AI assistant disclosure":** "It will tell you it is an AI" becomes "If you ask whether you are speaking with an AI, it will tell you." Added: calls may be transferred to a team member who may hear a short summary; recordings and transcripts are also used for training and evaluating the assistant.
+- **Privacy only:** to prepare the team, we may match the calling number to records we already hold, look up the carrier caller name and public business information (such as a Google listing); we do not buy personal data about callers. This covers the planned caller-context lookup before a transfer.
+- Last Updated dates moved to October 12, 2026 on all three pages. Retention is unchanged (call recordings and transcripts kept up to 12 months).
+- **Not done:** counsel review (the pages remain a plain-language draft); the Terms' "email account holders for material changes" step, if Adam treats this as material.
+
 ## 2026-10-08 — Search-first acquisition (branch `acquisition/search-first` from production `597fd49`, local only)
 
 **Owner priority:** paid Google traffic produced few Digital Footprint requests. Cold visitors now start with the free business lookup ("Check my business"); booking stays available as the secondary action. Full record: `docs/acquisition/SEARCH_FIRST_ROUTE_AUDIT.md`. Review page: `docs/acquisition/search-first-review.html`.

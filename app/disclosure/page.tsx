@@ -1,4 +1,4 @@
-// Updated 2026-10-11 for SMS, connected data, billing and financing. Plain-language draft; have counsel review before relying on it.
+// Updated 2026-10-12 for the AI phone assistant (disclosure on request, call transfer, training use). Updated 2026-10-11 for SMS, connected data, billing and financing. Plain-language draft; have counsel review before relying on it.
 import type { Metadata } from "next"
 import { PlainEmail } from "@/components/plain-email"
 import { SiteFooter } from "@/components/site-footer"
@@ -21,7 +21,7 @@ export default function DisclosurePage() {
           <div className="prose prose-lg max-w-none">
             <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-8">
               <p className="text-sm font-medium text-yellow-800">
-                <strong>Last Updated:</strong> October 11, 2026
+                <strong>Last Updated:</strong> October 12, 2026
               </p>
             </div>
 
@@ -72,9 +72,10 @@ export default function DisclosurePage() {
               <section>
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">AI ASSISTANT DISCLOSURE</h2>
                 <p className="text-gray-700 leading-relaxed">
-                  Our phone line may be answered by an AI assistant. It will tell you it is an AI. At the start of each
-                  call, we tell you that the call is recorded. Calls are recorded and transcribed to take your message,
-                  book a call and improve our service.
+                  Our phone line may be answered by an automated assistant that uses AI. If you ask whether you are
+                  speaking with an AI, it will tell you. At the start of each call, we tell you that the call is recorded.
+                  Calls are recorded and transcribed to take your message, connect you with our team, book a call and
+                  improve our service, including training and evaluating the assistant.
                 </p>
               </section>
 

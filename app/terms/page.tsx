@@ -1,4 +1,4 @@
-// Updated 2026-10-11 for SMS, connected data, billing and financing. Plain-language draft; have counsel review before relying on it.
+// Updated 2026-10-12 for the AI phone assistant (disclosure on request, call transfer, training use). Updated 2026-10-11 for SMS, connected data, billing and financing. Plain-language draft; have counsel review before relying on it.
 import type { Metadata } from "next"
 import { PlainEmail } from "@/components/plain-email"
 import { SiteFooter } from "@/components/site-footer"
@@ -39,7 +39,7 @@ export default function TermsPage() {
       <div className="max-w-4xl mx-auto py-12 px-6">
         <div className="bg-white rounded-lg shadow-lg p-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-4 text-center">TERMS OF SERVICE</h1>
-          <p className="text-sm text-gray-600 mb-8 text-center">Last Updated: October 11, 2026</p>
+          <p className="text-sm text-gray-600 mb-8 text-center">Last Updated: October 12, 2026</p>
 
           <div className="prose prose-lg max-w-none">
             <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-8">
@@ -390,10 +390,12 @@ export default function TermsPage() {
             <section id="ai-phone-assistant" className="mb-8 scroll-mt-28">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">10. AI PHONE ASSISTANT</h2>
               <p className="text-gray-700 leading-relaxed">
-                Our phone line may be answered by an AI assistant. It will tell you it is an AI. At the start of each
-                call, we tell you that the call is recorded. Calls are recorded and transcribed so we can take your
-                message, book a call with you and improve our service. If you don&apos;t want to speak with an AI
-                assistant, you can email us instead.
+                Our phone line may be answered by an automated assistant that uses AI. If you ask whether you are
+                speaking with an AI, it will tell you. At the start of each call, we tell you that the call is recorded.
+                Calls are recorded and transcribed so we can take your message, connect you with our team, book a call
+                with you and improve our service, including training and evaluating the assistant. The assistant may
+                transfer your call to a member of our team, who may hear a short summary of what you told it before
+                joining. If you would rather speak with a person, say so on the call, or email us instead.
               </p>
             </section>
 
