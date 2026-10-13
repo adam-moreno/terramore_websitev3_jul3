@@ -8,7 +8,7 @@
 - **Header:** desktop shows the number as a text link left of "Book a free call" (still the one filled button); the phone bar adds a 44 px call icon at 390 px and wider; the open menu leads with "Call (818) 699-9217" at every width.
 - **Footer:** both contact lines read "(818) 699-9217 · hello@terramore.io". **/book:** "Prefer to talk now? Call (818) 699-9217" under the calendar.
 - **Structured data** (`app/layout.tsx` ProfessionalService) gains `telephone`; `llms.txt` contact line includes the number. The Google tag config is untouched.
-- No click event added (would change analytics; ask first). **Browser pass still open** at 360 and 390 px: the window couldn't be resized in this session; the icon is hidden below 390 px as a precaution.
+- **Click tracking (owner approved 2026-10-12):** every phone link is `components/phone-link.tsx`, which fires the GA4 funnel event `phone_click` with `placement` (header, header_mobile, menu, footer, footer_legal, book) and `page_path` only, through the taxonomy's PII barrier. Not an Ads conversion. It tells which page and spot drove a call; who called comes from the phone line (caller ID matched to the TerraIQ lead, caller brief). **Browser pass still open** at 360 and 390 px: the window couldn't be resized in this session; the icon is hidden below 390 px as a precaution.
 - Checks: visual, v1-release, funnel, lookup pass; `tsc` unchanged (16).
 ## 2026-10-12 — Report value: benefit-first measurement with effort, unfinished pages, prices for scale, duplicate buttons (branch `fix/report-value`)
 

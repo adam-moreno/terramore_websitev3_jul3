@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
-import { PHONE_DISPLAY, PHONE_HREF } from "@/lib/contact"
+import { PHONE_DISPLAY } from "@/lib/contact"
+import { PhoneLink } from "@/components/phone-link"
 import Image from "next/image"
 import { ConnectedChain, HeroSystemDeck, Reveal, StagedShowcase, TerraIQTile } from "@/components/book-visuals"
 import { BookingLink } from "@/components/booking-popup"
@@ -113,9 +114,9 @@ export default function BookPage() {
         </p>
         <p className="mt-2 text-center text-[15px] text-ink/70">
           Prefer to talk now? Call{" "}
-          <a href={PHONE_HREF} className="font-medium text-ink underline underline-offset-4">
+          <PhoneLink placement="book" className="font-medium text-ink underline underline-offset-4">
             {PHONE_DISPLAY}
-          </a>
+          </PhoneLink>
         </p>
 
         {/* The deck: the same methodology we'd instill in your business. */}

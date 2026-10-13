@@ -133,4 +133,15 @@ const bakerRecs = buildRecommendations({ ...recInput, pages: [bakerHome], pixels
 const bakerMeasure = bakerRecs.findings.find((f) => f.id === "no_measurement")
 assert(bakerMeasure && /order form/.test(bakerMeasure.action) && !/Google Analytics/.test(bakerMeasure.action), "order business: order-form steps, not Google Analytics")
 
+// 7. Phone clicks: placement and page only, never the number or the visitor (lib/funnel-taxonomy.ts).
+const { sanitizeFunnelParams } = await import("../lib/funnel-taxonomy.ts")
+const clean = sanitizeFunnelParams("phone_click", { placement: "header", page_path: "/book", phone: "+18186999217", email: "a@b.co" })
+assert(clean && clean.placement === "header" && clean.page_path === "/book" && !("phone" in clean) && !("email" in clean), "phone_click keeps placement and page, drops personal data")
+assert(sanitizeFunnelParams("phone_click", { placement: "billboard" })?.placement === undefined, "unknown placement dropped")
+const linkSrc = fs.readFileSync(path.join(root, "components/phone-link.tsx"), "utf8")
+assert(/trackFunnelEvent\("phone_click", \{ placement \}\)/.test(linkSrc) && !/conversion|AW-/.test(linkSrc), "phone link fires phone_click, no Ads conversion")
+for (const f of ["components/site-header.tsx", "components/site-footer.tsx", "app/book/page.tsx"]) {
+  assert(!/href=\{PHONE_HREF\}|tel:\+1/.test(fs.readFileSync(path.join(root, f), "utf8")), `${f}: every phone link is tracked`)
+}
+
 console.log(`report accuracy: ok (${checks} checks)`)
