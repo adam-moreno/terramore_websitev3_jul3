@@ -64,7 +64,7 @@ assert((await fetchText("http://93.184.216.34/")) === null, "redirect to metadat
 assert(!requested.some((u) => u.includes("169.254")), "private redirect target never requested")
 
 // 3. Input normalization.
-const ok = { "blueprintswithbob.com": "https://blueprintswithbob.com/", "https://www.example.com/pricing?x=1": "https://www.example.com/", "Example.COM": "https://example.com/" }
+const ok = { "blueprintswithbob.com": "https://blueprintswithbob.com/", "https://www.example.com/pricing?x=1": "https://www.example.com/", "Example.COM": "https://example.com/", "https://adamrafamoreno.wixsite.com/buynest/about?x=1": "https://adamrafamoreno.wixsite.com/buynest", "sites.google.com/view/acme-roofing/home": "https://sites.google.com/view/acme-roofing", "name.github.io/site": "https://name.github.io/site", "name.wixsite.com": "https://name.wixsite.com/" }
 for (const [raw, want] of Object.entries(ok)) assert(normalizeLookupWebsite(raw) === want, `normalize ${raw}`)
 for (const raw of ["", "not a site", "localhost", "http://", "a b.com", 42, null, "x".repeat(300)]) {
   assert(normalizeLookupWebsite(raw) === null, `reject ${String(raw).slice(0, 20)}`)

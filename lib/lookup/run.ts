@@ -261,6 +261,25 @@ export function alternateWww(website: string): string | null {
   }
 }
 
+/**
+ * Hosts where a whole site lives under a path, so the path is part of the address: free Wix sites
+ * (name.wixsite.com/site), Google Sites (sites.google.com/view/site) and GitHub Pages (name.github.io/repo).
+ * Everywhere else a pasted page (example.com/pricing) reads the homepage.
+ */
+const PATH_SITES: { host: RegExp; segments: number }[] = [
+  { host: /\.wixsite\.com$/i, segments: 1 },
+  { host: /^sites\.google\.com$/i, segments: 2 },
+  { host: /\.github\.io$/i, segments: 1 },
+]
+
+function sitePath(url: URL): string {
+  const rule = PATH_SITES.find((item) => item.host.test(url.hostname))
+  if (!rule) return "/"
+  const parts = url.pathname.split("/").filter(Boolean).slice(0, rule.segments)
+  if (parts.length < rule.segments || !parts.every((part) => /^[A-Za-z0-9._~-]{1,80}$/.test(part))) return "/"
+  return `/${parts.join("/")}`
+}
+
 export function normalizeLookupWebsite(raw: unknown): string | null {
   if (typeof raw !== "string") return null
   const trimmed = raw.trim()
@@ -270,7 +289,7 @@ export function normalizeLookupWebsite(raw: unknown): string | null {
   try {
     const url = new URL(website)
     if (!/^[a-z0-9.-]+\.[a-z]{2,}$/i.test(url.hostname)) return null
-    return `${url.protocol}//${url.hostname}/`
+    return `${url.protocol}//${url.hostname}${sitePath(url)}`
   } catch {
     return null
   }

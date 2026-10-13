@@ -1,5 +1,13 @@
 # Development Log - Terramore Website
 
+## 2026-10-13 — The website check keeps the site's path on free Wix, Google Sites and GitHub Pages
+
+**Found while testing (Adam):** "We couldn't reach that website" for `https://adamrafamoreno.wixsite.com/buynest`. `normalizeLookupWebsite` cut every address to its domain, and `adamrafamoreno.wixsite.com` is a 404: on these hosts the path *is* the site.
+
+- `lib/lookup/run.ts`: `PATH_SITES` keeps the first path segment on `*.wixsite.com` and `*.github.io`, and `/view/<site>` on `sites.google.com`. Everywhere else a pasted page (`example.com/pricing`) still reads the homepage.
+- Checked against the real site: the lookup reads it and finds no description, no measurement and no call-to-action button. "No sitemap" is true for free Wix sites.
+- Checks: lookup 122 (4 new address cases), report-accuracy 61, funnel 79, v1-release, visual, conversion tracking, dedupe pass; `tsc` unchanged (16). `verify-report-places.mjs` fails ("report text still renders") with or without this change: a separate, older break.
+
 ## 2026-10-12 — "Who updates your website?" and Fix it for me in the report (branch `feature/fix-it-for-me`)
 
 **Owner direction (Adam, 2026-10-12):** own the timing: can the owner really do a fix in an afternoon, or does someone else run the site? Offer "Fix it for me" so owners get over the hump of doing nothing; service stays an upsell, the software does the work.
