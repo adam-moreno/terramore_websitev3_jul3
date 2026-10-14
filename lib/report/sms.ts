@@ -15,12 +15,12 @@ import { ensureContactAndVerify, sendblueConfigured } from "@/lib/sendblue"
 
 export const REPORT_SMS = {
   m1: (firstName: string) =>
-    `Hey ${firstName}, Adam from Terramore here. We received your Digital Footprint report request. We're putting it together now and will send it to your email shortly.`,
+    `Hey ${firstName}, Adam from Terramore here. We received your Digital Footprint report request. We're putting it together now and will send it to your email shortly. Reply STOP to opt out.`,
   m2: (firstName: string) =>
-    `Your Digital Footprint report is ready, ${firstName}. Check your inbox for the findings and priorities.`,
+    `Your Digital Footprint report is ready, ${firstName}. Check your inbox for the findings and priorities. Reply STOP to opt out.`,
   /** Optional later — not wired. Timing TBD (e.g. +24h soft book CTA). */
   m3: (firstName: string) =>
-    `Hi ${firstName}, Adam here. If you want to walk through your Digital Footprint report together, book a free call: https://www.terramore.io/book`,
+    `Hi ${firstName}, Adam here. If you want to walk through your Digital Footprint report together, book a free call: https://www.terramore.io/book Reply STOP to opt out.`,
 } as const
 
 function firstOf(name: string): string {
