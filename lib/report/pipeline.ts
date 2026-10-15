@@ -5,6 +5,7 @@ import { emailButton, emailP, emailShell, emailSignoff, emailTextLink } from "@/
 import { growthWorkspaceUrlFor } from "@/lib/growth-workspace"
 import { ADMIN_EMAIL, REPLY_TO, emailProvider, postSlack, sendEmail } from "@/lib/notify"
 import { collectDiagnostic } from "@/lib/report/diagnostic"
+import { reportEmailSummary } from "@/lib/report/email-summary"
 import { renderReportPdf } from "@/lib/report/pdf"
 import { sendReportDeliveredSms } from "@/lib/report/sms"
 import { buildReportJson, modelProvider, reportToText, writeReportFromDiagnostic } from "@/lib/report/write"
@@ -129,7 +130,14 @@ export async function runReportPipeline(request: ReportRequest): Promise<Pipelin
     const scopeLine = "It only says what we could see on the public web. If a chapter is thin, reply with a link and we read it."
     // The Growth Workspace is the next step after the report; booking stays available as a plain link.
     const workspaceLine = `Your Growth Workspace picks up from this report.${fixable ? ` ${fixable === 1 ? "One fix in it" : `${fixable} fixes in it`} can be done for you there: choose Fix it for me.` : ""} Use this email address when you create your account.`
-    // The PDF is the deliverable; the report text stays on the Supabase row, not in the email body.
+    // The PDF is the deliverable; the email leads with the score and the top two fixes so the value shows without
+    // opening it. The full report text stays on the Supabase row.
+    const summary = reportEmailSummary({
+      businessName: subjectName,
+      overallScore: report.overallScore,
+      recommendations: report.recommendations,
+      workspaceUrl,
+    })
     const emailResult = await sendEmail({
       to: request.email,
       bcc: ADMIN_EMAIL,
@@ -139,6 +147,7 @@ export async function runReportPipeline(request: ReportRequest): Promise<Pipelin
       text: [
         `Hi ${first},`,
         "",
+        ...summary.text,
         `Your Digital Footprint report for ${subjectName} is attached as a PDF.`,
         "",
         scopeLine,
@@ -151,9 +160,10 @@ export async function runReportPipeline(request: ReportRequest): Promise<Pipelin
       ].join("\n"),
       html: emailShell({
         heading: "Your Digital Footprint report",
-        previewText: `${subjectName}: the PDF is attached.`,
+        previewText: summary.preview ?? `${subjectName}: the PDF is attached.`,
         bodyHtml: [
           emailP(`Hi ${first},`),
+          summary.html,
           emailP(`Your Digital Footprint report for ${subjectName} is attached as a PDF.`),
           emailP(scopeLine),
           ...(workspaceUrl

@@ -1,5 +1,14 @@
 # Development Log - Terramore Website
 
+## 2026-10-14 — The report email shows the score and the first two fixes, not only "the PDF is attached"
+
+**Found while testing (Adam):** the report email said only that the PDF was attached, so the value sat behind a file most owners won't open on a phone.
+
+- `lib/report/email-summary.ts` (new): above the PDF line, "Buynest scored 44 out of 100 for what customers can see and do online.", then "The two fixes to start with:" with the top two report actions by `rank`: the finding and one short action (the first sentence, or step 1 of a two-step action), each with **Fix this**. The inbox preview says the score.
+- **Fix this** opens the Growth Workspace link (`growthWorkspaceUrlFor("report_email")`). The dashboard's Fixes page (`/workspace/fixes`) takes no fix parameter and doesn't create a workspace for a new owner, so the link goes to the workspace entry; no fix ids in URLs. Without a workspace link, the fixes are listed without it.
+- `lib/report/pipeline.ts`: text and HTML versions both carry it; "Open my Growth Workspace" and "Or book a free call" stay. Only what the PDF shows: no factor scores, ids, evidence or confidence. `lib/email-template.ts` exports its ink and link colors for the block.
+- Checks: report-accuracy 102 (19 new: order, top two, short action, Fix this in text and HTML, no internal values, escaping, placement), funnel, lookup, v1-release, visual, conversion tracking, dedupe pass; `tsc` unchanged (16). `verify-report-places.mjs` still fails as before.
+
 ## 2026-10-14 — Report form: each missing field says so, and the email box says what it's for
 
 **Found while testing (Adam):** the last step's box "Send the report and occasional notes about the work…" starts unticked but is required, and leaving it unticked showed "First name, last name, email, website, and consent are required." with everything else filled in.

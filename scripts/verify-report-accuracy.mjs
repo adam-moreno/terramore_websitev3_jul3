@@ -198,4 +198,39 @@ assert(/<span id=\{id\} role="alert"/.test(form), "field messages are announced"
 assert(/inputs\.find\(\(input\) => input\.dataset\.field === problems\[0\]\.field\)\?\.focus\(\)/.test(form), "focus moves to the first problem")
 assert(/noValidate/.test(form) && /trackFunnelEvent\("report_validation_error"/.test(form), "own validation, still one tracked event per attempt")
 
+// 11. The report email shows the value without opening the PDF (2026-10-14): the score and the top two fixes by rank,
+//     each with one short action and "Fix this" to the Growth Workspace; nothing the PDF doesn't show.
+{
+  const { reportEmailSummary, shortAction } = await import("../lib/report/email-summary.ts")
+  const recs = [
+    { id: "missing_meta", rank: 2, finding: "Search results show no description of the business.", action: "Add a one-sentence meta description. Keep it under 160 characters.", evidence: "meta description: none", impact: "x", priority: "medium", confidence: "high", fixable: true },
+    { id: "no_measurement", rank: 1, finding: "No analytics are installed.", action: "Step 1: list where customers come from today. Step 2: install Google Analytics 4.", evidence: "Homepage code", impact: "x", priority: "high", confidence: "high", fixable: true },
+    { id: "thin_trust", rank: 3, finding: "Few trust signals.", action: "Add reviews.", evidence: "x", impact: "x", priority: "low", confidence: "medium" },
+  ]
+  const ws = "https://app.example/workspace?source=report_email"
+  const sum = reportEmailSummary({ businessName: "Buynest", overallScore: 44, recommendations: recs, workspaceUrl: ws })
+  const text = sum.text.join("\n")
+  assert(text.startsWith("Buynest scored 44 out of 100"), `email: score line (${sum.text[0]})`)
+  assert(text.indexOf("No analytics are installed.") < text.indexOf("Search results show no description"), "email: fixes in rank order")
+  assert(!text.includes("Few trust signals"), "email: only the top two fixes")
+  assert(text.includes("   list where customers come from today.") && !text.includes("Step 2"), "email: one short action (step 1 only)")
+  assert(text.includes("   Add a one-sentence meta description.") && !text.includes("160 characters"), "email: first sentence of the action")
+  assert(sum.text.filter((l) => l === `   Fix this: ${ws}`).length === 2 && (sum.html.match(/>Fix this<\/a>/g) || []).length === 2, "email: Fix this on each, text and HTML")
+  assert(sum.html.includes(`href="${ws.replace(/&/g, "&amp;")}"`), "email: Fix this opens the Growth Workspace with source=report_email")
+  for (const hidden of ["missing_meta", "no_measurement", "Homepage code", "high", "medium", "confidence"]) {
+    assert(!text.includes(hidden) && !sum.html.includes(hidden), `email: no internal value (${hidden})`)
+  }
+  assert(sum.preview === "Buynest scored 44 out of 100. The two fixes to start with are inside.", `email: preview (${sum.preview})`)
+  const noWs = reportEmailSummary({ businessName: "Buynest", overallScore: null, recommendations: recs, workspaceUrl: null })
+  assert(!noWs.text.join(" ").includes("Fix this") && !noWs.html.includes("Fix this") && noWs.preview === null && !noWs.text.join(" ").includes("scored"), "email: no workspace link or score → neither shown")
+  const xss = reportEmailSummary({ businessName: "<b>A</b>", overallScore: 50, recommendations: [{ ...recs[1], finding: "<script>x</script>" }], workspaceUrl: ws })
+  assert(!xss.html.includes("<script>") && !xss.html.includes("<b>A</b>"), "email: values escaped in HTML")
+  assert(shortAction("Do this now. Then that.") === "Do this now.", "short action: first sentence")
+  const pipe = fs.readFileSync(path.join(root, "lib/report/pipeline.ts"), "utf8")
+  const t = pipe.indexOf("...summary.text"), tPdf = pipe.indexOf("is attached as a PDF.`", t)
+  const h = pipe.indexOf("summary.html,"), hPdf = pipe.indexOf("is attached as a PDF.`)", h)
+  assert(t > 0 && tPdf > t && h > 0 && hPdf > h, "email: summary sits above the PDF line in text and HTML")
+  assert(pipe.includes('emailButton("Open my Growth Workspace", workspaceUrl)') && pipe.includes('emailTextLink("Or book a free call", BOOK_URL)'), "email: workspace and booking buttons kept")
+}
+
 console.log(`report accuracy: ok (${checks} checks)`)

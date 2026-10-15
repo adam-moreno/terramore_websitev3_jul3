@@ -16,6 +16,9 @@ const BRAND = "#2a66ff"
 const MUTED = "#6b7280"
 const BORDER = "#e6e2df"
 
+/** The same ink and link colors, for blocks built outside this file (lib/report/email-summary.ts). */
+export { INK as EMAIL_INK, BRAND as EMAIL_BRAND }
+
 /** White Terramore wordmark the site already serves from Cloudinary; renders on the dark banner. */
 const LOGO_URL =
   "https://res.cloudinary.com/dzzzkruux/image/upload/v1768374924/Screenshot_2026-01-13_at_11_11_07_PM-Picsart-BackgroundRemover_vwxvqo.png"
