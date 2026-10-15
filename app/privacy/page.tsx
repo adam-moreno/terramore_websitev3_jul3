@@ -24,7 +24,7 @@ export default function PrivacyPolicyPage() {
           <div className="prose prose-lg max-w-none">
             <div className="bg-gray-50 p-6 rounded-lg mb-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">PRIVACY STATEMENT</h2>
-              <p className="text-gray-600 mb-0">Last Updated October 12, 2026</p>
+              <p className="text-gray-600 mb-0">Last Updated October 15, 2026</p>
             </div>
 
             <div className="space-y-8">
@@ -403,6 +403,50 @@ export default function PrivacyPolicyPage() {
                 </p>
               </section>
 
+              <section id="terraai-extension">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">TERRAAI CHROME EXTENSION</h2>
+                <p className="text-gray-700 leading-relaxed">
+                  TerraAI is Terramore&apos;s AI assistant, powered by Claude from Anthropic. The Terramore extension for
+                  Google Chrome lets TerraAI make one website fix with you, in a tab in your own browser, after you start
+                  that fix from your Growth Workspace. This section explains what the extension handles. The rest of this
+                  privacy statement also applies.
+                </p>
+                <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">What it reads, and when</h3>
+                <p className="text-gray-700 leading-relaxed">
+                  Only while a fix you started is running, and only in the tab that fix opened, the extension reads that
+                  page: its layout and labels, its visible text, and screenshots of it. It doesn&apos;t read your other
+                  tabs, your browsing history, your passwords or saved logins. It does nothing until you start a fix,
+                  and it stops when the fix ends or you press Stop.
+                </p>
+                <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">What it sends, and to whom</h3>
+                <p className="text-gray-700 leading-relaxed">
+                  The extension sends what it reads to Terramore&apos;s servers (dashboard.terramore.io). We send it to
+                  Anthropic, our AI provider, to decide the next step of your fix. Anthropic doesn&apos;t use this data
+                  to train its public models. We don&apos;t sell it, share it for advertising, or use it for anything
+                  except making the fix you asked for and showing you its result.
+                </p>
+                <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">What it won&apos;t do</h3>
+                <p className="text-gray-700 leading-relaxed">
+                  TerraAI doesn&apos;t type on login, security-code or payment screens, doesn&apos;t pay for anything,
+                  and doesn&apos;t delete anything. Nothing is saved on your website until you approve the exact change
+                  with Save it.
+                </p>
+                <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">How long we keep it</h3>
+                <p className="text-gray-700 leading-relaxed">
+                  While a fix runs, we keep TerraAI&apos;s working notes with a few recent screenshots. When the fix
+                  ends, we delete the screenshots and working notes and keep a short log of the steps taken, without
+                  screenshots and without anything TerraAI typed, so your Growth Workspace can show what was done. In
+                  your browser, the extension keeps the current fix&apos;s session until Chrome closes, and the list of
+                  sites you&apos;ve allowed TerraAI to work on until you remove the extension.
+                </p>
+                <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Your choices</h3>
+                <p className="text-gray-700 leading-relaxed">
+                  Press Stop at any time, or remove the extension from Chrome. To ask us to delete your fix logs, email
+                  hello@terramore.io. The use of information received from the extension adheres to the Chrome Web
+                  Store User Data Policy, including the Limited Use requirements.
+                </p>
+              </section>
+
               <section>
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">YOUR RIGHTS AND OPTIONS</h2>
                 <p className="text-gray-700 leading-relaxed">
@@ -499,7 +543,7 @@ export default function PrivacyPolicyPage() {
               <section>
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">CHANGES TO THIS PRIVACY STATEMENT</h2>
                 <p className="text-gray-700 leading-relaxed">
-                  This privacy statement was last updated on October 12, 2026, and is effective as of that date. The
+                  This privacy statement was last updated on October 15, 2026, and is effective as of that date. The
                   English language version of this privacy statement is the controlling version regardless of any
                   translation you may attempt.
                 </p>
