@@ -29,3 +29,5 @@ CREATE INDEX IF NOT EXISTS idx_website_booking_scheduled_emails_booking
   ON website.booking_scheduled_emails (booking_id, status);
 
 ALTER TABLE website.booking_scheduled_emails ENABLE ROW LEVEL SECURITY;
+
+REVOKE ALL ON website.booking_scheduled_emails FROM anon, authenticated;
