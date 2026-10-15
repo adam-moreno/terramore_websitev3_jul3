@@ -16,6 +16,7 @@
  */
 
 import { buildBookingSms, bookingSmsEnabled } from "./booking-sms"
+import { prepReportLine, prepReportState } from "./booking/report-check"
 import { emailShell, emailButton, emailP, emailDetail, emailSignoff } from "./email-template"
 import { formatDigitalFootprintSlack, type AttributionMap } from "./report/slack-report"
 import {
@@ -603,27 +604,24 @@ export async function confirmBookingToUser(b: BookingNotice): Promise<SendResult
   ])
 }
 
-const REPORT_URL = `${SITE}/report`
 const PREP_DELAY_MS = 5 * 60 * 1000
 
 /**
  * ~5 minutes after booking: what the call is, how to join, light prep.
- * Soft Digital Footprint CTA when we cannot confirm they already got a report.
+ * The report line branches (lib/booking/report-check.ts): the check is on its way, they already have one, or
+ * nothing is coming, in which case we ask them to bring their links to the call.
  * Prefer Resend/SendGrid schedule so the HTTP response is never blocked on a sleep.
  */
 export async function sendBookingPrepEmail(
   b: BookingNotice,
-  opts: { hasReport: boolean | null } = { hasReport: null },
+  opts: { hasReport: boolean | null; reportComing?: boolean } = { hasReport: null },
 ): Promise<SendResult> {
   const first = b.name.split(/\s+/)[0] || "there"
   const timeLine = when(b.startIso, b.tz)
   const joinLine = b.meetUrl
     ? `Join on Google Meet: ${b.meetUrl}`
     : "Open the calendar invite from adam.moreno@terramore.io for the join link."
-  const hasReport = opts.hasReport === true
-  const reportSoft = hasReport
-    ? "If you already have your Digital Footprint report, skim it once before we talk — it gives us a shared starting point."
-    : `If you have not run a free Digital Footprint report yet, it is a useful first step before the call: ${REPORT_URL}`
+  const reportSoft = prepReportLine(prepReportState({ reportComing: opts.reportComing === true, hasReport: opts.hasReport }))
 
   const subject = "Before your call: what to expect"
   const text = [
@@ -664,7 +662,6 @@ export async function sendBookingPrepEmail(
       emailP("Be somewhere quiet with a stable connection. Phone works if video is awkward."),
       emailP("Light prep (optional): one outcome for the next 90 days, the tools you already live in, and any link that shows how customers find you today."),
       emailP(reportSoft),
-      !hasReport ? emailButton("Get a free Digital Footprint report", REPORT_URL) : "",
       emailP("Need to move or cancel?"),
       emailButton("Reschedule or cancel", b.manageUrl),
       emailSignoff("Adam Moreno", "Terramore"),

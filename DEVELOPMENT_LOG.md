@@ -1,5 +1,16 @@
 # Development Log - Terramore Website
 
+## 2026-10-14 — Booking a call with a website runs the free website check (owner request)
+
+**Found while testing (Adam):** /book promises the roadmap is prepared before the call, but booking never ran the free check / Digital Footprint report, with or without a website.
+
+- **With a website:** `app/api/booking/route.ts` claims the report for that email (`lib/booking/claim-report.ts`) right after the booking succeeds, then runs `runReportPipeline` inside `after()`, alongside the booking messages, so the confirmation isn't held up (`maxDuration = 60`, same as /api/report). No lead row: one is created like /api/report's (`signup_source = digital_footprint_report`, `email_consent` false because the booker didn't tick the report form's box, `course_type = src=book`). Existing row: flipped to `generating` with a conditional update, so it runs once per email. Already `sent` or `generating`: no new report. No database or a lookup error: no report (can't promise one per email). The owner gets the report email; Adam gets the pipeline's BCC as call prep.
+- **Facebook, Instagram, Google Maps or Business links:** the report reads a website, so these don't run it. The link goes in the Terra IQ booking note and on the lead row's `socials` when a row exists. Classification is in `lib/booking/report-check.ts`; unreadable input counts as nothing.
+- **Form:** the field is "Website, Facebook or Google listing (optional)", placeholder "yourbusiness.com or facebook.com/yourbusiness", with a hint that a website gets a free check by email.
+- **Prep note** ("Before your call: what to expect"): report coming → "Your free website check is on its way by email; we'll walk through it on the call." Already has one → skim it. Nothing coming → "Bring your website or social links to the call and we'll look at them together." The "Get a free Digital Footprint report" button is gone from this email.
+- **Confirmation page:** "We're preparing your free website check now." shows only when the booking response says `reportComing`.
+- Checks: new `scripts/verify-booking-report.mjs` (89: site/social/nothing classification, no crash on Maps/Facebook links, sent/generating blocks, pipeline only inside `after()`, prep and confirmation copy branches); funnel, conversion tracking, attribution merge, lookup, report-accuracy, v1-release, dedupe, visual pass; `tsc` unchanged (16). `verify-report-places.mjs` still fails as before.
+
 ## 2026-10-14 — Booking reminders trimmed to three (owner direction)
 
 - Emails go out 24 hours, 2 hours and 30 minutes before the call; the 30-minute email carries the join link. The 10-hour and 2-minute emails are dropped. The 2-minute text is turned off in the SMS plan (the timed SMS cron isn't scheduled yet).

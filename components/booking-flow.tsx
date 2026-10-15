@@ -19,6 +19,8 @@ export type BookingResult = {
   meetProvider: "google_meet" | "teams" | null
   manageToken: string
   manageUrl: string
+  /** True only when /api/booking started the free website check for this booking. */
+  reportComing?: boolean
 }
 
 const DAYS_AHEAD = 14
@@ -799,14 +801,20 @@ export function BookingFlow({
               />
             </label>
             <label className="block">
-              <span className={detailsLabel}>Website</span>
+              <span className={detailsLabel}>
+                Website, Facebook or Google listing <span className="font-normal text-ink/40">(optional)</span>
+              </span>
               <input
                 value={website}
                 onChange={(e) => setWebsite(e.target.value)}
-                placeholder="https://"
+                placeholder="yourbusiness.com or facebook.com/yourbusiness"
                 className={detailsInput}
+                inputMode="url"
                 autoComplete="url"
               />
+              <span className="mt-1 block text-[12px] leading-snug text-slate-500">
+                With a website, we email you a free check of it before the call.
+              </span>
             </label>
             <label className="block">
               <span className={detailsLabel}>
@@ -954,6 +962,11 @@ export function BookingSuccess({ booking, tz, name }: { booking: BookingResult; 
         )}
       </p>
       <p className="mt-2 text-[14px] text-slate-600">Confirmation email on the way. A short prep note follows in a few minutes.</p>
+      {booking.reportComing === true ? (
+        <p className="mt-2 text-[14px] text-slate-600">
+          We&apos;re preparing your free website check now. It usually lands in your inbox within a few minutes.
+        </p>
+      ) : null}
       <AddToCalendar booking={booking} className="mt-6" />
     </div>
   )

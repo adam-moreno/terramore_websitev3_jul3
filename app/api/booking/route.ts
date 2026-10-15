@@ -3,18 +3,25 @@
  * Body: { name, email, phone?, business?, website?, note?, startIso, tz, source?, attribution? }
  * Books through Terra IQ, then tells Adam (Slack) and the lead (email, SMS with a phone).
  * `source` and whitelisted `attribution` keys (gclid/UTMs) are folded into the Terra IQ note; no schema change.
+ * With a website, the free website check (Digital Footprint report) runs after the response, once per email
+ * (lib/booking/claim-report.ts). A Facebook/Instagram page or Google listing is kept as socials; the check reads websites.
  */
 
 import { NextRequest, NextResponse } from "next/server"
 import { after } from "next/server"
 import { analyticsRef } from "@/lib/analytics-ref"
 import { bookingApi, manageUrl, type BookingRecord } from "@/lib/booking-api"
+import { claimBookingReport } from "@/lib/booking/claim-report"
+import { classifyBookingLink } from "@/lib/booking/report-check"
 import { leadHasDigitalFootprintReport } from "@/lib/leads/has-digital-footprint"
+import { runReportPipeline } from "@/lib/report/pipeline"
 import { scheduleBookingReminders } from "@/lib/booking-reminders"
 import { confirmBookingToUser, notifyAdminOfBooking, sendBookingPrepEmail } from "@/lib/notify"
 import { enrollLead } from "@/lib/nurture/enroll"
 
 export const dynamic = "force-dynamic"
+// The report pipeline runs in after() and needs the same time budget as /api/report.
+export const maxDuration = 60
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -79,14 +86,17 @@ export async function POST(request: NextRequest) {
   const source = sourceRaw && SOURCE_RE.test(sourceRaw) ? sourceRaw : null
   const attribution = cleanAttribution(body.attribution)
   const visitorNote = clean(body.note, 1000)
+  const websiteRaw = clean(body.website, 300)
+  const link = classifyBookingLink(websiteRaw)
+  const noteBase = link.kind === "social" ? [visitorNote, `Link: ${link.url}`].filter(Boolean).join("\n") : visitorNote
   const lead = {
     name,
     email,
     phone: clean(body.phone, 40),
     business: clean(body.business, 160),
-    website: clean(body.website, 300),
+    website: websiteRaw,
     // Terra IQ + Slack admin notice see Source/Attribution. Nurture (below) keeps the plain visitor note.
-    note: noteWithContext(visitorNote, source, attribution),
+    note: noteWithContext(noteBase, source, attribution),
   }
 
   const result = await bookingApi<BookingRecord>("/api/public/booking", { method: "POST", body: { ...lead, startIso, tz } })
@@ -106,21 +116,41 @@ export async function POST(request: NextRequest) {
     manageUrl: manage,
   }
 
+  // One quick row lookup decides whether the free check runs, so the confirmation page can say so truthfully.
+  // The check itself runs after the response.
+  const claim = await claimBookingReport({ name, email, phone: lead.phone, business: lead.business }, link)
+  const reportComing = claim.run && link.kind === "site"
+
   // Messages go out after the response so the visitor sees the confirmation right away.
   // Confirm immediate; prep ~5 min; reminders 24h/2h/30m via provider schedule. Nurture enroll future-only.
   after(async () => {
-    await Promise.all([notifyAdminOfBooking(notice), confirmBookingToUser(notice)])
-    const hasReport = await leadHasDigitalFootprintReport(email)
-    await sendBookingPrepEmail(notice, { hasReport })
-    await scheduleBookingReminders(notice, { hasReport })
-    await enrollLead({
-      email,
-      name,
-      source: "book",
-      businessName: lead.business,
-      website: lead.website,
-      job: visitorNote,
-    })
+    const messages = async () => {
+      await Promise.all([notifyAdminOfBooking(notice), confirmBookingToUser(notice)])
+      const hasReport = reportComing ? true : claim.hasReport ?? (await leadHasDigitalFootprintReport(email))
+      await sendBookingPrepEmail(notice, { hasReport, reportComing })
+      await scheduleBookingReminders(notice, { hasReport })
+      await enrollLead({
+        email,
+        name,
+        source: "book",
+        businessName: lead.business,
+        website: link.kind === "site" ? link.website : lead.website,
+        job: visitorNote,
+      })
+    }
+    // The report runs alongside the messages (both inside maxDuration). Owner gets the report email; Adam gets a copy
+    // (the pipeline BCCs ADMIN_EMAIL) as call prep. runReportPipeline never throws.
+    const report = async () => {
+      if (!reportComing || link.kind !== "site") return
+      await runReportPipeline({
+        name,
+        email,
+        phone: lead.phone,
+        businessName: lead.business || "",
+        website: link.website,
+      })
+    }
+    await Promise.all([messages(), report()])
   })
 
   // `id` stays for the confirmation UI (calendar file uid); analytics only ever gets the one-way `bookingRef`.
@@ -133,5 +163,6 @@ export async function POST(request: NextRequest) {
     meetProvider: booking.meetProvider,
     manageToken: booking.manageToken,
     manageUrl: manage,
+    reportComing,
   })
 }
