@@ -17,6 +17,7 @@
 
 import { buildBookingSms, bookingSmsEnabled } from "./booking-sms"
 import { prepReportLine, prepReportState } from "./booking/report-check"
+import { bookingRefUrl } from "./booking/prefill-token"
 import { emailShell, emailButton, emailP, emailDetail, emailSignoff } from "./email-template"
 import { formatDigitalFootprintSlack, type AttributionMap } from "./report/slack-report"
 import {
@@ -54,7 +55,6 @@ export const REPLY_TO = process.env.EMAIL_REPLY_TO?.trim() || "adam.moreno@terra
 /** Slack member ID to @-mention on admin alerts so they push to Adam's phone even in mentions-only channels. Env can override; "" disables. */
 const SLACK_MENTION = (process.env.SLACK_MENTION_USER_ID?.trim() || "U0BMKSTCBFD")
 const SITE = "https://www.terramore.io"
-const BOOK_URL = `${SITE}/book`
 
 function skip(channel: string, why: string): SendResult {
   console.info(`[notify] ${channel} skipped: ${why}`)
@@ -422,6 +422,8 @@ export async function notifyAdminOfLead(lead: Lead): Promise<SendResult[]> {
 export async function confirmLeadToUser(lead: Lead): Promise<SendResult[]> {
   const first = lead.name.split(/\s+/)[0] || "there"
   const isReport = lead.kind === "report"
+  // Fills in the booking form when BOOKING_PREFILL_SECRET is set; plain /book otherwise.
+  const BOOK_URL = bookingRefUrl(lead.email, { source: isReport ? "report_confirm" : "lead_confirm", medium: "email" })
 
   const subject = isReport ? "We got it. Your Digital Footprint report is on the way." : "We got it. We read the site before we reply."
   const body = isReport

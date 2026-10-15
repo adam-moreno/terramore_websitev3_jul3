@@ -1,6 +1,6 @@
 import { getServerSupabase, isMissingColumnError } from "@/lib/supabase-server"
 import { siteManagerFrom } from "@/lib/report/recommend"
-import { SITE_URL } from "@/lib/booking-api"
+import { bookingRefUrl } from "@/lib/booking/prefill-token"
 import { emailButton, emailP, emailShell, emailSignoff, emailTextLink } from "@/lib/email-template"
 import { growthWorkspaceUrlFor } from "@/lib/growth-workspace"
 import { ADMIN_EMAIL, REPLY_TO, emailProvider, postSlack, sendEmail } from "@/lib/notify"
@@ -25,8 +25,6 @@ export type ReportRequest = {
 
 export type ReportStatus = "needs_keys" | "generating" | "sent" | "failed"
 
-/** Canonical host is www (apex 308s to it), so the button never bounces through a redirect. */
-const BOOK_URL = `${SITE_URL}/book`
 
 export type PipelineResult = {
   ok: boolean
@@ -125,6 +123,8 @@ export async function runReportPipeline(request: ReportRequest): Promise<Pipelin
     const pdf = await renderReportPdf(report)
     const fixable = report.recommendations.filter((r) => r.fixable).length
 
+    // Canonical www host; with BOOKING_PREFILL_SECRET set, the link fills in the booking form (lib/booking/prefill-token.ts).
+    const BOOK_URL = bookingRefUrl(request.email, { source: "report_email", medium: "email" })
     const first = request.name.split(/\s+/)[0] || "there"
     const subjectName = report.businessName
     const scopeLine = "It only says what we could see on the public web. If a chapter is thin, reply with a link and we read it."

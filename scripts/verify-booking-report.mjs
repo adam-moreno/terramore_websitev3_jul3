@@ -123,4 +123,58 @@ assert(/\(optional\)<\/span>\s*<\/span>\s*<input\s+value=\{website\}/.test(form)
 assert(/booking\.reportComing === true \? \(/.test(form), "confirmation line only when the check is running")
 assert(form.includes("We&apos;re preparing your free website check now."), "confirmation copy")
 
+// 7. /book?ref= pre-fill token (lib/booking/prefill-token.ts). No env needed: the secret is passed in.
+const pt = await load("lib/booking/prefill-token.ts")
+const SECRET = "test-secret-not-real"
+const owner = "Dana.Reyes@ExampleReno.test"
+const tok = pt.signPrefillToken(owner, { secret: SECRET })
+assert(typeof tok === "string" && tok.startsWith("v1."), "token minted with v1 prefix")
+assert(pt.verifyPrefillToken(tok, { secret: SECRET }) === "dana.reyes@examplereno.test", "round trip gives the lowercased email")
+assert(pt.verifyPrefillToken(tok, { secret: "other-secret" }) === null, "wrong secret rejected")
+const body = tok.slice(3)
+const flipped = body.slice(0, 20) + (body[20] === "A" ? "B" : "A") + body.slice(21)
+assert(pt.verifyPrefillToken(`v1.${flipped}`, { secret: SECRET }) === null, "tampered token rejected")
+assert(pt.verifyPrefillToken(tok.slice(0, -2), { secret: SECRET }) === null, "truncated token rejected")
+for (const bad of [null, undefined, "", "v1.", "v2." + body, "garbage", "v1.!!!!", 42, "v1." + "A".repeat(800)]) {
+  assert(pt.verifyPrefillToken(bad, { secret: SECRET }) === null, `bad token rejected: ${String(bad).slice(0, 12)}`)
+}
+const now = Date.UTC(2026, 9, 14)
+const short = pt.signPrefillToken(owner, { secret: SECRET, ttlSeconds: 60, now })
+assert(pt.verifyPrefillToken(short, { secret: SECRET, now: now + 30_000 }) !== null, "valid before expiry")
+assert(pt.verifyPrefillToken(short, { secret: SECRET, now: now + 120_000 }) === null, "expired token rejected")
+const month = pt.signPrefillToken(owner, { secret: SECRET, now })
+assert(pt.verifyPrefillToken(month, { secret: SECRET, now: now + 29 * 86_400_000 }) !== null, "default lasts 29 days")
+assert(pt.verifyPrefillToken(month, { secret: SECRET, now: now + 31 * 86_400_000 }) === null, "default expires by day 31")
+assert(pt.verifyPrefillToken(tok, { secret: null }) === null, "no secret: nothing verifies")
+assert(pt.signPrefillToken("not-an-email", { secret: SECRET }) === null, "no token without an email")
+
+const link = pt.bookingRefUrl(owner, { source: "report_email", medium: "email" }, { secret: SECRET })
+const u = new URL(link)
+assert(u.origin === "https://www.terramore.io" && u.pathname === "/book", "link goes to www /book")
+assert(pt.verifyPrefillToken(u.searchParams.get("ref"), { secret: SECRET }) === "dana.reyes@examplereno.test", "link ref verifies")
+assert(u.searchParams.get("utm_source") === "report_email" && u.searchParams.get("utm_medium") === "email", "utms added")
+const lower = decodeURIComponent(link).toLowerCase()
+for (const piece of ["dana", "reyes", "examplereno", "@", "%40"]) assert(!lower.includes(piece), `no PII in the URL: ${piece}`)
+const decoded = Buffer.from(u.searchParams.get("ref").slice(3).replace(/-/g, "+").replace(/_/g, "/"), "base64").toString("latin1").toLowerCase()
+assert(!decoded.includes("dana") && !decoded.includes("examplereno"), "email not readable after base64 decoding either")
+assert(pt.bookingRefUrl(owner, {}, { secret: null }) === "https://www.terramore.io/book", "unset secret: plain /book")
+assert(pt.bookingRefUrl(null, { source: "x" }, { secret: SECRET }) === "https://www.terramore.io/book?utm_source=x", "no email: no ref")
+const prevSecret = process.env.BOOKING_PREFILL_SECRET
+delete process.env.BOOKING_PREFILL_SECRET
+assert(pt.bookingRefUrl(owner) === "https://www.terramore.io/book", "env unset: plain /book")
+if (prevSecret !== undefined) process.env.BOOKING_PREFILL_SECRET = prevSecret
+
+// Emails use it; the prefill endpoint never returns the phone; the form fills only empty fields and drops the ref.
+assert(/bookingRefUrl\(request\.email/.test(read("lib/report/pipeline.ts")), "report email /book link uses bookingRefUrl")
+assert(/bookingRefUrl\(lead\.email/.test(read("lib/notify.ts")), "lead confirmation /book link uses bookingRefUrl")
+assert(/bookingRefUrl\(row\.email/.test(read("lib/nurture/templates.ts")), "nurture /book links use bookingRefUrl")
+const prefillRoute = read("app/api/booking/prefill/route.ts")
+assert(/verifyPrefillToken\(request\.nextUrl\.searchParams\.get\("ref"\)\)/.test(prefillRoute), "endpoint verifies the token")
+assert(!/phone/.test(prefillRoute.replace(/^\s*(\/\/|\*|\/\*\*).*$/gm, "")), "endpoint never selects or returns the phone")
+assert(/return NextResponse\.json\(\{ prefill: null \}/.test(prefillRoute) && !/status: 4\d\d/.test(prefillRoute), "bad token: empty prefill, no error status")
+assert(/Cache-Control": "no-store"/.test(prefillRoute), "prefill not cached")
+assert(/setter\(\(current\) => current \|\| value\.trim\(\)\)/.test(form), "form fills only empty fields")
+assert(/params\.delete\("ref"\)[\s\S]{0,200}replaceState/.test(form), "ref removed from the address bar")
+assert(!/fill\(setPhone/.test(form), "phone never pre-filled")
+
 console.log(`verify-booking-report: ${checks} checks passed`)

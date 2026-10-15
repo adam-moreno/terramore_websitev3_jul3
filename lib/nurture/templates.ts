@@ -1,10 +1,15 @@
 import { createHmac, timingSafeEqual } from "crypto"
 import { emailButton, emailP, emailShell, emailSignoff, esc } from "@/lib/email-template"
+import { bookingRefUrl } from "@/lib/booking/prefill-token"
 import { pickNurtureLinks } from "./map-links"
 import type { LeadNurtureRow, NurtureEmail, NurtureStep } from "./types"
 
 const SITE = "https://www.terramore.io"
-const BOOK_URL = `${SITE}/book`
+
+/** /book link that fills in the booking form when BOOKING_PREFILL_SECRET is set (lib/booking/prefill-token.ts). */
+function bookUrl(row: LeadNurtureRow): string {
+  return bookingRefUrl(row.email, { source: "nurture", medium: "email" })
+}
 
 function firstName(name: string | null | undefined): string {
   const part = (name || "").trim().split(/\s+/)[0]
@@ -115,8 +120,8 @@ function bookCta(row: LeadNurtureRow): { text: string; buttonHtml: string } {
     }
   }
   return {
-    text: `Book a free call: ${BOOK_URL}`,
-    buttonHtml: emailButton("Book a free call", BOOK_URL),
+    text: `Book a free call: ${bookUrl(row)}`,
+    buttonHtml: emailButton("Book a free call", bookUrl(row)),
   }
 }
 
@@ -174,7 +179,7 @@ function buildStep2(row: LeadNurtureRow): NurtureEmail {
   const walkLine =
     row.source === "book"
       ? "Looking forward to walking a workflow on our call."
-      : `Want to walk a specific workflow? ${BOOK_URL}`
+      : `Want to walk a specific workflow? ${bookUrl(row)}`
   const paras = [
     `Hi ${first},`,
     "",
@@ -207,7 +212,7 @@ function buildStep2(row: LeadNurtureRow): NurtureEmail {
       emailP(
         "How to maintain it after it is live: one owner on your side, a short weekly review, and human approval on outbound messages and price changes. You can turn a path off. We design for that.",
       ),
-      row.source === "book" ? emailP(walkLine) : emailButton("Book a free call", BOOK_URL),
+      row.source === "book" ? emailP(walkLine) : emailButton("Book a free call", bookUrl(row)),
       emailSignoff("Adam Moreno", "Terramore"),
       unsub.html,
     ].join(""),
@@ -223,7 +228,7 @@ function buildStep3(row: LeadNurtureRow): NurtureEmail {
   const close =
     row.source === "book"
       ? "Looking forward to our call — reply if anything changes."
-      : `If a short call would help, book here: ${BOOK_URL}`
+      : `If a short call would help, book here: ${bookUrl(row)}`
   const paras = [
     `Hi ${first},`,
     "",
@@ -251,7 +256,7 @@ function buildStep3(row: LeadNurtureRow): NurtureEmail {
       ...links.map((link) => emailButton(link.label, link.href)),
       row.source === "book"
         ? emailP(close)
-        : `${emailP("If a short call would help:")}${emailButton("Book a free call", BOOK_URL)}`,
+        : `${emailP("If a short call would help:")}${emailButton("Book a free call", bookUrl(row))}`,
       emailSignoff("Adam Moreno", "Terramore"),
       unsub.html,
     ].join(""),

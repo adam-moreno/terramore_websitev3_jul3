@@ -348,6 +348,39 @@ export function BookingFlow({
     setTz(browserTimeZone())
   }, [])
 
+  // /book?ref=… from one of our emails: fill in what we already know (never the phone). The server checks the token;
+  // a bad or expired one just leaves the form empty, with no error. Only empty fields are filled. The ref is then
+  // taken off the address bar so it isn't shared by copy-paste.
+  useEffect(() => {
+    if (isPick || typeof window === "undefined") return
+    const params = new URLSearchParams(window.location.search)
+    const ref = params.get("ref")
+    if (!ref) return
+    params.delete("ref")
+    const rest = params.toString()
+    try {
+      window.history.replaceState(window.history.state, "", `${window.location.pathname}${rest ? `?${rest}` : ""}${window.location.hash}`)
+    } catch {
+      // Address bar left as is.
+    }
+    // No cancel on cleanup: the ref is already off the URL, so a re-run (React strict mode) wouldn't fetch it again.
+    fetch(`/api/booking/prefill?ref=${encodeURIComponent(ref)}`, { cache: "no-store" })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data: { prefill?: { name?: string | null; email?: string | null; business?: string | null; website?: string | null; socials?: string | null } | null } | null) => {
+        const p = data?.prefill
+        if (!p) return
+        const fill = (setter: (update: (current: string) => string) => void, value: string | null | undefined) => {
+          if (typeof value === "string" && value.trim()) setter((current) => current || value.trim())
+        }
+        fill(setName, p.name)
+        fill(setEmail, p.email)
+        fill(setBusiness, p.business)
+        fill(setWebsite, p.website)
+        fill(setSocials, p.socials)
+      })
+      .catch(() => undefined)
+  }, [isPick])
+
   const load = useCallback(async () => {
     setSlots(null)
     setLoadError(null)

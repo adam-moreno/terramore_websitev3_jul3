@@ -1,5 +1,17 @@
 # Development Log - Terramore Website
 
+## 2026-10-14 — /book fills in what we already know from a signed link (owner request)
+
+- `lib/booking/prefill-token.ts`: `bookingRefUrl(email, utm)` returns `https://www.terramore.io/book?ref=…&utm_…`, or plain `/book` (plus UTMs) when `BOOKING_PREFILL_SECRET` is unset or there's no email. Used for the /book links in the report email (`lib/report/pipeline.ts`), the report and contact confirmation emails (`confirmLeadToUser`) and the nurture series (`lib/nurture/templates.ts`).
+- `/book?ref=…`: `BookingFlow` sends the ref to `GET /api/booking/prefill`, which checks the token, reads the `website.free_courses_signups` row by email with the service-role client, and returns name, email, business name, website and socials. Never the phone. The form fills only empty fields and takes the ref off the address bar. A bad, expired or missing ref, or no row, leaves the form as it was (email only when the row is missing) with no error. The page stays static.
+- **Token format v1, for the Terra IQ dashboard to mint the same link with the same `BOOKING_PREFILL_SECRET`:**
+  - `key = HMAC-SHA256(key = BOOKING_PREFILL_SECRET, message = "terramore/book-prefill/v1")` (32 bytes)
+  - `plain = JSON {"e": "<email, trimmed, lowercased>", "x": <expiry, unix seconds; default now + 30 days>}`
+  - `ref = "v1." + base64url_nopad(iv[12 random bytes] || AES-256-GCM(key, iv, plain) || tag[16 bytes])`
+  - Changed from the requested signed-only base64url payload: base64 would put the email in readable form in URLs, analytics page locations and logs. GCM authenticates the token as well, so tampering fails.
+- Checks: `verify-booking-report.mjs` now 131 (42 new: round trip, wrong secret, tamper, truncation, expiry and the 30-day default, no name or email in the URL even after decoding, unset secret → plain /book, emails use the helper, the endpoint never returns the phone, the form fills only empty fields). Other verifiers pass; `tsc` unchanged (16).
+- To turn on: set `BOOKING_PREFILL_SECRET` on the website (and in the dashboard when it mints links). Not set in this change.
+
 ## 2026-10-14 — Booking a call with a website runs the free website check (owner request)
 
 **Found while testing (Adam):** /book promises the roadmap is prepared before the call, but booking never ran the free check / Digital Footprint report, with or without a website.
