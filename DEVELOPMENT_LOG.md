@@ -1,5 +1,10 @@
 # Development Log - Terramore Website
 
+## 2026-10-14 — The free check and report read WordPress.com sites (bug fix)
+
+- `isPrivateAddress` treated all of 192.0.0.0/16 as reserved, so every site hosted on WordPress.com (192.0.78.x) got "We can only check public websites." Only 192.0.0.0/24 and 192.0.2.0/24 are reserved; TEST-NET-2/3 (198.51.100.0/24, 203.0.113.0/24) are now blocked too. Found in the Halcyon Ridge Painting persona test (halcyonridgepainting.wordpress.com).
+- verify-lookup: WordPress.com addresses public, reserved ranges still refused (161 checks).
+
 ## 2026-10-14 — Aztec persona fixes: Maps link counts, found socials shown, fix steps capitalised
 
 - **Free check:** when the site itself links to a Google Maps listing but Places can't match the listing's website field, the check shows a note ("Your site links to your Google Maps listing. Check that the listing's website field points back to this site") instead of the "couldn't confirm" gap. Aztec Paving linked its Maps page and was still told none was found.

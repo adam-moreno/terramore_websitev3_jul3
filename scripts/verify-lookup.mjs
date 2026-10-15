@@ -29,7 +29,9 @@ const taxonomy = await load("lib/funnel-taxonomy.ts")
 for (const ip of ["127.0.0.1", "10.1.2.3", "172.16.0.1", "192.168.1.1", "169.254.169.254", "100.64.0.1", "0.0.0.0", "::1", "fd00::1", "fe80::1", "::ffff:10.0.0.1"]) {
   assert(isPrivateAddress(ip), `${ip} is private`)
 }
-for (const ip of ["93.184.216.34", "8.8.8.8", "2606:4700::1111"]) assert(!isPrivateAddress(ip), `${ip} is public`)
+for (const ip of ["93.184.216.34", "8.8.8.8", "2606:4700::1111", "192.0.78.12", "192.0.78.13"]) assert(!isPrivateAddress(ip), `${ip} is public`)
+// WordPress.com sites (192.0.78.x) are public; only 192.0.0.0/24 and the TEST-NETs are reserved.
+for (const ip of ["192.0.0.8", "192.0.2.1", "198.51.100.7", "203.0.113.9"]) assert(isPrivateAddress(ip), `${ip} is reserved`)
 
 const blocked = [
   "http://127.0.0.1/",

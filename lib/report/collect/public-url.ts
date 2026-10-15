@@ -15,7 +15,7 @@ export class BlockedUrlError extends Error {
 }
 
 function ipv4Private(ip: string): boolean {
-  const [a, b] = ip.split(".").map(Number)
+  const [a, b, c] = ip.split(".").map(Number)
   return (
     a === 0 ||
     a === 10 ||
@@ -24,7 +24,11 @@ function ipv4Private(ip: string): boolean {
     (a === 169 && b === 254) || // link-local, cloud metadata
     (a === 172 && b >= 16 && b <= 31) ||
     (a === 192 && b === 168) ||
-    (a === 192 && b === 0) ||
+    // Only 192.0.0.0/24 (IETF) and 192.0.2.0/24 (TEST-NET-1) are reserved. The rest of 192.0.0.0/16 is public:
+    // WordPress.com hosts every *.wordpress.com site at 192.0.78.x, which this guard used to refuse.
+    (a === 192 && b === 0 && (c === 0 || c === 2)) ||
+    (a === 198 && b === 51 && c === 100) || // TEST-NET-2
+    (a === 203 && b === 0 && c === 113) || // TEST-NET-3
     (a === 198 && (b === 18 || b === 19)) ||
     a >= 224 // multicast and reserved
   )
