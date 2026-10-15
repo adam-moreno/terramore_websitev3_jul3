@@ -1,5 +1,6 @@
 import type { TechnicalSnapshot } from "@/lib/report/types"
 import { fetchText, pickAttr } from "@/lib/report/collect/fetch"
+import { hasSitemapAt } from "@/lib/report/collect/sitemap"
 
 export async function collectTechnical(website: string | null, homeHtml?: string | null, homeStatus?: number | null, finalUrl?: string | null): Promise<TechnicalSnapshot> {
   const empty: TechnicalSnapshot = {
@@ -33,10 +34,9 @@ export async function collectTechnical(website: string | null, homeHtml?: string
     return { ...empty, status, note: "Could not resolve origin for robots/sitemap." }
   }
 
-  const [robots, sitemap] = await Promise.all([
-    fetchText(`${origin}/robots.txt`, 6000),
-    fetchText(`${origin}/sitemap.xml`, 6000),
-  ])
+  const robots = await fetchText(`${origin}/robots.txt`, 6000)
+  // robots.txt "Sitemap:" lines, the site's folder (user.wixsite.com/name/sitemap.xml), then /sitemap.xml.
+  const hasSitemap = await hasSitemapAt(resolved, robots && robots.status < 400 ? robots.text : null, fetchText)
 
   return {
     https: resolved.startsWith("https://"),
@@ -46,7 +46,7 @@ export async function collectTechnical(website: string | null, homeHtml?: string
       pickAttr(/<meta[^>]+content=["']([^"']*)["'][^>]+name=["']description["']/i, html),
     canonical: pickAttr(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)["']/i, html),
     hasRobots: Boolean(robots && robots.status < 400 && /user-agent/i.test(robots.text)),
-    hasSitemap: Boolean(sitemap && sitemap.status < 400 && /<urlset|<sitemapindex/i.test(sitemap.text)),
+    hasSitemap,
     viewport: /<meta[^>]+name=["']viewport["']/i.test(html),
     status,
     note: "HTTPS, metadata, robots, and sitemap checked from public responses. Not a full SEO crawl.",

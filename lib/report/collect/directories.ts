@@ -1,4 +1,5 @@
 import type { DirectoryProfile } from "@/lib/report/types"
+import { firstRealSocial } from "@/lib/report/collect/placeholder-social"
 
 const SOCIAL: Array<[string, RegExp]> = [
   ["instagram", /https?:\/\/(?:www\.)?instagram\.com\/[A-Za-z0-9_.-]+\/?/i],
@@ -14,15 +15,16 @@ const SOCIAL: Array<[string, RegExp]> = [
 const REQUIRED = ["instagram", "facebook", "tiktok", "linkedin", "youtube", "yelp"] as const
 
 /**
- * Discover directory/social links only from page HTML. Never invent profiles.
+ * Discover directory/social links only from page HTML. Never invent profiles, and skip template placeholders.
  */
 export function collectDirectories(htmlPages: Array<{ url: string; html: string }>): DirectoryProfile[] {
   const found = new Map<string, string>()
   for (const page of htmlPages) {
     for (const [platform, regex] of SOCIAL) {
       if (found.has(platform)) continue
-      const match = page.html.match(regex)
-      if (match) found.set(platform, match[0].replace(/[)>,.;]+$/, ""))
+      // Template links (facebook.com/wix) and share buttons aren't the owner's profiles.
+      const url = firstRealSocial(page.html, regex)
+      if (url) found.set(platform, url)
     }
   }
 

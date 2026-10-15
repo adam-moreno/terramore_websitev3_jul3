@@ -4,6 +4,9 @@
  * Google Places lives in lib/report/collect/locations.ts and must never feed model prompts.
  */
 
+import { firstRealSocial } from "@/lib/report/collect/placeholder-social"
+import { hasSitemapAt } from "@/lib/report/collect/sitemap"
+
 export type Footprint = {
   input: { businessName: string; website: string | null }
   site: {
@@ -176,12 +179,13 @@ async function readSite(website: string | null): Promise<Footprint["site"]> {
 
   const html = page.text
   const origin = new URL(page.finalUrl).origin
-  const [robots, sitemap] = await Promise.all([fetchText(`${origin}/robots.txt`, 6000), fetchText(`${origin}/sitemap.xml`, 6000)])
+  const robots = await fetchText(`${origin}/robots.txt`, 6000)
+  const hasSitemap = await hasSitemapAt(page.finalUrl, robots && robots.status < 400 ? robots.text : null, fetchText)
 
   const socialLinks: Record<string, string> = {}
   for (const [key, regex] of SOCIAL) {
-    const match = html.match(regex)
-    if (match) socialLinks[key] = match[0]
+    const url = firstRealSocial(html, regex)
+    if (url) socialLinks[key] = url
   }
 
   const text = stripToText(html)
@@ -201,7 +205,7 @@ async function readSite(website: string | null): Promise<Footprint["site"]> {
     platform: detect(PLATFORMS, html)[0] || null,
     https: page.finalUrl.startsWith("https://"),
     hasRobots: Boolean(robots && robots.status < 400 && /user-agent/i.test(robots.text)),
-    hasSitemap: Boolean(sitemap && sitemap.status < 400 && /<urlset|<sitemapindex/i.test(sitemap.text)),
+    hasSitemap,
     pixels: detect(PIXELS, html),
     emailTools: detect(EMAIL_TOOLS, html),
     socialLinks,

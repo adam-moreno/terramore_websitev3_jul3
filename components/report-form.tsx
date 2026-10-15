@@ -164,8 +164,15 @@ export function ReportForm({
       })
 
       if (response.status === 409) {
+        const dup = (await response.json().catch(() => ({}))) as { retryTomorrow?: unknown; inProgress?: unknown }
         setAlreadyRequested(true)
-        setError("Already requested. Check your inbox for the report, or talk with us if you need another copy.")
+        setError(
+          dup.inProgress === true
+            ? "Your report is being written now. It reaches your inbox within a few minutes."
+            : dup.retryTomorrow === true
+              ? "We sent your report in the last day. Check your inbox; you can ask for a fresh one tomorrow."
+              : "Already requested. Check your inbox for the report, or talk with us if you need another copy.",
+        )
         trackReportSubmissionError("already_requested")
         setBusy(false)
         return
@@ -181,7 +188,12 @@ export function ReportForm({
       // Safe conversion point: the server saved the row (saved + reportRef), not just any 2xx. Fires generate_lead +
       // report_submission_success once per reportRef, plus existing Ads "Digital Footprint Report Submitted" only.
       // No PII. Do not fire on button click, failed/duplicate responses, or a 2xx without a saved row.
-      const data = (await response.json().catch(() => ({}))) as { saved?: unknown; reportRef?: unknown }
+      const data = (await response.json().catch(() => ({}))) as { saved?: unknown; reportRef?: unknown; refreshed?: unknown }
+      // A returning owner's fresh report: same confirmation, but not a new lead, so no conversion.
+      if (data.refreshed === true) {
+        onSuccess?.()
+        return
+      }
       const reportRef = data.saved === true && typeof data.reportRef === "string" && /^[a-f0-9]{32}$/.test(data.reportRef) ? data.reportRef : ""
       if (reportRef) trackReportSubmissionSuccess("report_form", reportRef)
       else trackReportSubmissionError("not_saved")

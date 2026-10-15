@@ -9,6 +9,7 @@ import { confirmLeadToUser, notifyAdminOfLead } from "@/lib/notify"
 import { enrollLead } from "@/lib/nurture/enroll"
 import { businessTypeFromReportAnswers } from "@/lib/nurture/map-links"
 import { findDuplicateReportLead } from "@/lib/report/duplicates"
+import { decideReportRefresh } from "@/lib/report/refresh"
 import { ATTR_KEYS, normalizeEmail, normalizePhone, pickAttribution } from "@/lib/report/normalize-lead"
 import { runReportPipeline } from "@/lib/report/pipeline"
 import { sendReportAcceptSms } from "@/lib/report/sms"
@@ -164,9 +165,44 @@ export async function POST(request: NextRequest) {
     })
 
     if (duplicate) {
-      console.info(`[report] already requested (${duplicate.matchedOn})`)
+      // Same email, last report over a day ago: a fresh report for the returning owner (lib/report/refresh.ts).
+      // Not a new lead: no conversion, no confirmation email, no nurture enrolment, no follow-up call.
+      const decision =
+        duplicate.matchedOn === "email"
+          ? await decideReportRefresh(email, { website: website || null, businessName: businessName || null })
+          : null
+      if (decision === "refresh") {
+        console.info("[report] returning owner, fresh report")
+        after(async () => {
+          await notifyAdminOfLead({
+            kind: "report" as const,
+            name,
+            email,
+            phone: phone || null,
+            business: businessName || null,
+            website: website || null,
+            details: { Returning: "Asked for a fresh report", Answers: answerSummary || "none" },
+            rowId: duplicate.id,
+            tableUrl: supabaseTableUrl("free_courses_signups"),
+            submittedAt,
+            attribution,
+          })
+          await runReportPipeline({
+            name,
+            email,
+            phone: phone || null,
+            smsConsent: false,
+            businessName,
+            website: website || null,
+            answers: answerSummary || null,
+            startFix,
+          })
+        })
+        return NextResponse.json({ ok: true, saved: false, refreshed: true }, { status: 200 })
+      }
+      console.info(`[report] already requested (${duplicate.matchedOn}${decision ? `, ${decision}` : ""})`)
       return NextResponse.json(
-        { alreadyRequested: true, matchedOn: duplicate.matchedOn },
+        { alreadyRequested: true, matchedOn: duplicate.matchedOn, ...(decision === "too_soon" ? { retryTomorrow: true } : {}), ...(decision === "in_progress" ? { inProgress: true } : {}) },
         { status: 409 },
       )
     }
