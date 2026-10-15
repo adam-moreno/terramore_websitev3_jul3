@@ -22,6 +22,8 @@ export function ManageBooking() {
   const [booking, setBooking] = useState<Booking | null>(null)
   const [state, setState] = useState<"loading" | "ready" | "missing" | "down" | "moving" | "canceled" | "moved">("loading")
   const [busy, setBusy] = useState(false)
+  // Inline "are you sure" instead of window.confirm: matches the page, works on phones, and keeps focus in the page.
+  const [confirming, setConfirming] = useState(false)
   const [error, setError] = useState("")
 
   useEffect(() => {
@@ -56,7 +58,6 @@ export function ManageBooking() {
   }, [load])
 
   const cancel = async () => {
-    if (!window.confirm("Cancel this call?")) return
     setBusy(true)
     setError("")
     try {
@@ -69,6 +70,7 @@ export function ManageBooking() {
         setError("We could not cancel just now. Reply to the confirmation email and we will handle it.")
         return
       }
+      setConfirming(false)
       setState("canceled")
     } catch {
       setError("We could not cancel just now. Reply to the confirmation email and we will handle it.")
@@ -168,10 +170,33 @@ export function ManageBooking() {
         >
           Move it
         </button>
-        <button type="button" onClick={() => void cancel()} disabled={busy} className="text-[14px] font-medium text-slate-500 hover:text-red-600 disabled:opacity-60">
-          {busy ? "Canceling…" : "Cancel the call"}
-        </button>
+        {confirming ? null : (
+          <button type="button" onClick={() => setConfirming(true)} className="text-[14px] font-medium text-slate-500 hover:text-red-600">
+            Cancel the call
+          </button>
+        )}
       </div>
+      {confirming ? (
+        <div role="group" aria-labelledby="cancel-confirm-label" className="mt-4 rounded-2xl border border-red-200 bg-red-50/60 p-4">
+          <p id="cancel-confirm-label" className="text-[14px] font-medium text-ink">
+            Cancel this call?
+          </p>
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              autoFocus
+              onClick={() => void cancel()}
+              disabled={busy}
+              className="inline-flex h-11 items-center rounded-full bg-red-700 px-5 text-[15px] font-medium text-white hover:bg-red-800 disabled:opacity-60"
+            >
+              {busy ? "Canceling…" : "Yes, cancel it"}
+            </button>
+            <button type="button" onClick={() => setConfirming(false)} disabled={busy} className="text-[14px] font-medium text-slate-600 hover:text-ink">
+              Keep my call
+            </button>
+          </div>
+        </div>
+      ) : null}
     </div>
   )
 }

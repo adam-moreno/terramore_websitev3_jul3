@@ -1,5 +1,10 @@
 # Development Log - Terramore Website
 
+## 2026-10-15 — Canceling a call asks inline, not with a browser dialog (UX fix)
+
+- `/book/manage`: "Cancel the call" used `window.confirm("Cancel this call?")`. A native dialog is unstyled, awkward on phones, and blocked the automated owner test (the tab froze until someone clicked OK). It now opens an inline box under the buttons: "Cancel this call?" with **Yes, cancel it** (red-700, white text ≈6.5:1, focused when it opens) and **Keep my call**. Loading ("Canceling…") and error states are unchanged.
+- Found in the Halcyon rerun: report email → /book pre-filled (name, email, company, website) → TEST booking → four reminder rows scheduled → cancel.
+
 ## 2026-10-14 — The free check and report read WordPress.com sites (bug fix)
 
 - `isPrivateAddress` treated all of 192.0.0.0/16 as reserved, so every site hosted on WordPress.com (192.0.78.x) got "We can only check public websites." Only 192.0.0.0/24 and 192.0.2.0/24 are reserved; TEST-NET-2/3 (198.51.100.0/24, 203.0.113.0/24) are now blocked too. Found in the Halcyon Ridge Painting persona test (halcyonridgepainting.wordpress.com).
