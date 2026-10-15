@@ -235,6 +235,15 @@ function bookingEvidence(booking: BookingCheck, website: string): string {
   }
 }
 
+/**
+ * The free check's words when no button was found on a page its builder draws in the browser: a note to check, not a
+ * gap, because the button may be there for visitors (lib/report/collect/site-experience.ts drawsButtonsInBrowser).
+ */
+export function browserDrawnNote(platform: string | null): string {
+  const who = platform && ["Wix", "Squarespace", "Webflow", "Framer"].includes(platform) ? platform : "Your site"
+  return `We couldn't confirm a main button: ${who} draws some buttons in the browser, so check your homepage shows one clear next step`
+}
+
 function pagesLabel(pages: PageSnapshot[]): string {
   return pages.length > 1 ? `Homepage and ${pages.length - 1} linked page${pages.length > 2 ? "s" : ""}` : "Homepage"
 }
@@ -373,7 +382,9 @@ export async function runLookup(
   websiteFindings.push(
     ctas.length
       ? finding("website", "ctas", "working", `Visitors are asked to: ${ctas.join(", ")}`, where)
-      : finding("website", "no_cta", "gap", "We didn't find a clear next step for visitors to take", where),
+      : site.rendersInBrowser
+        ? finding("website", "cta_unconfirmed", "note", browserDrawnNote(site.platform), where)
+        : finding("website", "no_cta", "gap", "We didn't find a clear next step for visitors to take", where),
   )
   if (site.prices.length)
     websiteFindings.push(finding("website", "prices", "working", "Prices are shown on the site", where))

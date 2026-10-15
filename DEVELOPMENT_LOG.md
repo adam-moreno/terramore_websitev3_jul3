@@ -1,5 +1,15 @@
 # Development Log - Terramore Website
 
+## 2026-10-14 — No false "no clear next step" on pages a builder draws in the browser
+
+**Found while testing (Adam, Buynest on Wix):** the free check and the full report said Buynest had no next step, but the live page shows "Shop Now" under the hero. Wix draws those buttons in the browser; "Shop Now" isn't anywhere in the 700 KB of HTML we read. No headless browser: we say what we can and can't see.
+
+- `lib/report/collect/site-experience.ts`: `drawsButtonsInBrowser(html, platform)`: true for Wix and Framer pages (Framer is now detected), and for Squarespace, Webflow or unknown pages only when the HTML has almost no links with text and is mostly script. When no button is found on such a homepage, `PageSnapshot.ctaUnconfirmed` is set and `collectSiteExperience` returns `rendersInBrowser`.
+- Free check (`lib/lookup/run.ts`): a **note**, not a gap: "We couldn't confirm a main button: Wix draws some buttons in the browser, so check your homepage shows one clear next step". Normal HTML sites keep the gap.
+- Scores (`lib/report/score/digital-presence.ts`): an unconfirmed button is left out of Digital Experience and Conversion Readiness (the other parts are scaled to the same range); Decision Friction is unscored with a note.
+- Full report (`lib/report/recommend.ts`): `check_cta`, priority low, confidence low, not a fix: "We couldn't confirm a main button on the homepage", with a two-minute phone check as the action. It no longer triggers "hold paid ads".
+- Checks: lookup 155 (18 new: Wix, app shell, link-rich Squarespace and plain HTML fixtures; note vs gap; scores), report-accuracy 66 (5 new), funnel, v1-release, visual, conversion tracking, dedupe pass; `tsc` unchanged (16). `verify-report-places.mjs` still fails as before (older break).
+
 ## 2026-10-13 — Website check: the next step sits above the findings, and "Fix this" on each fixable gap
 
 **Owner direction (Adam):** owners shouldn't scroll the whole list to find the next step, and each gap should lead to doing it.

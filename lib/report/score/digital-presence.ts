@@ -107,6 +107,9 @@ function scoreDigitalExperience(home: PageSnapshot | undefined, pages: PageSnaps
   }
   let score = 40
   const evidence: string[] = []
+  // A button the builder draws in the browser can't be confirmed either way, so it isn't scored: the other parts are
+  // scaled to the same 50-point range (12 of the 50 are the button's).
+  const ctaUnknown = home.ctaTexts.length === 0 && Boolean(home.ctaUnconfirmed)
   if (home.h1.length === 1) {
     score += 12
     evidence.push("Single clear H1")
@@ -136,6 +139,8 @@ function scoreDigitalExperience(home: PageSnapshot | undefined, pages: PageSnaps
   } else if (home.ctaTexts.length > 4) {
     score -= 6
     evidence.push(`Many competing CTAs: ${home.ctaTexts.length}`)
+  } else if (ctaUnknown) {
+    evidence.push("CTA: not confirmed, the site builder draws buttons in the browser")
   } else if (home.ctaTexts.length === 0) {
     score -= 10
     evidence.push("No CTA-like controls detected")
@@ -147,6 +152,7 @@ function scoreDigitalExperience(home: PageSnapshot | undefined, pages: PageSnaps
     score += 8
     evidence.push(`Key pages checked: ${pages.length}`)
   }
+  if (ctaUnknown) score = 40 + ((score - 40) * 50) / 38
   return {
     id: "digital_experience",
     label: "Digital Experience",
@@ -158,7 +164,9 @@ function scoreDigitalExperience(home: PageSnapshot | undefined, pages: PageSnaps
       { id: "first_impression", label: "First Impression", score: clamp(home.h1.length && home.title ? 70 : 40), note: home.h1[0] || "No H1" },
       { id: "navigation", label: "Navigation", score: clamp(home.navLabels.length ? Math.min(90, 30 + home.navLabels.length * 6) : 25) },
       { id: "offer_clarity", label: "Offer Clarity", score: clamp(home.h1.length ? 65 : 35), note: "Based on H1/title presence only" },
-      { id: "decision_friction", label: "Decision Friction", score: clamp(home.ctaTexts.length > 4 ? 40 : home.ctaTexts.length ? 70 : 35) },
+      ctaUnknown
+        ? { id: "decision_friction", label: "Decision Friction", score: null, note: "Buttons are drawn in the browser; not confirmed" }
+        : { id: "decision_friction", label: "Decision Friction", score: clamp(home.ctaTexts.length > 4 ? 40 : home.ctaTexts.length ? 70 : 35) },
       { id: "mobile", label: "Mobile Experience", score: null, note: "Not available in this report version" },
     ],
   }
@@ -267,10 +275,13 @@ function scoreConversion(home: PageSnapshot | undefined, hasCheckout: boolean, c
   }
   let score = 25
   const evidence: string[] = []
+  // Unconfirmed button (drawn in the browser): left out, and the rest scaled to the same range (15 of 70 points).
+  const ctaUnknown = home.ctaTexts.length === 0 && Boolean(home.ctaUnconfirmed)
   if (home.ctaTexts.length) {
     score += 15
     evidence.push(`CTA present: ${home.ctaTexts.slice(0, 3).join(", ")}`)
-  } else evidence.push("CTA: Not found in sources checked")
+  } else if (ctaUnknown) evidence.push("CTA: not confirmed, the site builder draws buttons in the browser")
+  else evidence.push("CTA: Not found in sources checked")
   if (home.hasPhone || home.hasEmail || home.formCount > 0 || nextStep?.externalForm || nextStep?.orderForm) {
     score += 15
     evidence.push(`Contact path: phone=${home.hasPhone} email=${home.hasEmail} forms=${home.formCount}`)
@@ -302,6 +313,7 @@ function scoreConversion(home: PageSnapshot | undefined, hasCheckout: boolean, c
     score -= 8
     evidence.push("Many competing CTAs may dilute the next step")
   }
+  if (ctaUnknown) score = 25 + ((score - 25) * 70) / 55
   return {
     id: "conversion",
     label: "Conversion Readiness",

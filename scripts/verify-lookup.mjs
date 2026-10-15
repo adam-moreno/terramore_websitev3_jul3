@@ -398,4 +398,70 @@ const BOOKING_FLOW = page(`<h2>Pick a time</h2><p>Times show in your time zone.<
   assert(alternateWww("https://shop.terramore.io/") === null, "www: subdomains are left alone")
 }
 
+// Buttons drawn in the browser (2026-10-14, Buynest on Wix): no button in the HTML of a Wix page, or of a builder page
+// that is mostly script with almost no links, is a note to check, never a "no clear next step" gap. Normal HTML keeps the gap.
+{
+  const { drawsButtonsInBrowser, htmlShape } = await load("lib/report/collect/site-experience.ts")
+  const bundle = `<script>${"var a=1;".repeat(6000)}</script>`
+  // Like the live Buynest page: Wix static assets, a big script payload, a few nav links, no "Shop Now" in the HTML.
+  const WIX = `<html><head><title>Buynest | Home</title><link rel="preconnect" href="https://static.wixstatic.com">${bundle}</head><body><div id="SITE_CONTAINER"><a href="/">Home</a><a href="/about">About</a></div></body></html>`
+  // An ordinary HTML site with real links and no call to action.
+  const PLAIN = page(`<nav><a href="/about">About</a><a href="/services">Services</a><a href="/gallery">Gallery</a></nav><h1>Bay Area Tile</h1><p>Tile work since 1998.</p>`)
+  // A Squarespace page with plenty of links is ordinary HTML: not excused.
+  const SQUARESPACE_LINKS = page(`<link href="https://static1.squarespace.com/x.css">${Array.from({ length: 12 }, (_, i) => `<a href="/p${i}">Page ${i}</a>`).join("")}`)
+  assert(drawsButtonsInBrowser(WIX, "Wix"), "browser-drawn: a Wix page")
+  assert(!drawsButtonsInBrowser(PLAIN, null), "browser-drawn: a normal HTML page is not")
+  assert(!drawsButtonsInBrowser(SQUARESPACE_LINKS, "Squarespace"), "browser-drawn: a link-rich Squarespace page is not")
+  assert(drawsButtonsInBrowser(`<html><body><div id="root"></div>${bundle}</body></html>`, null), "browser-drawn: an app shell with no links")
+  assert(htmlShape(WIX).scriptShare > 0.6, "browser-drawn: the Wix fixture is mostly script")
+
+  const { site: wixSite } = await crawl({ [ORIGIN]: WIX })
+  assert(wixSite.platform === "Wix" && wixSite.rendersInBrowser, "browser-drawn: Wix detected and flagged")
+  assert(wixSite.pages[0].ctaUnconfirmed === true, "browser-drawn: homepage button unconfirmed")
+  const { site: plainSite } = await crawl({ [ORIGIN]: PLAIN })
+  assert(!plainSite.rendersInBrowser && !plainSite.pages[0].ctaUnconfirmed, "browser-drawn: plain HTML not flagged")
+  // A Wix page whose button is in the HTML is read as usual and not marked unconfirmed.
+  const { site: wixWithCta } = await crawl({ [ORIGIN]: WIX.replace("</div>", `<a href="/shop">Shop Now</a></div>`) })
+  assert(wixWithCta.pages[0].ctaTexts.includes("Shop Now") && !wixWithCta.pages[0].ctaUnconfirmed, "browser-drawn: a found button is confirmed")
+
+  const lookup = async (home) => {
+    const events = []
+    globalThis.fetch = async (url) =>
+      String(url).replace(/\/$/, "") === ORIGIN ? new Response(home, { status: 200 }) : new Response("not found", { status: 404 })
+    await runLookup(`${ORIGIN}/`, "d".repeat(32), (e) => events.push(e), Date.now() + 30_000)
+    return events
+  }
+  const wixEvents = await lookup(WIX)
+  const wixWebsite = wixEvents.find((e) => e.type === "source" && e.source === "website").findings
+  const note = wixWebsite.find((f) => f.id === "website.cta_unconfirmed")
+  assert(note && note.tone === "note", "lookup: Wix page with no button in its HTML gets a note")
+  assert(/couldn't confirm a main button: Wix draws some buttons in the browser/.test(note.text), `lookup: note names Wix (${note?.text})`)
+  assert(!wixWebsite.some((f) => f.id === "website.no_cta"), "lookup: no false 'no clear next step' gap on Wix")
+  assert(wixEvents.at(-1).firstLook?.id !== "website.no_cta", "lookup: the first look isn't a false missing button")
+  const plainEvents = await lookup(PLAIN)
+  const plainWebsite = plainEvents.find((e) => e.type === "source" && e.source === "website").findings
+  assert(plainWebsite.some((f) => f.id === "website.no_cta" && f.tone === "gap"), "lookup: plain HTML with no button keeps the gap")
+
+  // Scores: an unconfirmed button isn't counted against Digital Experience or Conversion Readiness.
+  const { scoreDigitalPresence } = await load("lib/report/score/digital-presence.ts")
+  const base = { url: "https://a.test/", status: 200, title: "A", h1: ["A"], navLabels: ["Home", "Shop", "About"], ctaTexts: [], hasPhone: false, hasEmail: true, formCount: 0, hasBookingLink: false, trustSignals: [], excerpt: "" }
+  const scoreWith = (home) =>
+    scoreDigitalPresence({
+      pages: [home],
+      technical: { https: true, title: "A", description: null, canonical: null, hasRobots: true, hasSitemap: true, viewport: true, status: 200, note: "" },
+      directories: [],
+      places: { checked: false, confirmed: false, placeId: null, rating: null, reviewCount: null, hasAddress: false },
+      catalog: { kind: "unknown", available: false, productCount: null, sampleNames: [] },
+      hasCheckout: true,
+    })
+  const f = (r, id) => r.factors.find((x) => x.id === id)
+  const missing = scoreWith(base)
+  const unknown = scoreWith({ ...base, ctaUnconfirmed: true })
+  for (const id of ["digital_experience", "conversion"]) {
+    assert(f(unknown, id).score > f(missing, id).score, `score: unconfirmed button not counted against ${id} (${f(missing, id).score} -> ${f(unknown, id).score})`)
+  }
+  assert(unknown.overall > missing.overall, "score: overall not marked down for an unconfirmed button")
+  assert(f(unknown, "digital_experience").subfactors.find((s) => s.id === "decision_friction").score === null, "score: decision friction left unscored")
+}
+
 console.log(`lookup: ok (${checks} checks)`)

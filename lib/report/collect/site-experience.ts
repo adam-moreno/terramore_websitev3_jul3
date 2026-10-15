@@ -67,6 +67,32 @@ function extractCtas(html: string): string[] {
   return out.slice(0, 12)
 }
 
+/**
+ * Builders that draw a page's buttons in the browser after it loads: Wix (Thunderbolt and Harmony) and Framer always,
+ * Squarespace and Webflow on some blocks and interactions. Their buttons can be missing from the HTML we read.
+ */
+const BROWSER_DRAWN_ALWAYS = new Set(["Wix", "Framer"])
+const BROWSER_DRAWN_SOMETIMES = new Set(["Squarespace", "Webflow"])
+
+/** Links and buttons with visible text, and how much of the page is script, from the HTML as fetched. */
+export function htmlShape(html: string): { textControls: number; scriptShare: number } {
+  const textControls = Array.from(html.matchAll(/<(a|button)\b[^>]*>([\s\S]*?)<\/\1>/gi)).filter((m) => stripToText(m[2])).length
+  const scriptChars = Array.from(html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)).reduce((n, m) => n + m[1].length, 0)
+  return { textControls, scriptShare: html.length ? scriptChars / html.length : 0 }
+}
+
+/**
+ * Whether the page's buttons may be drawn in the browser, so not finding one in the HTML proves nothing. True for a
+ * Wix or Framer page; for a Squarespace or Webflow page, or an unknown site, only when the HTML has almost no links
+ * with text and is mostly script (an app shell). A normal HTML page with real links is never excused.
+ */
+export function drawsButtonsInBrowser(html: string, platform: string | null): boolean {
+  if (platform && BROWSER_DRAWN_ALWAYS.has(platform)) return true
+  const { textControls, scriptShare } = htmlShape(html)
+  if (platform && BROWSER_DRAWN_SOMETIMES.has(platform)) return textControls < 8 && scriptShare >= 0.3
+  return textControls <= 2 && scriptShare >= 0.6
+}
+
 function attributeUrls(html: string, baseUrl: string): string[] {
   return Array.from(html.matchAll(/\b(?:href|src)=["']([^"']+)["']/gi))
     .map((m) => absoluteUrl(baseUrl, m[1]))
@@ -312,6 +338,8 @@ export async function collectSiteExperience(
   nextStep: NextStep
   /** The highest listed price across the pages read, with its sentence, or null. */
   priceAnchor: PriceAnchor | null
+  /** The homepage may draw its buttons in the browser (drawsButtonsInBrowser), so a missing button is unconfirmed. */
+  rendersInBrowser: boolean
 }> {
   if (!website) {
     return {
@@ -327,6 +355,7 @@ export async function collectSiteExperience(
       booking: { status: "none", via: null, url: null },
       nextStep: BOOKING_PATH_STEP,
       priceAnchor: null,
+      rendersInBrowser: false,
     }
   }
 
@@ -360,6 +389,7 @@ export async function collectSiteExperience(
       booking: { status: "none", via: null, url: null },
       nextStep: BOOKING_PATH_STEP,
       priceAnchor: null,
+      rendersInBrowser: false,
     }
   }
 
@@ -384,6 +414,7 @@ export async function collectSiteExperience(
     ["Squarespace", /squarespace\.com/i],
     ["Wix", /wix\.com|wixstatic\.com/i],
     ["Webflow", /webflow\.com|data-wf-page/i],
+    ["Framer", /framerusercontent\.com|<meta[^>]+content=["']Framer\b/i],
     ["WordPress", /wp-content|wp-includes/i],
     ["Next.js", /_next\/static/i],
   ]
@@ -404,6 +435,8 @@ export async function collectSiteExperience(
   const text = stripToText(home.text)
   const platform = platforms.find(([, re]) => re.test(home.text))?.[0] || null
   const hasCheckout = /\/cart|\/checkout|add[-_ ]to[-_ ]cart|Add to bag/i.test(home.text)
+  const rendersInBrowser = drawsButtonsInBrowser(home.text, platform)
+  if (rendersInBrowser && homePage.ctaTexts.length === 0) homePage.ctaUnconfirmed = true
   const pages = [homePage, ...extraPages]
   return {
     pages,
@@ -424,5 +457,6 @@ export async function collectSiteExperience(
       pageHtml,
     }),
     priceAnchor: priceAnchor(pageHtml),
+    rendersInBrowser,
   }
 }

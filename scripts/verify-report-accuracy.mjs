@@ -172,4 +172,16 @@ for (const f of ["components/site-header.tsx", "components/site-footer.tsx", "ap
   assert(!/href=\{PHONE_HREF\}|tel:\+1/.test(fs.readFileSync(path.join(root, f), "utf8")), `${f}: every phone link is tracked`)
 }
 
+// 9. A builder that draws its buttons in the browser (Wix): no button in the HTML is a low-priority check, never the
+//    confirmed no_cta problem, and it doesn't hold back paid ads. A normal HTML page with no button keeps no_cta.
+const noCtaHome = { ...home, ctaTexts: [] }
+const plainRecs = buildRecommendations({ ...recInput, pages: [noCtaHome], pixels: [] })
+assert(plainRecs.findings.some((f) => f.id === "no_cta" && f.priority === "high"), "normal HTML, no button → no_cta")
+const wixRecs = buildRecommendations({ ...recInput, pages: [{ ...noCtaHome, ctaUnconfirmed: true }], pixels: [], platform: "Wix" })
+const check = wixRecs.findings.find((f) => f.id === "check_cta")
+assert(!wixRecs.findings.some((f) => f.id === "no_cta"), "Wix, no button in HTML → no confirmed no_cta")
+assert(check && check.priority === "low" && check.confidence === "low" && !check.fixable, "Wix: a low-confidence check, not a fix")
+assert(/couldn't confirm/.test(check.finding) && /Wix draws some buttons in the browser/.test(check.evidence) && /check there's one clear button/.test(check.action), "Wix: phrased as a check")
+assert(!wixRecs.findings.some((f) => f.id === "hold_paid"), "an unconfirmed button doesn't hold back paid ads")
+
 console.log(`report accuracy: ok (${checks} checks)`)

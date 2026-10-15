@@ -108,6 +108,11 @@ export type PageSnapshot = {
   h1: string[]
   navLabels: string[]
   ctaTexts: string[]
+  /**
+   * No button or link was found, but the page is drawn in the browser (a Wix page, or a builder page with almost no
+   * links in its HTML), so its buttons may simply not be in the HTML we read. Not counted as a missing next step.
+   */
+  ctaUnconfirmed?: boolean
   formCount: number
   hasPhone: boolean
   hasEmail: boolean

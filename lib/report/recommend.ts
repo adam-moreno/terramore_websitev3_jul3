@@ -67,7 +67,20 @@ export function buildRecommendations(input: {
         }),
       )
     }
-    if (home.ctaTexts.length === 0) {
+    if (home.ctaTexts.length === 0 && home.ctaUnconfirmed) {
+      // The builder draws its buttons in the browser, so the HTML we read can't show one. A check, not a problem.
+      const builder = input.platform && ["Wix", "Squarespace", "Webflow", "Framer"].includes(input.platform) ? input.platform : "Your site builder"
+      findings.push(
+        finding("check_cta", "Conversion", {
+          finding: "We couldn't confirm a main button on the homepage.",
+          evidence: `${builder} draws some buttons in the browser, so they aren't in the page code we read (${home.url}).`,
+          impact: "If there isn't one clear button near the top, visitors who like what they see may not know what to do next.",
+          action: "Open your homepage on your phone and check there's one clear button near the top, like \"Shop now\" or \"Book a time\".",
+          priority: "low",
+          confidence: "low",
+        }),
+      )
+    } else if (home.ctaTexts.length === 0) {
       findings.push(
         finding("no_cta", "Conversion", {
           finding: "No clear call-to-action controls were detected on the homepage.",
@@ -213,7 +226,7 @@ export function buildRecommendations(input: {
   }
 
   // Paid acquisition dependency rule when offer/conversion weak
-  const offerWeak = Boolean(home && (!home.h1.length || home.ctaTexts.length === 0))
+  const offerWeak = Boolean(home && (!home.h1.length || (home.ctaTexts.length === 0 && !home.ctaUnconfirmed)))
   if (offerWeak) {
     findings.push(
       finding("hold_paid", "Recommendations", {
@@ -324,6 +337,7 @@ const EFFORT: Record<string, string> = {
   site_unreachable: "Needs whoever hosts your website.",
   missing_h1: "About 15 minutes.",
   no_cta: "About 30 minutes.",
+  check_cta: "About 2 minutes to check.",
   many_ctas: "About 30 minutes.",
   weak_contact: "About 15 minutes.",
   missing_meta: "About 10 minutes.",
