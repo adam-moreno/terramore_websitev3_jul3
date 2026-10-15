@@ -441,8 +441,8 @@ export default function PrivacyPolicyPage() {
                 </p>
                 <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Your choices</h3>
                 <p className="text-gray-700 leading-relaxed">
-                  Press Stop at any time, or remove the extension from Chrome. To ask us to delete your fix logs, email
-                  hello@terramore.io. The use of information received from the extension adheres to the Chrome Web
+                  Press Stop at any time, or remove the extension from Chrome. To ask us to delete your fix logs, email{" "}
+                  <PlainEmail address="hello@terramore.io" />. The use of information received from the extension adheres to the Chrome Web
                   Store User Data Policy, including the Limited Use requirements.
                 </p>
               </section>

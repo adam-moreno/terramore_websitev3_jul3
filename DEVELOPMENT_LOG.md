@@ -1,5 +1,13 @@
 # Development Log - Terramore Website
 
+## 2026-10-15 — Old ad pages redirect, a branded "not found" page, privacy email fixed (pre-Ads site check)
+
+- **Redirects** (`next.config.mjs`, temporary so they can change): `/services` and `/services/*` (the old construction ad pages) → `/report`; `/marketing/services` → `/marketing`; `/small-business` and `/small-business/*` → `/`. The paused Growth campaign's ads pointed at `/marketing/services` and `/small-business/marketing`, both 404.
+- **`app/not-found.tsx`:** "We couldn't find that page." with Check my business (/report), Book a free call and the homepage, plus the site footer. Not indexed. Replaces Next's unbranded 404.
+- **Privacy:** the TerraAI section wrote hello@terramore.io as plain JSX text, which Cloudflare rewrites (MV-15, breaks hydration). Now `<PlainEmail>`. Caught by `verify-visual`, which the earlier privacy change hadn't run.
+- Site check: 70 internal pages crawled, all 200 (the only "broken" link is Cloudflare's email-protection path, decoded in the browser); one phone number site-wide, `tel:+18186999217`; 67 external links respond.
+- Checks: verify-visual, verify-v1-release, verify-funnel, verify-lookup pass; `tsc` unchanged (16).
+
 ## 2026-10-15 — Privacy statement covers the TerraAI Chrome extension (draft for the Chrome Web Store listing; not merged)
 
 - New section `#terraai-extension` in `app/privacy/page.tsx`, after AI processing: what the extension reads (only the tab a fix opened, only while that fix runs: layout, text, screenshots), what it sends (to dashboard.terramore.io, then Anthropic to decide the next step; not used to train public models, not sold or shared for ads), what TerraAI won't do (no typing on login, code or payment screens; no paying or deleting; nothing saved without Save it), retention (working notes and screenshots deleted when the fix ends; a short step log kept without screenshots or typed text; in the browser, the session until Chrome closes and the allowed-sites list), choices, and the Chrome Web Store Limited Use statement. Facts from the dashboard branch `feature/terramore-extension` (`lib/growth-workspace/extension-policy.ts`, migration 091, `extension/panel.js` storage).
