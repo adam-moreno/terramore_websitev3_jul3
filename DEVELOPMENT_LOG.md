@@ -1,5 +1,10 @@
 # Development Log - Terramore Website
 
+## 2026-10-14 — Booking reminders trimmed to three (owner direction)
+
+- Emails go out 24 hours, 2 hours and 30 minutes before the call; the 30-minute email carries the join link. The 10-hour and 2-minute emails are dropped. The 2-minute text is turned off in the SMS plan (the timed SMS cron isn't scheduled yet).
+- Already-booked calls keep the reminders scheduled at booking time.
+
 ## 2026-10-14 — Booking without a phone; owner words in the report email (Buynest persona test)
 
 - **/book:** phone is optional. A Wix shop owner with no business phone was stopped one click before booking ("Please fill out this field"). With a number we text the confirmation and reminders; without one we email them, which the booking reminders already supported. A number that is entered still has to be complete.

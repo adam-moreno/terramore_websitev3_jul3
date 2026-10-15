@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Messages go out after the response so the visitor sees the confirmation right away.
-  // Confirm immediate; prep ~5 min; reminders 24h/10h/2h/30m/2m via provider schedule. Nurture enroll future-only.
+  // Confirm immediate; prep ~5 min; reminders 24h/2h/30m via provider schedule. Nurture enroll future-only.
   after(async () => {
     await Promise.all([notifyAdminOfBooking(notice), confirmBookingToUser(notice)])
     const hasReport = await leadHasDigitalFootprintReport(email)

@@ -47,7 +47,8 @@ export const BOOKING_SMS_SPECS: BookingSmsSpec[] = [
   { kind: "24h", offsetMs: 24 * 60 * 60 * 1000, label: "24 hours before", enabled: true },
   { kind: "2h", offsetMs: 2 * 60 * 60 * 1000, label: "2 hours before", enabled: true },
   { kind: "30m", offsetMs: 30 * 60 * 1000, label: "30 minutes before", enabled: true },
-  { kind: "2m", offsetMs: 2 * 60 * 1000, label: "2 minutes before", enabled: true },
+  // Off (owner, 2026-10-14): three reminders are enough; the 30-minute one carries the join link.
+  { kind: "2m", offsetMs: 2 * 60 * 1000, label: "2 minutes before", enabled: false },
 ]
 
 /** Timed kinds only (cron). Confirm is sent at booking time. */

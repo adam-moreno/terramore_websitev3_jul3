@@ -2,7 +2,7 @@
  * Pre-call reminder emails, scheduled at booking time via Resend `scheduled_at` /
  * SendGrid `send_at` (same path as the ~5 min prep email).
  *
- * Offsets before start: 24h, 10h, 2h, 30m, 2m.
+ * Offsets before start: 24h, 2h, 30m (owner trimmed to three, 2026-10-14; 10h and 2m read as too many for a 30-minute call).
  * Only schedule if send time is still > now + 2 minutes (skip past / imminent sends).
  *
  * SMS campaign copy (confirm + optional timed) lives in `lib/booking-sms.ts`.
@@ -27,10 +27,8 @@ export type ReminderSpec = {
 
 export const BOOKING_REMINDER_SPECS: ReminderSpec[] = [
   { kind: "24h", offsetMs: 24 * 60 * 60 * 1000, label: "24 hours before" },
-  { kind: "10h", offsetMs: 10 * 60 * 60 * 1000, label: "10 hours before" },
   { kind: "2h", offsetMs: 2 * 60 * 60 * 1000, label: "2 hours before" },
   { kind: "30m", offsetMs: 30 * 60 * 1000, label: "30 minutes before" },
-  { kind: "2m", offsetMs: 2 * 60 * 1000, label: "2 minutes before" },
 ]
 
 function firstName(name: string): string {
