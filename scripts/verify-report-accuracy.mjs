@@ -184,4 +184,18 @@ assert(check && check.priority === "low" && check.confidence === "low" && !check
 assert(/couldn't confirm/.test(check.finding) && /Wix draws some buttons in the browser/.test(check.evidence) && /check there's one clear button/.test(check.action), "Wix: phrased as a check")
 assert(!wixRecs.findings.some((f) => f.id === "hold_paid"), "an unconfirmed button doesn't hold back paid ads")
 
+// 10. The email box on the report form (2026-10-14): its job is said in the label, it stays unticked and required, and a
+//     missing field gets its own message under it, linked to the field, announced, with focus on the first problem.
+assert(/Email me my report and occasional tips\. You can unsubscribe any time\./.test(form), "consent label says what the emails are")
+assert(!/occasional notes about the work/.test(form) && !/consent are required/.test(form), "old label and lumped error are gone")
+assert(/const \[consent, setConsent\] = useState\(false\)/.test(form), "email box starts unticked")
+assert(/"consent" && !v\.consent\) return \{ message: "Tick the box so we can email your report\."/.test(form), "missing box has its own message")
+for (const f of ["website", "first_name", "last_name", "email", "consent"]) {
+  assert(new RegExp(`data-field="${f}"\\s+aria-invalid=\\{fieldErrors\\.${f} \\? true : undefined\\}\\s+aria-describedby=\\{fieldErrors\\.${f} \\? "report-${f}-error"`).test(form), `${f}: aria-invalid and aria-describedby only after a failed check`)
+  assert(form.includes(`<FieldError id="report-${f}-error" message={fieldErrors.${f}} />`), `${f}: message under the field`)
+}
+assert(/<span id=\{id\} role="alert"/.test(form), "field messages are announced")
+assert(/inputs\.find\(\(input\) => input\.dataset\.field === problems\[0\]\.field\)\?\.focus\(\)/.test(form), "focus moves to the first problem")
+assert(/noValidate/.test(form) && /trackFunnelEvent\("report_validation_error"/.test(form), "own validation, still one tracked event per attempt")
+
 console.log(`report accuracy: ok (${checks} checks)`)

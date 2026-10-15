@@ -1,5 +1,13 @@
 # Development Log - Terramore Website
 
+## 2026-10-14 — Report form: each missing field says so, and the email box says what it's for
+
+**Found while testing (Adam):** the last step's box "Send the report and occasional notes about the work…" starts unticked but is required, and leaving it unticked showed "First name, last name, email, website, and consent are required." with everything else filled in.
+
+- `components/report-form.tsx`: the box now reads "Email me my report and occasional tips. You can unsubscribe any time." It stays unticked and required (the report and follow-ups go by email; no pre-tick). The server still records `email_consent` as before.
+- The form checks itself (`noValidate`, so no browser bubbles): each problem shows directly under its field ("Tick the box so we can email your report.", "Enter an email like name@example.com.", …), with `aria-invalid` and `aria-describedby` set only after a failed submit, `role="alert"`, and focus on the first problem. A message clears as soon as its field is fixed (UX Doctrine §3.12). One `report_validation_error` per attempt with field ids only, `email_format` kept apart.
+- Checks: report-accuracy 83 (17 new source checks on the form), funnel 79, lookup 155, v1-release, visual, conversion tracking, dedupe pass; `tsc` unchanged (16).
+
 ## 2026-10-14 — No false "no clear next step" on pages a builder draws in the browser
 
 **Found while testing (Adam, Buynest on Wix):** the free check and the full report said Buynest had no next step, but the live page shows "Shop Now" under the hero. Wix draws those buttons in the browser; "Shop Now" isn't anywhere in the 700 KB of HTML we read. No headless browser: we say what we can and can't see.
