@@ -26,8 +26,9 @@ export function plainWords(text: string): string {
 export function shortAction(action: string): string {
   const step = action.match(/^\s*Step 1:\s*([\s\S]*?)(?:\s*Step 2:|$)/i)
   const body = (step ? step[1] : action).trim()
-  const sentence = body.match(/^[\s\S]*?[.!?](?=\s|$)/)?.[0] ?? body
-  return sentence.trim()
+  const sentence = (body.match(/^[\s\S]*?[.!?](?=\s|$)/)?.[0] ?? body).trim()
+  // "Step 1: ask every new customer…" starts mid-sentence; the email shows it as its own sentence.
+  return sentence.charAt(0).toUpperCase() + sentence.slice(1)
 }
 
 export function reportEmailSummary(input: {

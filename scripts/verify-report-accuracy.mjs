@@ -213,7 +213,7 @@ assert(/noValidate/.test(form) && /trackFunnelEvent\("report_validation_error"/.
   assert(text.startsWith("Buynest scored 44 out of 100"), `email: score line (${sum.text[0]})`)
   assert(text.indexOf("No analytics are installed.") < text.indexOf("Search results show no description"), "email: fixes in rank order")
   assert(!text.includes("Few trust signals"), "email: only the top two fixes")
-  assert(text.includes("   list where customers come from today.") && !text.includes("Step 2"), "email: one short action (step 1 only)")
+  assert(text.includes("   List where customers come from today.") && !text.includes("Step 2"), "email: one short action (step 1 only)")
   assert(text.includes("   Add a one-sentence search description.") && !text.includes("160 characters"), "email: first sentence of the action, in owner words")
   assert(!/\bmeta description|\bH1\b|\bCTA\b/.test(text + sum.html), "email: no web jargon reaches the owner")
   assert(sum.text.filter((l) => l === `   Fix this: ${ws}`).length === 2 && (sum.html.match(/>Fix this<\/a>/g) || []).length === 2, "email: Fix this on each, text and HTML")

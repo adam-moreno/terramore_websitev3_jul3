@@ -963,7 +963,7 @@ function SocialsStep({
       return
     }
     if (!socials.length) {
-      setFormError("Add at least one account name, or choose \"I don't use social media\".")
+      setFormError(linked.size ? "Add an account name, or choose \"That's all of them\"." : "Add at least one account name, or choose \"I don't use social media\".")
       return
     }
     setFormError(null)
@@ -974,11 +974,13 @@ function SocialsStep({
   return (
     <>
       <h3 id="journey-heading" ref={headingRef} tabIndex={-1} className="mt-1 text-[22px] font-bold text-ink focus:outline-none">
-        Do you have social media accounts?
+        {linked.size ? "We found your social profiles. Any others?" : "Do you have social media accounts?"}
       </h3>
       <p className="mt-2 max-w-[44rem] text-[15px] leading-snug text-slate-700">
-        Add the ones you use, even if it&apos;s just one. Each profile counts toward Discoverability, so adding them can
-        raise your score. We don&apos;t post or sign in to anything.
+        {linked.size
+          ? "These are linked from your website and already count. Add any others you use, or carry on."
+          : "Add the ones you use, even if it\u2019s just one. Each profile counts toward Discoverability, so adding them can raise your score."}{" "}
+        We don&apos;t post or sign in to anything.
       </p>
 
       {linked.size || added.size ? (
@@ -1104,7 +1106,7 @@ function SocialsStep({
                   onClick={onNext}
                   className="inline-flex min-h-11 items-center justify-center text-[16px] font-medium text-ink underline underline-offset-4 hover:text-brand"
                 >
-                  I don&apos;t use social media
+                  {linked.size ? "That\u2019s all of them" : "I don\u2019t use social media"}
                 </button>
               </>
             )}

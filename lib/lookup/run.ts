@@ -570,6 +570,17 @@ export async function runLookup(
       report("google_maps", "done", [
         finding("google_maps", "confirmed", "working", "A Google Maps listing points to this website", "Google Maps"),
       ])
+    } else if (inputs.directories.some((d) => d.platform === "googleMaps" && d.linkedFromSite)) {
+      // The site links to its own Maps listing, so there is one; only the listing's website field couldn't be matched.
+      report("google_maps", "done", [
+        finding(
+          "google_maps",
+          "linked_unconfirmed",
+          "note",
+          "Your site links to your Google Maps listing. Check that the listing's website field points back to this site",
+          "Google Maps",
+        ),
+      ])
     } else {
       report("google_maps", "not_found", [
         finding(

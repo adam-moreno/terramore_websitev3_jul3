@@ -1,5 +1,11 @@
 # Development Log - Terramore Website
 
+## 2026-10-14 — Aztec persona fixes: Maps link counts, found socials shown, fix steps capitalised
+
+- **Free check:** when the site itself links to a Google Maps listing but Places can't match the listing's website field, the check shows a note ("Your site links to your Google Maps listing. Check that the listing's website field points back to this site") instead of the "couldn't confirm" gap. Aztec Paving linked its Maps page and was still told none was found.
+- **Social step:** when profiles were found on the site, the heading reads "We found your social profiles. Any others?" and the skip button "That's all of them" (not "I don't use social media").
+- **Report email:** fix steps start with a capital letter ("Step 1: ask…" → "Ask…").
+
 ## 2026-10-14 — Canceling or moving a call withdraws its scheduled reminder emails (live bug)
 
 **Bug:** reminders (24h/2h/30m) and the ~5-minute prep note are scheduled with the email provider at booking time, and cancel/reschedule on /book/manage never withdrew them. A canceled owner still got "your call is in 2 hours"; a moved one got reminders for the old time.
