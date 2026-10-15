@@ -200,18 +200,42 @@ export function BusinessLookup({
     return () => window.removeEventListener("hashchange", focusIfTargeted)
   }, [anchor])
 
+  // A link with ?site= (a cold email or a retargeting ad: "see your results") opens with the check already running,
+  // on the page's canonical lookup only. The address is taken off the URL so a refresh doesn't run it again.
+  useEffect(() => {
+    if (!anchor) return
+    const params = new URLSearchParams(window.location.search)
+    const site = params.get("site")?.trim().slice(0, 200)
+    if (!site) return
+    params.delete("site")
+    const rest = params.toString()
+    window.history.replaceState(window.history.state, "", `${window.location.pathname}${rest ? `?${rest}` : ""}${window.location.hash}`)
+    if (!looksLikeWebsite(site)) return
+    setValue(site)
+    void startCheck(site, { fromLink: true })
+    // Runs once on arrival.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [anchor])
+
   async function submit(event: React.FormEvent) {
     event.preventDefault()
     if (pending) return
-    if (!looksLikeWebsite(value)) {
+    await startCheck(value)
+  }
+
+  /** fromLink: started by a ?site= link, not a click, so it isn't counted as the CTA's click. */
+  async function startCheck(website: string, { fromLink = false }: { fromLink?: boolean } = {}) {
+    if (!looksLikeWebsite(website)) {
       setInputError(LOOKUP_ERROR_COPY.invalid_website)
       inputRef.current?.focus()
       return
     }
     setInputError(null)
     const run = ++runRef.current
-    trackCtaClick(ctaId)
-    onSubmitted?.()
+    if (!fromLink) {
+      trackCtaClick(ctaId)
+      onSubmitted?.()
+    }
     trackFunnelEvent("lookup_start", { cta_id: ctaId })
     let current: LookupState = { ...EMPTY, phase: "checking" }
     setState(current)
@@ -232,7 +256,7 @@ export function BusinessLookup({
     }
 
     try {
-      await streamLookup({ website: value.trim() }, apply)
+      await streamLookup({ website: website.trim() }, apply)
       if (current.phase === "checking") apply({ type: "error", code: "server", message: "" })
     } catch (error) {
       // A TypeError from fetch or the stream means the connection failed, not the lookup.
