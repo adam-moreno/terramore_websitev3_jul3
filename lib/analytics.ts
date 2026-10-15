@@ -11,6 +11,7 @@
  * parameter values from lib/funnel-taxonomy.ts, sent to GA4 from the production hostname only, logged locally elsewhere.
  */
 
+import { INTERNAL_COOKIE } from "./google-tag"
 import { CTA_IDS, funnelSendMode, sanitizeFunnelParams, type CtaId, type FunnelEventName, type FunnelParams } from "./funnel-taxonomy"
 
 /**
@@ -156,10 +157,20 @@ export function trackGoogleAdsReportConversion(options?: { once?: string; transa
   }
 }
 
+/** True on Terramore's own devices (`?internal=on`, see lib/google-tag.ts): no ad pixel counts their tests. */
+export function isInternalVisitor(): boolean {
+  try {
+    if (typeof document === "undefined") return false
+    return new RegExp(`(?:^|;\\s*)${INTERNAL_COOKIE}=1(?:;|$)`).test(document.cookie || "")
+  } catch {
+    return false
+  }
+}
+
 /** Meta Lead — only if pixel script loaded (NEXT_PUBLIC_META_PIXEL_ID). */
 export function trackMetaLead() {
   try {
-    if (typeof window === "undefined") return
+    if (typeof window === "undefined" || isInternalVisitor()) return
     if (typeof window.fbq === "function") {
       window.fbq("track", "Lead")
     }
@@ -171,7 +182,7 @@ export function trackMetaLead() {
 /** TikTok Lead — only if pixel script loaded (NEXT_PUBLIC_TIKTOK_PIXEL_ID). */
 export function trackTikTokLead() {
   try {
-    if (typeof window === "undefined") return
+    if (typeof window === "undefined" || isInternalVisitor()) return
     if (window.ttq && typeof window.ttq.track === "function") {
       window.ttq.track("Lead")
     }

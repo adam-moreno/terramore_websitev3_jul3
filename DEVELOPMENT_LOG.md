@@ -1,5 +1,11 @@
 # Development Log - Terramore Website
 
+## 2026-10-15 — Internal visitors don't count in Ads or GA4; ?site= links open with the check running
+
+- **Internal visitors** (`lib/google-tag.ts`, `lib/analytics.ts`): visiting any page once with `?internal=on` sets a first-party `tm_internal` cookie for a year, and that device then loads no Google tag (no GA4 page views, no Google Ads conversions) and fires no Meta or TikTok Lead. `?internal=off` clears it. Our own test reports and bookings (Buynest, Aztec, Halcyon) had been counting as Ads conversions; this needs doing on each of Adam's browsers before the Ads relaunch. A lookalike value (`internal=online`, `tm_internal=10`) changes nothing.
+- **`?site=` links** (`components/business-lookup.tsx`): `terramore.io/report?site=theirsite.com` (or the homepage) opens with that site's free check already running, on the page's canonical lookup only. The address comes off the URL so a refresh doesn't re-run it; a bad value runs nothing; the run isn't counted as a CTA click (the `lookup_start` funnel event still fires). For cold email ("see your results") and retargeting.
+- Checks: `verify-funnel` adds internal-visitor checks (set, honoured, cleared, lookalikes ignored, Meta/TikTok guarded; a mutation removing the guard is caught). `verify-owner-rerun-fixes` adds 5 source checks for the link. Other verifiers pass; `tsc` unchanged (16).
+
 ## 2026-10-15 — Reminders are sent by our own cron, so a canceled call gets none (live bug)
 
 **Bug:** canceling a call didn't stop its reminders. They were scheduled with Resend, and the website's Resend key is send-only ("This API key is restricted to only send emails"), so every withdraw came back cancel_failed. Found when the TEST booking from the Halcyon rerun was canceled.

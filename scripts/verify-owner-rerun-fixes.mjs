@@ -131,4 +131,16 @@ const trust = reportEmailSummary({
 assert(!/trust signals|primary button|verifiable proof/i.test(trust), "trust finding in owner words")
 assert(/reviews/.test(trust), "trust step names reviews")
 
+// --- ?site= link opens with the check running (cold email, retargeting)
+{
+  const fs = await import("node:fs")
+  const src = fs.readFileSync(path.join(root, "components/business-lookup.tsx"), "utf8")
+  const effect = src.slice(src.indexOf("A link with ?site="), src.indexOf("async function submit"))
+  assert(/if \(!anchor\) return/.test(effect), "?site= only on the page's canonical lookup")
+  assert(/params\.delete\("site"\)/.test(effect) && /history\.replaceState/.test(effect), "the address comes off the URL (no re-run on refresh)")
+  assert(/if \(!looksLikeWebsite\(site\)\) return/.test(effect), "a bad ?site= value doesn't run anything")
+  assert(/startCheck\(site, \{ fromLink: true \}\)/.test(effect), "the link run is marked as not a click")
+  assert(/if \(!fromLink\) \{\s*trackCtaClick\(ctaId\)/.test(src), "a link run isn't counted as the CTA's click")
+}
+
 console.log(`owner-rerun fixes: ${checks} checks passed`)

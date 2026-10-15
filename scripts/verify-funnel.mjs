@@ -72,16 +72,16 @@ async function loadModules(mutation) {
 }
 
 /** Runs the layout's inline Google tag bootstrap in a sandbox for one hostname; returns what it loaded and queued. */
-function runGoogleTagBootstrap(source, hostname) {
+function runGoogleTagBootstrap(source, hostname, { search = "", cookie = "" } = {}) {
   const appended = []
   const sandbox = {
-    location: { hostname },
-    document: { createElement: () => ({}), head: { appendChild: (node) => appended.push(node) } },
+    location: { hostname, search, protocol: "https:" },
+    document: { cookie, createElement: () => ({}), head: { appendChild: (node) => appended.push(node) } },
   }
   sandbox.window = sandbox
   vm.runInNewContext(source, sandbox)
   const commands = (sandbox.dataLayer ?? []).map((args) => Array.from(args).map((v) => (Object.prototype.toString.call(v) === "[object Date]" ? "DATE" : v)))
-  return { appended, commands, gtag: sandbox.gtag, dataLayer: sandbox.dataLayer }
+  return { appended, commands, gtag: sandbox.gtag, dataLayer: sandbox.dataLayer, cookie: sandbox.document.cookie }
 }
 
 const analyticsRefModule = await import(pathToFileURL(path.join(root, "lib/analytics-ref.ts")).href)
@@ -326,6 +326,20 @@ const RULES = [
           if (run.dataLayer.length !== 1) out.push(`${host || "(empty)"}: gtag() no longer queues to dataLayer`)
         }
       }
+      // Internal visitors (2026-10-15): Terramore's own tests never reach GA4 or Google Ads.
+      const on = runGoogleTagBootstrap(source, "www.terramore.io", { search: "?internal=on" })
+      if (on.appended.length !== 0 || on.commands.length !== 0) out.push("?internal=on still loaded or configured the tag")
+      if (!/^tm_internal=1; path=\/; max-age=31536000; SameSite=Lax; Secure$/.test(on.cookie)) out.push(`?internal=on didn't set the cookie (${on.cookie})`)
+      const marked = runGoogleTagBootstrap(source, "www.terramore.io", { cookie: "a=1; tm_internal=1" })
+      if (marked.appended.length !== 0 || marked.commands.length !== 0) out.push("a device with tm_internal=1 still loaded the tag")
+      const off = runGoogleTagBootstrap(source, "www.terramore.io", { search: "?utm_source=x&internal=off", cookie: "tm_internal=1" })
+      if (off.appended.length !== 1 || !/max-age=0/.test(off.cookie)) out.push("?internal=off didn't clear the cookie and load the tag")
+      const lookalike = runGoogleTagBootstrap(source, "www.terramore.io", { search: "?internal=online", cookie: "tm_internal=10" })
+      if (lookalike.appended.length !== 1) out.push("a lookalike value or cookie switched tracking off")
+      if (typeof on.gtag !== "function") out.push("internal visitors still need gtag() for the helpers")
+      const analyticsSrc = files.get(ANALYTICS) ?? ""
+      if (!/trackMetaLead\(\) \{\s*try \{\s*if \(typeof window === "undefined" \|\| isInternalVisitor\(\)\) return/.test(analyticsSrc)) out.push("Meta Lead isn't skipped for internal visitors")
+      if (!/trackTikTokLead\(\) \{\s*try \{\s*if \(typeof window === "undefined" \|\| isInternalVisitor\(\)\) return/.test(analyticsSrc)) out.push("TikTok Lead isn't skipped for internal visitors")
       const layout = files.get(LAYOUT) ?? ""
       if (!layout.includes("__html: googleTagBootstrap(GOOGLE_TAG_ID, [GA4_MEASUREMENT_ID, GA4_MEASUREMENT_ID_LEGACY, googleAdsId])")) out.push(`${LAYOUT} no longer uses googleTagBootstrap`)
       for (const [file, src] of files) {
