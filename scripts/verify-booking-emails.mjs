@@ -191,6 +191,90 @@ assert(se.prepMessage({ ok: false, channel: "email:resend", scheduledAt: future(
   delete process.env.SENDGRID_API_KEY
 }
 
+// 6. Own sender (2026-10-15): reminders are queued rows our cron sends after checking the booking.
+{
+  const br = await import(pathToFileURL(path.join(root, "lib/booking-reminders.ts")).href)
+  const sr = await import(pathToFileURL(path.join(root, "lib/booking/send-reminders.ts")).href)
+  const notice = { name: "Dana Reyes", email: "dana@examplereno.test", phone: null, startIso: future(72), endIso: future(72.5), tz: "America/Chicago", meetUrl: null, meetProvider: null, manageUrl: "https://www.terramore.io/book/manage?token=tok-1" }
+  const queued = await br.scheduleBookingReminders(notice, { hasReport: true }, NOW)
+  assert(queued.messages.length === 3 && queued.messages.every((m) => m.provider === br.OWN_SENDER && m.messageId === null), "booking queues three own reminders")
+  assert(queued.results.length === 0, "nothing sent or scheduled with a provider at booking time")
+  assert(queued.messages.map((m) => m.sendAt).join() === [future(48), future(70), future(71.5)].join(), "24h, 2h and 30m before the call")
+  const soon = await br.scheduleBookingReminders({ ...notice, startIso: future(1) }, {}, NOW)
+  assert(soon.messages.map((m) => m.kind).join() === "30m", "a call in an hour only gets the 30-minute reminder")
+
+  const rows = se.rowsFor("bk-9", queued.messages, { tz: "America/Chicago", hasPhone: true, manageToken: "tok-1", startIso: notice.startIso })
+  assert(rows.every((r) => !r.status && r.manage_token === "tok-1" && r.start_iso === notice.startIso), "own rows stay scheduled with the manage token and call time")
+  assert(!JSON.stringify(rows).includes("@"), "still no email address stored")
+  assert(se.tokenFromManageUrl("https://www.terramore.io/book/manage?token=abc%2B1") === "abc+1" && se.tokenFromManageUrl("nope") === null, "token read from the manage link")
+
+  // Cancel: own rows are just marked; no provider call.
+  const { deps, log, store } = fakeDeps({ rows: [row("o1", "24h", null, future(30), { provider: "terramore" }), row("o2", "2h", null, future(50), { provider: "terramore" })] })
+  const withdrawn = await se.withdrawBookingEmails("bk-9", deps)
+  assert(withdrawn.canceled === 2 && withdrawn.failed === 0, "own reminders withdrawn")
+  assert(!log.some((l) => l[0] === "cancel") && store.every((r) => r.status === "canceled"), "no provider call, rows canceled")
+
+  // Reschedule records the token from the manage link and the new time.
+  const re = fakeDeps({ rows: [row("o3", "24h", null, future(30), { provider: "terramore" })] })
+  re.deps.schedule = async (n) => br.scheduleBookingReminders(n, {}, NOW)
+  await se.rescheduleBookingEmails({ id: "bk-9", startIso: future(96), endIso: future(96.5), meetUrl: null, meetProvider: null, name: "Dana", email: "dana@examplereno.test" }, "https://www.terramore.io/book/manage?token=tok-2", re.deps)
+  const fresh = re.store.filter((r) => r.status === "scheduled")
+  assert(fresh.length === 3 && fresh.every((r) => r.manage_token === "tok-2" && r.start_iso === future(96)), "reschedule queues new reminders with the token and new time")
+  assert(re.store.find((r) => r.id === "o3").status === "canceled", "old reminder canceled on reschedule")
+
+  // decideReminder
+  const due = (over = {}) => ({ id: "d", booking_id: "bk", kind: "2h", send_at: future(-0.05), visitor_tz: "America/Chicago", has_phone: false, manage_token: "tok", start_iso: future(1.95), ...over })
+  const on = (over = {}) => ({ ok: true, booking: { id: "bk", startIso: future(1.95), endIso: future(2.45), meetUrl: "https://meet.google.com/x", meetProvider: "google_meet", manageToken: "tok", status: "scheduled", name: "Dana Reyes", email: "dana@examplereno.test", ...over } })
+  assert(sr.decideReminder(due(), on(), NOW).outcome === "send", "call still on: send")
+  assert(sr.decideReminder(due(), on({ status: "canceled" }), NOW).outcome === "canceled", "canceled call: no reminder")
+  assert(sr.decideReminder(due(), on({ startIso: future(30) }), NOW).outcome === "canceled", "moved call: old reminder dropped")
+  assert(sr.decideReminder(due(), { ok: false, status: 404, error: "not_found" }, NOW).outcome === "canceled", "unknown booking: dropped")
+  assert(sr.decideReminder(due(), { ok: false, status: 503, error: "upstream_503" }, NOW).outcome === "retry", "Terra IQ down: retried next run")
+  assert(sr.decideReminder(due({ send_at: future(-1) }), on(), NOW).outcome === "skipped", "over 30 minutes late: skipped")
+  assert(sr.decideReminder(due(), on({ startIso: future(-0.1) }), NOW).outcome === "skipped", "call already started: skipped")
+  assert(sr.decideReminder(due({ manage_token: null }), null, NOW).outcome === "skipped", "no token: skipped")
+  assert(sr.decideReminder(due({ kind: "prep" }), on(), NOW).outcome === "skipped", "only reminders are sent here")
+
+  // sendDueReminders end to end with fakes.
+  const runWith = async (rowsIn, lookups, sendOk = true) => {
+    const marks = []
+    const sends = []
+    const result = await sr.sendDueReminders({
+      claimDue: async () => rowsIn,
+      booking: async (t) => lookups[t] ?? { ok: false, status: 404, error: "not_found" },
+      hasReport: async () => true,
+      send: async (m) => (sends.push(m), sendOk ? { ok: true, channel: "email:resend" } : { ok: false, channel: "email:resend", error: "500" }),
+      mark: async (id, status, error) => marks.push([id, status, error]),
+      now: () => NOW,
+    })
+    return { result, marks, sends }
+  }
+  const a = await runWith([due({ id: "r1", manage_token: "live" }), due({ id: "r2", manage_token: "gone" }), due({ id: "r3", manage_token: "down" })], {
+    live: on(),
+    down: { ok: false, status: 503, error: "upstream_503" },
+  })
+  assert(a.sends.length === 1 && a.sends[0].to === "dana@examplereno.test" && a.sends[0].subject === "In 2 hours — join details", "the live call gets its 2-hour reminder")
+  assert(a.sends[0].text.includes("manage?token=live") && a.sends[0].text.includes("Hi Dana"), "reminder has the owner's name and manage link")
+  assert(a.marks.find((m) => m[0] === "r1")[1] === "sent", "sent row marked sent")
+  assert(a.marks.find((m) => m[0] === "r2")[1] === "canceled", "gone booking marked canceled")
+  assert(a.marks.find((m) => m[0] === "r3")[1] === "scheduled", "Terra IQ down: row back to scheduled")
+  assert(a.result.sent === 1 && a.result.canceled === 1 && a.result.retry === 1, "run counts")
+  const f = await runWith([due({ id: "r4", manage_token: "live" })], { live: on() }, false)
+  assert(f.marks[0][1] === "send_failed" && f.marks[0][2] === "500", "send failure kept on the row")
+  const t = await sr.sendDueReminders({ claimDue: async () => { throw new Error("db down") }, now: () => NOW })
+  assert(t.claimed === 0, "a failing claim doesn't throw")
+
+  // Wiring
+  const cron = JSON.parse(read("vercel.json")).crons ?? []
+  assert(cron.some((c) => c.path === "/api/cron/booking-reminders" && c.schedule === "*/5 * * * *"), "cron every 5 minutes")
+  const cronRoute = read("app/api/cron/booking-reminders/route.ts")
+  assert(/CRON_SECRET/.test(cronRoute) && /timingSafeEqual/.test(cronRoute) && /status: 401/.test(cronRoute), "cron route needs the secret")
+  const sql2 = read("supabase/migrations/20261015_booking_reminders_own_sender.sql")
+  assert(/manage_token TEXT/.test(sql2) && /start_iso TIMESTAMPTZ/.test(sql2) && /'sending'/.test(sql2) && /REVOKE ALL/.test(sql2), "migration: token, start time, new statuses, no public access")
+  assert(!/\bemail TEXT|\bphone TEXT/i.test(sql2), "migration: still no email/phone columns")
+  assert(/manageToken: booking\.manageToken, startIso: booking\.startIso/.test(read("app/api/booking/route.ts")), "booking records the token and call time")
+}
+
 // 5. Wiring (source checks).
 const route = read("app/api/booking/route.ts")
 assert(/recordScheduledEmails\(\s*String\(booking\.id\)/.test(route), "booking records the scheduled ids")
