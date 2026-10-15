@@ -1,5 +1,11 @@
 # Development Log - Terramore Website
 
+## 2026-10-15 — Privacy statement covers the TerraAI Chrome extension (draft for the Chrome Web Store listing; not merged)
+
+- New section `#terraai-extension` in `app/privacy/page.tsx`, after AI processing: what the extension reads (only the tab a fix opened, only while that fix runs: layout, text, screenshots), what it sends (to dashboard.terramore.io, then Anthropic to decide the next step; not used to train public models, not sold or shared for ads), what TerraAI won't do (no typing on login, code or payment screens; no paying or deleting; nothing saved without Save it), retention (working notes and screenshots deleted when the fix ends; a short step log kept without screenshots or typed text; in the browser, the session until Chrome closes and the allowed-sites list), choices, and the Chrome Web Store Limited Use statement. Facts from the dashboard branch `feature/terramore-extension` (`lib/growth-workspace/extension-policy.ts`, migration 091, `extension/panel.js` storage).
+- "Last Updated" moved to October 15, 2026 (both places).
+- The store listing links to https://www.terramore.io/privacy#terraai-extension. Needs Adam's review before merge. `tsc` unchanged (16).
+
 ## 2026-10-15 — Internal visitors don't count in Ads or GA4; ?site= links open with the check running
 
 - **Internal visitors** (`lib/google-tag.ts`, `lib/analytics.ts`): visiting any page once with `?internal=on` sets a first-party `tm_internal` cookie for a year, and that device then loads no Google tag (no GA4 page views, no Google Ads conversions) and fires no Meta or TikTok Lead. `?internal=off` clears it. Our own test reports and bookings (Buynest, Aztec, Halcyon) had been counting as Ads conversions; this needs doing on each of Adam's browsers before the Ads relaunch. A lookalike value (`internal=online`, `tm_internal=10`) changes nothing.
