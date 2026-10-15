@@ -1,5 +1,10 @@
 # Development Log - Terramore Website
 
+## 2026-10-14 — Booking without a phone; owner words in the report email (Buynest persona test)
+
+- **/book:** phone is optional. A Wix shop owner with no business phone was stopped one click before booking ("Please fill out this field"). With a number we text the confirmation and reminders; without one we email them, which the booking reminders already supported. A number that is entered still has to be complete.
+- **Report email:** the top two fixes pass through `plainWords` (H1 → main headline, CTA → button, meta description → search description, SEO → search, above the fold → at the top of the page). The test owner's first fix had read "Add one specific H1…". Check added in verify-report-accuracy.
+
 ## 2026-10-14 — The report email shows the score and the first two fixes, not only "the PDF is attached"
 
 **Found while testing (Adam):** the report email said only that the PDF was attached, so the value sat behind a file most owners won't open on a phone.

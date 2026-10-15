@@ -8,6 +8,20 @@ import type { Recommendation } from "@/lib/report/types"
  */
 export type ReportEmailSummary = { text: string[]; html: string; /** Inbox preview line, or null to keep the default. */ preview: string | null }
 
+/** Owners don't speak web jargon: the report's wording is translated before it reaches their inbox. */
+const JARGON: [RegExp, string][] = [
+  [/\bH1s?\b/g, "main headline"],
+  [/\bCTAs?\b/g, "button"],
+  [/\bcalls? to action\b/gi, "button"],
+  [/\bmeta descriptions?\b/gi, "search description"],
+  [/\bSEO\b/g, "search"],
+  [/\babove the fold\b/gi, "at the top of the page"],
+]
+
+export function plainWords(text: string): string {
+  return JARGON.reduce((t, [re, w]) => t.replace(re, w), text)
+}
+
 /** The first step or sentence of an action, so each fix reads in one line ("Step 1: …" keeps step 1 only). */
 export function shortAction(action: string): string {
   const step = action.match(/^\s*Step 1:\s*([\s\S]*?)(?:\s*Step 2:|$)/i)
@@ -39,11 +53,12 @@ export function reportEmailSummary(input: {
     html.push(`<p style="margin:0 0 8px 0;font-size:15px;line-height:1.6;color:${INK};">${esc(intro)}</p>`)
     const items: string[] = []
     top.forEach((r, i) => {
-      const action = shortAction(r.action)
-      text.push(`${i + 1}. ${r.finding}`, `   ${action}`)
+      const action = plainWords(shortAction(r.action))
+      const finding = plainWords(r.finding)
+      text.push(`${i + 1}. ${finding}`, `   ${action}`)
       if (input.workspaceUrl) text.push(`   Fix this: ${input.workspaceUrl}`)
       items.push(
-        `<li style="margin:0 0 12px 0;font-size:15px;line-height:1.6;color:${INK};"><strong>${esc(r.finding)}</strong><br>${esc(action)}${
+        `<li style="margin:0 0 12px 0;font-size:15px;line-height:1.6;color:${INK};"><strong>${esc(finding)}</strong><br>${esc(action)}${
           input.workspaceUrl
             ? `<br><a href="${esc(input.workspaceUrl)}" target="_blank" style="color:${BRAND};text-decoration:underline;">Fix this</a>`
             : ""

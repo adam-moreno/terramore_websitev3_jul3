@@ -503,9 +503,10 @@ export function BookingFlow({
       setError("We need a name and an email to send the invite.")
       return
     }
-    if (!isUsablePhone(phone)) {
+    // Phone is optional (online shops often have none): without one, the confirmation and reminders go by email.
+    if (phone.trim() && !isUsablePhone(phone)) {
       bookingError("validation", ["phone_invalid"])
-      setError("We need a phone number in case you miss the video call.")
+      setError("That phone number doesn't look complete. Fix it, or leave it empty and we'll email your reminders.")
       return
     }
     setBusy(true)
@@ -770,9 +771,10 @@ export function BookingFlow({
               />
             </label>
             <label className="block">
-              <span className={detailsLabel}>Phone</span>
+              <span className={detailsLabel}>
+                Phone <span className="font-normal text-slate-500">(optional)</span>
+              </span>
               <input
-                required
                 type="tel"
                 data-field="phone"
                 value={phone}
@@ -782,7 +784,7 @@ export function BookingFlow({
                 autoComplete="tel"
               />
               <span className="mt-1 block text-[12px] leading-snug text-slate-500">
-                We&apos;ll text your confirmation and reminders, and if you miss the call. Msg &amp; data rates may apply.
+                With a number, we&apos;ll text your confirmation and reminders, and if you miss the call; without one, we email them. Msg &amp; data rates may apply.
                 Reply STOP to opt out. <a href="/terms#text-messages" className="underline underline-offset-2">Text terms</a>
               </span>
             </label>
