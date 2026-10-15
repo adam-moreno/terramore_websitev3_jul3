@@ -1,5 +1,17 @@
 # Development Log - Terramore Website
 
+## 2026-10-14 — Canceling or moving a call withdraws its scheduled reminder emails (live bug)
+
+**Bug:** reminders (24h/2h/30m) and the ~5-minute prep note are scheduled with the email provider at booking time, and cancel/reschedule on /book/manage never withdrew them. A canceled owner still got "your call is in 2 hours"; a moved one got reminders for the old time.
+
+- **Ids kept:** `sendEmail` now returns the provider handle of a scheduled email (`messageId`: Resend's email id; for SendGrid a `batch_id` requested from `/v3/mail/batch` before the send, which is how SendGrid cancels). `scheduleBookingReminders` returns `messages`, and `sendBookingPrepEmail` returns its send time. `/api/booking` stores them in **new table `website.booking_scheduled_emails`** (booking id, kind, provider, id, send time, the visitor's time zone, whether a phone was given; no name, email or phone).
+- **Why a table:** the dashboard's booking API has no write path for metadata the website could use, and the booking note is the owner-visible note in Terra IQ. A small website-schema table is the least invasive place, and it needs no dashboard change.
+- **Cancel** (`app/api/booking/manage/route.ts` → `withdrawBookingEmails`): after the response, each still-future email is withdrawn (Resend `POST /emails/{id}/cancel`, SendGrid `POST /v3/user/scheduled_sends {batch_id, status: "cancel"}`). Each row is marked canceled, cancel_failed (with the error) or not_cancelable (already sent, or no id). One failure doesn't stop the rest. The Slack notice says when reminders couldn't be withdrawn.
+- **Reschedule** (`rescheduleBookingEmails`): the old emails are withdrawn first, then reminders are scheduled for the new time by the same 24h/2h/30m rules, in the visitor's zone from the old rows (otherwise the owner's zone), and recorded. The prep note isn't sent again.
+- **Limits:** bookings made before this ships, or before the migration runs, have no stored ids. Their reminders can't be withdrawn and may still arrive for the old time (provider scheduling can't check the booking just before sending). On reschedule they still get correct reminders for the new time. Postmark can't schedule, so it has nothing to withdraw.
+- **Owner must run:** `supabase/migrations/20261014_booking_scheduled_emails.sql` in the dashboard project's SQL editor. Until then, bookings work as before and the withdraw step logs "table missing".
+- Checks: new `scripts/verify-booking-emails.mjs` (41, fakes only: ids recorded, a provider cancel for each future email, failures and throws don't stop the rest, reschedule withdraws before it schedules, older bookings don't crash, Resend and SendGrid cancel requests, no email/phone columns). Other verifiers pass; `tsc` unchanged (16).
+
 ## 2026-10-14 — /book fills in what we already know from a signed link (owner request)
 
 - `lib/booking/prefill-token.ts`: `bookingRefUrl(email, utm)` returns `https://www.terramore.io/book?ref=…&utm_…`, or plain `/book` (plus UTMs) when `BOOKING_PREFILL_SECRET` is unset or there's no email. Used for the /book links in the report email (`lib/report/pipeline.ts`), the report and contact confirmation emails (`confirmLeadToUser`) and the nurture series (`lib/nurture/templates.ts`).

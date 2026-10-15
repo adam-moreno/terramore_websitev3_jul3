@@ -13,6 +13,7 @@ import { analyticsRef } from "@/lib/analytics-ref"
 import { bookingApi, manageUrl, type BookingRecord } from "@/lib/booking-api"
 import { claimBookingReport } from "@/lib/booking/claim-report"
 import { classifyBookingLink } from "@/lib/booking/report-check"
+import { prepMessage, recordScheduledEmails } from "@/lib/booking/scheduled-emails"
 import { leadHasDigitalFootprintReport } from "@/lib/leads/has-digital-footprint"
 import { runReportPipeline } from "@/lib/report/pipeline"
 import { scheduleBookingReminders } from "@/lib/booking-reminders"
@@ -127,8 +128,15 @@ export async function POST(request: NextRequest) {
     const messages = async () => {
       await Promise.all([notifyAdminOfBooking(notice), confirmBookingToUser(notice)])
       const hasReport = reportComing ? true : claim.hasReport ?? (await leadHasDigitalFootprintReport(email))
-      await sendBookingPrepEmail(notice, { hasReport, reportComing })
-      await scheduleBookingReminders(notice, { hasReport })
+      const prep = await sendBookingPrepEmail(notice, { hasReport, reportComing })
+      const reminders = await scheduleBookingReminders(notice, { hasReport })
+      // Keep the provider ids so /book/manage can withdraw them on cancel or reschedule.
+      const prepScheduled = prepMessage(prep)
+      await recordScheduledEmails(
+        String(booking.id),
+        [...(prepScheduled ? [prepScheduled] : []), ...reminders.messages],
+        { tz, hasPhone: Boolean(lead.phone) },
+      )
       await enrollLead({
         email,
         name,

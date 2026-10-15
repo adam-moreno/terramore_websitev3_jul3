@@ -45,7 +45,14 @@ export type EmailInput = {
   scheduledAt?: string
 }
 
-export type SendResult = { ok: boolean; channel: string; skipped?: boolean; error?: string }
+export type SendResult = {
+  ok: boolean
+  channel: string
+  skipped?: boolean
+  error?: string
+  /** Provider handle for a scheduled email, so it can be withdrawn: Resend email id, or SendGrid batch_id. */
+  messageId?: string
+}
 
 export const ADMIN_EMAIL = process.env.NOTIFY_EMAIL_TO?.trim() || "adam.moreno@terramore.io"
 /** Same value the Terra IQ dashboard uses (RESEND_FROM_EMAIL) so one address is set once; EMAIL_FROM is the local name. */
@@ -127,6 +134,21 @@ export async function sendEmail(input: EmailInput): Promise<SendResult> {
     if (scheduledAt && provider === "postmark") {
       console.warn(`[notify] email:postmark cannot schedule; sending immediately (wanted ${scheduledAt})`)
     }
+    // SendGrid can only cancel a scheduled send by batch: ask for a batch id first (fail-soft: send without one).
+    let sendgridBatchId: string | undefined
+    if (scheduledAt && provider === "sendgrid") {
+      try {
+        const batch = await fetch("https://api.sendgrid.com/v3/mail/batch", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${process.env.SENDGRID_API_KEY}` },
+        })
+        const data = batch.ok ? ((await batch.json().catch(() => null)) as { batch_id?: string } | null) : null
+        sendgridBatchId = typeof data?.batch_id === "string" ? data.batch_id : undefined
+        if (!sendgridBatchId) console.warn(`[notify] email:sendgrid no batch id (${batch.status}); this scheduled send can't be withdrawn`)
+      } catch (error) {
+        console.warn(`[notify] email:sendgrid batch id failed: ${error instanceof Error ? error.message : String(error)}`)
+      }
+    }
     if (provider === "resend") {
       response = await fetch("https://api.resend.com/emails", {
         method: "POST",
@@ -164,6 +186,7 @@ export async function sendEmail(input: EmailInput): Promise<SendResult> {
             ...(input.html ? [{ type: "text/html", value: input.html }] : []),
           ],
           send_at: sendAt && Number.isFinite(sendAt) ? sendAt : undefined,
+          batch_id: sendgridBatchId,
           attachments: input.attachments?.map((a) => ({
             filename: a.filename,
             content: a.content.toString("base64"),
@@ -199,6 +222,11 @@ export async function sendEmail(input: EmailInput): Promise<SendResult> {
     }
 
     if (!response.ok) return fail(`email:${provider}`, await readError(response))
+    if (provider === "resend") {
+      const data = (await response.json().catch(() => null)) as { id?: string } | null
+      return { ok: true, channel: "email:resend", ...(typeof data?.id === "string" ? { messageId: data.id } : {}) }
+    }
+    if (provider === "sendgrid" && sendgridBatchId) return { ok: true, channel: "email:sendgrid", messageId: sendgridBatchId }
     return { ok: true, channel: `email:${provider}` }
   } catch (error) {
     return fail(`email:${provider}`, error)
@@ -617,7 +645,7 @@ const PREP_DELAY_MS = 5 * 60 * 1000
 export async function sendBookingPrepEmail(
   b: BookingNotice,
   opts: { hasReport: boolean | null; reportComing?: boolean } = { hasReport: null },
-): Promise<SendResult> {
+): Promise<SendResult & { scheduledAt: string }> {
   const first = b.name.split(/\s+/)[0] || "there"
   const timeLine = when(b.startIso, b.tz)
   const joinLine = b.meetUrl
@@ -671,5 +699,6 @@ export async function sendBookingPrepEmail(
   })
 
   const scheduledAt = new Date(Date.now() + PREP_DELAY_MS).toISOString()
-  return sendEmail({ to: b.email, subject, text, html, scheduledAt })
+  // scheduledAt comes back so the booking can record it and withdraw it on cancel (lib/booking/scheduled-emails.ts).
+  return { ...(await sendEmail({ to: b.email, subject, text, html, scheduledAt })), scheduledAt }
 }

@@ -2,11 +2,14 @@
  * /api/booking/manage
  * GET  ?token=                      booking details for the manage page
  * POST { token, action: "cancel" }  or { token, action: "reschedule", startIso }
+ * After a cancel the booking's scheduled prep/reminder emails are withdrawn; after a reschedule they're withdrawn and
+ * new reminders are scheduled for the new time (lib/booking/scheduled-emails.ts). Both run after the response.
  */
 
 import { NextRequest, NextResponse } from "next/server"
 import { after } from "next/server"
-import { bookingApi, type BookingRecord } from "@/lib/booking-api"
+import { bookingApi, manageUrl, type BookingRecord } from "@/lib/booking-api"
+import { rescheduleBookingEmails, withdrawBookingEmails } from "@/lib/booking/scheduled-emails"
 import { postSlack } from "@/lib/notify"
 
 export const dynamic = "force-dynamic"
@@ -42,7 +45,16 @@ export async function POST(request: NextRequest) {
     const result = await bookingApi<Wrapped>("/api/public/booking/cancel", { method: "POST", body: { manageToken: token } })
     if (!result.ok) return NextResponse.json({ error: result.error }, { status: result.status >= 500 ? 503 : result.status })
     const b = result.data.booking
-    after(() => postSlack(`Call canceled: ${b.name || b.email} (${b.email}), was ${pt(b.startIso)}.`))
+    after(async () => {
+      const withdrawn = await withdrawBookingEmails(String(b.id))
+      const note =
+        withdrawn.rows === null
+          ? " Reminders couldn't be withdrawn (no record), so they may still go out."
+          : withdrawn.failed > 0
+            ? ` ${withdrawn.failed} reminder(s) couldn't be withdrawn and may still go out.`
+            : ""
+      await postSlack(`Call canceled: ${b.name || b.email} (${b.email}), was ${pt(b.startIso)}.${note}`)
+    })
     return NextResponse.json(b)
   }
 
@@ -53,7 +65,16 @@ export async function POST(request: NextRequest) {
     })
     if (!result.ok) return NextResponse.json({ error: result.error }, { status: result.status >= 500 ? 503 : result.status })
     const b = result.data.booking
-    after(() => postSlack(`Call moved: ${b.name || b.email} (${b.email}), now ${pt(b.startIso)}.`))
+    after(async () => {
+      const { withdrawn } = await rescheduleBookingEmails(b, manageUrl(b.manageToken || token))
+      const note =
+        withdrawn.rows === null
+          ? " Old reminders couldn't be withdrawn (no record), so they may still go out for the old time."
+          : withdrawn.failed > 0
+            ? ` ${withdrawn.failed} old reminder(s) couldn't be withdrawn.`
+            : ""
+      await postSlack(`Call moved: ${b.name || b.email} (${b.email}), now ${pt(b.startIso)}.${note}`)
+    })
     return NextResponse.json(b)
   }
 

@@ -323,10 +323,25 @@ export function buildBookingReminder(
   return build2m(b)
 }
 
+/** One email scheduled with the provider; kept so a cancel or reschedule can withdraw it (lib/booking/scheduled-emails.ts). */
+export type ScheduledMessage = {
+  kind: ReminderKind | "prep"
+  /** "resend" | "sendgrid" (from SendResult.channel). */
+  provider: string
+  /** Provider handle; null when the provider gave none (that email can't be withdrawn). */
+  messageId: string | null
+  sendAt: string
+}
+
 export type ScheduleRemindersResult = {
   scheduled: ReminderKind[]
   skipped: ReminderKind[]
   results: SendResult[]
+  messages: ScheduledMessage[]
+}
+
+export function providerOf(result: SendResult): string {
+  return result.channel.replace(/^email:/, "")
 }
 
 /**
@@ -341,6 +356,7 @@ export async function scheduleBookingReminders(
   const scheduled: ReminderKind[] = []
   const skipped: ReminderKind[] = []
   const results: SendResult[] = []
+  const messages: ScheduledMessage[] = []
 
   for (const spec of BOOKING_REMINDER_SPECS) {
     const scheduledAt = reminderSendAt(b.startIso, spec.offsetMs, nowMs)
@@ -358,12 +374,14 @@ export async function scheduleBookingReminders(
       scheduledAt,
     })
     results.push(result)
-    if (result.ok) scheduled.push(spec.kind)
-    else {
+    if (result.ok) {
+      scheduled.push(spec.kind)
+      if (!result.skipped) messages.push({ kind: spec.kind, provider: providerOf(result), messageId: result.messageId ?? null, sendAt: scheduledAt })
+    } else {
       skipped.push(spec.kind)
       console.warn(`[booking-reminders] ${spec.kind} schedule failed: ${result.error || "unknown"}`)
     }
   }
 
-  return { scheduled, skipped, results }
+  return { scheduled, skipped, results, messages }
 }
