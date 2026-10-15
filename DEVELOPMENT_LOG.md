@@ -1,5 +1,16 @@
 # Development Log - Terramore Website
 
+## 2026-10-15 — Reminders are sent by our own cron, so a canceled call gets none (live bug)
+
+**Bug:** canceling a call didn't stop its reminders. They were scheduled with Resend, and the website's Resend key is send-only ("This API key is restricted to only send emails"), so every withdraw came back cancel_failed. Found when the TEST booking from the Halcyon rerun was canceled.
+
+- **Queued, not provider-scheduled:** `scheduleBookingReminders` now only queues the 24h/2h/30m reminders as rows (provider `terramore`) with the booking's manage token and call time. Nothing goes to Resend at booking time. The ~5-minute prep note is still provider-scheduled (it goes out before anyone cancels).
+- **Sender** (`lib/booking/send-reminders.ts`, `/api/cron/booking-reminders`, every 5 minutes, `CRON_SECRET`): claims due rows (scheduled → sending, so overlapping runs can't double-send) and reads the booking from Terra IQ with its token. It sends only if the call is still on at the queued time. Canceled, moved or unknown bookings → canceled with the reason. Terra IQ unreachable → back to scheduled for the next run. More than 30 minutes late, or the call already started → skipped. The owner's name and email come from the booking at send time, not the row.
+- **Cancel/reschedule:** own rows are withdrawn by marking them canceled (no provider call). A reschedule queues new rows with the token from the manage link.
+- **Cancel confirm, smaller (owner):** the red box is now one quiet line in place of the link: "Cancel this call? **Yes, cancel** · Keep it". Text buttons keep 44px tap height; red-700 ≈6.5:1, slate-500 ≈4.8:1; focus on "Yes, cancel".
+- **Owner must run first:** `supabase/migrations/20261015_booking_reminders_own_sender.sql` (manage_token, start_iso, the new statuses, a due index). Until it runs, new bookings can't record their reminders.
+- Checks: `verify-booking-emails` 74 (33 new: queueing, rows, withdraw, reschedule, every send decision, a run with fakes, cron and migration wiring). Other verifiers pass; `verify-report-places` fails the same as before; `tsc` unchanged (16).
+
 ## 2026-10-15 — Owner rerun fixes: owner words in the report email, template socials, folder sitemaps, paid-plan fixes, fresh reports
 
 Found in the three-owner rerun (Buynest on free Wix, Aztec Paving, Halcyon Ridge on free WordPress.com).

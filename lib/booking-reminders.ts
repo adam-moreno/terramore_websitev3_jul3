@@ -1,6 +1,9 @@
 /**
- * Pre-call reminder emails, scheduled at booking time via Resend `scheduled_at` /
- * SendGrid `send_at` (same path as the ~5 min prep email).
+ * Pre-call reminder emails. Queued at booking time as rows in website.booking_scheduled_emails (provider "terramore")
+ * and sent by our own cron (/api/cron/booking-reminders, lib/booking/send-reminders.ts), which checks the booking is
+ * still on, at that time, just before each send. A cancel or move needs no provider call. (Until 2026-10-15 they were
+ * scheduled with Resend, but the website's send-only key can't withdraw a scheduled email, so a canceled owner still
+ * got "your call is in 2 hours".) The ~5 min prep note is still provider-scheduled.
  *
  * Offsets before start: 24h, 2h, 30m (owner trimmed to three, 2026-10-14; 10h and 2m read as too many for a 30-minute call).
  * Only schedule if send time is still > now + 2 minutes (skip past / imminent sends).
@@ -344,44 +347,30 @@ export function providerOf(result: SendResult): string {
   return result.channel.replace(/^email:/, "")
 }
 
+/** Provider name on reminder rows our cron sends (lib/booking/send-reminders.ts). */
+export const OWN_SENDER = "terramore"
+
 /**
- * Schedule every reminder whose send time is still > now + 2 minutes.
- * Provider limits (Resend ~30d, SendGrid often ~72h) may still reject far-future sends — those log as failures.
+ * Queue every reminder whose send time is still > now + 2 minutes. Nothing is sent here: the rows are recorded by
+ * recordScheduledEmails and sent by the cron when due. `results` stays empty (kept for callers that log it).
  */
 export async function scheduleBookingReminders(
   b: BookingNotice,
-  opts: { hasReport: boolean | null } = { hasReport: null },
+  _opts: { hasReport: boolean | null } = { hasReport: null },
   nowMs: number = Date.now(),
 ): Promise<ScheduleRemindersResult> {
   const scheduled: ReminderKind[] = []
   const skipped: ReminderKind[] = []
-  const results: SendResult[] = []
   const messages: ScheduledMessage[] = []
-
   for (const spec of BOOKING_REMINDER_SPECS) {
-    const scheduledAt = reminderSendAt(b.startIso, spec.offsetMs, nowMs)
-    if (!scheduledAt) {
+    const sendAt = reminderSendAt(b.startIso, spec.offsetMs, nowMs)
+    if (!sendAt) {
       skipped.push(spec.kind)
       console.info(`[booking-reminders] skip ${spec.kind}: send time not after now+2m (start ${b.startIso})`)
       continue
     }
-    const built = buildBookingReminder(spec.kind, b, opts)
-    const result = await sendEmail({
-      to: b.email,
-      subject: built.subject,
-      text: built.text,
-      html: built.html,
-      scheduledAt,
-    })
-    results.push(result)
-    if (result.ok) {
-      scheduled.push(spec.kind)
-      if (!result.skipped) messages.push({ kind: spec.kind, provider: providerOf(result), messageId: result.messageId ?? null, sendAt: scheduledAt })
-    } else {
-      skipped.push(spec.kind)
-      console.warn(`[booking-reminders] ${spec.kind} schedule failed: ${result.error || "unknown"}`)
-    }
+    scheduled.push(spec.kind)
+    messages.push({ kind: spec.kind, provider: OWN_SENDER, messageId: null, sendAt })
   }
-
-  return { scheduled, skipped, results, messages }
+  return { scheduled, skipped, results: [], messages }
 }

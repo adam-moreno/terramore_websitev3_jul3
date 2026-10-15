@@ -1,6 +1,10 @@
 /**
  * Withdraw a booking's scheduled emails (prep note + 24h/2h/30m reminders) when the call is canceled or moved.
  *
+ * Since 2026-10-15 the reminders are our own rows (provider "terramore", sent by lib/booking/send-reminders.ts), so
+ * withdrawing one just marks it canceled; the sender also checks the booking before each send. Rows that went to a
+ * provider (the prep note, and reminders from before this change) are withdrawn with the provider as below.
+ *
  * At booking time the provider handle of each scheduled email is stored in website.booking_scheduled_emails
  * (supabase/migrations/20261014_booking_scheduled_emails.sql). On cancel each one still in the future is withdrawn
  * (Resend: POST /emails/{id}/cancel; SendGrid: cancel its batch_id). On reschedule the old ones are withdrawn, then
@@ -15,7 +19,7 @@
 import { getServerSupabase } from "@/lib/supabase-server"
 import { leadHasDigitalFootprintReport } from "@/lib/leads/has-digital-footprint"
 import type { BookingNotice, SendResult } from "@/lib/notify"
-import { providerOf, scheduleBookingReminders, type ScheduledMessage, type ScheduleRemindersResult } from "@/lib/booking-reminders"
+import { OWN_SENDER, providerOf, scheduleBookingReminders, type ScheduledMessage, type ScheduleRemindersResult } from "@/lib/booking-reminders"
 
 const TABLE = "booking_scheduled_emails"
 
@@ -27,6 +31,21 @@ export type ScheduledRow = {
   send_at: string
   visitor_tz: string | null
   has_phone: boolean | null
+  /** Our own reminders only: the booking's manage token (the sender reads the booking with it) and its start time. */
+  manage_token?: string | null
+  start_iso?: string | null
+}
+
+/** What a booking's rows need besides the messages. */
+export type RecordContext = { tz: string; hasPhone: boolean; manageToken?: string | null; startIso?: string | null }
+
+/** The token in a /book/manage?token= link, or null. */
+export function tokenFromManageUrl(url: string): string | null {
+  try {
+    return new URL(url).searchParams.get("token")?.trim() || null
+  } catch {
+    return null
+  }
 }
 
 export type CancelOutcome = { ok: boolean; error?: string }
@@ -114,18 +133,23 @@ function defaultDeps(): ScheduledEmailDeps {
 export function rowsFor(
   bookingId: string,
   messages: ScheduledMessage[],
-  context: { tz: string; hasPhone: boolean },
+  context: RecordContext,
 ): Array<Omit<ScheduledRow, "id"> & { booking_id: string; status?: string }> {
-  return messages.map((m) => ({
-    booking_id: bookingId,
-    kind: m.kind,
-    provider: m.provider,
-    message_id: m.messageId,
-    send_at: m.sendAt,
-    visitor_tz: context.tz,
-    has_phone: context.hasPhone,
-    ...(m.messageId ? {} : { status: "not_cancelable" }),
-  }))
+  return messages.map((m) => {
+    const own = m.provider === OWN_SENDER
+    return {
+      booking_id: bookingId,
+      kind: m.kind,
+      provider: m.provider,
+      message_id: m.messageId,
+      send_at: m.sendAt,
+      visitor_tz: context.tz,
+      has_phone: context.hasPhone,
+      ...(own ? { manage_token: context.manageToken ?? null, start_iso: context.startIso ?? null } : {}),
+      // Our own rows are sent by the cron; a provider email without an id can't be withdrawn.
+      ...(own || m.messageId ? {} : { status: "not_cancelable" }),
+    }
+  })
 }
 
 /** The prep note as a ScheduledMessage (sendBookingPrepEmail returns its send time). */
@@ -138,7 +162,7 @@ export function prepMessage(result: SendResult & { scheduledAt?: string }): Sche
 export async function recordScheduledEmails(
   bookingId: string,
   messages: ScheduledMessage[],
-  context: { tz: string; hasPhone: boolean },
+  context: RecordContext,
   deps: ScheduledEmailDeps = defaultDeps(),
 ): Promise<void> {
   try {
@@ -168,6 +192,12 @@ export async function withdrawBookingEmails(bookingId: string, deps: ScheduledEm
     }
     const now = deps.now()
     for (const row of rows) {
+      // Our own reminder: not sent yet, so marking it is the withdrawal (the cron only sends "scheduled" rows).
+      if (row.provider === OWN_SENDER) {
+        out.canceled++
+        await deps.mark(row.id, "canceled")
+        continue
+      }
       if (!row.message_id) {
         await deps.mark(row.id, "not_cancelable", "no provider id")
         continue
@@ -239,7 +269,7 @@ export async function rescheduleBookingEmails(
     }
     const result = await deps.schedule(notice, { hasReport: await deps.hasReport(email) })
     scheduled = result.messages
-    await recordScheduledEmails(booking.id, scheduled, { tz, hasPhone }, deps)
+    await recordScheduledEmails(booking.id, scheduled, { tz, hasPhone, manageToken: tokenFromManageUrl(manageUrl), startIso: booking.startIso }, deps)
   } catch (error) {
     console.warn(`[booking-emails] reschedule failed: ${error instanceof Error ? error.message : String(error)}`)
   }

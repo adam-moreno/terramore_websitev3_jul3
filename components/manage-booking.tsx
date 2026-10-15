@@ -22,7 +22,7 @@ export function ManageBooking() {
   const [booking, setBooking] = useState<Booking | null>(null)
   const [state, setState] = useState<"loading" | "ready" | "missing" | "down" | "moving" | "canceled" | "moved">("loading")
   const [busy, setBusy] = useState(false)
-  // Inline "are you sure" instead of window.confirm: matches the page, works on phones, and keeps focus in the page.
+  // Inline "are you sure" instead of window.confirm: one quiet line in place of the link, keyboard focus on "Yes, cancel".
   const [confirming, setConfirming] = useState(false)
   const [error, setError] = useState("")
 
@@ -170,33 +170,29 @@ export function ManageBooking() {
         >
           Move it
         </button>
-        {confirming ? null : (
-          <button type="button" onClick={() => setConfirming(true)} className="text-[14px] font-medium text-slate-500 hover:text-red-600">
-            Cancel the call
-          </button>
-        )}
-      </div>
-      {confirming ? (
-        <div role="group" aria-labelledby="cancel-confirm-label" className="mt-4 rounded-2xl border border-red-200 bg-red-50/60 p-4">
-          <p id="cancel-confirm-label" className="text-[14px] font-medium text-ink">
-            Cancel this call?
-          </p>
-          <div className="mt-3 flex flex-wrap items-center gap-3">
+        {confirming ? (
+          // Inline and quiet: canceling shouldn't take more room than the call itself (owner, 2026-10-15).
+          <span role="group" aria-label="Cancel this call?" className="inline-flex flex-wrap items-center gap-x-3 text-[14px]">
+            <span className="text-slate-600">Cancel this call?</span>
             <button
               type="button"
               autoFocus
               onClick={() => void cancel()}
               disabled={busy}
-              className="inline-flex h-11 items-center rounded-full bg-red-700 px-5 text-[15px] font-medium text-white hover:bg-red-800 disabled:opacity-60"
+              className="min-h-11 font-medium text-red-700 underline-offset-4 hover:underline disabled:opacity-60"
             >
-              {busy ? "Canceling…" : "Yes, cancel it"}
+              {busy ? "Canceling…" : "Yes, cancel"}
             </button>
-            <button type="button" onClick={() => setConfirming(false)} disabled={busy} className="text-[14px] font-medium text-slate-600 hover:text-ink">
-              Keep my call
+            <button type="button" onClick={() => setConfirming(false)} disabled={busy} className="min-h-11 font-medium text-slate-500 hover:text-ink">
+              Keep it
             </button>
-          </div>
-        </div>
-      ) : null}
+          </span>
+        ) : (
+          <button type="button" onClick={() => setConfirming(true)} className="min-h-11 text-[14px] font-medium text-slate-500 hover:text-red-600">
+            Cancel the call
+          </button>
+        )}
+      </div>
     </div>
   )
 }

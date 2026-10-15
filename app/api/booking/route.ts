@@ -123,19 +123,19 @@ export async function POST(request: NextRequest) {
   const reportComing = claim.run && link.kind === "site"
 
   // Messages go out after the response so the visitor sees the confirmation right away.
-  // Confirm immediate; prep ~5 min; reminders 24h/2h/30m via provider schedule. Nurture enroll future-only.
+  // Confirm immediate; prep ~5 min (provider schedule); reminders 24h/2h/30m queued for our cron. Nurture enroll future-only.
   after(async () => {
     const messages = async () => {
       await Promise.all([notifyAdminOfBooking(notice), confirmBookingToUser(notice)])
       const hasReport = reportComing ? true : claim.hasReport ?? (await leadHasDigitalFootprintReport(email))
       const prep = await sendBookingPrepEmail(notice, { hasReport, reportComing })
       const reminders = await scheduleBookingReminders(notice, { hasReport })
-      // Keep the provider ids so /book/manage can withdraw them on cancel or reschedule.
+      // Record the prep id and the queued reminders, so /book/manage can withdraw them on cancel or reschedule.
       const prepScheduled = prepMessage(prep)
       await recordScheduledEmails(
         String(booking.id),
         [...(prepScheduled ? [prepScheduled] : []), ...reminders.messages],
-        { tz, hasPhone: Boolean(lead.phone) },
+        { tz, hasPhone: Boolean(lead.phone), manageToken: booking.manageToken, startIso: booking.startIso },
       )
       await enrollLead({
         email,
