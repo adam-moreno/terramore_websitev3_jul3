@@ -1,5 +1,16 @@
 # Development Log - Terramore Website
 
+## 2026-10-15 — Owner rerun fixes: owner words in the report email, template socials, folder sitemaps, paid-plan fixes, fresh reports
+
+Found in the three-owner rerun (Buynest on free Wix, Aztec Paving, Halcyon Ridge on free WordPress.com).
+
+- **Report email in owner words:** the top two fixes use owner wording keyed by fix id (`lib/report/email-summary.ts` `plainFinding`/`plainStep`, kept in step with the dashboard's `lib/report-fixes/plain-words.ts`). Before: "A search description was not found… states the offer and location or specialty"; "On-site trust signals were thin… near primary button".
+- **Template social links aren't profiles** (`lib/report/collect/placeholder-social.ts`): builder handles (facebook.com/wix, twitter.com/wordpressdotcom…) and share/intent links are skipped in the free check, the report's directories and the footprint. Buynest's Wix footer had told it "we found your Facebook". Aztec's real profiles still count (live: score 70, five linked).
+- **Sitemap where the site publishes it** (`lib/report/collect/sitemap.ts`): robots.txt `Sitemap:` lines on the same host, then the site's folder (user.wixsite.com/buynest/sitemap.xml), then /sitemap.xml. Buynest no longer gets a false "no sitemap" (live: Technical Health 100).
+- **No paid-plan fixes on free builder addresses** (`freeHostPlan`, `fitToFreePlan` in `lib/report/recommend.ts`): on *.wordpress.com, the search-description fix is dropped; on *.wordpress.com and *.wixsite.com, measurement keeps its free first step (ask and tally) and says Google Analytics needs a paid plan, without "Fix it for me". The free check shows a note on WordPress.com ("WordPress.com adds this box on its paid plans") instead of a gap.
+- **A returning owner can get a fresh report** (`lib/report/refresh.ts`): the same email asking again more than 24 hours after the last report gets a new report (the row takes the website and business name just typed). It isn't a new lead: no conversion, confirmation, nurture enrolment or follow-up call; staff get the lead alert marked "Returning". Inside 24 hours: "We sent your report in the last day… ask for a fresh one tomorrow". While one is being written: "Your report is being written now". A phone or name match with a different email is still a 409. Read errors fail closed (no second report).
+- Checks: new `scripts/verify-owner-rerun-fixes.mjs` (46). `verify-report-accuracy` updated for owner wording (103). Other verifiers pass. `verify-report-places` fails the same way before and after (pre-existing). `tsc` unchanged (16).
+
 ## 2026-10-15 — Canceling a call asks inline, not with a browser dialog (UX fix)
 
 - `/book/manage`: "Cancel the call" used `window.confirm("Cancel this call?")`. A native dialog is unstyled, awkward on phones, and blocked the automated owner test (the tab froze until someone clicked OK). It now opens an inline box under the buttons: "Cancel this call?" with **Yes, cancel it** (red-700, white text ≈6.5:1, focused when it opens) and **Keep my call**. Loading ("Canceling…") and error states are unchanged.

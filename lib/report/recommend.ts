@@ -171,7 +171,7 @@ export function buildRecommendations(input: {
       findings.push(
         finding("missing_sitemap", "Discoverability", {
           finding: "A public sitemap.xml was not found.",
-          evidence: "Fetched /sitemap.xml: Not found or invalid in sources checked",
+          evidence: "Checked robots.txt, the site folder and /sitemap.xml: no sitemap found",
           impact: "Search engines may discover important pages more slowly without a sitemap.",
           action: "Publish a sitemap.xml and reference it from robots.txt.",
           priority: "low",
@@ -241,8 +241,10 @@ export function buildRecommendations(input: {
   }
 
   const priorityRank: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 }
-  const sorted = [...findings]
+  const freePlan = freeHostPlan(home?.url ?? null)
+  const sorted = fitToFreePlan(findings, freePlan)
     .map((f) => fitToWhoDoesIt({ ...f, effort: f.effort ?? EFFORT[f.id] }, input.siteManager ?? "unsure", input.platform ?? null))
+    .map((f) => (freePlan?.paidOnly.has(f.id) && f.id === "no_measurement" ? { ...f, fixable: false, handoff: undefined, effort: "About 10 minutes, and you can start today." } : f))
     .sort((a, b) => priorityRank[a.priority] - priorityRank[b.priority])
   const recommendations: Recommendation[] = sorted.slice(0, 5).map((f, index) => ({ ...f, rank: index + 1 }))
   // For scale, on the top action only: the owner's own listed price, never an estimate of what they're losing.
@@ -269,6 +271,42 @@ export function effortPhrase(effort: string | undefined): string | null {
   const main = (steps.at(-1) ?? effort).toLowerCase()
   const m = main.match(/\b(an afternoon|a day or two|a day|about \d+ (?:minutes|hours?))\b/)
   return m ? m[1] : null
+}
+
+/**
+ * A site on a builder's free address (name.wordpress.com, user.wixsite.com/name) is on a free plan, and some fixes need
+ * a paid one: WordPress.com's search description and Google Analytics, Wix's Google Analytics. The report doesn't
+ * recommend what the owner can't do without paying (Halcyon Ridge persona, 2026-10-15).
+ */
+export type FreeHostPlan = { builder: "WordPress.com" | "Wix"; paidOnly: Set<string> }
+
+export function freeHostPlan(url: string | null): FreeHostPlan | null {
+  let host = ""
+  try {
+    host = url ? new URL(url).hostname.toLowerCase() : ""
+  } catch {
+    return null
+  }
+  if (/\.wordpress\.com$/.test(host)) return { builder: "WordPress.com", paidOnly: new Set(["missing_meta", "no_measurement"]) }
+  if (/\.wixsite\.com$/.test(host)) return { builder: "Wix", paidOnly: new Set(["no_measurement"]) }
+  return null
+}
+
+/** Drops paid-only fixes; measurement keeps its free first step (ask and tally) and says the second needs a paid plan. */
+export function fitToFreePlan(findings: Finding[], plan: FreeHostPlan | null): Finding[] {
+  if (!plan) return findings
+  return findings
+    .filter((f) => !plan.paidOnly.has(f.id) || f.id === "no_measurement")
+    .map((f) => {
+      if (f.id !== "no_measurement" || !plan.paidOnly.has(f.id)) return f
+      const step1 = f.action.match(/^\s*Step 1:\s*([\s\S]*?)\s*Step 2:/i)?.[1]?.trim()
+      if (!step1) return f
+      return {
+        ...f,
+        action: `Step 1: ${step1} Step 2, when you upgrade: Google Analytics needs a paid ${plan.builder} plan, so the tally is your measure for now.`,
+        effort: "About 10 minutes, and you can start today.",
+      }
+    })
 }
 
 export type SiteManager = "self" | "someone" | "unsure"

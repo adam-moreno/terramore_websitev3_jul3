@@ -511,14 +511,24 @@ export async function runLookup(
         ),
       )
     if (!technical.description) {
+      // WordPress.com's free plan can't set one (it needs a paid plan), so it's a note there, not a gap to fix.
+      const wpcomFree = /\.wordpress\.com$/i.test(hostOf(site.homeFinalUrl || website))
       search.push(
-        finding(
-          "search_basics",
-          "no_description",
-          "gap",
-          "The homepage has no meta description for search results",
-          "Homepage",
-        ),
+        wpcomFree
+          ? finding(
+              "search_basics",
+              "description_paid_plan",
+              "note",
+              "No search description yet. WordPress.com adds this box on its paid plans, so there's nothing to do on the free plan",
+              "Homepage",
+            )
+          : finding(
+              "search_basics",
+              "no_description",
+              "gap",
+              "The homepage has no meta description for search results",
+              "Homepage",
+            ),
       )
     }
     search.push(
