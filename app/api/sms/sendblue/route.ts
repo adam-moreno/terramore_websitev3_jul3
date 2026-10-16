@@ -23,6 +23,10 @@ import { clearOptOut, isOptedOut, recordOptOut } from "@/lib/sms/opt-outs"
 import { logText } from "@/lib/sms/comms-log"
 import { getServerSupabase } from "@/lib/supabase-server"
 import { authorised } from "@/lib/sms/webhook-auth"
+import { after } from "next/server"
+import { buildTextContext } from "@/lib/sms/terraai/context"
+import { draftReply } from "@/lib/sms/terraai/draft"
+import { createDraft, draftReviewUrl, saveMessage } from "@/lib/sms/terraai/store"
 import { refFromText } from "@/lib/sms/text-link"
 import { claimTextRef, findTextRef } from "@/lib/sms/text-refs"
 import { CONTACT_CARD_URL, textFirstReply } from "@/lib/sms/text-first-replies"
@@ -100,6 +104,8 @@ export async function POST(request: NextRequest) {
 
   const logged = await logText({ direction: "inbound", phone: from, status: "received", text: content || "(media)", providerId: body.message_handle ?? null, stream: "reply" })
   if (logged === "duplicate") return NextResponse.json({ ok: true, duplicate: true })
+  // Full text for TerraAI's view of the conversation (the Comms log keeps only a preview).
+  const inboundId = await saveMessage({ phone: from, direction: "inbound", body: content || "(media)", source: "owner", providerId: body.message_handle ?? null })
 
   const keyword = smsKeyword(content)
   let action = "reply"
@@ -116,6 +122,9 @@ export async function POST(request: NextRequest) {
   } else if (keyword === "help") {
     await sendSms(from, SMS_REPLIES.help, { typing: false, force: true, stream: "help" })
     action = "asked for help"
+  } else if (keyword === "human") {
+    await sendSms(from, SMS_REPLIES.human, { typing: false, stream: "handoff" })
+    action = "ASKED FOR A PERSON"
   } else {
     // "Tap to text us": the pre-filled message carries a ref. One instant reply (with the contact card) per ref, or
     // per number for the general footer text. Once they've texted, links and media are allowed.
@@ -129,16 +138,37 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  const who = await whoIs(from).catch(() => null)
-  const label = who ? `${who} (${from})` : from
-  const line = `Text from ${label}${action === "reply" ? "" : `, ${action}`}: "${content.slice(0, 500)}"`
-  await Promise.allSettled([
-    postSlack(`${line}\nReply from the Sendblue inbox: https://dashboard.sendblue.com/conversations`),
-    sendEmail({
-      to: ADMIN_EMAIL,
-      subject: action === "reply" ? `Text reply from ${who || from}` : `Text ${action}: ${who || from}`,
-      text: `${line}\n\nReply from the Sendblue inbox: https://dashboard.sendblue.com/conversations`,
-    }),
-  ])
+  // Everything else gets a TerraAI draft (draft mode: Adam approves before anything is sent). It runs after the
+  // response so Sendblue isn't kept waiting, and the alert carries the draft and its review link.
+  const wantsDraft = action === "reply" && !(keyword === "stop" || keyword === "start" || keyword === "help" || keyword === "human")
+
+  const alert = async (draftLines: string[]) => {
+    const who = await whoIs(from).catch(() => null)
+    const label = who ? `${who} (${from})` : from
+    const line = `Text from ${label}${action === "reply" ? "" : `, ${action}`}: "${content.slice(0, 500)}"`
+    const text = [line, ...draftLines, "", "Or reply yourself from the Sendblue inbox: https://dashboard.sendblue.com/conversations"].join("\n")
+    await Promise.allSettled([
+      postSlack(text),
+      sendEmail({ to: ADMIN_EMAIL, subject: action === "reply" ? `Text from ${who || from}${draftLines.length ? " (TerraAI draft ready)" : ""}` : `Text ${action}: ${who || from}`, text }),
+    ])
+  }
+
+  if (wantsDraft) {
+    after(async () => {
+      const ctx = await buildTextContext(from)
+      const draft = await draftReply(ctx, content || "(they sent a photo or file)")
+      const draftId = await createDraft({ phone: from, inboundId, draft: draft.reply, intent: draft.intent, handoff: draft.handoff, notes: [draft.handoffReason, draft.notes].filter(Boolean).join(" · ") || null })
+      const review = draftId ? draftReviewUrl(draftId) : null
+      await alert([
+        "",
+        `TerraAI draft${draft.handoff ? " (wants you to take this one)" : ""}: "${draft.reply}"`,
+        draft.handoffReason ? `Why: ${draft.handoffReason}` : "",
+        draft.notes ? `Note: ${draft.notes}` : "",
+        review ? `Send, edit or discard: ${review}` : "Draft couldn't be saved (run 20261016_terraai_texting.sql).",
+      ].filter((x) => x !== ""))
+    })
+  } else {
+    await alert([])
+  }
   return NextResponse.json({ ok: true, action })
 }
