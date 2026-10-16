@@ -6,6 +6,7 @@
  */
 
 import type { TextRef } from "@/lib/sms/text-refs"
+import { DISCLOSURE } from "@/lib/sms/terraai/voice"
 
 export const CONTACT_CARD_URL = "https://www.terramore.io/terramore.vcf"
 const SITE = "https://www.terramore.io"
@@ -27,21 +28,21 @@ function when(startIso: string, tz: string): string {
 const CLOSE = "Here's our contact card so our texts and links show up properly. Reply STOP to opt out."
 
 export function reportReply(first: string | null, sent: boolean): string {
-  const hi = first ? `Hi ${first}, it's Adam at Terramore.` : "Hi, it's Adam at Terramore."
+  const hi = first ? `Hi ${first}, this is TerraAI, Terramore's AI assistant.` : DISCLOSURE
   const status = sent
     ? "Your Digital Footprint report is in your inbox (check spam if you don't see it)."
     : "Your Digital Footprint report is on its way to your inbox, usually within a few minutes."
-  return `${hi} Thanks for texting! ${status} Questions about it? Just reply here. ${CLOSE}`
+  return `${hi} Thanks for texting. ${status} Questions about it? Just reply here. ${CLOSE}`
 }
 
 export function bookingReply(first: string | null, time: string | null): string {
-  const hi = first ? `Hi ${first}, it's Adam at Terramore.` : "Hi, it's Adam at Terramore."
+  const hi = first ? `Hi ${first}, this is TerraAI, Terramore's AI assistant.` : DISCLOSURE
   const set = time ? `You're all set for ${time}.` : "You're all set for your call."
   return `${hi} ${set} I'll text you a day before, 2 hours before and 30 minutes before, with the join link. Need to move it? Just reply here. ${CLOSE}`
 }
 
 export function siteReply(): string {
-  return `Hi, it's Adam at Terramore. Thanks for texting! Send me your website and I'll run your free check, or run it yourself in about a minute: ${SITE}/report ${CLOSE}`
+  return `${DISCLOSURE} Thanks for texting. Send your website and I'll point you to your free check, or run it yourself in about a minute: ${SITE}/report ${CLOSE}`
 }
 
 /** The reply and a label for Adam's alert, or null when no instant reply is due. Never throws. */
