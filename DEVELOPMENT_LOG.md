@@ -1,5 +1,11 @@
 # Development Log - Terramore Website
 
+## 2026-10-16 — The booking text follows Sendblue's first-message rules
+
+- Until a contact replies, Sendblue only delivers plain text: no links, media, phone numbers or email addresses, at most 300 characters and 6 messages (docs.sendblue.com/limits). The booking confirmation carried the Google Meet link, so new contacts' confirmations were declined. Now: "Terramore: you're booked, {first}. {time}. Your join link is in the confirmation email and calendar invite. Reply here if anything changes. Reply STOP to opt out."
+- `fitsFirstMessageRules()` (lib/booking-sms.ts) checks it. `verify-sms-replies` now checks the booking text and both report texts against it (48 checks).
+- Still to note: the timed booking texts (24h/2h/30m, not wired) contain links and may only go to contacts who have replied. Adam's own hot-lead alert texts carry email and phone, so his number must have texted the line once.
+
 ## 2026-10-15 — Text replies reach Adam, STOP works, and the paid Sendblue line is used properly
 
 **Found in the pre-Ads site check:** no Sendblue webhook was connected, so replies to our texts (including STOP) went nowhere. The code still ran the free-plan "verify contact" step on every booking and report. Several real contacts in the Sendblue inbox show "No messages yet". The account now has a paid line, +1 612 356 8558.

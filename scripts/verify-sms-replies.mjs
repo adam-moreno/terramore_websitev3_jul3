@@ -51,4 +51,16 @@ const sb = read("lib/sendblue.ts")
 assert(/if \(process\.env\.SENDBLUE_FREE_LINE\?\.trim\(\) !== "1"\) return created/.test(sb), "no free-plan verification text on the paid line")
 const sql = read("supabase/migrations/20261015_sms_opt_outs.sql")
 assert(/website\.sms_opt_outs/.test(sql) && /ENABLE ROW LEVEL SECURITY/.test(sql) && /REVOKE ALL/.test(sql) && !/email TEXT|name TEXT|content/i.test(sql), "opt-out table: website schema, RLS, phone only")
+// First texts follow Sendblue's pre-reply rules (no links, media, phones or emails; 300 characters).
+const bs = await load("lib/booking-sms.ts")
+const ctx = { name: "Dana Reyes", startIso: "2026-10-27T16:00:00Z", tz: "America/Los_Angeles", meetUrl: "https://meet.google.com/abc-defg-hij", meetProvider: "google_meet", manageUrl: "https://www.terramore.io/book/manage?token=x" }
+const confirm = bs.buildBookingSms("confirm", ctx)
+assert(bs.fitsFirstMessageRules(confirm.body), `booking confirmation fits the first-message rules: ${confirm.body}`)
+assert(!confirm.mediaUrl, "no media on the first text")
+assert(/Reply STOP to opt out\.$/.test(confirm.body), "booking confirmation says how to opt out")
+assert(!bs.fitsFirstMessageRules("Join: https://meet.google.com/x") && !bs.fitsFirstMessageRules("Email hello@terramore.io") && !bs.fitsFirstMessageRules("Call (818) 699-9217") && !bs.fitsFirstMessageRules("x".repeat(301)), "the rule check catches links, emails, phones and length")
+const rs = await load("lib/report/sms.ts")
+assert(bs.fitsFirstMessageRules(rs.REPORT_SMS.m1("Dana")), "report text 1 fits the first-message rules")
+assert(bs.fitsFirstMessageRules(rs.REPORT_SMS.m2("Dana")), "report text 2 fits the first-message rules")
+
 console.log(`sms replies: ${checks} checks passed`)
