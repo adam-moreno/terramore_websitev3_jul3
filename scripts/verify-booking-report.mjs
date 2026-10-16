@@ -98,7 +98,7 @@ assert(afterAt > 0 && pipelineAt > afterAt && pipelineAt < responseAt, "runRepor
 assert(route.slice(0, afterAt).split("runReportPipeline(").length === 1, "pipeline is not called before after()")
 assert(/if \(!reportComing \|\| link\.kind !== "site"\) return/.test(route), "pipeline guarded by the claim and a website")
 assert(/const reportComing = claim\.run && link\.kind === "site"/.test(route), "reportComing needs a successful claim")
-assert(/reportComing,\n  \}\)/.test(route), "response tells the page whether the check is running")
+assert(/reportComing,\n(    textRef,\n)?  \}\)/.test(route), "response tells the page whether the check is running (and the text-us ref)")
 assert(/sendBookingPrepEmail\(notice, \{ hasReport, reportComing \}\)/.test(route), "prep note told about the report")
 assert(/Link: \$\{link\.url\}/.test(route), "social link kept in the booking note")
 

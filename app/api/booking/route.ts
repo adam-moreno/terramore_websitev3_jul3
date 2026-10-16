@@ -7,6 +7,7 @@
  * (lib/booking/claim-report.ts). A Facebook/Instagram page or Google listing is kept as socials; the check reads websites.
  */
 
+import { mintTextRef } from "@/lib/sms/text-refs"
 import { NextRequest, NextResponse } from "next/server"
 import { after } from "next/server"
 import { analyticsRef } from "@/lib/analytics-ref"
@@ -107,6 +108,8 @@ export async function POST(request: NextRequest) {
 
   const booking = result.data
   const manage = manageUrl(booking.manageToken)
+  // "Tap to text us" for reminders by text (lib/sms/text-refs.ts); shown on the confirmation and in the email.
+  const textRef = await mintTextRef({ kind: "booking", refId: String(booking.id), firstName: name.split(/\s+/)[0] })
   const notice = {
     ...lead,
     startIso: booking.startIso,
@@ -115,6 +118,7 @@ export async function POST(request: NextRequest) {
     meetUrl: booking.meetUrl,
     meetProvider: booking.meetProvider,
     manageUrl: manage,
+    textRef,
   }
 
   // One quick row lookup decides whether the free check runs, so the confirmation page can say so truthfully.
@@ -172,5 +176,6 @@ export async function POST(request: NextRequest) {
     manageToken: booking.manageToken,
     manageUrl: manage,
     reportComing,
+    textRef,
   })
 }

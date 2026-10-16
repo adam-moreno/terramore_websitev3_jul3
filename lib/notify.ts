@@ -20,7 +20,7 @@ import { logText } from "@/lib/sms/comms-log"
 import { buildBookingSms, bookingSmsEnabled } from "./booking-sms"
 import { prepReportLine, prepReportState } from "./booking/report-check"
 import { bookingRefUrl } from "./booking/prefill-token"
-import { emailShell, emailButton, emailP, emailDetail, emailSignoff } from "./email-template"
+import { emailShell, emailButton, emailP, emailDetail, emailSignoff, emailTextLink } from "./email-template"
 import { formatDigitalFootprintSlack, type AttributionMap } from "./report/slack-report"
 import {
   ensureContactAndVerify,
@@ -541,6 +541,8 @@ export type BookingNotice = {
   meetUrl: string | null
   meetProvider: "google_meet" | "teams" | null
   manageUrl: string
+  /** "Tap to text us" code (lib/sms/text-refs.ts); the confirmation email links to /text?ref= with it. */
+  textRef?: string | null
 }
 
 const PT = "America/Los_Angeles"
@@ -587,6 +589,8 @@ export async function confirmBookingToUser(b: BookingNotice): Promise<SendResult
   const joinLine = b.meetUrl ? `Join on Google Meet: ${b.meetUrl}` : "The calendar invite from adam.moreno@terramore.io has the join link."
   const followUp =
     "In a few minutes I will send another short note with what to expect on the call, how to join, and a light prep list."
+  // Inbound-first texting: the owner opens /text on their phone, which fills in a text to us (app/text/page.tsx).
+  const textLink = b.textRef ? `${SITE}/text?ref=${encodeURIComponent(b.textRef)}` : null
   const text = [
     `Hi ${first},`,
     "",
@@ -599,6 +603,7 @@ export async function confirmBookingToUser(b: BookingNotice): Promise<SendResult
     "",
     `Need to move or cancel? ${b.manageUrl}`,
     "",
+    ...(textLink ? [`Want reminders by text? Text us from your phone: ${textLink}`, ""] : []),
     "Adam Moreno",
     "Terramore",
   ].join("\n")
@@ -618,6 +623,7 @@ export async function confirmBookingToUser(b: BookingNotice): Promise<SendResult
       emailP(followUp),
       emailP("Need to move or cancel?"),
       emailButton("Reschedule or cancel", b.manageUrl),
+      textLink ? emailP("Want reminders by text?") + emailTextLink("Text us from your phone", textLink) : "",
       emailSignoff("Adam Moreno", "Terramore"),
     ].join(""),
   })

@@ -10,6 +10,7 @@ import { enrollLead } from "@/lib/nurture/enroll"
 import { businessTypeFromReportAnswers } from "@/lib/nurture/map-links"
 import { findDuplicateReportLead } from "@/lib/report/duplicates"
 import { decideReportRefresh } from "@/lib/report/refresh"
+import { mintTextRef } from "@/lib/sms/text-refs"
 import { ATTR_KEYS, normalizeEmail, normalizePhone, pickAttribution } from "@/lib/report/normalize-lead"
 import { runReportPipeline } from "@/lib/report/pipeline"
 import { sendReportAcceptSms } from "@/lib/report/sms"
@@ -198,7 +199,9 @@ export async function POST(request: NextRequest) {
             startFix,
           })
         })
-        return NextResponse.json({ ok: true, saved: false, refreshed: true }, { status: 200 })
+        // "Tap to text us" on the confirmation: a ref for this lead (lib/sms/text-refs.ts).
+        const textRef = await mintTextRef({ kind: "report", refId: duplicate.id, firstName: resolvedFirst })
+        return NextResponse.json({ ok: true, saved: false, refreshed: true, ...(textRef ? { textRef } : {}) }, { status: 200 })
       }
       console.info(`[report] already requested (${duplicate.matchedOn}${decision ? `, ${decision}` : ""})`)
       return NextResponse.json(
@@ -366,9 +369,13 @@ export async function POST(request: NextRequest) {
       })
     })
 
+    // "Tap to text us" on the confirmation: a ref ties the owner's first text to this report (lib/sms/text-refs.ts).
+    const textRef = rowId ? await mintTextRef({ kind: "report", refId: rowId, firstName: resolvedFirst }) : null
     // `saved` tells the client whether a row exists; only then does it count an ad conversion.
     return NextResponse.json(
-      rowId ? { success: true, saved: true, reportRef: analyticsRef("terramore-report", rowId) } : { success: true, saved: false },
+      rowId
+        ? { success: true, saved: true, reportRef: analyticsRef("terramore-report", rowId), ...(textRef ? { textRef } : {}) }
+        : { success: true, saved: false },
       { status: 201 },
     )
   } catch (error) {

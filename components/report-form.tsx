@@ -49,7 +49,8 @@ export function ReportForm({
   className?: string
   onCancel?: () => void
   /** Called after server 201 and conversion tracking. Parent shows confirmation + home redirect. */
-  onSuccess?: () => void
+  /** textRef: the "Tap to text us" code for this report, when the server minted one. */
+  onSuccess?: (result?: { textRef: string | null; firstName: string; businessName: string }) => void
   answers?: ReportAnswers
   plain?: boolean
   /** Optional prefill (e.g. the /solutions website input). Does not change submit or tracking behavior. */
@@ -188,16 +189,17 @@ export function ReportForm({
       // Safe conversion point: the server saved the row (saved + reportRef), not just any 2xx. Fires generate_lead +
       // report_submission_success once per reportRef, plus existing Ads "Digital Footprint Report Submitted" only.
       // No PII. Do not fire on button click, failed/duplicate responses, or a 2xx without a saved row.
-      const data = (await response.json().catch(() => ({}))) as { saved?: unknown; reportRef?: unknown; refreshed?: unknown }
+      const data = (await response.json().catch(() => ({}))) as { saved?: unknown; reportRef?: unknown; refreshed?: unknown; textRef?: unknown }
+      const textResult = { textRef: typeof data.textRef === "string" && /^[A-HJ-NP-Z2-9]{5}$/.test(data.textRef) ? data.textRef : null, firstName: firstName.trim(), businessName: businessName.trim() }
       // A returning owner's fresh report: same confirmation, but not a new lead, so no conversion.
       if (data.refreshed === true) {
-        onSuccess?.()
+        onSuccess?.(textResult)
         return
       }
       const reportRef = data.saved === true && typeof data.reportRef === "string" && /^[a-f0-9]{32}$/.test(data.reportRef) ? data.reportRef : ""
       if (reportRef) trackReportSubmissionSuccess("report_form", reportRef)
       else trackReportSubmissionError("not_saved")
-      onSuccess?.()
+      onSuccess?.(textResult)
     } catch {
       setError("We could not send that just now. Try again, or talk with us.")
       trackReportSubmissionError("network_or_client")

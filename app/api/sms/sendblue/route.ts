@@ -23,6 +23,9 @@ import { clearOptOut, isOptedOut, recordOptOut } from "@/lib/sms/opt-outs"
 import { logText } from "@/lib/sms/comms-log"
 import { getServerSupabase } from "@/lib/supabase-server"
 import { authorised } from "@/lib/sms/webhook-auth"
+import { refFromText } from "@/lib/sms/text-link"
+import { claimTextRef, findTextRef } from "@/lib/sms/text-refs"
+import { CONTACT_CARD_URL, textFirstReply } from "@/lib/sms/text-first-replies"
 
 export const dynamic = "force-dynamic"
 export const maxDuration = 30
@@ -54,6 +57,27 @@ async function whoIs(phone: string): Promise<string | null> {
   if (!row) return null
   const name = [row.first_name, row.last_name].filter((x) => x && x !== "-").join(" ")
   return [name, row.business_name].filter(Boolean).join(", ") || null
+}
+
+/** True when this is the first text we've had from this number (the one just logged counts). */
+async function firstInboundFrom(phone: string): Promise<boolean> {
+  const supabase = getServerSupabase()
+  if (!supabase) return false
+  const { count } = await supabase.schema("public").from("comms_messages").select("id", { count: "exact", head: true }).eq("channel", "sms").eq("direction", "inbound").eq("counterpart", phone.toLowerCase())
+  return (count ?? 0) <= 1
+}
+
+/** What the instant reply needs: a report's status, or a booking's time and zone. */
+async function lookupRefContext(kind: "report" | "booking", refId: string): Promise<{ reportSent?: boolean; startIso?: string; tz?: string }> {
+  const supabase = getServerSupabase()
+  if (!supabase) return {}
+  if (kind === "report") {
+    const { data } = await supabase.schema("website").from("free_courses_signups").select("report_status").eq("id", refId).maybeSingle()
+    return { reportSent: (data as { report_status?: string } | null)?.report_status === "sent" }
+  }
+  const { data } = await supabase.schema("website").from("booking_scheduled_emails").select("start_iso, visitor_tz").eq("booking_id", refId).not("start_iso", "is", null).limit(1).maybeSingle()
+  const row = data as { start_iso?: string; visitor_tz?: string } | null
+  return row?.start_iso ? { startIso: row.start_iso, tz: row.visitor_tz || "America/Los_Angeles" } : {}
 }
 
 export async function POST(request: NextRequest) {
@@ -92,6 +116,17 @@ export async function POST(request: NextRequest) {
   } else if (keyword === "help") {
     await sendSms(from, SMS_REPLIES.help, { typing: false, force: true, stream: "help" })
     action = "asked for help"
+  } else {
+    // "Tap to text us": the pre-filled message carries a ref. One instant reply (with the contact card) per ref, or
+    // per number for the general footer text. Once they've texted, links and media are allowed.
+    const ref = refFromText(content)
+    if (ref) {
+      const reply = await textFirstReply(ref, from, { findTextRef, claimTextRef, firstInbound: () => firstInboundFrom(from), lookup: lookupRefContext })
+      if (reply) {
+        await sendSms(from, reply.text, { typing: false, mediaUrl: CONTACT_CARD_URL, stream: "text_first" })
+        action = reply.label
+      }
+    }
   }
 
   const who = await whoIs(from).catch(() => null)

@@ -1,5 +1,7 @@
 "use client"
 
+import { TextUsButton } from "@/components/text-us-button"
+import { textBody } from "@/lib/sms/text-link"
 import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState, type ReactNode } from "react"
 import { createPortal } from "react-dom"
@@ -110,6 +112,7 @@ export function ReportPopup({
   const [answers, setAnswers] = useState<ReportAnswers>({})
   const [picked, setPicked] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [textInfo, setTextInfo] = useState<{ textRef: string | null; firstName: string; businessName: string } | null>(null)
 
   const closeRef = useRef(onClose)
   closeRef.current = onClose
@@ -213,6 +216,15 @@ export function ReportPopup({
             <p className="mt-3 text-[15px] leading-relaxed text-ink/70">
               We&apos;re preparing it now. In your inbox in minutes.
             </p>
+            {/* Inbound-first texting: the owner texts us, then we can text them (lib/sms/text-link.ts). */}
+            <div className="mt-5 rounded-2xl border border-ink/10 px-5 py-4">
+              <TextUsButton
+                placement="report_success"
+                intro="Want updates by text too?"
+                label="Tap to text us"
+                body={textBody("report", { firstName: textInfo?.firstName, business: textInfo?.businessName, code: textInfo?.textRef })}
+              />
+            </div>
             {workspaceUrl ? (
               <>
                 <div className="mt-6 rounded-2xl bg-cream px-5 py-5 text-left">
@@ -328,7 +340,10 @@ export function ReportPopup({
                     <p className="mt-2 text-[1.2rem] font-semibold tracking-tight text-ink">Where should the report go?</p>
                   </>
                 )}
-                <ReportForm plain className={direct ? "" : "mt-4"} answers={answers} initialWebsite={website} entry={entry} startFix={startFix} onSuccess={() => setSuccess(true)} />
+                <ReportForm plain className={direct ? "" : "mt-4"} answers={answers} initialWebsite={website} entry={entry} startFix={startFix} onSuccess={(result) => {
+                    setTextInfo(result ?? null)
+                    setSuccess(true)
+                  }} />
               </div>
             )}
           </>
