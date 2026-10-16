@@ -56,6 +56,7 @@
     "next": "15.2.8",
     "next-themes": "latest",
     "pdf-lib": "^1.17.1",
+    "qrcode": "1.5.4",
     "react": "^19",
     "react-day-picker": "latest",
     "react-dom": "^19",
@@ -72,6 +73,7 @@
   },
   "devDependencies": {
     "@types/node": "^22",
+    "@types/qrcode": "1.5.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9.30.1",

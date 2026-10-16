@@ -126,12 +126,16 @@ const isPagePath = (value: unknown) => typeof value === "string" && PAGE_PATH.te
 /** Existing booking `source` tags (homepage, header, floating_cta, report, …) or their pathname fallback. */
 const isBookingSource = (value: unknown) => typeof value === "string" && (/^[a-z_]{1,24}$/.test(value) || isPagePath(value))
 
+/** Where a "Tap to text us" button sits (components/text-us-button.tsx). */
+export const TEXT_PLACEMENTS = ["report_success", "booking_success", "footer", "text_page"] as const
+
 /** Where a phone link sits (lib/contact.ts). Calls themselves are identified by the phone line, not here. */
 export const PHONE_PLACEMENTS = ["header", "header_mobile", "menu", "footer", "footer_legal", "book"] as const
 
 const VALIDATORS = {
   cta_id: isCtaId,
   phone_placement: oneOf(PHONE_PLACEMENTS),
+  text_placement: oneOf(TEXT_PLACEMENTS),
   destination: oneOf(["report", "booking"]),
   placement: oneOf(["hero", "header", "floating", "inline", "closing", "confirmation", "error"]),
   page_path: isPagePath,
@@ -169,6 +173,8 @@ export const FUNNEL_EVENTS = {
   lookup_result: { cta_id: "cta_id", outcome: "lookup_outcome", lookup_id: "lookup_id", page_path: "page_path" },
   /** A tap or click on Terramore's phone number. Where it was and the page; never the number or the visitor. GA4 only. */
   phone_click: { placement: "phone_placement", page_path: "page_path" },
+  /** A tap on "Tap to text us": where the button was. Never the number, the message or the ref. */
+  text_us_click: { placement: "text_placement", page_path: "page_path" },
   booking_start: { source: "source", entry: "booking_entry", flow: "flow", page_path: "page_path" },
   booking_progress: {
     step: "booking_step",

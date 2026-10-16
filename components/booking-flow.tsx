@@ -1,5 +1,7 @@
 "use client"
 
+import { TextUsButton } from "@/components/text-us-button"
+import { textBody } from "@/lib/sms/text-link"
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { trackFunnelEvent, trackMeetingBooked } from "@/lib/analytics"
@@ -21,6 +23,8 @@ export type BookingResult = {
   manageUrl: string
   /** True only when /api/booking started the free website check for this booking. */
   reportComing?: boolean
+  /** "Tap to text us" code for reminders by text (lib/sms/text-refs.ts). */
+  textRef?: string | null
 }
 
 const DAYS_AHEAD = 14
@@ -1001,6 +1005,15 @@ export function BookingSuccess({ booking, tz, name }: { booking: BookingResult; 
         </p>
       ) : null}
       <AddToCalendar booking={booking} className="mt-6" />
+      {/* Inbound-first texting: once they text us, reminders and the join link can come by text too. */}
+      <div className="mt-6 rounded-2xl border border-ink/10 px-5 py-4">
+        <TextUsButton
+          placement="booking_success"
+          intro="Want reminders by text?"
+          label="Tap to text us"
+          body={textBody("booking", { firstName: first, code: booking.textRef })}
+        />
+      </div>
     </div>
   )
 }

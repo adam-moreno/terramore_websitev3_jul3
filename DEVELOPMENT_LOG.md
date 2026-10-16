@@ -1,5 +1,16 @@
 # Development Log - Terramore Website
 
+## 2026-10-16 — "Tap to text us": owners text us first, then we can text them (inbound-first Sendblue line)
+
+**Why:** the Terramore line is on Sendblue's AI Agent plan, which is inbound-first. Owners text first and we reply; once they have, links, media and reminders are allowed. Pattern from Sendblue's iMessage link button guide.
+
+- **Button** (`components/text-us-button.tsx`, logic in `lib/sms/text-link.ts`): opens Messages with (612) 356-8558 and a short message filled in. The separator is `&body=` on iPhone and Mac, `?body=` on Android. Windows and Linux get a QR code (`SMSTO:` payload, `qrcode` 1.5.4); Macs get the button and the QR. Instagram, Facebook and TikTok in-app browsers get a "use Safari or Chrome" note and a copy. If Messages doesn't open in 1.5 s, the number and message are copied. Consent line with Text terms. GA4 `text_us_click` carries the placement only.
+- **Placements:** the report confirmation ("Want updates by text too?"), the booking confirmation ("Want reminders by text?"), the booking confirmation email (links to `/text?ref=…`), and both footers ("Text (612) 356-8558"; this also shows the number for Google Ads message-asset verification).
+- **Refs** (`website.text_refs`, migration `20261016_text_refs.sql`): each report request and booking mints a 5-character code that rides in the message ("… (Ref K7Q2M)"). The footer uses "(Ref WEB)". Until the migration runs, the button still works, just without a ref.
+- **Instant reply** (`lib/sms/text-first-replies.ts`, from `/api/sms/sendblue`): one per ref (claimed atomically), or for "WEB" only on a number's first text. Report: in your inbox, or on its way. Booking: the time, plus the promise of reminders a day, 2 hours and 30 minutes before. Footer: send your website, or run the free check at /report. Each carries the contact card (`/terramore.vcf`) and "Reply STOP to opt out". Adam still gets the alert, labelled with what they texted about.
+- **Reminders by text:** the reminder cron (`lib/booking/send-reminders.ts`) also texts the 24h, 2h and 30m reminders, with the join link, to the number that texted for that booking.
+- Checks: `verify-sms-replies` 82 (links per platform, refs, replies, one reply per ref, text reminders, placements, consent, taxonomy, migration). `verify-booking-report` updated for the response field. Other verifiers pass (`verify-report-places` pre-existing). `tsc` unchanged (16). Looked at `/text` in Chrome on a Mac: button, QR, consent and footer link.
+
 ## 2026-10-16 — Terramore contact card for texts
 
 - `public/terramore.vcf` (served as `text/vcard`, see `next.config.mjs` headers): "Terramore", text line +1 612 356 8558, call line (818) 699-9217, hello@terramore.io, www.terramore.io, and a 600×600 photo.

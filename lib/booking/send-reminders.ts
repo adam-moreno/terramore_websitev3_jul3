@@ -12,7 +12,9 @@
 import { bookingApi, manageUrl, type BookingRecord } from "@/lib/booking-api"
 import { buildBookingReminder, OWN_SENDER, type ReminderKind } from "@/lib/booking-reminders"
 import { leadHasDigitalFootprintReport } from "@/lib/leads/has-digital-footprint"
-import { type BookingNotice, type SendResult, sendEmail } from "@/lib/notify"
+import { type BookingNotice, type SendResult, sendEmail, sendSms } from "@/lib/notify"
+import { BOOKING_SMS_TIMED_SPECS, buildBookingSms, type BookingSmsKind } from "@/lib/booking-sms"
+import { bookingTextPhone } from "@/lib/sms/text-refs"
 import { getServerSupabase } from "@/lib/supabase-server"
 
 const TABLE = "booking_scheduled_emails"
@@ -46,9 +48,15 @@ export type SenderDeps = {
   /** Final status, or back to "scheduled" for a retry next run. */
   mark(id: string, status: "sent" | "send_failed" | "canceled" | "skipped" | "scheduled", error?: string): Promise<void>
   now(): number
+  /** The number that texted us for this booking ("Tap to text us"), if any. Optional so older callers keep working. */
+  textPhone?(bookingId: string): Promise<string | null>
+  /** Sends the text version of a reminder. */
+  sendText?(phone: string, body: string): Promise<SendResult>
 }
 
 const KINDS = new Set<string>(["24h", "10h", "2h", "30m", "2m"])
+/** Reminder kinds that also go by text, from lib/booking-sms.ts (enabled timed kinds). */
+const KINDS_TEXTED = new Set<string>(BOOKING_SMS_TIMED_SPECS.map((s) => s.kind))
 
 /** What to do with one claimed row. Pure, exported for scripts/verify-booking-emails.mjs. */
 export function decideReminder(
@@ -114,6 +122,8 @@ function defaultDeps(): SenderDeps {
     },
     hasReport: (email) => leadHasDigitalFootprintReport(email),
     send: (input) => sendEmail(input),
+    textPhone: (bookingId) => bookingTextPhone(bookingId),
+    sendText: (phone, body) => sendSms(phone, body, { typing: false, stream: "booking_reminder" }),
     async mark(id, status, error) {
       const supabase = getServerSupabase()
       if (!supabase) return
@@ -165,6 +175,14 @@ export async function sendDueReminders(deps: SenderDeps = defaultDeps()): Promis
       }
       const built = buildBookingReminder(row.kind as ReminderKind, notice, { hasReport: await deps.hasReport(email).catch(() => null) })
       const result = await deps.send({ to: email, subject: built.subject, text: built.text, html: built.html })
+      // Owners who texted us get the reminder by text too, with the join link (allowed once they've texted first).
+      if (KINDS_TEXTED.has(row.kind) && deps.textPhone && deps.sendText) {
+        const phone = await deps.textPhone(row.booking_id).catch(() => null)
+        if (phone) {
+          const sms = buildBookingSms(row.kind as BookingSmsKind, { name: notice.name, startIso: notice.startIso, tz: notice.tz, meetUrl: notice.meetUrl })
+          await deps.sendText(phone, sms.body).catch(() => undefined)
+        }
+      }
       if (result.ok && !result.skipped) {
         out.sent++
         await deps.mark(row.id, "sent")
