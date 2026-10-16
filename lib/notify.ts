@@ -17,6 +17,7 @@
 
 import { isOptedOut } from "@/lib/sms/opt-outs"
 import { logText } from "@/lib/sms/comms-log"
+import { saveMessage } from "@/lib/sms/terraai/store"
 import { buildBookingSms, bookingSmsEnabled } from "./booking-sms"
 import { prepReportLine, prepReportState } from "./booking/report-check"
 import { bookingRefUrl } from "./booking/prefill-token"
@@ -260,6 +261,8 @@ export type SendSmsOptions = {
   force?: boolean
   /** Comms log stream for this text (default "website"). */
   stream?: string
+  /** Who wrote it, for TerraAI's conversation view (default "auto"). */
+  source?: "terraai" | "adam" | "auto"
 }
 
 export async function sendSms(
@@ -293,6 +296,7 @@ export async function sendSms(
     })
     // Website texts show on the dashboard's Comms page alongside its own.
     void logText({ direction: "outbound", phone, status: result.ok ? "sent" : "failed_send", text: body, stream: opts.stream || "website" })
+    if (result.ok) void saveMessage({ phone, direction: "outbound", body, source: opts.source || "auto" }).catch(() => undefined)
     if (!result.ok) return fail("sms:sendblue", result.error || "send failed")
     return { ok: true, channel: "sms:sendblue" }
   }

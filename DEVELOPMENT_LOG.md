@@ -1,5 +1,14 @@
 # Development Log - Terramore Website
 
+## 2026-10-16 — TerraAI answers texts in draft mode (Adam approves every reply)
+
+- **Draft for any normal text** (`/api/sms/sendblue`, after the response): `lib/sms/terraai/context.ts` gathers the owner (by number or "Tap to text us" ref), their report score and top 3 fixes in owner words, an upcoming call with its move link, the links TerraAI may send, and the last 20 messages. `lib/sms/terraai/draft.ts` calls Claude Opus 5.5 (`@anthropic-ai/sdk` 0.131.0, low effort, server-side fallback `"default"`) with the voice guide (`lib/sms/terraai/voice.ts`) as a cached system prompt and structured output (reply, intent, handoff, reason, note for Adam). Markdown is stripped; a first text always opens with the disclosure ("Hi, this is TerraAI, Terramore's AI assistant (powered by Claude from Anthropic). Text ADAM anytime to reach a real person."). A decline or error becomes a hand-off draft.
+- **Adam decides:** the Slack and email alert carries the draft and a signed 72-hour link to `/sms/drafts/{id}` (conversation, editable draft, Send / Send my version / Discard). Claimed before sending, so a double click sends once. Edits are recorded as "edited" for future examples. A newer text supersedes a waiting draft. Nothing is sent without Adam.
+- **"ADAM", "HUMAN", "PERSON", "real person", "agent":** instant "Terramore: got it. Adam will text you back shortly." and an alert marked ASKED FOR A PERSON.
+- **Full-text log** (`website.sms_messages`) for the conversation view; drafts in `website.sms_drafts` (migration `20261016_terraai_texting.sql`). Before it runs, drafts still arrive in the alert, just without the review link.
+- **Simulations:** `scripts/sim-texting.mjs` runs 17 owner personas (`docs/testing/sms-personas.json`: paving, Wix store, painter, salon, plumber, dentist, taquería in Spanish, landscaper, roofer, med spa, bakery, HVAC, café, auto shop, florist, Toronto cleaner, a manipulation attempt; area codes 602 to 416) against the production prompt, with a Claude judge scoring natural / accurate / helpful / concise plus rule violations. Real API calls; prints the cost.
+- Checks: `verify-sms-replies` 121. Others pass (`verify-report-places` pre-existing). `tsc` unchanged (16).
+
 ## 2026-10-16 — "Tap to text us": owners text us first, then we can text them (inbound-first Sendblue line)
 
 **Why:** the Terramore line is on Sendblue's AI Agent plan, which is inbound-first. Owners text first and we reply; once they have, links, media and reminders are allowed. Pattern from Sendblue's iMessage link button guide.
