@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
     await sendSms(from, SMS_REPLIES.help, { typing: false, force: true, stream: "help" })
     action = "asked for help"
   } else if (keyword === "human") {
-    await sendSms(from, SMS_REPLIES.human, { typing: false, stream: "handoff" })
+    await sendSms(from, SMS_REPLIES.human, { typing: false, stream: "handoff", source: "terraai" })
     action = "ASKED FOR A PERSON"
   } else {
     // "Tap to text us": the pre-filled message carries a ref. One instant reply (with the contact card) per ref, or
@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
     if (ref) {
       const reply = await textFirstReply(ref, from, { findTextRef, claimTextRef, firstInbound: () => firstInboundFrom(from), lookup: lookupRefContext })
       if (reply) {
-        await sendSms(from, reply.text, { typing: false, mediaUrl: CONTACT_CARD_URL, stream: "text_first" })
+        await sendSms(from, reply.text, { typing: false, mediaUrl: CONTACT_CARD_URL, stream: "text_first", source: "terraai" })
         action = reply.label
       }
     }

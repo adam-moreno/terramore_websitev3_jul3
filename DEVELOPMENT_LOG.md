@@ -1,5 +1,13 @@
 # Development Log - Terramore Website
 
+## 2026-10-16 — TerraAI's voice: Customer Success, "earn it" hand-offs, call-first (owner direction)
+
+- **Names:** owners hear "our Customer Success team", never "Adam" (a stranger doesn't know the name) or "account manager". The first text is just "Hi, this is TerraAI, Terramore's AI assistant." No model name; if asked what it runs on: "built on Claude, made by Anthropic". If asked whether it's a bot: honest, and Customer Success reads these too.
+- **Earn it:** no person offered up front. When an owner asks (or texts TEAM, ADAM, HUMAN, PERSON, REP, "customer success"), TerraAI asks two or three quick questions (business and where; how customers find them; what they want more of) so Customer Success comes prepared, then offers a call now or a time. The answers go in the note to Adam. It never refuses or stalls: a skip or a second ask connects them right away. No questions for anyone upset, in an emergency, or raising billing, legal or medical issues. The keyword reply discloses the AI and asks the first question.
+- **Call-first:** after answering, TerraAI's default next step is "Want someone from our Customer Success team to call you now, or would you rather pick a time?" "Call now" sets a hand-off flagged "wants a call now".
+- The instant "Tap to text us" replies said "it's Adam at Terramore". They are automated, so they now say TerraAI, and they count as TerraAI's first text (no repeated disclosure). HELP and /text say Customer Success.
+- Checks: `verify-sms-replies` 126. Others pass (`verify-report-places` pre-existing). `tsc` unchanged (16).
+
 ## 2026-10-16 — TerraAI answers texts in draft mode (Adam approves every reply)
 
 - **Draft for any normal text** (`/api/sms/sendblue`, after the response): `lib/sms/terraai/context.ts` gathers the owner (by number or "Tap to text us" ref), their report score and top 3 fixes in owner words, an upcoming call with its move link, the links TerraAI may send, and the last 20 messages. `lib/sms/terraai/draft.ts` calls Claude Opus 5.5 (`@anthropic-ai/sdk` 0.131.0, low effort, server-side fallback `"default"`) with the voice guide (`lib/sms/terraai/voice.ts`) as a cached system prompt and structured output (reply, intent, handoff, reason, note for Adam). Markdown is stripped; a first text always opens with the disclosure ("Hi, this is TerraAI, Terramore's AI assistant (powered by Claude from Anthropic). Text ADAM anytime to reach a real person."). A decline or error becomes a hand-off draft.

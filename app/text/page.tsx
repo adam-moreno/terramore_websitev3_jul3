@@ -28,7 +28,7 @@ export default async function TextPage({ searchParams }: { searchParams: Promise
       ? "Send us one text and we'll text you before your call, with the join link."
       : kind === "report"
         ? "Send us one text and we'll text you about your report."
-        : "Send us a text and Adam will get back to you. Want a free check of your business? Say so and include your website."
+        : "Send us a text and our Customer Success team will get back to you. Want a free check of your business? Say so and include your website."
   return (
     <>
       <main className="mx-auto flex min-h-[60vh] max-w-md flex-col justify-center px-6 py-14">
