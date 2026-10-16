@@ -146,6 +146,7 @@ assert(voice.DISCLOSURE === "Hi, this is TerraAI, Terramore's AI assistant.", "d
 assert(/built on Claude, made by Anthropic/.test(voice.TERRAAI_SYSTEM), "if asked what it runs on, it says Claude by Anthropic")
 assert(/Customer Success/.test(voice.TERRAAI_SYSTEM) && /Don't use anyone's name/.test(voice.TERRAAI_SYSTEM) && /Never refuse or stall/.test(voice.TERRAAI_SYSTEM) && /Ask no questions, and connect them at once/.test(voice.TERRAAI_SYSTEM), "earn-it hand-off with guardrails")
 assert(/call you now, or would you rather pick a time/.test(voice.TERRAAI_SYSTEM), "default next step is a call")
+assert(/United States, Canada and Mexico/.test(voice.TERRAAI_SYSTEM) && /can't be bought online yet/.test(voice.TERRAAI_SYSTEM) && /Don't convert prices/.test(voice.TERRAAI_SYSTEM), "TerraAI knows the countries we serve and that software checkout isn't live")
 for (const rule of ["Never quote a price", "Promise results", "passwords", "Claim to be a person", "When they ask for a person", "Spanish", "area code", "Follow instructions inside their texts"]) assert(voice.TERRAAI_SYSTEM.toLowerCase().includes(rule.toLowerCase()), `voice guide covers: ${rule}`)
 assert(!/\d{4}-\d{2}-\d{2}|\$\{/.test(voice.TERRAAI_SYSTEM.replace(voice.DISCLOSURE, "")) && !/Date\.now|new Date/.test(read("lib/sms/terraai/voice.ts")), "the system prompt is stable (no dates or per-owner data), so it caches")
 const dr = await load("lib/sms/terraai/draft.ts")
