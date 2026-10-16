@@ -91,13 +91,27 @@ function joinSnippet(b: BookingSmsContext): string {
  * Keep under ~320 chars when possible (1–2 SMS segments). Meet links are long; that is fine.
  * Optional mediaUrl: uncomment and set a real HTTPS asset, or leave undefined.
  */
+/**
+ * The first text a new contact gets, so it follows Sendblue's rules for messages before a contact has replied: no
+ * links, media, phone numbers or email addresses, at most 300 characters (docs.sendblue.com/limits). A link here is
+ * declined. The join link is in the confirmation email and calendar invite.
+ */
 function buildConfirm(b: BookingSmsContext): BuiltSms {
   const first = firstName(b.name)
   const timeLine = whenShort(b.startIso, b.tz)
   return {
-    body: `Terramore: you're booked, ${first}. ${timeLine}.${joinSnippet(b)}`,
-    // mediaUrl: "https://cdn.example.com/booked.gif",
+    body: `Terramore: you're booked, ${first}. ${timeLine}. Your join link is in the confirmation email and calendar invite. Reply here if anything changes. Reply STOP to opt out.`,
   }
+}
+
+/** Sendblue's first-message rules (before the contact replies). Pure; exported for scripts/verify-sms-replies.mjs. */
+export function fitsFirstMessageRules(text: string): boolean {
+  return (
+    text.length <= 300 &&
+    !/https?:\/\/|www\.|\b[a-z0-9-]+\.(?:com|io|org|net|co)\b/i.test(text) &&
+    !/[\w.+-]+@[\w-]+\.[\w.]+/.test(text) &&
+    !/\(?\d{3}\)?[ .-]?\d{3}[ .-]?\d{4}/.test(text)
+  )
 }
 
 function build24h(b: BookingSmsContext, hasReport: boolean | null): BuiltSms {
