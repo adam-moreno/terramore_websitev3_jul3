@@ -113,6 +113,8 @@ public/*
 !public/industries/**
 !public/examples/
 !public/examples/**
+# The Terramore contact card sent by text (DEVELOPMENT_LOG 2026-10-16).
+!public/terramore.vcf
 # Storybook build outputs
 .out
 .storybook-out
