@@ -9,6 +9,11 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  // The Terramore contact card (public/terramore.vcf), sent by text after an owner replies so the line shows as
+  // "Terramore" and links preview (Apple hides previews from unknown senders).
+  async headers() {
+    return [{ source: '/terramore.vcf', headers: [{ key: 'Content-Type', value: 'text/vcard; charset=utf-8' }, { key: 'Content-Disposition', value: 'inline; filename="Terramore.vcf"' }] }]
+  },
   async redirects() {
     return [
       { source: '/courses', destination: '/', permanent: true },

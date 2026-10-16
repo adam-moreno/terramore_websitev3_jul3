@@ -1,5 +1,11 @@
 # Development Log - Terramore Website
 
+## 2026-10-16 — Terramore contact card for texts
+
+- `public/terramore.vcf` (served as `text/vcard`, see `next.config.mjs` headers): "Terramore", text line +1 612 356 8558, call line (818) 699-9217, hello@terramore.io, www.terramore.io, and a 600×600 photo.
+- Photo: the existing "Terramore.io" wordmark (Cloudinary `…_vwxvqo.png`, white, no crest, per Adam), scaled to 480 px wide and centred on ink #0f1e2e. Made with a script and `sips`, not AI. It stays inside the circle iPhones crop to.
+- Use: send it as media after an owner's first reply. Sendblue allows no media before a reply, and Apple hides link previews from senders who aren't in the recipient's contacts.
+
 ## 2026-10-16 — The booking text follows Sendblue's first-message rules
 
 - Until a contact replies, Sendblue only delivers plain text: no links, media, phone numbers or email addresses, at most 300 characters and 6 messages (docs.sendblue.com/limits). The booking confirmation carried the Google Meet link, so new contacts' confirmations were declined. Now: "Terramore: you're booked, {first}. {time}. Your join link is in the confirmation email and calendar invite. Reply here if anything changes. Reply STOP to opt out."
