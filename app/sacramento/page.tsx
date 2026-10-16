@@ -4,7 +4,7 @@ import { DIY_FAQ, PRICE_FAQ, TopicPage } from "@/components/topic-page"
 export const metadata: Metadata = {
   title: "Marketing Help for Sacramento Small Businesses | Terramore.io",
   description:
-    "Terramore is a Sacramento company. Free website check for Sacramento small businesses: your site, Google listing, and social profiles, with fixes in plain words.",
+    "Terramore's registered business address is in Sacramento. Free website check for Sacramento small businesses: your site, Google listing, and social profiles, with fixes in plain words.",
   alternates: { canonical: "/sacramento" },
 }
 
@@ -13,7 +13,7 @@ export default function SacramentoPage() {
     <TopicPage
       title="Marketing help for"
       accent="Sacramento businesses."
-      subtitle="Terramore is based in Sacramento. Check how your business shows up online, free, then decide what to fix."
+      subtitle="Terramore is registered in Sacramento. Check how your business shows up online, free, then decide what to fix."
       intro={[
         "When people in Sacramento, Midtown, Elk Grove, Roseville, or Folsom search for what you do, they compare you in seconds: your Google listing, your reviews, and your website.",
         "The free check shows you what they see, and what to fix first. We work online, by video call, text, and email, so you don't need to take time out to meet in person.",
@@ -35,7 +35,7 @@ export default function SacramentoPage() {
         },
         {
           q: "Do you only work with Sacramento businesses?",
-          a: "No. We work with small businesses across the US, plus Canada and Mexico. Sacramento is home.",
+          a: "No. We work with small businesses across the US, plus Canada and Mexico.",
         },
         DIY_FAQ,
         PRICE_FAQ,
