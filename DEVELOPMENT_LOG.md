@@ -1,5 +1,9 @@
 # Development Log - Terramore Website
 
+## 2026-10-16 — TerraAI knows Terramore serves the US, Canada and Mexico
+
+- Voice guide: Terramore works with businesses in the United States, Canada and Mexico (calls are online). Software plans start at $29 a month in US dollars and can't be bought online yet, so interested owners are offered a Customer Success call; no currency conversion until checkout exists (owner, 2026-10-16).
+
 ## 2026-10-16 — TerraAI's voice: Customer Success, "earn it" hand-offs, call-first (owner direction)
 
 - **Names:** owners hear "our Customer Success team", never "Adam" (a stranger doesn't know the name) or "account manager". The first text is just "Hi, this is TerraAI, Terramore's AI assistant." No model name; if asked what it runs on: "built on Claude, made by Anthropic". If asked whether it's a bot: honest, and Customer Success reads these too.
