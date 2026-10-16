@@ -2,9 +2,10 @@ import type { Metadata } from "next"
 import { DigitalFootprintLanding } from "@/components/digital-footprint-landing"
 
 export const metadata: Metadata = {
-  title: "Free Digital Footprint report | Terramore.io",
+  title: "Free Website Check for Small Businesses | Terramore.io",
   description:
-    "Get a free written report on your website, socials, ads, and reviews. About a minute to request. In your inbox in minutes.",
+    "Free website check for small business owners: your site, Google Maps listing, social profiles, and reviews. First results in about a minute, full report by email.",
+  alternates: { canonical: "/report" },
 }
 
 export default function ReportPage() {

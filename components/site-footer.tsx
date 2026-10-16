@@ -14,12 +14,17 @@ import { Logo } from "@/components/logo"
 import { useDoNotSellPopup } from "@/hooks/use-do-not-sell-popup"
 import { DASHBOARD_LOGIN_URL } from "@/lib/dashboard"
 
-/* Explore matches header nav (Marketing / Solutions / How we work).
+/* Explore starts with the header nav (Marketing / Solutions / How we work), then the pages
+   search engines can only find through a plain link: the free check, pricing, about, and articles.
    Talk with us + Log in stay as CTAs. Legal links stay below. */
 const EXPLORE = [
   { href: "/marketing", label: "Marketing" },
   { href: "/solutions", label: "Solutions" },
   { href: "/#how-we-work", label: "How we work" },
+  { href: "/report", label: "Free website check" },
+  { href: "/pricing", label: "Pricing" },
+  { href: "/about", label: "About" },
+  { href: "/resources", label: "Articles and answers" },
 ]
 
 const LEGAL = [
