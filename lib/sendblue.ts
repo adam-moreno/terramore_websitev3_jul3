@@ -310,6 +310,8 @@ export async function ensureContactAndVerify(input: {
   updateIfExists?: boolean
 }): Promise<SendblueResult> {
   const created = await ensureContact(input)
+  // Paid dedicated line (from 2026-10-15): no allowlist, so no verification message. SENDBLUE_FREE_LINE=1 restores it.
+  if (process.env.SENDBLUE_FREE_LINE?.trim() !== "1") return created
   if (!created.ok && !created.skipped) {
     // Still try verify — contact may already exist from a prior booking.
     const verified = await verifyContact(input.phone)

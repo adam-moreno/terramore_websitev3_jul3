@@ -1,5 +1,15 @@
 # Development Log - Terramore Website
 
+## 2026-10-15 — Text replies reach Adam, STOP works, and the paid Sendblue line is used properly
+
+**Found in the pre-Ads site check:** no Sendblue webhook was connected, so replies to our texts (including STOP) went nowhere. The code still ran the free-plan "verify contact" step on every booking and report. Several real contacts in the Sendblue inbox show "No messages yet". The account now has a paid line, +1 612 356 8558.
+
+- **`POST /api/sms/sendblue`** (auth: `SENDBLUE_WEBHOOK_SECRET` as `?key=` or in any header, constant time). Every inbound text is logged to the dashboard's Comms page (`public.comms_messages`, retries de-duplicated by message handle) and alerts Adam by Slack and email, naming the lead when the number matches. STOP, STOPALL, UNSUBSCRIBE, CANCEL, END, QUIT: saved first, then one confirmation text. START or UNSTOP: opted back in, with a confirmation, only for someone who had opted out. HELP or INFO: one help text. Failed outbound deliveries are logged if that webhook is on.
+- **`sendSms`** skips any number that texted STOP (`website.sms_opt_outs`, new migration `20261015_sms_opt_outs.sql`) before either provider. Only the STOP and HELP replies are forced. Website texts are now logged to the Comms page as well.
+- **Free-plan verify off:** `ensureContactAndVerify` only creates the contact now; `SENDBLUE_FREE_LINE=1` restores the old behaviour.
+- **Owner steps:** run the migration; then the webhook secret is set on Vercel and Adam adds the endpoint in Sendblue (Webhooks → Inbound Messages).
+- Checks: new `scripts/verify-sms-replies.mjs` (42). Other verifiers pass; `tsc` unchanged (16).
+
 ## 2026-10-15 — Old ad pages redirect, a branded "not found" page, privacy email fixed (pre-Ads site check)
 
 - **Redirects** (`next.config.mjs`, temporary so they can change): `/services` and `/services/*` (the old construction ad pages) → `/report`; `/marketing/services` → `/marketing`; `/small-business` and `/small-business/*` → `/`. The paused Growth campaign's ads pointed at `/marketing/services` and `/small-business/marketing`, both 404.

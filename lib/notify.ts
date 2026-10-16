@@ -15,6 +15,8 @@
  *                      TWILIO_AUTH_TOKEN, TWILIO_FROM_NUMBER). Failures never throw.
  */
 
+import { isOptedOut } from "@/lib/sms/opt-outs"
+import { logText } from "@/lib/sms/comms-log"
 import { buildBookingSms, bookingSmsEnabled } from "./booking-sms"
 import { prepReportLine, prepReportState } from "./booking/report-check"
 import { bookingRefUrl } from "./booking/prefill-token"
@@ -254,6 +256,10 @@ export type SendSmsOptions = {
   mediaUrl?: string
   /** Show iMessage typing briefly before send (Sendblue only). Default true; never blocks send. */
   typing?: boolean
+  /** Sends even to an opted-out number: only the STOP confirmation and HELP reply, which carriers require. */
+  force?: boolean
+  /** Comms log stream for this text (default "website"). */
+  stream?: string
 }
 
 export async function sendSms(
@@ -263,6 +269,8 @@ export async function sendSms(
 ): Promise<SendResult> {
   const phone = normalizePhone(to)
   if (!phone) return skip("sms", "no usable phone number")
+  // Someone who texted STOP gets nothing more (lib/sms/opt-outs.ts), except the carrier-required confirmations.
+  if (!opts.force && (await isOptedOut(phone))) return skip("sms", "opted out (texted STOP)")
 
   const provider = smsProvider()
   if (!provider) {
@@ -283,6 +291,8 @@ export async function sendSms(
       content: body,
       ...(mediaUrl ? { mediaUrl } : {}),
     })
+    // Website texts show on the dashboard's Comms page alongside its own.
+    void logText({ direction: "outbound", phone, status: result.ok ? "sent" : "failed_send", text: body, stream: opts.stream || "website" })
     if (!result.ok) return fail("sms:sendblue", result.error || "send failed")
     return { ok: true, channel: "sms:sendblue" }
   }
