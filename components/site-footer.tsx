@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { PlainEmail } from "@/components/plain-email"
+import { PlainEmailLink } from "@/components/plain-email"
 import { PHONE_DISPLAY } from "@/lib/contact"
 import { PhoneLink } from "@/components/phone-link"
 import { TextUsButton } from "@/components/text-us-button"
@@ -112,7 +112,7 @@ export function SiteFooter({
                   {" · "}
                   <TextUsButton variant="compact" placement="footer" body={textBody("site")} className="underline-offset-4 hover:text-white hover:underline" />
                   {" · "}
-                  <a href="mailto:hello@terramore.io" className="underline-offset-4 hover:text-white hover:underline"><PlainEmail address="hello@terramore.io" /></a>
+                  <PlainEmailLink address="hello@terramore.io" className="underline-offset-4 hover:text-white hover:underline" />
                 </p>
               </div>
               <ul className="flex flex-wrap items-center gap-x-5 gap-y-2">
@@ -201,7 +201,7 @@ export function SiteFooter({
             {" · "}
             <TextUsButton variant="compact" placement="footer" body={textBody("site")} className="underline underline-offset-2 hover:text-ink" />
             {" · "}
-            <a href="mailto:hello@terramore.io" className="underline underline-offset-2 hover:text-ink"><PlainEmail address="hello@terramore.io" /></a>
+            <PlainEmailLink address="hello@terramore.io" className="underline underline-offset-2 hover:text-ink" />
           </p>
         </div>
       </div>
