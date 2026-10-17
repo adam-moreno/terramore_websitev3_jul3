@@ -28,7 +28,7 @@ import { buildTextContext } from "@/lib/sms/terraai/context"
 import { draftReply } from "@/lib/sms/terraai/draft"
 import { AUTO_REPLY_HOURLY_CAP, createDraft, decideDraft, draftReviewUrl, recentMessages, saveMessage, terraaiRepliesLastHour, textMode } from "@/lib/sms/terraai/store"
 import { refFromText } from "@/lib/sms/text-link"
-import { activeHandoff, activeHandoffs, alertPhone, alertText, claimHandoff, closeHandoff, followupText, handoffByCode, inBusinessHours, isGiveBack, openHandoff, resolveAdamReply, touchHandoff } from "@/lib/sms/terraai/handoff"
+import { activeHandoff, activeHandoffs, alertPhone, alertText, claimHandoff, closeHandoff, followupText, handoffByCode, inBusinessHours, isGiveBack, openHandoff, sameText, resolveAdamReply, touchHandoff } from "@/lib/sms/terraai/handoff"
 import { claimTextRef, findTextRef } from "@/lib/sms/text-refs"
 import { CONTACT_CARD_URL, textFirstReply } from "@/lib/sms/text-first-replies"
 
@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
       after(async () => {
         await new Promise((resolve) => setTimeout(resolve, 5000))
         const since = Date.now() - 3 * 60 * 1000
-        const ours = (await recentMessages(to, 15)).some((m) => m.direction === "outbound" && m.body.trim() === text && Date.parse(m.at) >= since)
+        const ours = (await recentMessages(to, 15)).some((m) => m.direction === "outbound" && sameText(m.body, text) && Date.parse(m.at) >= since)
         if (ours) return
         await saveMessage({ phone: to, direction: "outbound", body: text, source: "adam", providerId: body.message_handle ?? null })
         const handoff = await openHandoff(to, "Adam replied from the Sendblue inbox")

@@ -66,6 +66,25 @@ export function followupText(book: string, now = Date.now()): string {
   return `It's after hours here, so someone from our Customer Success team will text you ${nextOpening(now)}. Or grab a time that works for you: ${book}`
 }
 
+/**
+ * Two texts are the same message, allowing for what iMessage changes on the way: curly quotes and apostrophes, dashes,
+ * spacing and case. (2026-10-17: "Terramore's" came back as "Terramore’s", so TerraAI's own first text was taken
+ * for a reply typed in the Sendblue inbox and the conversation was handed off by mistake.) Pure.
+ */
+export function sameText(a: string, b: string): boolean {
+  const norm = (t: string) =>
+    t
+      .normalize("NFKC")
+      .replace(/[\u2018\u2019\u201A\u201B\u2032\u02BC]/g, "'")
+      .replace(/[\u201C\u201D\u201E\u201F\u2033]/g, '"')
+      .replace(/[\u2010-\u2015\u2212]/g, "-")
+      .replace(/\u2026/g, "...")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase()
+  return norm(a) === norm(b)
+}
+
 /** "A7 hello there" → { code: "A7", rest: "hello there" }. Only Adam's texts are read this way. */
 export function parseCommand(text: string): { code: string; rest: string } | null {
   const m = /^\s*([A-Za-z][0-9])(?:\s+|$)([\s\S]*)$/.exec(text)
