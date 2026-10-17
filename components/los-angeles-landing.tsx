@@ -75,17 +75,18 @@ export function LosAngelesLanding() {
                         </p>
                       </div>
                       <h1 className="mx-auto text-center text-[2.35rem] font-bold leading-[1.08] tracking-[-0.02em] text-ink sm:text-5xl md:text-[64px] md:leading-[68px] [@media(min-width:768px)_and_(max-height:820px)]:text-[54px] [@media(min-width:768px)_and_(max-height:820px)]:leading-[58px]">
-                        Get{" "}
+                        Unlock{" "}
                         <span className={`${brandMore.className} text-[1.28em] font-bold leading-none tracking-[-0.08em] text-ink`}>
                           more
-                        </span>{" "}
-                        LA customers
+                        </span>
                         <br />
-                        <span className="text-gold-display">from the business you built.</span>
+                        from <span className="text-gold-display">the business</span>
+                        <br />
+                        <span className="text-gold-display">you already built.</span>
                       </h1>
                       <p className="mx-auto mt-4 max-w-xl text-center text-[16px] leading-relaxed text-ink/70 md:text-[18px]">
-                        Marketing help for Los Angeles small businesses. See what customers see when they look you up,
-                        free, then decide what to fix.
+                        Marketing for Los Angeles small businesses. We find where you&apos;re losing customers, fix it, and run the
+                        marketing that brings them back.
                       </p>
                     </>
                   }
