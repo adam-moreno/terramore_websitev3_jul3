@@ -1,5 +1,15 @@
 # Development Log - Terramore Website
 
+## 2026-10-17 — TerraAI hands texting conversations to Adam
+
+Owner decisions (Adam, 2026-10-17): pause TerraAI only for the handed-off conversation; Adam answers from his iPhone; 10-minute claim window; business hours Mon–Fri 8am–6pm Pacific; no group chat.
+
+- When TerraAI hands off, the conversation gets a code (A7) in `website.sms_handoffs` (migration 20261017_terraai_handoffs.sql) and TerraAI stays quiet on that number only. Everyone else keeps getting TerraAI.
+- Adam's cell (`HANDOFF_ALERT_PHONE` in Vercel; kept out of this public repo) gets a text from the 612 line: who it is, why, what they said, TerraAI's notes, the number to call, and how to reply.
+- He replies in iPhone Messages to the 612 thread: "A7 message" is relayed from 612 so the owner sees one thread; "A7 done" gives it back. Replies typed in the Sendblue inbox also pause TerraAI.
+- Nobody answers in 10 minutes in business hours: the owner gets "Still getting someone… pick a time?" with their booking link (`/api/cron/handoff-followups`, every 2 minutes). After hours that text goes right away and names the next business morning.
+- 24 quiet hours ends a hand-off on its own. STOP, START and HELP work throughout.
+
 ## 2026-10-17 — Report form snags fixed; TerraAI texts send on their own
 
 Owner decisions (Adam, 2026-10-17): fix the funnel snags from the ads journey test, and take texting off draft mode.

@@ -200,4 +200,37 @@ assert(/edited \? "edited" : "sent"/.test(api), "Adam's edits are recorded as ed
 const sql4 = read("supabase/migrations/20261016_terraai_texting.sql")
 assert(/website\.sms_messages/.test(sql4) && /website\.sms_drafts/.test(sql4) && (sql4.match(/ENABLE ROW LEVEL SECURITY/g) || []).length === 2 && (sql4.match(/REVOKE ALL/g) || []).length === 2, "texting tables: website schema, RLS, no public access")
 
+// --- Hand-offs (2026-10-17): TerraAI goes quiet on that conversation; Adam answers "A7 …" from his phone
+const ho = await load("lib/sms/terraai/handoff.ts")
+const pt = (iso) => Date.parse(iso) // instants below are UTC; Pacific is UTC-7 in October
+assert(ho.inBusinessHours(pt("2026-10-19T15:00:00Z")) && !ho.inBusinessHours(pt("2026-10-19T14:59:00Z")) && ho.inBusinessHours(pt("2026-10-20T00:59:00Z")) && !ho.inBusinessHours(pt("2026-10-20T01:00:00Z")), "business hours are 8am to 6pm Pacific")
+assert(!ho.inBusinessHours(pt("2026-10-17T19:00:00Z")) && !ho.inBusinessHours(pt("2026-10-18T19:00:00Z")), "weekends are after hours")
+assert(ho.nextOpening(pt("2026-10-20T03:00:00Z")) === "tomorrow morning" && ho.nextOpening(pt("2026-10-24T03:00:00Z")) === "Monday morning" && ho.nextOpening(pt("2026-10-19T12:00:00Z")) === "this morning", "after hours names the next business morning (Friday night → Monday)")
+assert(/^Still getting someone/.test(ho.followupText("https://b.test", pt("2026-10-19T18:00:00Z"))) && /after hours.*tomorrow morning.*https:\/\/b\.test/.test(ho.followupText("https://b.test", pt("2026-10-20T03:00:00Z"))), "follow-up text: still getting someone in hours, next morning after hours, both with the booking link")
+assert(!/\bAdam\b/.test(ho.followupText("x", pt("2026-10-19T18:00:00Z")) + ho.followupText("x", pt("2026-10-20T03:00:00Z"))), "owner-facing hand-off texts say Customer Success, not Adam")
+assert(JSON.stringify(ho.parseCommand("a7 Hi Maria, this is Adam")) === JSON.stringify({ code: "A7", rest: "Hi Maria, this is Adam" }) && ho.parseCommand("A7")?.rest === "", "Adam's reply: code, then the message")
+assert(ho.parseCommand("B2B leads?") === null && ho.parseCommand("Hi there") === null && ho.parseCommand("AB hi") === null, "ordinary texts aren't read as codes")
+assert(ho.isGiveBack("done") && ho.isGiveBack("Back.") && !ho.isGiveBack("done by friday?"), "\"A7 done\" gives it back to TerraAI")
+const at = ho.alertText({ code: "A7", who: "Maria, Rosa's Bakery", phone: "+15555550100", said: "can someone call me", reason: "wants a call now", notes: "bakery, Fresno" })
+assert(/^A7: TerraAI handed you Maria/.test(at) && /Call: \+15555550100/.test(at) && /"A7 your message"/.test(at) && /"A7 done"/.test(at), "Adam's alert: code, who, number to call, how to reply and give back")
+{
+  const prev = process.env.HANDOFF_ALERT_PHONE
+  delete process.env.HANDOFF_ALERT_PHONE
+  assert(ho.alertPhone() === null, "no alert phone unless HANDOFF_ALERT_PHONE is set (the number stays out of this public repo)")
+  process.env.HANDOFF_ALERT_PHONE = "(555) 555-0100"
+  assert(ho.alertPhone() === "+15555550100", "alert phone is normalized")
+  if (prev === undefined) delete process.env.HANDOFF_ALERT_PHONE; else process.env.HANDOFF_ALERT_PHONE = prev
+}
+const route3 = read("app/api/sms/sendblue/route.ts")
+assert(route3.indexOf("parseCommand(content)") < route3.indexOf("const keyword = smsKeyword(content)") && /from === adam/.test(route3), "only Adam's own number can relay with a code, checked before anything else")
+assert(route3.indexOf("await activeHandoff(from)") < route3.indexOf("after(async () => {\n      const ctx = await buildTextContext"), "a handed-off conversation never reaches TerraAI")
+assert(/keyword === "stop" \|\| keyword === "start" \|\| keyword === "help" \? null : await activeHandoff/.test(route3), "STOP, START and HELP still work during a hand-off")
+assert(/if \(draft\.handoff\) \{\s*const handoff = await openHandoff/.test(route3) && /!inBusinessHours\(\)/.test(route3), "TerraAI's hand-off opens one, alerts Adam's phone, and follows up at once after hours")
+assert(/source: "adam"/.test(route3) && /openHandoff\(to, "Adam replied from the Sendblue inbox"\)/.test(route3), "a reply typed in the Sendblue inbox pauses TerraAI too")
+const cron = read("app/api/cron/handoff-followups/route.ts")
+assert(/CRON_SECRET/.test(cron) && cron.indexOf("followup_sent_at") < cron.indexOf("sendSms(handoff.phone"), "follow-up cron is authorised and marks each hand-off before texting (no double texts)")
+assert(/handoff-followups/.test(read("vercel.json")), "follow-up cron is scheduled")
+const sql5 = read("supabase/migrations/20261017_terraai_handoffs.sql")
+assert(/website\.sms_handoffs/.test(sql5) && /ENABLE ROW LEVEL SECURITY/.test(sql5) && /REVOKE ALL/.test(sql5) && /IF NOT EXISTS/.test(sql5), "hand-off table: website schema, RLS, no public access, safe to rerun")
+
 console.log(`sms replies: ${checks} checks passed`)
