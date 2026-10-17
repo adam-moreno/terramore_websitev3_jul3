@@ -134,6 +134,7 @@ export default function RootLayout({
                   areaServed: 'US',
                   sameAs: [
                     'https://www.linkedin.com/company/terramore-marketing',
+                    'https://www.facebook.com/terramore.io',
                   ],
                   makesOffer: [
                     { '@type': 'Offer', name: 'Free 30-minute call', price: '0', priceCurrency: 'USD', url: 'https://www.terramore.io/book' },
