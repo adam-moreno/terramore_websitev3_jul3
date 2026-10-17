@@ -212,7 +212,20 @@ assert(JSON.stringify(ho.parseCommand("a7 Hi Maria, this is Adam")) === JSON.str
 assert(ho.parseCommand("B2B leads?") === null && ho.parseCommand("Hi there") === null && ho.parseCommand("AB hi") === null, "ordinary texts aren't read as codes")
 assert(ho.isGiveBack("done") && ho.isGiveBack("Back.") && !ho.isGiveBack("done by friday?"), "\"A7 done\" gives it back to TerraAI")
 const at = ho.alertText({ code: "A7", who: "Maria, Rosa's Bakery", phone: "+15555550100", said: "can someone call me", reason: "wants a call now", notes: "bakery, Fresno" })
-assert(/^A7: TerraAI handed you Maria/.test(at) && /Call: \+15555550100/.test(at) && /"A7 your message"/.test(at) && /"A7 done"/.test(at), "Adam's alert: code, who, number to call, how to reply and give back")
+assert(/^A7: TerraAI handed you Maria/.test(at) && /Call: \+15555550100/.test(at) && /Reply here to text them/.test(at) && /"done" gives it back/.test(at), "Adam's alert with one open: code, who, number to call, plain reply")
+const at2 = ho.alertText({ code: "A7", who: "Maria", phone: "+15555550100", said: "hi", reason: null, notes: null, openCount: 3 })
+assert(/3 conversations are open/.test(at2) && /"A7 your message"/.test(at2) && /"A7 done"/.test(at2), "Adam's alert with several open asks for the code")
+{
+  const h = (code, phone) => ({ id: code, phone, code, status: "open", reason: null, created_at: "", last_activity_at: "", claimed_at: null, followup_sent_at: null, closed_at: null })
+  const adamNum = "+15555550199"
+  const one = [h("K4", "+15555550100")]
+  assert(ho.resolveAdamReply("Free at 3?", one, adamNum)?.handoff?.code === "K4", "one open: a plain reply goes to that person")
+  assert(ho.resolveAdamReply("K4 done", one, adamNum)?.rest === "done" && ho.resolveAdamReply("done", one, adamNum)?.rest === "done", "one open: \"done\" works with or without the code")
+  const two = [h("K4", "+15555550100"), h("B2", "+15555550101")]
+  assert(ho.resolveAdamReply("Free at 3?", two, adamNum) === null && ho.resolveAdamReply("B2 Free at 3?", two, adamNum)?.handoff?.phone === "+15555550101", "two open: a code is required, and picks the right person")
+  assert(ho.resolveAdamReply("Z9 hi", one, adamNum)?.handoff === null, "an unknown code is reported, not guessed")
+  assert(ho.resolveAdamReply("hello", [h("K4", adamNum)], adamNum) === null, "Adam testing as a customer from his own phone isn't relayed to himself")
+}
 {
   const prev = process.env.HANDOFF_ALERT_PHONE
   delete process.env.HANDOFF_ALERT_PHONE
@@ -222,7 +235,7 @@ assert(/^A7: TerraAI handed you Maria/.test(at) && /Call: \+15555550100/.test(at
   if (prev === undefined) delete process.env.HANDOFF_ALERT_PHONE; else process.env.HANDOFF_ALERT_PHONE = prev
 }
 const route3 = read("app/api/sms/sendblue/route.ts")
-assert(route3.indexOf("parseCommand(content)") < route3.indexOf("const keyword = smsKeyword(content)") && /from === adam/.test(route3), "only Adam's own number can relay with a code, checked before anything else")
+assert(route3.indexOf("resolveAdamReply(content") < route3.indexOf("const keyword = smsKeyword(content)") && /from === adam && !smsKeyword\(content\)/.test(route3), "only Adam's own number can relay, checked before anything else, and never STOP/START/HELP")
 assert(route3.indexOf("await activeHandoff(from)") < route3.indexOf("after(async () => {\n      const ctx = await buildTextContext"), "a handed-off conversation never reaches TerraAI")
 assert(/keyword === "stop" \|\| keyword === "start" \|\| keyword === "help" \? null : await activeHandoff/.test(route3), "STOP, START and HELP still work during a hand-off")
 assert(/if \(draft\.handoff\) \{\s*const handoff = await openHandoff/.test(route3) && /!inBusinessHours\(\)/.test(route3), "TerraAI's hand-off opens one, alerts Adam's phone, and follows up at once after hours")

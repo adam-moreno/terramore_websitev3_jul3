@@ -1,5 +1,9 @@
 # Development Log - Terramore Website
 
+## 2026-10-17 — Hand-off replies need no code when only one conversation is open
+
+Owner (Adam): codes shouldn't be something to keep track of. With one hand-off open, a plain reply from Adam's phone goes to that person and "done" gives it back; with two or more, the alert says how many are open and asks for the code. STOP, START and HELP from his phone are never relayed. A conversation that is Adam's own number (testing as a customer) never takes plain replies. Next: a mobile-friendly Conversations page in the dashboard so an assistant can take hand-offs instead of one Messages thread.
+
 ## 2026-10-17 — TerraAI hands texting conversations to Adam
 
 Owner decisions (Adam, 2026-10-17): pause TerraAI only for the handed-off conversation; Adam answers from his iPhone; 10-minute claim window; business hours Mon–Fri 8am–6pm Pacific; no group chat.

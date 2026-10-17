@@ -28,7 +28,7 @@ import { buildTextContext } from "@/lib/sms/terraai/context"
 import { draftReply } from "@/lib/sms/terraai/draft"
 import { AUTO_REPLY_HOURLY_CAP, createDraft, decideDraft, draftReviewUrl, recentMessages, saveMessage, terraaiRepliesLastHour, textMode } from "@/lib/sms/terraai/store"
 import { refFromText } from "@/lib/sms/text-link"
-import { activeHandoff, alertPhone, alertText, claimHandoff, closeHandoff, followupText, handoffByCode, inBusinessHours, isGiveBack, openHandoff, parseCommand, touchHandoff } from "@/lib/sms/terraai/handoff"
+import { activeHandoff, activeHandoffs, alertPhone, alertText, claimHandoff, closeHandoff, followupText, handoffByCode, inBusinessHours, isGiveBack, openHandoff, resolveAdamReply, touchHandoff } from "@/lib/sms/terraai/handoff"
 import { claimTextRef, findTextRef } from "@/lib/sms/text-refs"
 import { CONTACT_CARD_URL, textFirstReply } from "@/lib/sms/text-first-replies"
 
@@ -122,21 +122,23 @@ export async function POST(request: NextRequest) {
   const inboundId = await saveMessage({ phone: from, direction: "inbound", body: content || "(media)", source: "owner", providerId: body.message_handle ?? null })
 
   // Adam answering a hand-off from his phone: "A7 your message" is relayed from this line, "A7 done" gives it back.
+  // With only one conversation open, the code is optional. STOP, START and HELP are never relayed.
   const adam = alertPhone()
-  const command = adam && from === adam ? parseCommand(content) : null
+  const command = adam && from === adam && !smsKeyword(content) ? resolveAdamReply(content, await activeHandoffs(), adam) : null
   if (adam && command) {
-    const handoff = await handoffByCode(command.code)
+    const handoff = command.handoff
+    const code = command.code ?? ""
     if (!handoff) {
-      await sendSms(adam, `No open conversation ${command.code}. Codes end after 24 quiet hours.`, { typing: false, stream: "handoff_alert" })
+      await sendSms(adam, `No open conversation ${code}. Codes end after 24 quiet hours.`, { typing: false, stream: "handoff_alert" })
     } else if (isGiveBack(command.rest)) {
       await closeHandoff(handoff.id)
-      await sendSms(adam, `${command.code} is back with TerraAI.`, { typing: false, stream: "handoff_alert" })
+      await sendSms(adam, `${code} is back with TerraAI.`, { typing: false, stream: "handoff_alert" })
     } else if (!command.rest) {
-      await sendSms(adam, `Add your message after the code, like "${command.code} Hi, this is Adam from Terramore."`, { typing: false, stream: "handoff_alert" })
+      await sendSms(adam, `Add your message after the code, like "${code} Hi, this is Adam from Terramore."`, { typing: false, stream: "handoff_alert" })
     } else {
       const sent = await sendSms(handoff.phone, command.rest, { stream: "handoff", source: "adam" })
       if (sent.ok) await claimHandoff(handoff)
-      await sendSms(adam, sent.ok ? `${command.code}: sent.` : `${command.code}: not sent (${sent.error || "Sendblue didn't accept it"}).`, { typing: false, stream: "handoff_alert" })
+      await sendSms(adam, sent.ok ? `${code}: sent.` : `${code}: not sent (${sent.error || "Sendblue didn't accept it"}).`, { typing: false, stream: "handoff_alert" })
     }
     return NextResponse.json({ ok: true, action: "handoff relay" })
   }
@@ -148,7 +150,8 @@ export async function POST(request: NextRequest) {
     await touchHandoff(paused.id)
     const who = (await whoIs(from).catch(() => null)) || from
     const line = `${paused.code} ${who}: "${content.slice(0, 400) || "(photo or file)"}"`
-    if (adam) await sendSms(adam, `${line}\nReply "${paused.code} your message". "${paused.code} done" gives it back to TerraAI.`, { typing: false, stream: "handoff_alert" })
+    const onlyOne = (await activeHandoffs()).filter((h) => h.phone !== adam).length <= 1
+    if (adam) await sendSms(adam, onlyOne ? `${line}\nReply here to answer. "done" gives it back to TerraAI.` : `${line}\nReply "${paused.code} your message". "${paused.code} done" gives it back to TerraAI.`, { typing: false, stream: "handoff_alert" })
     await Promise.allSettled([
       postSlack(`${line}\nTerraAI is paused on this conversation; it's yours (${paused.code}).`),
       sendEmail({ to: ADMIN_EMAIL, subject: `Text from ${who} (${paused.code}, yours)`, text: `${line}\n\nTerraAI is paused on this conversation. Reply from your phone with "${paused.code} your message", or from the Sendblue inbox: https://dashboard.sendblue.com/conversations` }),
@@ -219,7 +222,7 @@ export async function POST(request: NextRequest) {
             if (handoff) {
               why.unshift(`Code ${handoff.code}: TerraAI is paused on this conversation.`)
               const who = (await whoIs(from).catch(() => null)) || "someone"
-              if (adam) await sendSms(adam, alertText({ code: handoff.code, who, phone: from, said: content || "(photo or file)", reason: draft.handoffReason || null, notes: draft.notes || null }), { typing: false, stream: "handoff_alert" })
+              if (adam) await sendSms(adam, alertText({ code: handoff.code, who, phone: from, said: content || "(photo or file)", reason: draft.handoffReason || null, notes: draft.notes || null, openCount: (await activeHandoffs()).filter((h) => h.phone !== adam).length }), { typing: false, stream: "handoff_alert" })
               if (!inBusinessHours()) {
                 const followed = await sendSms(from, followupText(ctx.links.book), { stream: "handoff", source: "terraai" })
                 if (followed.ok) await touchHandoff(handoff.id, { followup_sent_at: new Date().toISOString() })
