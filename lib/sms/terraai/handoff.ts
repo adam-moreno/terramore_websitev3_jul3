@@ -77,14 +77,17 @@ export function isGiveBack(rest: string): boolean {
 }
 
 /** What Adam reads on his phone when TerraAI hands off. */
-export function alertText(h: { code: string; who: string; phone: string; said: string; reason: string | null; notes: string | null }): string {
+export function alertText(h: { code: string; who: string; phone: string; said: string; reason: string | null; notes: string | null; openCount?: number }): string {
+  const others = (h.openCount ?? 1) - 1
   return [
     `${h.code}: TerraAI handed you ${h.who}`,
     h.reason ? `Why: ${h.reason}` : "",
     `They said: "${h.said.slice(0, 280)}"`,
     h.notes ? `Notes: ${h.notes}` : "",
     `Call: ${h.phone}`,
-    `Reply here with "${h.code} your message" to text them from this line. "${h.code} done" gives it back to TerraAI.`,
+    others > 0
+      ? `${others + 1} conversations are open, so start replies with the code: "${h.code} your message". "${h.code} done" gives it back to TerraAI.`
+      : `Reply here to text them from this line. "done" gives it back to TerraAI.`,
   ]
     .filter(Boolean)
     .join("\n")
@@ -111,6 +114,26 @@ export async function activeHandoff(phone: string, now = Date.now()): Promise<Ha
     .limit(1)
     .maybeSingle()
   return (data as Handoff | null) ?? null
+}
+
+/** Every hand-off waiting on Adam, newest activity first. */
+export async function activeHandoffs(now = Date.now()): Promise<Handoff[]> {
+  const client = db()
+  if (!client) return []
+  const { data } = await client.from("sms_handoffs").select("*").is("closed_at", null).gte("last_activity_at", idleCutoff(now)).order("last_activity_at", { ascending: false }).limit(50)
+  return (data ?? []) as Handoff[]
+}
+
+/**
+ * Which hand-off a text from Adam's phone is for. "K4 …" names one. A plain text goes to the only open hand-off,
+ * unless that one is Adam's own number (he tests as a customer from the same phone). Null: not a hand-off reply.
+ */
+export function resolveAdamReply(text: string, open: Handoff[], adam: string): { handoff: Handoff | null; code: string | null; rest: string } | null {
+  const command = parseCommand(text)
+  if (command) return { handoff: open.find((h) => h.code === command.code) ?? null, code: command.code, rest: command.rest }
+  const others = open.filter((h) => h.phone !== adam)
+  if (others.length === 1) return { handoff: others[0], code: others[0].code, rest: text.trim() }
+  return null
 }
 
 export async function handoffByCode(code: string, now = Date.now()): Promise<Handoff | null> {
