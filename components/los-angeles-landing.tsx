@@ -1,7 +1,7 @@
 "use client"
 
 import { League_Spartan } from "next/font/google"
-import { MapPin, Smartphone, Star, Video } from "lucide-react"
+import { MapPin, Phone, Smartphone, Star } from "lucide-react"
 import { BookingLink } from "@/components/booking-popup"
 import { BusinessLookup, LookupBookButton, LookupReportButton } from "@/components/business-lookup"
 import { DualCtas } from "@/components/dual-ctas"
@@ -156,7 +156,7 @@ export function LosAngelesLanding() {
               ))}
             </ul>
             <p className="mt-8 flex items-center gap-2 text-[15px] text-white/75">
-              <Video aria-hidden className="h-4 w-4" />
+              <Phone aria-hidden className="h-4 w-4" />
               Prefer to talk now? Call {PHONE_DISPLAY}.
             </p>
           </div>
