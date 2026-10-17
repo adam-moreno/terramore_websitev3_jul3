@@ -256,4 +256,13 @@ assert(/website\.sms_handoffs/.test(sql5) && /ENABLE ROW LEVEL SECURITY/.test(sq
   assert(!/website, Google Maps, reviews/.test(v), "the one-line pitch names content, not reviews")
 }
 
+// --- Sendblue echoes our texts with iMessage's punctuation (2026-10-17 bug: "Terramore's" → "Terramore’s")
+{
+  const h2 = await load("lib/sms/terraai/handoff.ts")
+  assert(h2.sameText("Hi, this is TerraAI, Terramore's AI assistant.", "Hi, this is TerraAI, Terramore\u2019s AI assistant."), "a curly apostrophe is still our own text")
+  assert(h2.sameText('He said "hi" - ok...', "He said \u201Chi\u201D \u2014 ok\u2026") && h2.sameText("a  b\nc", "A B C"), "quotes, dashes, ellipses, spacing and case don't matter")
+  assert(!h2.sameText("Free at 3?", "Free at 4?"), "different words are different texts")
+  assert(/sameText\(m\.body, text\)/.test(read("app/api/sms/sendblue/route.ts")), "the Sendblue-inbox check uses the forgiving match")
+}
+
 console.log(`sms replies: ${checks} checks passed`)
