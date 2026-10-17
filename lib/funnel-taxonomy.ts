@@ -73,6 +73,10 @@ export const CTA_IDS = {
   /** Next steps under a finished business lookup (components/business-lookup.tsx), on any page that hosts it. */
   marketing_lookup_report: { destination: "report", placement: "confirmation", view: true },
   marketing_lookup_book: { destination: "booking", placement: "confirmation", view: true },
+  /** City landing pages (/los-angeles): the hero lookup, its booking line, and the closing CTAs. */
+  city_hero_report: { destination: "report", placement: "hero", view: true },
+  city_hero_book: { destination: "booking", placement: "hero", view: true },
+  city_closing_report: { destination: "report", placement: "closing", view: true },
   infopage_hero_book: { destination: "booking", placement: "hero", view: true },
   infopage_hero_report: { destination: "report", placement: "hero", view: true },
 } as const satisfies Record<string, CtaSpec>
