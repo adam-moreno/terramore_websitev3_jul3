@@ -9,7 +9,7 @@ Search Console (domain property terramore.io) showed 5 indexed pages, no submitt
 - The footer Explore list adds plain links to the free check, pricing, about and articles, on every footer variant.
 - /report is titled "Free Website Check for Small Businesses", the words owners search, with a canonical URL.
 - Footer email is a `PlainEmailLink`: Cloudflare rewrote the mailto href to /cdn-cgi/l/email-protection, which Semrush counted as a broken link on 66 pages.
-- New pages built on LindyPage via `components/topic-page.tsx`: /google-business-profile, /website-redesign, /sacramento. Each one ends in the free check and the call. The copy claims only what the report checks today: Maps presence, rating and review count, listing-to-site link, search basics, social profiles. Not phone speed, hours or review replies. Sacramento says "business address", not an office or a local team.
+- New pages built on LindyPage via `components/topic-page.tsx`: /google-business-profile, /website-redesign, /los-angeles. Each one ends in the free check and the call. The copy claims only what the report checks today: Maps presence, rating and review count, listing-to-site link, search basics, social profiles. Not phone speed, hours or review replies. The city page is Los Angeles (owner decision 2026-10-16): "based in Los Angeles", no street address, no office. Sacramento stays only on the legal pages (privacy, terms, DMCA, disclosure) as the registered address. Listings use Los Angeles, city only, and the site phone (818) 699-9217.
 
 ## 2026-10-16 — TerraAI knows Terramore serves the US, Canada and Mexico
 

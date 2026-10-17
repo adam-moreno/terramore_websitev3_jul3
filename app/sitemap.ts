@@ -17,7 +17,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/report',
     '/google-business-profile',
     '/website-redesign',
-    '/sacramento',
+    '/los-angeles',
     '/report/example',
     '/security',
     '/integrations',
