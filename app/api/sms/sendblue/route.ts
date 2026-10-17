@@ -26,8 +26,9 @@ import { authorised } from "@/lib/sms/webhook-auth"
 import { after } from "next/server"
 import { buildTextContext } from "@/lib/sms/terraai/context"
 import { draftReply } from "@/lib/sms/terraai/draft"
-import { AUTO_REPLY_HOURLY_CAP, createDraft, decideDraft, draftReviewUrl, saveMessage, terraaiRepliesLastHour, textMode } from "@/lib/sms/terraai/store"
+import { AUTO_REPLY_HOURLY_CAP, createDraft, decideDraft, draftReviewUrl, recentMessages, saveMessage, terraaiRepliesLastHour, textMode } from "@/lib/sms/terraai/store"
 import { refFromText } from "@/lib/sms/text-link"
+import { activeHandoff, alertPhone, alertText, claimHandoff, closeHandoff, followupText, handoffByCode, inBusinessHours, isGiveBack, openHandoff, parseCommand, touchHandoff } from "@/lib/sms/terraai/handoff"
 import { claimTextRef, findTextRef } from "@/lib/sms/text-refs"
 import { CONTACT_CARD_URL, textFirstReply } from "@/lib/sms/text-first-replies"
 
@@ -94,6 +95,19 @@ export async function POST(request: NextRequest) {
     const status = String(body.status || "").toUpperCase()
     if (to && /FAIL|ERROR|UNDELIVER/.test(status)) {
       await logText({ direction: "outbound", phone: to, status: `failed_${status}`, text: body.error_message || "Delivery failed", providerId: body.message_handle ? `${body.message_handle}:status` : null, stream: "website" })
+    } else if (to && to !== alertPhone() && body.content?.trim()) {
+      // A text we didn't send through the API was typed in the Sendblue inbox: Adam has this conversation, so TerraAI
+      // goes quiet on it. Checked a few seconds later, once our own sends have been saved to the message log.
+      const text = body.content.trim()
+      after(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 5000))
+        const since = Date.now() - 3 * 60 * 1000
+        const ours = (await recentMessages(to, 15)).some((m) => m.direction === "outbound" && m.body.trim() === text && Date.parse(m.at) >= since)
+        if (ours) return
+        await saveMessage({ phone: to, direction: "outbound", body: text, source: "adam", providerId: body.message_handle ?? null })
+        const handoff = await openHandoff(to, "Adam replied from the Sendblue inbox")
+        if (handoff) await claimHandoff(handoff)
+      })
     }
     return NextResponse.json({ ok: true })
   }
@@ -107,7 +121,41 @@ export async function POST(request: NextRequest) {
   // Full text for TerraAI's view of the conversation (the Comms log keeps only a preview).
   const inboundId = await saveMessage({ phone: from, direction: "inbound", body: content || "(media)", source: "owner", providerId: body.message_handle ?? null })
 
+  // Adam answering a hand-off from his phone: "A7 your message" is relayed from this line, "A7 done" gives it back.
+  const adam = alertPhone()
+  const command = adam && from === adam ? parseCommand(content) : null
+  if (adam && command) {
+    const handoff = await handoffByCode(command.code)
+    if (!handoff) {
+      await sendSms(adam, `No open conversation ${command.code}. Codes end after 24 quiet hours.`, { typing: false, stream: "handoff_alert" })
+    } else if (isGiveBack(command.rest)) {
+      await closeHandoff(handoff.id)
+      await sendSms(adam, `${command.code} is back with TerraAI.`, { typing: false, stream: "handoff_alert" })
+    } else if (!command.rest) {
+      await sendSms(adam, `Add your message after the code, like "${command.code} Hi, this is Adam from Terramore."`, { typing: false, stream: "handoff_alert" })
+    } else {
+      const sent = await sendSms(handoff.phone, command.rest, { stream: "handoff", source: "adam" })
+      if (sent.ok) await claimHandoff(handoff)
+      await sendSms(adam, sent.ok ? `${command.code}: sent.` : `${command.code}: not sent (${sent.error || "Sendblue didn't accept it"}).`, { typing: false, stream: "handoff_alert" })
+    }
+    return NextResponse.json({ ok: true, action: "handoff relay" })
+  }
+
+  // A conversation Adam has (TerraAI handed off, or he replied himself): TerraAI stays quiet, Adam hears about it.
   const keyword = smsKeyword(content)
+  const paused = keyword === "stop" || keyword === "start" || keyword === "help" ? null : await activeHandoff(from)
+  if (paused) {
+    await touchHandoff(paused.id)
+    const who = (await whoIs(from).catch(() => null)) || from
+    const line = `${paused.code} ${who}: "${content.slice(0, 400) || "(photo or file)"}"`
+    if (adam) await sendSms(adam, `${line}\nReply "${paused.code} your message". "${paused.code} done" gives it back to TerraAI.`, { typing: false, stream: "handoff_alert" })
+    await Promise.allSettled([
+      postSlack(`${line}\nTerraAI is paused on this conversation; it's yours (${paused.code}).`),
+      sendEmail({ to: ADMIN_EMAIL, subject: `Text from ${who} (${paused.code}, yours)`, text: `${line}\n\nTerraAI is paused on this conversation. Reply from your phone with "${paused.code} your message", or from the Sendblue inbox: https://dashboard.sendblue.com/conversations` }),
+    ])
+    return NextResponse.json({ ok: true, action: "handed off" })
+  }
+
   let action = "reply"
   if (keyword === "stop") {
     await recordOptOut(from, content.trim().toUpperCase())
@@ -166,6 +214,18 @@ export async function POST(request: NextRequest) {
         const sent = await sendSms(from, draft.reply, { stream: "terraai", source: "terraai" })
         if (sent.ok) {
           if (draftId) await decideDraft(draftId, "sent", draft.reply)
+          if (draft.handoff) {
+            const handoff = await openHandoff(from, draft.handoffReason || null)
+            if (handoff) {
+              why.unshift(`Code ${handoff.code}: TerraAI is paused on this conversation.`)
+              const who = (await whoIs(from).catch(() => null)) || "someone"
+              if (adam) await sendSms(adam, alertText({ code: handoff.code, who, phone: from, said: content || "(photo or file)", reason: draft.handoffReason || null, notes: draft.notes || null }), { typing: false, stream: "handoff_alert" })
+              if (!inBusinessHours()) {
+                const followed = await sendSms(from, followupText(ctx.links.book), { stream: "handoff", source: "terraai" })
+                if (followed.ok) await touchHandoff(handoff.id, { followup_sent_at: new Date().toISOString() })
+              }
+            }
+          }
           await alert(
             ["", `TerraAI replied${draft.handoff ? " and handed this one to you" : ""}: "${draft.reply}"`, ...why].filter((x) => x !== ""),
             draft.handoff ? "TerraAI replied, needs you" : "TerraAI replied",
