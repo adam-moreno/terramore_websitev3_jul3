@@ -182,9 +182,9 @@ assert(!st.verifyDraftToken("11111111-2222-3333-4444-000000000000", tok, Date.UT
 const route2 = read("app/api/sms/sendblue/route.ts")
 assert(/saveMessage\(\{ phone: from, direction: "inbound"/.test(route2), "every inbound text is saved in full")
 assert(/keyword === "human"/.test(route2) && /SMS_REPLIES\.human/.test(route2), "asking for a person gets an instant reply and an alert")
-assert(/after\(async \(\) => \{\s*const ctx = await buildTextContext\(from\)/.test(route2) && /draftReply\(ctx/.test(route2) && /createDraft\(/.test(route2) && /draftReviewUrl\(draftId\)/.test(route2), "other texts get a TerraAI draft after the response, with a review link")
-assert(/textMode\(\) === "auto" && !overCap/.test(route2) && /sendSms\(from, draft\.reply/.test(route2), "auto mode: the webhook sends TerraAI's reply itself, unless the hourly cap is hit")
-assert(route2.indexOf("sendSms(from, draft.reply") < route2.indexOf('decideDraft(draftId, "sent"'), "an auto reply is marked sent only after Sendblue accepts it")
+assert(/after\(async \(\) => \{[\s\S]{0,300}?const ctx = await buildTextContext\(from\)/.test(route2) && /draftReply\(ctx/.test(route2) && /createDraft\(/.test(route2) && /draftReviewUrl\(draftId\)/.test(route2), "other texts get a TerraAI draft after the response, with a review link")
+assert(/textMode\(\) === "auto" && !overCap/.test(route2) && /sendSms\(from, bubbles\[0\] \?\? draft\.reply/.test(route2), "auto mode: the webhook sends TerraAI's reply itself, unless the hourly cap is hit")
+assert(route2.indexOf("sendSms(from, bubble, ") < route2.indexOf('decideDraft(draftId, "sent"'), "an auto reply is marked sent only after Sendblue accepts it")
 assert(!/Adam will get back/.test(read("lib/sms/terraai/draft.ts")) && !/every reply you write is a draft/.test(read("lib/sms/terraai/voice.ts")), "owner-facing texts say Customer Success, and the prompt matches auto mode")
 {
   const prevMode = process.env.TERRAAI_TEXT_MODE
@@ -236,7 +236,7 @@ assert(/3 conversations are open/.test(at2) && /"A7 your message"/.test(at2) && 
 }
 const route3 = read("app/api/sms/sendblue/route.ts")
 assert(route3.indexOf("resolveAdamReply(content") < route3.indexOf("const keyword = smsKeyword(content)") && /from === adam && !smsKeyword\(content\)/.test(route3), "only Adam's own number can relay, checked before anything else, and never STOP/START/HELP")
-assert(route3.indexOf("await activeHandoff(from)") < route3.indexOf("after(async () => {\n      const ctx = await buildTextContext"), "a handed-off conversation never reaches TerraAI")
+assert(route3.indexOf("await activeHandoff(from)") < route3.indexOf("const ctx = await buildTextContext(from)"), "a handed-off conversation never reaches TerraAI")
 assert(/keyword === "stop" \|\| keyword === "start" \|\| keyword === "help" \? null : await activeHandoff/.test(route3), "STOP, START and HELP still work during a hand-off")
 assert(/if \(draft\.handoff\) \{\s*const handoff = await openHandoff/.test(route3) && /!inBusinessHours\(\)/.test(route3), "TerraAI's hand-off opens one, alerts Adam's phone, and follows up at once after hours")
 assert(/source: "adam"/.test(route3) && /openHandoff\(to, "Adam replied from the Sendblue inbox"\)/.test(route3), "a reply typed in the Sendblue inbox pauses TerraAI too")
@@ -254,6 +254,26 @@ assert(/website\.sms_handoffs/.test(sql5) && /ENABLE ROW LEVEL SECURITY/.test(sq
   assert(/Don't lead with the free check link before you know who they are/.test(v), "the free check isn't pushed before TerraAI knows who it's talking to")
   assert(/we make their content for them/.test(v) && /making their content, ads/.test(v) && /Always include making their content/.test(v), "every list of what Terramore does includes making their content")
   assert(!/website, Google Maps, reviews/.test(v), "the one-line pitch names content, not reviews")
+}
+
+// --- Texting like a person (2026-10-17): separate texts with typing bubbles; context-led openers
+{
+  const b = await load("lib/sms/terraai/bubbles.ts")
+  assert(JSON.stringify(b.splitBubbles("Hi, this is TerraAI.\n\nSaw your report.\n\nWant the top findings?")) === JSON.stringify(["Hi, this is TerraAI.", "Saw your report.", "Want the top findings?"]), "blank lines split a reply into separate texts")
+  assert(b.splitBubbles("a\n\nb\n\nc\n\nd").length === 3 && b.splitBubbles("a\n\nb\n\nc\n\nd")[2] === "c d", "never more than 3 texts; extras fold into the last")
+  assert(b.splitBubbles("one line\nwrapped").length === 1 && b.splitBubbles("  ").length === 0, "single line breaks stay in one text")
+  assert(b.typingDelayMs("ok") === 1200 && b.typingDelayMs("x".repeat(500)) === 4500, "typing bubble shows 1.2 to 4.5 seconds per text")
+  const fd2 = dr.finishDraft({ reply: "Saw you just requested your check.", intent: "free_check", handoff: false, handoff_reason: "", notes_for_adam: "" }, true)
+  assert(b.splitBubbles(fd2.reply)[0] === voice.DISCLOSURE, "the AI disclosure is its own first text")
+  const r4 = read("app/api/sms/sendblue/route.ts")
+  assert(r4.indexOf('sendTypingIndicator(from, { state: "start", maxDurationMs: 60_000 })') < r4.indexOf("buildTextContext(from)"), "the typing bubble starts as soon as a text arrives, before TerraAI writes")
+  assert(/splitBubbles\(draft\.reply\)/.test(r4) && /typingDelayMs\(bubble\)/.test(r4) && /state: "stop"/.test(r4), "replies go out as paced texts; a held draft stops the bubble")
+  assert(/maxDuration = 60/.test(r4), "the webhook has time for paced texts")
+  const ctxMod = await load("lib/sms/terraai/context.ts")
+  const ev = (t, m) => ({ event_type: t, occurred_at: new Date(Date.UTC(2026, 9, 17, 12, m)).toISOString() })
+  assert(ctxMod.reportEmailState([ev("delivered", 1), ev("opened", 5)]) === "opened" && ctxMod.reportEmailState([ev("delivered", 1)]) === "delivered" && ctxMod.reportEmailState([ev("bounced", 1)]) === "bounced" && ctxMod.reportEmailState([]) === "unknown" && ctxMod.reportEmailState([ev("delivered", 1), ev("clicked", 9)]) === "clicked", "report email state: clicked, opened, delivered, bounced, unknown")
+  const v2 = voice.TERRAAI_SYSTEM
+  assert(/Lead with what you already know/.test(v2) && /Only say the email arrived when the context says delivered or opened/.test(v2) && /Text the way a person texts/.test(v2), "TerraAI leads with what it knows, only claims the email arrived when it did, and texts in short separate messages")
 }
 
 console.log(`sms replies: ${checks} checks passed`)
