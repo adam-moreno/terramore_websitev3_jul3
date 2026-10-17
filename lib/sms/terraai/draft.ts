@@ -36,7 +36,7 @@ export function finishDraft(raw: { reply: string; intent: TerraaiDraft["intent"]
     .replace(/^\s*[-*•]\s+/gm, "")
     .replace(/\n{3,}/g, "\n\n")
     .trim()
-  if (firstText && !/TerraAI/.test(reply)) reply = `${DISCLOSURE} ${reply}`
+  if (firstText && !/TerraAI/.test(reply)) reply = `${DISCLOSURE}\n\n${reply}`
   return { reply: reply.slice(0, 1000), intent: raw.intent, handoff: raw.handoff, handoffReason: raw.handoff_reason.trim(), notes: raw.notes_for_adam.trim() }
 }
 

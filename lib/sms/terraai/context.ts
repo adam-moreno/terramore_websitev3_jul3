@@ -12,13 +12,28 @@ import { recentMessages, type StoredMessage } from "@/lib/sms/terraai/store"
 export type TextContext = {
   firstText: boolean
   owner: { firstName: string | null; business: string | null; website: string | null }
-  report: { status: string | null; score: number | null; fixes: Array<{ finding: string; step: string }> } | null
+  report: { status: string | null; score: number | null; fixes: Array<{ finding: string; step: string }>; email?: ReportEmail; requestedAt?: string | null } | null
   booking: { when: string; manageUrl: string } | null
   links: { freeCheck: string; book: string; workspace: string; contactCard: string }
   history: Array<Pick<StoredMessage, "direction" | "source" | "body" | "at">>
 }
 
 const SITE = "https://www.terramore.io"
+
+/** What we know about their report email from Resend's events (public.email_events): the furthest it got. */
+export type ReportEmail = "clicked" | "opened" | "delivered" | "bounced" | "unknown"
+
+/** Pure: the furthest event for a recipient. A bounce wins only if nothing was delivered after it. */
+export function reportEmailState(events: Array<{ event_type: string; occurred_at: string }>): ReportEmail {
+  const sorted = [...events].sort((a, b) => Date.parse(a.occurred_at) - Date.parse(b.occurred_at))
+  const has = (t: string) => sorted.some((e) => e.event_type.includes(t))
+  if (has("click")) return "clicked"
+  if (has("open")) return "opened"
+  const last = sorted.filter((e) => /deliver|bounce/.test(e.event_type)).at(-1)
+  if (last?.event_type.includes("bounce")) return "bounced"
+  if (has("deliver")) return "delivered"
+  return "unknown"
+}
 
 function when(startIso: string, tz: string): string {
   const d = new Date(startIso)
@@ -27,7 +42,7 @@ function when(startIso: string, tz: string): string {
   return `${day} at ${time}`
 }
 
-type LeadRow = { id: string; email: string | null; first_name: string | null; business_name: string | null; website: string | null; phone: string | null; report_status: string | null; report_json: { overallScore?: number; recommendations?: Array<{ id: string; rank: number; finding: string; action: string }> } | null }
+type LeadRow = { id: string; signup_date?: string | null; email: string | null; first_name: string | null; business_name: string | null; website: string | null; phone: string | null; report_status: string | null; report_json: { overallScore?: number; recommendations?: Array<{ id: string; rank: number; finding: string; action: string }> } | null }
 
 /** Everything TerraAI may use for this number. Never throws. */
 export async function buildTextContext(phone: string, now = Date.now()): Promise<TextContext> {
@@ -50,7 +65,7 @@ export async function buildTextContext(phone: string, now = Date.now()): Promise
     const reportRef = (refs ?? []).find((r) => r.kind === "report")?.ref_id
     const bookingRef = (refs ?? []).find((r) => r.kind === "booking")?.ref_id
     let lead: LeadRow | null = null
-    const cols = "id, email, first_name, business_name, website, phone, report_status, report_json"
+    const cols = "id, email, first_name, business_name, website, phone, report_status, report_json, signup_date"
     if (reportRef) lead = ((await web.from("free_courses_signups").select(cols).eq("id", reportRef).maybeSingle()).data as LeadRow | null) ?? null
     if (!lead) {
       const { data } = await web.from("free_courses_signups").select(cols).ilike("phone", `%${digits.slice(-4)}%`).order("signup_date", { ascending: false }).limit(25)
@@ -63,6 +78,11 @@ export async function buildTextContext(phone: string, now = Date.now()): Promise
         status: lead.report_status,
         score: typeof lead.report_json?.overallScore === "number" ? Math.round(lead.report_json.overallScore) : null,
         fixes: recs.map((r) => ({ finding: plainFinding(r), step: plainStep(r) })),
+        requestedAt: lead.signup_date ?? null,
+      }
+      if (lead.email) {
+        const { data: events } = await supabase.schema("public").from("email_events").select("event_type, occurred_at").ilike("recipient", lead.email).gte("occurred_at", lead.signup_date ?? new Date(now - 30 * 864e5).toISOString()).limit(50)
+        ctx.report.email = reportEmailState((events ?? []) as Array<{ event_type: string; occurred_at: string }>)
       }
       if (lead.website) ctx.links.freeCheck = `${SITE}/report?site=${encodeURIComponent(lead.website.replace(/^https?:\/\//, "").replace(/\/$/, ""))}`
       if (lead.email) ctx.links.book = bookingRefUrl(lead.email, { source: "sms", medium: "sms" })
@@ -86,6 +106,8 @@ export function renderContext(ctx: TextContext, latest: string): string {
   lines.push(`Owner: ${o.firstName ?? "unknown name"}${o.business ? `, ${o.business}` : ""}${o.website ? `, website ${o.website}` : ""}`)
   if (ctx.report) {
     lines.push(`Report: ${ctx.report.status === "sent" ? "sent to their email" : ctx.report.status === "generating" ? "being written now" : ctx.report.status ?? "unknown"}${ctx.report.score !== null ? `, score ${ctx.report.score} out of 100` : ""}`)
+    if (ctx.report.requestedAt) lines.push(`Report requested: ${Math.max(0, Math.round((Date.now() - Date.parse(ctx.report.requestedAt)) / 60000)) < 120 ? "in the last two hours" : "earlier"}`)
+    if (ctx.report.email) lines.push(`Report email: ${{ clicked: "opened, and they clicked a link", opened: "opened", delivered: "delivered to their inbox (not opened yet)", bounced: "bounced; we don't have a working email", unknown: "no delivery confirmation yet" }[ctx.report.email]}`)
     ctx.report.fixes.forEach((f, i) => lines.push(`  Fix ${i + 1}: ${f.finding} Step: ${f.step}`))
   } else {
     lines.push("Report: none on file for this number.")
