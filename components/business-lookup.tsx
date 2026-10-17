@@ -460,6 +460,7 @@ export function BusinessLookup({
         entry="popup_lookup"
         startFix={startFix}
         website={state.website ?? undefined}
+        businessName={state.name ?? undefined}
         description={
           state.domain ? `We'll finish the review of ${state.domain} and email you the full report.` : undefined
         }

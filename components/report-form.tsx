@@ -43,6 +43,7 @@ export function ReportForm({
   answers,
   plain = false,
   initialWebsite,
+  initialBusinessName,
   entry = "popup_questions",
   startFix,
 }: {
@@ -55,6 +56,8 @@ export function ReportForm({
   plain?: boolean
   /** Optional prefill (e.g. the /solutions website input). Does not change submit or tracking behavior. */
   initialWebsite?: string
+  /** The business name the free check found, so the owner doesn't type it again. */
+  initialBusinessName?: string
   /** How the popup opened, for the V2A report_progress / report_validation_error events. */
   entry?: ReportEntry
   /** The gap the visitor tapped "Fix this" on (lib/report/start-fix.ts); the report opens on it. */
@@ -66,8 +69,9 @@ export function ReportForm({
   const [phone, setPhone] = useState("")
   const [website, setWebsite] = useState(initialWebsite ?? "")
   const [socials, setSocials] = useState("")
-  const [businessName, setBusinessName] = useState("")
-  const [consent, setConsent] = useState(false)
+  const [businessName, setBusinessName] = useState(initialBusinessName ?? "")
+  /** Asking for the report is the consent to email it (with the notice under the form); unsubscribe is in every email. */
+  const consent = true
   /** Separate, optional, unchecked: texts only go to people who tick it (TCPA). */
   const [smsConsent, setSmsConsent] = useState(false)
   /** Separate, optional, unchecked: the only path to an automated or AI call (lib/consent/call-consent.ts). */
@@ -332,22 +336,7 @@ export function ReportForm({
           autoComplete="tel"
         />
       </label>
-      <div>
-        <label className="flex items-start gap-3 text-[14px] leading-relaxed text-ink/70">
-          <input
-            type="checkbox"
-            required
-            data-field="consent"
-            aria-invalid={fieldErrors.consent ? true : undefined}
-            aria-describedby={fieldErrors.consent ? "report-consent-error" : undefined}
-            checked={consent}
-            onChange={(event) => setConsent(event.target.checked)}
-            className="mt-1"
-          />
-          <span>Email me my report and occasional tips. You can unsubscribe any time.</span>
-        </label>
-        <FieldError id="report-consent-error" message={fieldErrors.consent} />
-      </div>
+      <p className="text-[13px] leading-relaxed text-ink/60">We&apos;ll email your report and occasional tips. You can unsubscribe any time.</p>
       {phone.trim() ? (
         <label className="flex items-start gap-3 text-[14px] leading-relaxed text-ink/70">
           <input type="checkbox" checked={smsConsent} onChange={(event) => setSmsConsent(event.target.checked)} className="mt-1" />
