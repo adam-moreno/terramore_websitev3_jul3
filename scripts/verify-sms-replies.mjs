@@ -136,7 +136,7 @@ assert(/text_us_click: \{ placement: "text_placement", page_path: "page_path" \}
 const sql3 = read("supabase/migrations/20261016_text_refs.sql")
 assert(/website\.text_refs/.test(sql3) && /ENABLE ROW LEVEL SECURITY/.test(sql3) && /REVOKE ALL/.test(sql3), "text_refs: website schema, RLS, no public access")
 
-// --- TerraAI texting, draft mode (2026-10-16)
+// --- TerraAI texting: drafts (2026-10-16), auto-send by default (2026-10-17)
 for (const w of ["ADAM", "adam", "Human", "real person", "PERSON", "talk to a person", "Agent"]) assert(smsKeyword(w) === "human", `asks for a person: ${w}`)
 assert(smsKeyword("Adam, quick question about my report") === null, "a sentence to Adam is a normal text, not the keyword")
 assert(SMS_REPLIES.human.startsWith("Hi, this is TerraAI, Terramore's AI assistant.") && /Customer Success team/.test(SMS_REPLIES.human) && /what kind of business do you run, and where\?$/.test(SMS_REPLIES.human), "asking for a person: AI disclosure, Customer Success, one prep question")
@@ -164,7 +164,7 @@ assert(fake.last.system[0].cache_control?.type === "ephemeral" && fake.last.syst
 const userTurn = fake.last.messages[0].content
 assert(/score 52 out of 100/.test(userTurn) && /Fix 1: No phone number listed\. Step: Add it to the top\./.test(userTurn) && /Owner: what's my score/.test(userTurn) && /include the disclosure/.test(userTurn), "the context reaches the model")
 got = await dr.draftReply(ctxBase, "x", { client: fake({ stop_reason: "refusal", parsed_output: null }) })
-assert(got.handoff && /Adam will get back to you shortly/.test(got.reply) && got.error === "declined", "a decline becomes a hand-off draft")
+assert(got.handoff && /Customer Success team will text you shortly/.test(got.reply) && got.error === "declined", "a decline becomes a hand-off draft")
 got = await dr.draftReply({ ...ctxBase, firstText: false }, "x", { client: { beta: { messages: { parse: async () => { throw new Error("network") } } } } })
 assert(got.handoff && !got.reply.includes("TerraAI") && got.error === "network", "an error becomes a hand-off draft, never a throw")
 const ctxMod = await load("lib/sms/terraai/context.ts")
@@ -183,7 +183,17 @@ const route2 = read("app/api/sms/sendblue/route.ts")
 assert(/saveMessage\(\{ phone: from, direction: "inbound"/.test(route2), "every inbound text is saved in full")
 assert(/keyword === "human"/.test(route2) && /SMS_REPLIES\.human/.test(route2), "asking for a person gets an instant reply and an alert")
 assert(/after\(async \(\) => \{\s*const ctx = await buildTextContext\(from\)/.test(route2) && /draftReply\(ctx/.test(route2) && /createDraft\(/.test(route2) && /draftReviewUrl\(draftId\)/.test(route2), "other texts get a TerraAI draft after the response, with a review link")
-assert(!/sendSms\([^)]*draft\.reply/.test(route2), "draft mode: the webhook never sends a draft itself")
+assert(/textMode\(\) === "auto" && !overCap/.test(route2) && /sendSms\(from, draft\.reply/.test(route2), "auto mode: the webhook sends TerraAI's reply itself, unless the hourly cap is hit")
+assert(route2.indexOf("sendSms(from, draft.reply") < route2.indexOf('decideDraft(draftId, "sent"'), "an auto reply is marked sent only after Sendblue accepts it")
+assert(!/Adam will get back/.test(read("lib/sms/terraai/draft.ts")) && !/every reply you write is a draft/.test(read("lib/sms/terraai/voice.ts")), "owner-facing texts say Customer Success, and the prompt matches auto mode")
+{
+  const prevMode = process.env.TERRAAI_TEXT_MODE
+  delete process.env.TERRAAI_TEXT_MODE
+  assert(st.textMode() === "auto", "auto-send is the default")
+  process.env.TERRAAI_TEXT_MODE = " Draft "
+  assert(st.textMode() === "draft", "TERRAAI_TEXT_MODE=draft switches back to approvals")
+  if (prevMode === undefined) delete process.env.TERRAAI_TEXT_MODE; else process.env.TERRAAI_TEXT_MODE = prevMode
+}
 const api = read("app/api/sms/drafts/[id]/route.ts")
 assert(api.indexOf("verifyDraftToken(id, body?.t)") < api.indexOf("sendSms(") && api.indexOf("await decideDraft(id, edited") < api.indexOf("sendSms("), "a draft is verified and claimed before it's sent (a double click sends once)")
 assert(/edited \? "edited" : "sent"/.test(api), "Adam's edits are recorded as edited")

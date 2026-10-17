@@ -1,5 +1,12 @@
 # Development Log - Terramore Website
 
+## 2026-10-17 — Report form snags fixed; TerraAI texts send on their own
+
+Owner decisions (Adam, 2026-10-17): fix the funnel snags from the ads journey test, and take texting off draft mode.
+
+- Report form: the business name from the lookup is filled in; the required consent checkbox is replaced by a plain line ("We'll email your report and occasional tips. You can unsubscribe any time."). The confirmation leads with one button, "Book a free 30-minute call", then "Rather text?", then the Workspace link and Done.
+- TerraAI texting: replies now send as soon as TerraAI writes them, and Adam gets the same Slack and email alert with the reply that went out ("needs you" when TerraAI hands off). `TERRAAI_TEXT_MODE=draft` in Vercel switches back to approving each reply. A number that has had 6 TerraAI texts in the last hour falls back to a draft, so two bots can't loop. The fallback reply when the model fails now says "Someone from our Customer Success team will text you shortly", not "Adam". STOP, HELP and opt-outs are unchanged.
+
 ## 2026-10-16 — Organic search foundation: Google can find the pages, three search landing pages
 
 Search Console (domain property terramore.io) showed 5 indexed pages, no submitted sitemap, and 21 clicks in 16 months, nearly all for "terramore". The homepage HTML linked to none of /report, /pricing, /about or the articles; the header CTAs are buttons, not links.

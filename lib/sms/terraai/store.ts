@@ -123,3 +123,20 @@ export function draftReviewUrl(id: string): string | null {
   const token = draftToken(id)
   return token ? `https://www.terramore.io/sms/drafts/${id}?t=${encodeURIComponent(token)}` : null
 }
+
+// --- Auto-send (Adam, 2026-10-17): TerraAI's replies go out as written. TERRAAI_TEXT_MODE=draft switches back to
+// approving each one. A number that gets AUTO_REPLY_HOURLY_CAP TerraAI texts within an hour falls back to drafts,
+// so two bots can't text each other forever.
+
+export const AUTO_REPLY_HOURLY_CAP = 6
+
+export function textMode(): "auto" | "draft" {
+  return (process.env.TERRAAI_TEXT_MODE || "").trim().toLowerCase() === "draft" ? "draft" : "auto"
+}
+
+/** TerraAI texts sent to this number in the last hour (from the message log). */
+export async function terraaiRepliesLastHour(phone: string, now = Date.now()): Promise<number> {
+  const since = now - 60 * 60 * 1000
+  const messages = await recentMessages(phone, 30)
+  return messages.filter((m) => m.direction === "outbound" && m.source === "terraai" && Date.parse(m.at) >= since).length
+}
