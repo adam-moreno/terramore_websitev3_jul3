@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { PlainEmail } from "@/components/plain-email"
+import { PlainEmailLink } from "@/components/plain-email"
 import { PHONE_DISPLAY } from "@/lib/contact"
 import { PhoneLink } from "@/components/phone-link"
 import { TextUsButton } from "@/components/text-us-button"
@@ -14,12 +14,17 @@ import { Logo } from "@/components/logo"
 import { useDoNotSellPopup } from "@/hooks/use-do-not-sell-popup"
 import { DASHBOARD_LOGIN_URL } from "@/lib/dashboard"
 
-/* Explore matches header nav (Marketing / Solutions / How we work).
+/* Explore starts with the header nav (Marketing / Solutions / How we work), then the pages
+   search engines can only find through a plain link: the free check, pricing, about, and articles.
    Talk with us + Log in stay as CTAs. Legal links stay below. */
 const EXPLORE = [
   { href: "/marketing", label: "Marketing" },
   { href: "/solutions", label: "Solutions" },
   { href: "/#how-we-work", label: "How we work" },
+  { href: "/report", label: "Free website check" },
+  { href: "/pricing", label: "Pricing" },
+  { href: "/about", label: "About" },
+  { href: "/resources", label: "Articles and answers" },
 ]
 
 const LEGAL = [
@@ -107,7 +112,7 @@ export function SiteFooter({
                   {" · "}
                   <TextUsButton variant="compact" placement="footer" body={textBody("site")} className="underline-offset-4 hover:text-white hover:underline" />
                   {" · "}
-                  <a href="mailto:hello@terramore.io" className="underline-offset-4 hover:text-white hover:underline"><PlainEmail address="hello@terramore.io" /></a>
+                  <PlainEmailLink address="hello@terramore.io" className="underline-offset-4 hover:text-white hover:underline" />
                 </p>
               </div>
               <ul className="flex flex-wrap items-center gap-x-5 gap-y-2">
@@ -196,7 +201,7 @@ export function SiteFooter({
             {" · "}
             <TextUsButton variant="compact" placement="footer" body={textBody("site")} className="underline underline-offset-2 hover:text-ink" />
             {" · "}
-            <a href="mailto:hello@terramore.io" className="underline underline-offset-2 hover:text-ink"><PlainEmail address="hello@terramore.io" /></a>
+            <PlainEmailLink address="hello@terramore.io" className="underline underline-offset-2 hover:text-ink" />
           </p>
         </div>
       </div>

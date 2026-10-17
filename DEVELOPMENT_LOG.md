@@ -1,5 +1,16 @@
 # Development Log - Terramore Website
 
+## 2026-10-16 — Organic search foundation: Google can find the pages, three search landing pages
+
+Search Console (domain property terramore.io) showed 5 indexed pages, no submitted sitemap, and 21 clicks in 16 months, nearly all for "terramore". The homepage HTML linked to none of /report, /pricing, /about or the articles; the header CTAs are buttons, not links.
+
+- Sitemap submitted in Search Console; indexing requested for /report and /marketing.
+- The old ad-page redirects (/services/*, /small-business/*, /marketing/services) are now permanent (308), so Google passes their standing on.
+- The footer Explore list adds plain links to the free check, pricing, about and articles, on every footer variant.
+- /report is titled "Free Website Check for Small Businesses", the words owners search, with a canonical URL.
+- Footer email is a `PlainEmailLink`: Cloudflare rewrote the mailto href to /cdn-cgi/l/email-protection, which Semrush counted as a broken link on 66 pages.
+- New pages built on LindyPage via `components/topic-page.tsx`: /google-business-profile, /website-redesign. /los-angeles was rebuilt on the homepage pattern instead (`components/los-angeles-landing.tsx`, 2026-10-17, owner: the text-only version was too bare): hero lookup with an LA headline, "what LA customers check" cards, What Terramore does, the report band, toolkit, kinds of businesses, an areas band, LA FAQ with FAQPage data, and new CTA ids city_hero_report / city_hero_book / city_closing_report. Owner: not live and not used in ads until he approves. Each one ends in the free check and the call. The copy claims only what the report checks today: Maps presence, rating and review count, listing-to-site link, search basics, social profiles. Not phone speed, hours or review replies. The city page is Los Angeles (owner decision 2026-10-16): "based in Los Angeles", no street address, no office. Sacramento stays only on the legal pages (privacy, terms, DMCA, disclosure) as the registered address. Listings use Los Angeles, city only, and the site phone (818) 699-9217.
+
 ## 2026-10-16 — TerraAI knows Terramore serves the US, Canada and Mexico
 
 - Voice guide: Terramore works with businesses in the United States, Canada and Mexico (calls are online). Software plans start at $29 a month in US dollars and can't be bought online yet, so interested owners are offered a Customer Success call; no currency conversion until checkout exists (owner, 2026-10-16).

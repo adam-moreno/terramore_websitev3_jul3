@@ -25,11 +25,12 @@ const nextConfig = {
       { source: '/integrations/communications/gmail', destination: '/integrations/email-marketing/gmail', permanent: true },
       // Old Google Ads landing pages (2026-10-15): the construction service pages and the marketing service pages are gone.
       // Anyone with an old ad or link lands on the free check (or the marketing page) instead of "not found".
-      { source: '/services', destination: '/report', permanent: false },
-      { source: '/services/:path*', destination: '/report', permanent: false },
-      { source: '/marketing/services', destination: '/marketing', permanent: false },
-      { source: '/small-business', destination: '/', permanent: false },
-      { source: '/small-business/:path*', destination: '/', permanent: false },
+      // Permanent (2026-10-16): the old pages aren't coming back, and Google only passes a page's standing on with a permanent redirect.
+      { source: '/services', destination: '/report', permanent: true },
+      { source: '/services/:path*', destination: '/report', permanent: true },
+      { source: '/marketing/services', destination: '/marketing', permanent: true },
+      { source: '/small-business', destination: '/', permanent: true },
+      { source: '/small-business/:path*', destination: '/', permanent: true },
     ]
   },
 }
