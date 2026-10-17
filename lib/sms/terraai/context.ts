@@ -95,7 +95,7 @@ export function renderContext(ctx: TextContext, latest: string): string {
   lines.push("")
   lines.push("Conversation so far (oldest first):")
   const hist = ctx.history.length ? ctx.history : []
-  for (const m of hist) lines.push(`${m.direction === "inbound" ? "Owner" : m.source === "terraai" ? "TerraAI" : m.source === "adam" ? "Adam" : "Terramore (automatic)"}: ${m.body}`)
+  for (const m of hist) lines.push(`${m.direction === "inbound" ? "Owner" : m.source === "terraai" ? "TerraAI" : m.source === "adam" ? "Customer Success (a person)" : "Terramore (automatic)"}: ${m.body}`)
   if (!hist.length || hist[hist.length - 1].body !== latest) lines.push(`Owner: ${latest}`)
   lines.push("")
   lines.push("Write the next text to the owner.")

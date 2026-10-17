@@ -1,5 +1,9 @@
 # Development Log - Terramore Website
 
+## 2026-10-17 — TerraAI asks who it's talking to first; content is always in the pitch
+
+Owner (Adam, approved and shipped): asking an unknown texter's name and business is a more natural start than pushing the free check. TerraAI now answers briefly, then asks one question (who am I chatting with, and what's your business); greets known owners by name; doesn't repeat the question if they skip it; and offers the call or the check only once it knows them. Every list of what Terramore does includes making their content ("one of the biggest hurdles for clients"), replacing reviews in the one-line pitch: "we help small businesses get more customers from their website, Google Maps and ads, and we make their content for them." Team replies show to TerraAI as "Customer Success (a person)".
+
 ## 2026-10-17 — Hand-off replies need no code when only one conversation is open
 
 Owner (Adam): codes shouldn't be something to keep track of. With one hand-off open, a plain reply from Adam's phone goes to that person and "done" gives it back; with two or more, the alert says how many are open and asks for the code. STOP, START and HELP from his phone are never relayed. A conversation that is Adam's own number (testing as a customer) never takes plain replies. Next: a mobile-friendly Conversations page in the dashboard so an assistant can take hand-offs instead of one Messages thread.

@@ -246,4 +246,14 @@ assert(/handoff-followups/.test(read("vercel.json")), "follow-up cron is schedul
 const sql5 = read("supabase/migrations/20261017_terraai_handoffs.sql")
 assert(/website\.sms_handoffs/.test(sql5) && /ENABLE ROW LEVEL SECURITY/.test(sql5) && /REVOKE ALL/.test(sql5) && /IF NOT EXISTS/.test(sql5), "hand-off table: website schema, RLS, no public access, safe to rerun")
 
+// --- TerraAI gets to know them first, and always names content (Adam, 2026-10-17)
+{
+  const v = (await load("lib/sms/terraai/voice.ts")).TERRAAI_SYSTEM
+  assert(/who you're chatting with and what their business is/.test(v) && /unknown name/.test(v), "an unknown texter is asked their name and business first")
+  assert(/don't ask again/.test(v) && /greet them by first name/.test(v), "known owners are greeted by name; a skipped question isn't repeated")
+  assert(/Don't lead with the free check link before you know who they are/.test(v), "the free check isn't pushed before TerraAI knows who it's talking to")
+  assert(/we make their content for them/.test(v) && /making their content, ads/.test(v) && /Always include making their content/.test(v), "every list of what Terramore does includes making their content")
+  assert(!/website, Google Maps, reviews/.test(v), "the one-line pitch names content, not reviews")
+}
+
 console.log(`sms replies: ${checks} checks passed`)
