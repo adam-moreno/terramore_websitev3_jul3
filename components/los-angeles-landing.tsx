@@ -68,10 +68,12 @@ export function LosAngelesLanding() {
                   align="center"
                   header={
                     <>
-                      <p className="mx-auto mb-3 inline-flex items-center gap-2 rounded-full border border-ink/10 bg-white/70 px-3 py-1 text-[13px] font-medium text-ink/70">
+                      <div className="mb-3 flex justify-center">
+                        <p className="inline-flex items-center gap-2 rounded-full border border-ink/10 bg-white/70 px-3 py-1 text-[13px] font-medium text-ink/70">
                         <MapPin aria-hidden className="h-3.5 w-3.5" />
                         Based in Los Angeles
-                      </p>
+                        </p>
+                      </div>
                       <h1 className="mx-auto text-center text-[2.35rem] font-bold leading-[1.08] tracking-[-0.02em] text-ink sm:text-5xl md:text-[64px] md:leading-[68px] [@media(min-width:768px)_and_(max-height:820px)]:text-[54px] [@media(min-width:768px)_and_(max-height:820px)]:leading-[58px]">
                         Get{" "}
                         <span className={`${brandMore.className} text-[1.28em] font-bold leading-none tracking-[-0.08em] text-ink`}>
