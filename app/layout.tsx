@@ -135,6 +135,7 @@ export default function RootLayout({
                   sameAs: [
                     'https://www.linkedin.com/company/terramore-marketing',
                     'https://www.facebook.com/terramore.io',
+                    'https://clutch.co/profile/terramore',
                   ],
                   makesOffer: [
                     { '@type': 'Offer', name: 'Free 30-minute call', price: '0', priceCurrency: 'USD', url: 'https://www.terramore.io/book' },
