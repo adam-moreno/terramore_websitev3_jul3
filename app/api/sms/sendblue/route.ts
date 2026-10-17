@@ -10,8 +10,8 @@
  *   2. STOP / UNSUBSCRIBE / CANCEL / END / QUIT / STOPALL: the number is opted out first (website.sms_opt_outs), then
  *      one confirmation text. START / UNSTOP: opted back in, with a confirmation, only if they were opted out.
  *      HELP / INFO: one help text.
- *   3. Every inbound text alerts Adam (Slack and email) with who it's from when the number matches a lead, so a real
- *      reply never sits unanswered. Replies to owners are written by a person, from the Sendblue inbox.
+ *   3. Every inbound text alerts Adam (Slack and email) with who it's from when the number matches a lead.
+ *   4. Anything else gets a TerraAI reply, sent right away (TERRAAI_TEXT_MODE=draft holds each one for Adam's OK).
  * Outbound status (is_outbound true, if that webhook is turned on): failures are logged to the Comms page.
  * Always answers 200 once authorised, so Sendblue doesn't retry a message we've already handled.
  */
@@ -26,7 +26,7 @@ import { authorised } from "@/lib/sms/webhook-auth"
 import { after } from "next/server"
 import { buildTextContext } from "@/lib/sms/terraai/context"
 import { draftReply } from "@/lib/sms/terraai/draft"
-import { createDraft, draftReviewUrl, saveMessage } from "@/lib/sms/terraai/store"
+import { AUTO_REPLY_HOURLY_CAP, createDraft, decideDraft, draftReviewUrl, saveMessage, terraaiRepliesLastHour, textMode } from "@/lib/sms/terraai/store"
 import { refFromText } from "@/lib/sms/text-link"
 import { claimTextRef, findTextRef } from "@/lib/sms/text-refs"
 import { CONTACT_CARD_URL, textFirstReply } from "@/lib/sms/text-first-replies"
@@ -138,18 +138,19 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  // Everything else gets a TerraAI draft (draft mode: Adam approves before anything is sent). It runs after the
-  // response so Sendblue isn't kept waiting, and the alert carries the draft and its review link.
+  // Everything else gets a TerraAI reply. It runs after the response so Sendblue isn't kept waiting. Auto mode (the
+  // default) sends it and tells Adam; draft mode (TERRAAI_TEXT_MODE=draft, or a number past the hourly cap) waits for
+  // Adam, and the alert carries the review link.
   const wantsDraft = action === "reply" && !(keyword === "stop" || keyword === "start" || keyword === "help" || keyword === "human")
 
-  const alert = async (draftLines: string[]) => {
+  const alert = async (draftLines: string[], tag = "") => {
     const who = await whoIs(from).catch(() => null)
     const label = who ? `${who} (${from})` : from
     const line = `Text from ${label}${action === "reply" ? "" : `, ${action}`}: "${content.slice(0, 500)}"`
     const text = [line, ...draftLines, "", "Or reply yourself from the Sendblue inbox: https://dashboard.sendblue.com/conversations"].join("\n")
     await Promise.allSettled([
       postSlack(text),
-      sendEmail({ to: ADMIN_EMAIL, subject: action === "reply" ? `Text from ${who || from}${draftLines.length ? " (TerraAI draft ready)" : ""}` : `Text ${action}: ${who || from}`, text }),
+      sendEmail({ to: ADMIN_EMAIL, subject: action === "reply" ? `Text from ${who || from}${tag ? ` (${tag})` : ""}` : `Text ${action}: ${who || from}`, text }),
     ])
   }
 
@@ -158,14 +159,32 @@ export async function POST(request: NextRequest) {
       const ctx = await buildTextContext(from)
       const draft = await draftReply(ctx, content || "(they sent a photo or file)")
       const draftId = await createDraft({ phone: from, inboundId, draft: draft.reply, intent: draft.intent, handoff: draft.handoff, notes: [draft.handoffReason, draft.notes].filter(Boolean).join(" · ") || null })
+      const why = [draft.handoffReason ? `Why: ${draft.handoffReason}` : "", draft.notes ? `Note: ${draft.notes}` : ""]
+
+      const overCap = (await terraaiRepliesLastHour(from)) >= AUTO_REPLY_HOURLY_CAP
+      if (textMode() === "auto" && !overCap) {
+        const sent = await sendSms(from, draft.reply, { stream: "terraai", source: "terraai" })
+        if (sent.ok) {
+          if (draftId) await decideDraft(draftId, "sent", draft.reply)
+          await alert(
+            ["", `TerraAI replied${draft.handoff ? " and handed this one to you" : ""}: "${draft.reply}"`, ...why].filter((x) => x !== ""),
+            draft.handoff ? "TerraAI replied, needs you" : "TerraAI replied",
+          )
+          return
+        }
+      }
+
       const review = draftId ? draftReviewUrl(draftId) : null
-      await alert([
-        "",
-        `TerraAI draft${draft.handoff ? " (wants you to take this one)" : ""}: "${draft.reply}"`,
-        draft.handoffReason ? `Why: ${draft.handoffReason}` : "",
-        draft.notes ? `Note: ${draft.notes}` : "",
-        review ? `Send, edit or discard: ${review}` : "Draft couldn't be saved (run 20261016_terraai_texting.sql).",
-      ].filter((x) => x !== ""))
+      await alert(
+        [
+          "",
+          overCap ? `Not sent: ${AUTO_REPLY_HOURLY_CAP} TerraAI texts to this number in the last hour, so this one waits for you.` : "",
+          `TerraAI draft${draft.handoff ? " (wants you to take this one)" : ""}: "${draft.reply}"`,
+          ...why,
+          review ? `Send, edit or discard: ${review}` : "Draft couldn't be saved (run 20261016_terraai_texting.sql).",
+        ].filter((x) => x !== ""),
+        "TerraAI draft ready",
+      )
     })
   } else {
     await alert([])

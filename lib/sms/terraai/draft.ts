@@ -41,7 +41,7 @@ export function finishDraft(raw: { reply: string; intent: TerraaiDraft["intent"]
 }
 
 function handoffDraft(firstText: boolean, error: string): TerraaiDraft {
-  const reply = `${firstText ? `${DISCLOSURE} ` : ""}Thanks for the text. Adam will get back to you shortly.`
+  const reply = `${firstText ? `${DISCLOSURE} ` : ""}Thanks for the text. Someone from our Customer Success team will text you shortly.`
   return { reply, intent: "other", handoff: true, handoffReason: "TerraAI couldn't draft a reply", notes: "", error }
 }
 

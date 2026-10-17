@@ -85,6 +85,7 @@ export function ReportPopup({
   open,
   onClose,
   website,
+  businessName,
   direct = false,
   description,
   entry: entryOverride,
@@ -94,6 +95,8 @@ export function ReportPopup({
   onClose: () => void
   /** Optional website prefill passed through to the report form. */
   website?: string
+  /** The business name the free check found; pre-fills the form. */
+  businessName?: string
   /** Skip the qualifying questions and go straight to the details form
       (used on the /book ads landing page). Also stays on the page after
       success instead of redirecting home. */
@@ -216,36 +219,33 @@ export function ReportPopup({
             <p className="mt-3 text-[15px] leading-relaxed text-ink/70">
               We&apos;re preparing it now. In your inbox in minutes.
             </p>
+            {/* The goal is the call: booking is the one main action; texting and the Workspace are quieter options. */}
+            <a
+              ref={successActionRef}
+              href="/book"
+              onClick={() => trackFunnelEvent("report_success_book_click", { entry })}
+              className="mt-6 inline-flex min-h-11 w-full items-center justify-center rounded-full bg-brand px-4 py-2 text-center text-[15px] font-medium leading-snug text-white hover:bg-brand-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
+            >
+              Book a free 30-minute call
+            </a>
+            <p className="mt-2 text-[13px] text-ink/60">We&apos;ll walk through your report and what we&apos;d fix first.</p>
             {/* Inbound-first texting: the owner texts us, then we can text them (lib/sms/text-link.ts). */}
             <div className="mt-5 rounded-2xl border border-ink/10 px-5 py-4">
               <TextUsButton
                 placement="report_success"
-                intro="Want updates by text too?"
+                intro="Rather text?"
                 label="Tap to text us"
                 body={textBody("report", { firstName: textInfo?.firstName, business: textInfo?.businessName, code: textInfo?.textRef })}
               />
             </div>
             {workspaceUrl ? (
               <>
-                <div className="mt-6 rounded-2xl bg-cream px-5 py-5 text-left">
-                  <p className="text-[15px] leading-relaxed text-ink/80">
-                    We&apos;ve mapped what customers can see. Add a few business numbers to see what happens after they contact you.
-                  </p>
-                  <a
-                    ref={successActionRef}
-                    href={workspaceUrl}
-                    onClick={() => trackFunnelEvent("workspace_cta_click", { entry })}
-                    className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-full bg-brand px-4 py-2 text-center text-[15px] font-medium leading-snug text-white hover:bg-brand-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
-                  >
-                    Open My Growth Workspace
-                  </a>
-                </div>
                 <a
-                  href="/book"
-                  onClick={() => trackFunnelEvent("report_success_book_click", { entry })}
-                  className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-full border border-ink/15 px-4 text-[15px] font-medium text-ink hover:border-ink/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
+                  href={workspaceUrl}
+                  onClick={() => trackFunnelEvent("workspace_cta_click", { entry })}
+                  className="mt-4 inline-flex min-h-11 w-full items-center justify-center text-[15px] font-medium text-ink underline underline-offset-4 hover:text-ink/80"
                 >
-                  Or book a free call to walk through it
+                  Or open your free Growth Workspace
                 </a>
                 <button
                   type="button"
@@ -256,23 +256,13 @@ export function ReportPopup({
                 </button>
               </>
             ) : (
-              <>
-                <button
-                  ref={successActionRef}
-                  type="button"
-                  onClick={goHome}
-                  className="mt-7 inline-flex h-11 w-full items-center justify-center rounded-full bg-brand text-[15px] font-medium text-white hover:bg-brand-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
-                >
-                  Done
-                </button>
-                <a
-                  href="/book"
-                  onClick={() => trackFunnelEvent("report_success_book_click", { entry })}
-                  className="mt-3 inline-flex min-h-11 w-full items-center justify-center text-[15px] font-medium text-ink underline underline-offset-4"
-                >
-                  Or book a free call to walk through it
-                </a>
-              </>
+              <button
+                type="button"
+                onClick={goHome}
+                className="mt-3 inline-flex h-11 w-full items-center justify-center rounded-full text-[15px] font-medium text-ink/70 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
+              >
+                Done
+              </button>
             )}
           </div>
         ) : (
@@ -340,7 +330,7 @@ export function ReportPopup({
                     <p className="mt-2 text-[1.2rem] font-semibold tracking-tight text-ink">Where should the report go?</p>
                   </>
                 )}
-                <ReportForm plain className={direct ? "" : "mt-4"} answers={answers} initialWebsite={website} entry={entry} startFix={startFix} onSuccess={(result) => {
+                <ReportForm plain className={direct ? "" : "mt-4"} answers={answers} initialWebsite={website} initialBusinessName={businessName} entry={entry} startFix={startFix} onSuccess={(result) => {
                     setTextInfo(result ?? null)
                     setSuccess(true)
                   }} />
