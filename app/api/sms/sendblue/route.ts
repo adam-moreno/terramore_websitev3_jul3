@@ -11,7 +11,9 @@
  *      one confirmation text. START / UNSTOP: opted back in, with a confirmation, only if they were opted out.
  *      HELP / INFO: one help text.
  *   3. Every inbound text alerts Adam (Slack and email) with who it's from when the number matches a lead.
- *   4. Anything else gets a TerraAI reply, sent right away (TERRAAI_TEXT_MODE=draft holds each one for Adam's OK).
+ *   4. A report lead's reply to Adam's opener, or anyone's second text after TerraAI's first reply, goes to Adam as a
+ *      hand-off (routeInbound). Anything else gets a TerraAI reply, sent right away (TERRAAI_TEXT_MODE=draft holds each
+ *      one for Adam's OK).
  * Outbound status (is_outbound true, if that webhook is turned on): failures are logged to the Comms page.
  * Always answers 200 once authorised, so Sendblue doesn't retry a message we've already handled.
  */
@@ -30,7 +32,7 @@ import { AUTO_REPLY_HOURLY_CAP, createDraft, decideDraft, draftReviewUrl, recent
 import { refFromText } from "@/lib/sms/text-link"
 import { splitBubbles, typingDelayMs } from "@/lib/sms/terraai/bubbles"
 import { sendTypingIndicator } from "@/lib/sendblue"
-import { activeHandoff, activeHandoffs, alertPhone, alertText, claimHandoff, closeHandoff, followupText, handoffByCode, inBusinessHours, isGiveBack, openHandoff, sameText, resolveAdamReply, touchHandoff } from "@/lib/sms/terraai/handoff"
+import { activeHandoff, activeHandoffs, alertPhone, alertText, claimHandoff, closeHandoff, everHandedOff, followupText, handoffByCode, inBusinessHours, isGiveBack, openHandoff, resolveAdamReply, routeInbound, sameText, touchHandoff } from "@/lib/sms/terraai/handoff"
 import { claimTextRef, findTextRef } from "@/lib/sms/text-refs"
 import { CONTACT_CARD_URL, textFirstReply } from "@/lib/sms/text-first-replies"
 
@@ -209,9 +211,26 @@ export async function POST(request: NextRequest) {
 
   if (wantsDraft) {
     after(async () => {
-      // The typing bubble shows while TerraAI writes (Sendblue: start it early, keep it up while the model thinks).
-      await sendTypingIndicator(from, { state: "start", maxDurationMs: 60_000 }).catch(() => undefined)
       const ctx = await buildTextContext(from)
+      // Automation earns the first reply; then the conversation is Adam's (routeInbound in lib/sms/terraai/handoff.ts).
+      const route = routeInbound({ reportLead: ctx.report !== null, terraaiReplied: !ctx.firstText, handedOffBefore: await everHandedOff(from) })
+      if (route.to === "adam") {
+        const handoff = await openHandoff(from, route.reason)
+        const who = (await whoIs(from).catch(() => null)) || from
+        if (handoff && adam) {
+          const headline = ctx.report ? `${who} replied to your opener` : `${who} answered TerraAI`
+          await sendSms(adam, alertText({ code: handoff.code, who, phone: from, said: content || "(photo or file)", reason: null, notes: null, headline, openCount: (await activeHandoffs()).filter((h) => h.phone !== adam).length }), { typing: false, stream: "handoff_alert" })
+        }
+        if (handoff && !inBusinessHours()) {
+          const fromAdam = ctx.report !== null
+          const followed = await sendSms(from, followupText(ctx.links.book, Date.now(), fromAdam ? "adam" : "team"), { stream: "handoff", source: fromAdam ? "auto" : "terraai" })
+          if (followed.ok) await touchHandoff(handoff.id, { followup_sent_at: new Date().toISOString() })
+        }
+        await alert(["", handoff ? `Sent to you (${handoff.code}): ${route.reason}. TerraAI is quiet on this conversation.` : `For you: ${route.reason}. (The hand-off couldn't be saved, so TerraAI may answer their next text.)`], "for you")
+        return
+      }
+      // The typing bubble shows while TerraAI writes (Sendblue: keep it up while the model thinks).
+      await sendTypingIndicator(from, { state: "start", maxDurationMs: 60_000 }).catch(() => undefined)
       const draft = await draftReply(ctx, content || "(they sent a photo or file)")
       const draftId = await createDraft({ phone: from, inboundId, draft: draft.reply, intent: draft.intent, handoff: draft.handoff, notes: [draft.handoffReason, draft.notes].filter(Boolean).join(" · ") || null })
       const why = [draft.handoffReason ? `Why: ${draft.handoffReason}` : "", draft.notes ? `Note: ${draft.notes}` : ""]

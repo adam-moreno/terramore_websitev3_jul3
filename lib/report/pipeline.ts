@@ -8,6 +8,7 @@ import { collectDiagnostic } from "@/lib/report/diagnostic"
 import { reportEmailSummary } from "@/lib/report/email-summary"
 import { renderReportPdf } from "@/lib/report/pdf"
 import { sendReportDeliveredSms } from "@/lib/report/sms"
+import { TEXT_NUMBER_DISPLAY } from "@/lib/sms/text-link"
 import { buildReportJson, modelProvider, reportToText, writeReportFromDiagnostic } from "@/lib/report/write"
 
 export type ReportRequest = {
@@ -127,6 +128,8 @@ export async function runReportPipeline(request: ReportRequest): Promise<Pipelin
     const BOOK_URL = bookingRefUrl(request.email, { source: "report_email", medium: "email" })
     const first = request.name.split(/\s+/)[0] || "there"
     const subjectName = report.businessName
+    // The report email is the only place someone without a phone on the form learns they can text us (2026-10-17).
+    const TEXT_LINE = `Rather text? Text me at ${TEXT_NUMBER_DISPLAY}.`
     const scopeLine = "It only says what we could see on the public web. If a chapter is thin, reply with a link and we read it."
     // The Growth Workspace is the next step after the report; booking stays available as a plain link.
     const workspaceLine = `Your Growth Workspace picks up from this report.${fixable ? ` ${fixable === 1 ? "One fix in it" : `${fixable} fixes in it`} can be done for you there: choose Fix it for me.` : ""} Use this email address when you create your account.`
@@ -155,6 +158,8 @@ export async function runReportPipeline(request: ReportRequest): Promise<Pipelin
         ...(workspaceUrl ? [workspaceLine, `Open my Growth Workspace: ${workspaceUrl}`, ""] : []),
         `Book a free call: ${BOOK_URL}`,
         "",
+        TEXT_LINE,
+        "",
         "Adam Moreno",
         "Terramore",
       ].join("\n"),
@@ -169,6 +174,7 @@ export async function runReportPipeline(request: ReportRequest): Promise<Pipelin
           ...(workspaceUrl
             ? [emailP(workspaceLine), emailButton("Open my Growth Workspace", workspaceUrl), emailTextLink("Or book a free call", BOOK_URL)]
             : [emailButton("Book a free call", BOOK_URL)]),
+          emailP(TEXT_LINE),
           emailSignoff("Adam Moreno", "Terramore"),
         ].join(""),
       }),

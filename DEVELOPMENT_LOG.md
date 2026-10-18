@@ -2360,3 +2360,11 @@ User report: deck card data wasn't all fitting on mobile. Audited all six faces 
 - Discoverability leads with ChatGPT, Google Search, and Maps.
 - /book: removed Learn more links; owner question answers always stack.
 - Homepage hero min-height reduced so the Slack/analytics band peeks sooner.
+
+## 2026-10-17: Automation earns the first reply, then the conversation is Adam's
+
+- Report leads get Adam's opener as two texts (lib/report/sms.ts): who, why, the inbox, then "Who are your typical customers?" (from Adam's own texts that got replies). "It's in your inbox now" goes only if they haven't replied.
+- routeInbound (lib/sms/terraai/handoff.ts): a report lead's reply goes straight to Adam as a hand-off; someone who texts us first gets one TerraAI reply, and their next text goes to Adam; after "done", TerraAI keeps it.
+- Report leads' 10-minute and after-hours follow-ups are signed Adam; everyone else still hears Customer Success.
+- The report email now says "Rather text? Text me at (612) 356-8558."
+- Includes PR #21 (typing bubbles, separate texts, context-led TerraAI replies) merged with the Sendblue echo fix.
