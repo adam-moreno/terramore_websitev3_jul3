@@ -6,6 +6,8 @@
  * - Adam gets a text on his cell (HANDOFF_ALERT_PHONE, kept out of this public repo) with who it is, what they want and
  *   the code. He answers from his iPhone by texting the 612 line "A7 <message>"; it's relayed from 612, so the owner
  *   sees one thread. "A7 done" gives the conversation back to TerraAI. Replies from the Sendblue inbox also count.
+ * - Report leads' replies to Adam's opener, and anyone's second text after TerraAI's first reply, open a hand-off
+ *   too (routeInbound, 2026-10-17): automation gets the first reply, Adam takes it from there.
  * - No answer in 10 minutes during business hours (Mon–Fri 8am–6pm Pacific): one "still getting someone" text.
  *   After hours that text goes right away, with the next business morning.
  * - A hand-off with no activity for 24 hours ends on its own, and TerraAI picks the conversation back up.
@@ -60,10 +62,32 @@ export function nextOpening(now = Date.now()): string {
   return "Monday morning"
 }
 
-/** The text the owner gets when nobody has picked up their hand-off. */
-export function followupText(book: string, now = Date.now()): string {
+/**
+ * The text the owner gets when nobody has picked up their hand-off. "adam": a report lead, whose thread Adam's opener
+ * started, so it's signed by him. "team": someone TerraAI was talking to, who hears Customer Success.
+ */
+export function followupText(book: string, now = Date.now(), from: "adam" | "team" = "team"): string {
+  if (from === "adam") {
+    if (inBusinessHours(now)) return `Adam here, give me a few minutes. If it's easier, grab a time that works for you: ${book}`
+    return `Adam here, I'm out for the day and will text you ${nextOpening(now)}. Or grab a time that works for you: ${book}`
+  }
   if (inBusinessHours(now)) return `Still getting someone from our Customer Success team for you. Want to pick a time instead? ${book}`
   return `It's after hours here, so someone from our Customer Success team will text you ${nextOpening(now)}. Or grab a time that works for you: ${book}`
+}
+
+/**
+ * Who answers a text when no hand-off is open (Adam, 2026-10-17): automation earns the first reply, then the
+ * conversation is his. Pure.
+ * - A report lead got Adam's opener, so their reply goes straight to him.
+ * - Anyone else texted us first: TerraAI answers once (who they are, what their business is), and their next text
+ *   goes to Adam.
+ * - Once a conversation has been handed off and given back ("done"), TerraAI keeps it.
+ */
+export function routeInbound(x: { reportLead: boolean; terraaiReplied: boolean; handedOffBefore: boolean }): { to: "adam" | "terraai"; reason: string | null } {
+  if (x.handedOffBefore) return { to: "terraai", reason: null }
+  if (x.reportLead) return { to: "adam", reason: "Replied to your opener" }
+  if (x.terraaiReplied) return { to: "adam", reason: "Answered TerraAI's first text" }
+  return { to: "terraai", reason: null }
 }
 
 /**
@@ -96,10 +120,10 @@ export function isGiveBack(rest: string): boolean {
 }
 
 /** What Adam reads on his phone when TerraAI hands off. */
-export function alertText(h: { code: string; who: string; phone: string; said: string; reason: string | null; notes: string | null; openCount?: number }): string {
+export function alertText(h: { code: string; who: string; phone: string; said: string; reason: string | null; notes: string | null; openCount?: number; headline?: string }): string {
   const others = (h.openCount ?? 1) - 1
   return [
-    `${h.code}: TerraAI handed you ${h.who}`,
+    h.headline ? `${h.code}: ${h.headline}` : `${h.code}: TerraAI handed you ${h.who}`,
     h.reason ? `Why: ${h.reason}` : "",
     `They said: "${h.said.slice(0, 280)}"`,
     h.notes ? `Notes: ${h.notes}` : "",
@@ -168,6 +192,14 @@ export async function handoffByCode(code: string, now = Date.now()): Promise<Han
     .limit(1)
     .maybeSingle()
   return (data as Handoff | null) ?? null
+}
+
+/** True when this number has ever been handed off (open, claimed or closed). */
+export async function everHandedOff(phone: string): Promise<boolean> {
+  const client = db()
+  if (!client) return false
+  const { count } = await client.from("sms_handoffs").select("id", { count: "exact", head: true }).eq("phone", phone)
+  return (count ?? 0) > 0
 }
 
 /** A code no active hand-off is using: A1…Z9, starting from a random spot. */

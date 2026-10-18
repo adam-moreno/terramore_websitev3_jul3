@@ -31,7 +31,9 @@ export async function GET(request: NextRequest) {
     // Claim it first, so a slow run and the next one can't both text the owner.
     await touchHandoff(handoff.id, { followup_sent_at: new Date().toISOString() })
     const ctx = await buildTextContext(handoff.phone)
-    const result = await sendSms(handoff.phone, followupText(ctx.links.book), { stream: "handoff", source: "terraai" })
+    // Report leads' threads were started by Adam's opener, so the follow-up is his; everyone else hears Customer Success.
+    const fromAdam = ctx.report !== null
+    const result = await sendSms(handoff.phone, followupText(ctx.links.book, Date.now(), fromAdam ? "adam" : "team"), { stream: "handoff", source: fromAdam ? "auto" : "terraai" })
     if (result.ok) sent++
     if (adam) {
       await sendSms(adam, `${handoff.code} is still waiting (10 min). We texted them a booking link. Reply "${handoff.code} your message" to take it.`, { typing: false, stream: "handoff_alert" })

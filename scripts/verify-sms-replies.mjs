@@ -61,7 +61,7 @@ assert(!confirm.mediaUrl, "no media on the first text")
 assert(/Reply STOP to opt out\.$/.test(confirm.body), "booking confirmation says how to opt out")
 assert(!bs.fitsFirstMessageRules("Join: https://meet.google.com/x") && !bs.fitsFirstMessageRules("Email hello@terramore.io") && !bs.fitsFirstMessageRules("Call (818) 699-9217") && !bs.fitsFirstMessageRules("x".repeat(301)), "the rule check catches links, emails, phones and length")
 const rs = await load("lib/report/sms.ts")
-assert(bs.fitsFirstMessageRules(rs.REPORT_SMS.m1("Dana")), "report text 1 fits the first-message rules")
+assert(rs.REPORT_SMS.m1("Dana").length === 2 && rs.REPORT_SMS.m1("Dana").every((t) => bs.fitsFirstMessageRules(t)) && rs.REPORT_SMS.m1("Dana", false).every((t) => bs.fitsFirstMessageRules(t)), "the opener is two texts, each within the first-message rules")
 assert(bs.fitsFirstMessageRules(rs.REPORT_SMS.m2("Dana")), "report text 2 fits the first-message rules")
 
 // --- Tap to text us (2026-10-16)
@@ -182,9 +182,9 @@ assert(!st.verifyDraftToken("11111111-2222-3333-4444-000000000000", tok, Date.UT
 const route2 = read("app/api/sms/sendblue/route.ts")
 assert(/saveMessage\(\{ phone: from, direction: "inbound"/.test(route2), "every inbound text is saved in full")
 assert(/keyword === "human"/.test(route2) && /SMS_REPLIES\.human/.test(route2), "asking for a person gets an instant reply and an alert")
-assert(/after\(async \(\) => \{\s*const ctx = await buildTextContext\(from\)/.test(route2) && /draftReply\(ctx/.test(route2) && /createDraft\(/.test(route2) && /draftReviewUrl\(draftId\)/.test(route2), "other texts get a TerraAI draft after the response, with a review link")
-assert(/textMode\(\) === "auto" && !overCap/.test(route2) && /sendSms\(from, draft\.reply/.test(route2), "auto mode: the webhook sends TerraAI's reply itself, unless the hourly cap is hit")
-assert(route2.indexOf("sendSms(from, draft.reply") < route2.indexOf('decideDraft(draftId, "sent"'), "an auto reply is marked sent only after Sendblue accepts it")
+assert(/after\(async \(\) => \{[\s\S]{0,300}?const ctx = await buildTextContext\(from\)/.test(route2) && /draftReply\(ctx/.test(route2) && /createDraft\(/.test(route2) && /draftReviewUrl\(draftId\)/.test(route2), "other texts get a TerraAI draft after the response, with a review link")
+assert(/textMode\(\) === "auto" && !overCap/.test(route2) && /sendSms\(from, bubbles\[0\] \?\? draft\.reply/.test(route2), "auto mode: the webhook sends TerraAI's reply itself, unless the hourly cap is hit")
+assert(route2.indexOf("sendSms(from, bubble, ") < route2.indexOf('decideDraft(draftId, "sent"'), "an auto reply is marked sent only after Sendblue accepts it")
 assert(!/Adam will get back/.test(read("lib/sms/terraai/draft.ts")) && !/every reply you write is a draft/.test(read("lib/sms/terraai/voice.ts")), "owner-facing texts say Customer Success, and the prompt matches auto mode")
 {
   const prevMode = process.env.TERRAAI_TEXT_MODE
@@ -236,7 +236,7 @@ assert(/3 conversations are open/.test(at2) && /"A7 your message"/.test(at2) && 
 }
 const route3 = read("app/api/sms/sendblue/route.ts")
 assert(route3.indexOf("resolveAdamReply(content") < route3.indexOf("const keyword = smsKeyword(content)") && /from === adam && !smsKeyword\(content\)/.test(route3), "only Adam's own number can relay, checked before anything else, and never STOP/START/HELP")
-assert(route3.indexOf("await activeHandoff(from)") < route3.indexOf("after(async () => {\n      const ctx = await buildTextContext"), "a handed-off conversation never reaches TerraAI")
+assert(route3.indexOf("await activeHandoff(from)") < route3.indexOf("const ctx = await buildTextContext(from)"), "a handed-off conversation never reaches TerraAI")
 assert(/keyword === "stop" \|\| keyword === "start" \|\| keyword === "help" \? null : await activeHandoff/.test(route3), "STOP, START and HELP still work during a hand-off")
 assert(/if \(draft\.handoff\) \{\s*const handoff = await openHandoff/.test(route3) && /!inBusinessHours\(\)/.test(route3), "TerraAI's hand-off opens one, alerts Adam's phone, and follows up at once after hours")
 assert(/source: "adam"/.test(route3) && /openHandoff\(to, "Adam replied from the Sendblue inbox"\)/.test(route3), "a reply typed in the Sendblue inbox pauses TerraAI too")
@@ -256,6 +256,26 @@ assert(/website\.sms_handoffs/.test(sql5) && /ENABLE ROW LEVEL SECURITY/.test(sq
   assert(!/website, Google Maps, reviews/.test(v), "the one-line pitch names content, not reviews")
 }
 
+// --- Texting like a person (2026-10-17): separate texts with typing bubbles; context-led openers
+{
+  const b = await load("lib/sms/terraai/bubbles.ts")
+  assert(JSON.stringify(b.splitBubbles("Hi, this is TerraAI.\n\nSaw your report.\n\nWant the top findings?")) === JSON.stringify(["Hi, this is TerraAI.", "Saw your report.", "Want the top findings?"]), "blank lines split a reply into separate texts")
+  assert(b.splitBubbles("a\n\nb\n\nc\n\nd").length === 3 && b.splitBubbles("a\n\nb\n\nc\n\nd")[2] === "c d", "never more than 3 texts; extras fold into the last")
+  assert(b.splitBubbles("one line\nwrapped").length === 1 && b.splitBubbles("  ").length === 0, "single line breaks stay in one text")
+  assert(b.typingDelayMs("ok") === 1200 && b.typingDelayMs("x".repeat(500)) === 4500, "typing bubble shows 1.2 to 4.5 seconds per text")
+  const fd2 = dr.finishDraft({ reply: "Saw you just requested your check.", intent: "free_check", handoff: false, handoff_reason: "", notes_for_adam: "" }, true)
+  assert(b.splitBubbles(fd2.reply)[0] === voice.DISCLOSURE, "the AI disclosure is its own first text")
+  const r4 = read("app/api/sms/sendblue/route.ts")
+  assert(r4.indexOf('sendTypingIndicator(from, { state: "start", maxDurationMs: 60_000 })') < r4.indexOf("draftReply(ctx"), "the typing bubble starts before TerraAI writes")
+  assert(/splitBubbles\(draft\.reply\)/.test(r4) && /typingDelayMs\(bubble\)/.test(r4) && /state: "stop"/.test(r4), "replies go out as paced texts; a held draft stops the bubble")
+  assert(/maxDuration = 60/.test(r4), "the webhook has time for paced texts")
+  const ctxMod = await load("lib/sms/terraai/context.ts")
+  const ev = (t, m) => ({ event_type: t, occurred_at: new Date(Date.UTC(2026, 9, 17, 12, m)).toISOString() })
+  assert(ctxMod.reportEmailState([ev("delivered", 1), ev("opened", 5)]) === "opened" && ctxMod.reportEmailState([ev("delivered", 1)]) === "delivered" && ctxMod.reportEmailState([ev("bounced", 1)]) === "bounced" && ctxMod.reportEmailState([]) === "unknown" && ctxMod.reportEmailState([ev("delivered", 1), ev("clicked", 9)]) === "clicked", "report email state: clicked, opened, delivered, bounced, unknown")
+  const v2 = voice.TERRAAI_SYSTEM
+  assert(/Lead with what you already know/.test(v2) && /Only say the email arrived when the context says delivered or opened/.test(v2) && /Text the way a person texts/.test(v2), "TerraAI leads with what it knows, only claims the email arrived when it did, and texts in short separate messages")
+}
+
 // --- Sendblue echoes our texts with iMessage's punctuation (2026-10-17 bug: "Terramore's" → "Terramore’s")
 {
   const h2 = await load("lib/sms/terraai/handoff.ts")
@@ -263,6 +283,29 @@ assert(/website\.sms_handoffs/.test(sql5) && /ENABLE ROW LEVEL SECURITY/.test(sq
   assert(h2.sameText('He said "hi" - ok...', "He said \u201Chi\u201D \u2014 ok\u2026") && h2.sameText("a  b\nc", "A B C"), "quotes, dashes, ellipses, spacing and case don't matter")
   assert(!h2.sameText("Free at 3?", "Free at 4?"), "different words are different texts")
   assert(/sameText\(m\.body, text\)/.test(read("app/api/sms/sendblue/route.ts")), "the Sendblue-inbox check uses the forgiving match")
+}
+
+// --- Automation earns the first reply, then the conversation is Adam's (2026-10-17)
+{
+  const rs2 = await load("lib/report/sms.ts")
+  const [hello, question] = rs2.REPORT_SMS.m1("Mark")
+  assert(/^Hey Mark! This is Adam from Terramore/.test(hello) && /let me know if you don't see it\.$/.test(hello), "the opener says who, why and the inbox, in Adam's words")
+  assert(/We went through your site for it\. Who are your typical customers\?/.test(question) && /Reply STOP to opt out$/.test(question), "the second text asks one easy question and says how to opt out")
+  assert(/^Quick question while it builds\./.test(rs2.REPORT_SMS.m1("Mark", false)[1]), "without a website, the opener doesn't claim we read their site")
+  assert(rs2.REPORT_SMS.m2("Mark") === "It's in your inbox now, Mark.", "the report-ready text is one short line")
+  assert(/hasReplied\(phone\)/.test(read("lib/report/sms.ts")), "the report-ready text is skipped once they've replied")
+  const h3 = await load("lib/sms/terraai/handoff.ts")
+  const r = (o) => h3.routeInbound({ reportLead: false, terraaiReplied: false, handedOffBefore: false, ...o })
+  assert(r({ reportLead: true }).to === "adam" && r({ reportLead: true }).reason === "Replied to your opener", "a report lead's reply goes straight to Adam")
+  assert(r({}).to === "terraai", "someone texting us first gets TerraAI's reply")
+  assert(r({ terraaiReplied: true }).to === "adam", "their next text after TerraAI's first reply goes to Adam")
+  assert(r({ reportLead: true, handedOffBefore: true }).to === "terraai" && r({ terraaiReplied: true, handedOffBefore: true }).to === "terraai", "after \"done\", TerraAI keeps the conversation")
+  const inHours = Date.parse("2026-10-19T18:00:00Z"), late = Date.parse("2026-10-20T03:00:00Z")
+  assert(/^Adam here, give me a few minutes\..*https:\/\/b\.test$/.test(h3.followupText("https://b.test", inHours, "adam")) && /^Adam here, I'm out for the day and will text you tomorrow morning\./.test(h3.followupText("https://b.test", late, "adam")), "report leads' follow-up is signed Adam")
+  assert(/^K4: Mark replied to your opener/.test(h3.alertText({ code: "K4", who: "Mark", phone: "+15555550100", said: "contractors", reason: null, notes: null, headline: "Mark replied to your opener" })), "Adam's alert says they replied to his opener")
+  const r5 = read("app/api/sms/sendblue/route.ts")
+  assert(r5.indexOf("routeInbound(") < r5.indexOf("draftReply(ctx") && /if \(route\.to === "adam"\)[\s\S]*?return\n/.test(r5), "routing happens before TerraAI writes, and Adam's conversations skip TerraAI")
+  assert(/Rather text\? Text me at \$\{TEXT_NUMBER_DISPLAY\}/.test(read("lib/report/pipeline.ts")), "the report email says they can text us")
 }
 
 console.log(`sms replies: ${checks} checks passed`)

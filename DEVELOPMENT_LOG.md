@@ -1,5 +1,9 @@
 # Development Log - Terramore Website
 
+## 2026-10-17 — TerraAI texts like a person: typing bubbles, separate texts, leads with what it knows
+
+Owner (Adam): no typing bubbles, and replies didn't feel natural ("I see hesitancy"). Following Sendblue's guidance, the typing bubble now starts as soon as a text arrives (60 s, best-effort, iMessage only) and shows again before each following text. Replies go out as 1 to 3 short texts (TerraAI separates them with blank lines; `lib/sms/terraai/bubbles.ts` splits and paces them, 1.2 to 4.5 s each), and the AI disclosure is its own first text. TerraAI now leads with what it knows ("Saw you just requested your free Digital Footprint check"), says the report should be in their inbox only when Resend's events (public.email_events) show delivered or opened, and offers the top findings in a text or two. Loop cap is 15 TerraAI texts an hour (about 6 replies).
+
 ## 2026-10-17 — TerraAI asks who it's talking to first; content is always in the pitch
 
 Owner (Adam, approved and shipped): asking an unknown texter's name and business is a more natural start than pushing the free check. TerraAI now answers briefly, then asks one question (who am I chatting with, and what's your business); greets known owners by name; doesn't repeat the question if they skip it; and offers the call or the check only once it knows them. Every list of what Terramore does includes making their content ("one of the biggest hurdles for clients"), replacing reviews in the one-line pitch: "we help small businesses get more customers from their website, Google Maps and ads, and we make their content for them." Team replies show to TerraAI as "Customer Success (a person)".
@@ -2356,3 +2360,11 @@ User report: deck card data wasn't all fitting on mobile. Audited all six faces 
 - Discoverability leads with ChatGPT, Google Search, and Maps.
 - /book: removed Learn more links; owner question answers always stack.
 - Homepage hero min-height reduced so the Slack/analytics band peeks sooner.
+
+## 2026-10-17: Automation earns the first reply, then the conversation is Adam's
+
+- Report leads get Adam's opener as two texts (lib/report/sms.ts): who, why, the inbox, then "Who are your typical customers?" (from Adam's own texts that got replies). "It's in your inbox now" goes only if they haven't replied.
+- routeInbound (lib/sms/terraai/handoff.ts): a report lead's reply goes straight to Adam as a hand-off; someone who texts us first gets one TerraAI reply, and their next text goes to Adam; after "done", TerraAI keeps it.
+- Report leads' 10-minute and after-hours follow-ups are signed Adam; everyone else still hears Customer Success.
+- The report email now says "Rather text? Text me at (612) 356-8558."
+- Includes PR #21 (typing bubbles, separate texts, context-led TerraAI replies) merged with the Sendblue echo fix.

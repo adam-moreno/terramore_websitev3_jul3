@@ -126,9 +126,9 @@ export function draftReviewUrl(id: string): string | null {
 
 // --- Auto-send (Adam, 2026-10-17): TerraAI's replies go out as written. TERRAAI_TEXT_MODE=draft switches back to
 // approving each one. A number that gets AUTO_REPLY_HOURLY_CAP TerraAI texts within an hour falls back to drafts,
-// so two bots can't text each other forever.
+// so two bots can't text each other forever. Replies go out as up to 3 texts each, so 15 is about 6 replies.
 
-export const AUTO_REPLY_HOURLY_CAP = 6
+export const AUTO_REPLY_HOURLY_CAP = 15
 
 export function textMode(): "auto" | "draft" {
   return (process.env.TERRAAI_TEXT_MODE || "").trim().toLowerCase() === "draft" ? "draft" : "auto"

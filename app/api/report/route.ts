@@ -348,7 +348,7 @@ export async function POST(request: NextRequest) {
             })
           : Promise.resolve(),
       ])
-      if (smsConsent) await sendReportAcceptSms({ email, name, phone: phone || null })
+      if (smsConsent) await sendReportAcceptSms({ email, name, phone: phone || null, website: website || null })
       await enrollLead({
         email,
         name,
